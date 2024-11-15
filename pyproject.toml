@@ -1,0 +1,114 @@
+[tool.poetry]
+name = "pypacks"
+description = "A package used to generate Minecraft datapacks using Python code"
+authors = ["Skezza"]
+version = "0.0.1"
+license = "Proprietary"
+readme = "README.md"
+packages = [{include = "pypacks"}]
+
+[tool.poetry.scripts]
+ado_wrapper = "pypacks.__main__:main"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+pylint = "^2.17.5"
+pytest = "^7.4.0"
+coverage = "^7.4.4"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+exclude = [".vscode", ".pytest_cache", ".mypy_cache", ".git", "__pycache__", "script.py"]
+strict = true
+
+[tool.pylint.main]
+ignore = [".vscode", ".pytest_cache", ".mypy_cache", ".git", "__pycache__", "script.py"]
+recursive = true
+
+[tool.pylint.messages_control]
+max-line-length = 140
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-timeout",
+
+    "too-few-public-methods",
+    "too-many-instance-attributes",
+    "too-many-arguments",
+
+    "wrong-import-position",
+    "duplicate-code",
+    "unused-argument",
+    "fixme",
+    "arguments-differ",
+    "arguments-renamed",
+    "invalid-name",
+    "too-many-locals",
+    "line-too-long",
+    "broad-exception-caught",
+    "import-outside-toplevel",
+    "attribute-defined-outside-init",
+    "cyclic-import",
+    "redefined-outer-name",
+    "abstract-method",
+    "pointless-statement",
+    "inconsistent-return-statements",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", ]
+log_cli = true
+markers = [
+    "wip: mark test as a work in progress",
+]
+
+[tool.black]
+line_length = 140
+
+[tool.isort]
+profile = "black"
+
+[tool.coverage.run]
+omit = [
+    "__pycache__/*",
+    ".mypy_cache/*",
+    ".pytest_cache/*",
+    ".ruff_cache/*",
+    ".vscode/*",
+    "dist/*",
+    "htmlcov/*",
+    "tests/*",
+    "/opt/*",
+]
+
+[tool.bandit]
+skips = ["B101", "B105", "B106", "B107"]  # SQL Injection, assert x3
+
+[tool.ruff]
+line-length = 140
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle
+    "F",  # Pyflakes
+    "UP",  # pyupgrade
+    "B",  # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "I",  # isort
+]
+ignore = ["F401", "F403", "E501", "I001", "SIM105", "SIM118"]
