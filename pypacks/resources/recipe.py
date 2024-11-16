@@ -1,8 +1,9 @@
+import json
 from dataclasses import dataclass
+from typing import TypeVar
 
-from pypacks.templates.recipe_templates import (
-    furnace_recipe_template, shapeless_recipe_template, shaped_recipe_template, smoker_recipe_template,
-)
+
+# https://minecraft.wiki/w/Recipe
 
 
 @dataclass
@@ -15,7 +16,14 @@ class ShapelessCraftingRecipe:
     amount: int = 1
 
     def to_file_contents(self) -> str:
-        return shapeless_recipe_template(self.ingredients, self.result, self.amount)
+        return json.dumps({
+            "type": "minecraft:crafting_shapeless",
+            "ingredients": self.ingredients,
+            "result": {
+                "id": self.result,
+                "count": self.amount,
+            }
+        }, indent=4)
 
 
 @dataclass
@@ -26,18 +34,40 @@ class ShapedCraftingRecipe:
     result: str
     amount: int = 1
 
-    def to_file_contents(self) -> str:
+    def __post_init__(self):
         assert 0 < len(self.rows) <= 3, "Rows must be a list of 1-3 strings"
         row_1 = self.rows[0]
         row_2 = self.rows[1] if len(self.rows) >= 2 else None
         row_3 = self.rows[2] if len(self.rows) == 3 else None
-        removed_nones = [x for x in [row_1, row_2, row_3] if x is not None]
-        return shaped_recipe_template(removed_nones, self.keys, self.result, self.amount)
+        self.removed_nones_rows = [x for x in [row_1, row_2, row_3] if x is not None]
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:crafting_shaped",
+            "pattern": self.removed_nones_rows,
+            "key": self.keys,
+            "result": {
+                "id": self.result,
+                "count": self.amount,
+            },
+            "show_notification": True,
+        }, indent=4)
 
 
 @dataclass
-class StoneCutterRecipe:
-    pass
+class CraftingTransmuteRecipe:
+    name: str
+    input_item: str
+    material_item: str
+    result: str
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:crafting_shapeless",
+            "input": self.input_item,
+            "material": self.material_item,
+            "result": self.result,
+        }, indent=4)
 
 
 @dataclass
@@ -49,7 +79,102 @@ class FurnaceRecipe:
     cooking_time_ticks: int = 200
 
     def to_file_contents(self) -> str:
-        return furnace_recipe_template(self.ingredient, self.result, self.experience, self.cooking_time_ticks)
+        return json.dumps({
+            "type": "minecraft:smelting",
+            "ingredient": self.ingredient,
+            "result": {
+                "id": self.result,
+            },
+            "experience": self.experience,
+            "cookingtime": self.cooking_time_ticks,
+        }, indent=4)
+
+
+@dataclass
+class BlastFurnaceRecipe:
+    name: str
+    ingredient: str
+    result: str
+    experience: int | None = 1
+    cooking_time_ticks: int = 200
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:blasting",
+            "ingredient": self.ingredient,
+            "result": {
+                "id": self.result,
+            },
+            "experience": self.experience,
+            "cookingtime": self.cooking_time_ticks
+        }, indent=4)
+
+
+@dataclass
+class CampfireRecipe:
+    name: str
+    ingredient: str
+    result: str
+    experience: int | None = 1
+    cooking_time_ticks: int = 200
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:campfire_cooking",
+            "ingredient": self.ingredient,
+            "result": {
+                "id": self.result,
+            },
+            "experience": self.experience,
+            "cookingtime": self.cooking_time_ticks,
+        }, indent=4)
+
+@dataclass
+class SmithingTransformRecipe:
+    name: str
+    template_item: str
+    base_item: str
+    addition_item: str
+    result: str
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:smithing_transform",
+            "template": {
+                "item": self.template_item,
+            },
+            "base": {
+                "item": self.base_item,
+            },
+            "addition": {
+                "item": self.addition_item,
+            },
+            "result": {
+                "item": self.result,
+            }
+        }, indent=4)
+
+
+@dataclass
+class SmithingTrimRecipe:
+    name: str
+    template_item: str
+    base_item: str
+    addition_item: str
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:smithing_trim",
+            "template": {
+                "item": self.template_item,
+            },
+            "base": {
+                "item": self.base_item,
+            },
+            "addition": {
+                "item": self.addition_item,
+            },
+        }, indent=4)
 
 
 @dataclass
@@ -61,4 +186,37 @@ class SmokerRecipe:
     cooking_time_ticks: int = 200
 
     def to_file_contents(self) -> str:
-        return smoker_recipe_template(self.ingredient, self.result, self.experience, self.cooking_time_ticks)
+        return json.dumps({
+            "type": "minecraft:smoking",
+            "ingredient": self.ingredient,
+            "result": {
+                "id": self.result,
+            },
+            "experience": self.experience,
+            "cookingtime": self.cooking_time_ticks,
+        }, indent=4)
+
+
+@dataclass
+class StonecutterRecipe:
+    name: str
+    ingredient: str
+    result: str
+    count: int = 1
+
+    def to_file_contents(self) -> str:
+        return json.dumps({
+            "type": "minecraft:stonecutting",
+            "ingredient": self.ingredient,
+            "result": {
+                "id": self.result,
+                "count": self.count,
+            }
+        }, indent=4)
+
+
+# This is a type hint for a recipe, it can be any of the recipe types
+Recipe = TypeVar(
+    "Recipe", ShapelessCraftingRecipe, ShapedCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,
+    CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe
+)

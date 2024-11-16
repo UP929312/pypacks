@@ -1,31 +1,49 @@
-# Where items are equipable, work as food, etc.
+Paintings (when creating) need author and title
 
-# More recipes, cooking, stone cutter, https://misode.github.io/recipe/
+# When creating instruments, optionally take a custom sound and do it for you.
+
+# Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with silk touch, etc.
+
+# Advancements (maybe even give one for loading the datapack for the first time?)
+
+# For recipes, I suggest we suffix _<method> to it, so you can make stuff multiple ways, like beef can be smoked, furnaced and campfired
+
+# ▙ is fun for stairs, ▄▄ for slab
+# ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾ 
+
+# For the ref book, have a 2nd row of invisible icons so the buttons and hover work well
 
 # Book - We need to work out how many categories there are, so we can automatically generate the category image, or we can down
 what we're currently doing and fill it in with stuff.
 
-
-CHANGE THE ICON SLOTS TO ALLOW A 16x16 ICON INSIDE
-
 python -m pip install -e .
 
-# Make the default texture path point to some default texture we provide?
+# Maybe load in all the regular tags and stuff, sort of like how he pre-makes all the item attributes
+# Maybe we should pre-populate all the default items, like swords and stuff, so you can base stuff of them?
 
-# Unbreakable/durability, attack damanage, pickaxe speed
+# Make the default texture path point to some default texture we provide? For the datapack?
 
-# For things that are edible, add some lore? Same with equipable? "Glider", etc?
+# attack damanage, pickaxe speed
 
-# Lodestone tracker component data is broken, spins randomly.
+# For things that are edible, add some lore? Same with equipable? "Can be used as a Glider", etc?
+
+# Make a tag by default for all items created by the datapack?
+
+# Lodestone tracker component data is broken, spins randomly (Because we're not in the nether?)
+
+# With crafting recipes, be able to put CustomItems in, currently just supports strings.
 
 # Custom recipe for our items? I guess you can just add them manually? I guess we need to show the user how to obtain stuff, e.g. smelting, crafting, etc.
 
 # § -> &a
 
-# Smoker Recipes are broken.
+# Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
+
+
+# Crafting recipe categories = Literal["blocks", "building", "equipment", "food", "misc", "redstone"] | None = None
 
 Added minecraft:extended_view boolean property
-Returns true if player has requested extended details by holding shift key down
+Returns true if player has requested extended details by holding shift key down (maybe only if they're not in the inventory?)
 Note: not a keybind, can't be rebound
 Only works when item is displayed in UI  - Better text on shift!
 

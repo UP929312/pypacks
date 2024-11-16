@@ -2,8 +2,6 @@ from typing import Any, Literal
 
 from dataclasses import dataclass, field
 
-from pypacks.utils import to_snbt
-
 # ==========================================================================================
 
 
@@ -19,7 +17,7 @@ class Equippable:
             "slot": self.slot,
             "equip_sound": self.equip_sound,
             "model": self.model,
-            "dispensable": True if self.dispensable else None,
+            "dispensable": True if self.dispensable else None,  # Defaults to False
         }
 
 
@@ -60,7 +58,7 @@ class Food:
         return {
             "nutrition": self.nutrition,
             "saturation": self.saturation,
-            "can_always_eat": True if self.can_always_eat else None,
+            "can_always_eat": True if self.can_always_eat else None,  # Defaults to False
         }
 
 
@@ -146,25 +144,26 @@ class Tool:
 
 @dataclass
 class Instrument:
+    """Used for the goat horn, can take a default minecraft sound or a custom sound, create a custom sound using CustomSound, then 
+    For sound_id, use {namespace}:{sound_internal_name}"""
     # https://minecraft.wiki/w/Data_component_format#instrument
-    sound_id: Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn", "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]  # https://minecraft.wiki/w/Sounds.json#Sound_events
+    sound_id: str | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn", "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]  # https://minecraft.wiki/w/Sounds.json#Sound_events
+    description: str | None = None  # A string for the description of the sound.
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
-    range: int = 16  #  A non-negative float for the range of the sound.
+    instrument_range: int = 256  #  A non-negative float for the range of the sound (normal horns are 256).
 
-    def to_dict(self) -> dict[str, Any]:  # TODO: Add range and use_duration
+    def to_dict(self) -> dict[str, Any]:
+        # TODO: Allow a sound_id OR sound_event, or CustomSound (needs datapack though ):  )
+        #DEFAULTS = "ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn", "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"
         assert self.use_duration >= 0, "use_duration must be a non-negative integer"
-        assert self.range >= 0, "range must be a non-negative integer"
-        assert self.use_duration == 5, "use_duration not yet supported"
-        assert self.range == 16, "range not yet supported"
-        return self.sound_id  # type: ignore
-        # TODO: I accidentally deleted this, whoops
-        # return {
-        #     "sound_event": {
-        #         "sound_id": self.sound_id,
-        #     },
-        #     "use_duration": self.use_duration,
-        #     "range": self.range,
-        # }
+        assert self.instrument_range >= 0, "range must be a non-negative integer"
+        return {
+            "description": self.description,
+            "range": self.instrument_range,
+            "sound_event": {"sound_id": self.sound_id},
+            "use_duration": self.use_duration,
+        }
+
 
 
 # ==========================================================================================
@@ -192,9 +191,11 @@ class WrittenBookContent:
 
 @dataclass
 class CustomItemData:
-    damage: int | None = None  # NOT WEAPON DAMAGE, LOST DURABILITY, https://minecraft.wiki/w/Data_component_format#damage
+    durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#max_damage
+    lost_durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#damage
     glider: bool = False  # https://minecraft.wiki/w/Data_component_format#glider
     unbreakable: bool = False  # https://minecraft.wiki/w/Data_component_format#unbreakable
+    destroyed_in_lava: bool = True  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
     equippable_slots: "Equippable | None" = None  # https://minecraft.wiki/w/Data_component_format#equippable
     consumable: "Consumable | None" = None  # https://minecraft.wiki/w/Data_component_format#consumable
     food: "Food | None" = None  # https://minecraft.wiki/w/Data_component_format#food
@@ -207,12 +208,14 @@ class CustomItemData:
 
     def to_dict(self) -> dict[str, Any]:
         # assert self.durability is None or self.durability >= 0, "durability must be a non-negative integer"
-        assert self.damage is None or self.damage >= 0, "damage must be a non-negative integer"
+        assert self.durability is None or self.durability > 0, "durability must be a positive integer"
+        assert self.lost_durability is None or self.lost_durability >= 0, "lost_durability must be a non-negative integer"
         return {
-            # "durability":         self.durability if self.durability is not None else None,
-            "damage":               self.damage if self.damage is not None else None,
+            "max_damage":           self.durability if self.durability is not None else None,
+            "damage":               self.lost_durability if self.lost_durability is not None else None,
             "glider":               {} if self.glider else None,
             "unbreakable":          {"show_in_tooltip": False} if self.unbreakable else None,
+            "damage_resistant":     {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me
             "equippable":           self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
             "consumable":           self.consumable.to_dict() if self.consumable is not None else None,
             "food":                 self.food.to_dict() if self.food is not None else None,
@@ -223,6 +226,9 @@ class CustomItemData:
             "instrument":           self.instrument.to_dict() if self.instrument is not None else None,
             "written_book_content": self.written_book_content.to_dict() if self.written_book_content is not None else None,
         }  # fmt: skip
+
+# Added data component use_remainder, which can have a single item stack as value. If present, will replace the item if its stack count has decreased after use.
+# Added data component use_cooldown. If present, will apply a cooldown to all items of the same type when it has been used. It is an object with fields seconds (positive float) and cooldownGroup (resource location). Weird casing is a typo and is corrected in the next snapshot.
 
 # attribute_modifiers PROBABLY
 # banner_patterns
@@ -236,9 +242,11 @@ class CustomItemData:
 # can_place_on Meh
 # charged_projectiles HMMM
 # consumable More work for effects and sound.
-# container MEH
-# container_loot MEH (for chests)
-# damage_resistant Hmmm
+# container YES (for chests) =======================================
+# container_loot MEH
+# damage_resistant Hmmm  Maybe to make it resistant to lava like netherite? =======================================
+# damage_resistant={types:"#minecraft:is_fire"}
+
 # debug_stick_state no.
 # death_protection HMMMM (totem of undying)
 # dyed_color MEH

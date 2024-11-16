@@ -1,0 +1,22 @@
+/give @s minecraft:goat_horn[minecraft:instrument={description:'test',sound_event:"minecraft:ambient.cave",use_duration:5,range:256}]
+# Working cave
+
+
+
+# Eating stick plays sound:
+/give @p stick[consumable={"consume_seconds": 0.2, "animation": "toot_horn", "has_consume_particles": false, "on_consume_effects": [{"type": "minecraft:play_sound", "sound": {"sound_id": "block.note_block.flute", "range": 256}}]}]
+
+
+/playsound pypacks_testing:rick_roll_sound
+
+{
+  "rick_roll": {
+    "sounds": [
+      {
+        "name": "pypacks_testing:rick_roll",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  }
+}

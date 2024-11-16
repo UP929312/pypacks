@@ -1,7 +1,8 @@
-from typing import Any
 import json
-
+import io
 import os
+from typing import Any
+
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 
 
@@ -23,9 +24,17 @@ def chunk_list(lst: list[Any], size: int) -> list[list[Any]]:
     return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 
-def get_png_dimensions(file_path: str) -> tuple[int, int]:
+def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None = None) -> tuple[int, int]:
     """Returns width, height of the image"""
-    with open(file_path, 'rb') as f:
+    if file_path is not None:
+        with open(file_path, 'rb') as f:
+            f.seek(16)  # Width and height start at byte 16
+            width = int.from_bytes(f.read(4), 'big')
+            height = int.from_bytes(f.read(4), 'big')
+    else:
+        # TODO: The same, one with a context manager, one without...
+        assert image_bytes is not None, "Must provide image bytes if not providing file_path"
+        f = io.BytesIO(image_bytes)
         f.seek(16)  # Width and height start at byte 16
         width = int.from_bytes(f.read(4), 'big')
         height = int.from_bytes(f.read(4), 'big')
@@ -34,4 +43,5 @@ def get_png_dimensions(file_path: str) -> tuple[int, int]:
     assert height == 1 or height % 2 == 0, "Image height must be divisible by 16"
     assert 1 <= width <= 512, "Image width must be between 1 and 512"
     assert 1 <= height <= 512, "Image height must be between 1 and 512"
+    # rint(file_path, width, height)
     return width, height
