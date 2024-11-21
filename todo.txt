@@ -1,10 +1,29 @@
-Paintings (when creating) need author and title
+# With crafting recipes, be able to put CustomItems in, currently just supports strings.
+This works for outputs, but I'm not sure about inputs... NOT POSSIBLE Custom crafter???
 
-# When creating instruments, optionally take a custom sound and do it for you.
+
+Categories need more work (in progress)
+# Make some part of the logo clickable would be fun.
+
+Advancements
+# Advancements (maybe even give one for loading the datapack for the first time?)
+
+# Loot tables
+
+# Paintings require a world reset
+
+# Improve testing setup, it's a nice start though.
+
+# When generating categories, we're not creating the icons properly (or the font bit)
+
+# JUKEBOX SONGS - Length is messed up... Hmmmm
+
+# Debug book with all the sounds? Could be fun, and helpful, sounds, fonts, paintings, etc.
+"Play sound" button in the book, with a list of all the sounds, and a play button next to them.
+
+# When creating instruments, optionally take a custom sound and do it for you. (Need datapack ]:)
 
 # Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with silk touch, etc.
-
-# Advancements (maybe even give one for loading the datapack for the first time?)
 
 # For recipes, I suggest we suffix _<method> to it, so you can make stuff multiple ways, like beef can be smoked, furnaced and campfired
 
@@ -23,15 +42,11 @@ python -m pip install -e .
 
 # Make the default texture path point to some default texture we provide? For the datapack?
 
-# attack damanage, pickaxe speed
-
 # For things that are edible, add some lore? Same with equipable? "Can be used as a Glider", etc?
 
 # Make a tag by default for all items created by the datapack?
 
 # Lodestone tracker component data is broken, spins randomly (Because we're not in the nether?)
-
-# With crafting recipes, be able to put CustomItems in, currently just supports strings.
 
 # Custom recipe for our items? I guess you can just add them manually? I guess we need to show the user how to obtain stuff, e.g. smelting, crafting, etc.
 
@@ -39,6 +54,8 @@ python -m pip install -e .
 
 # Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
 
+
+# IN MISODE CRAFTLESS, Creative_slot_lock???
 
 # Crafting recipe categories = Literal["blocks", "building", "equipment", "food", "misc", "redstone"] | None = None
 
@@ -48,3 +65,13 @@ Note: not a keybind, can't be rebound
 Only works when item is displayed in UI  - Better text on shift!
 
 # https://www.reddit.com/r/mcresourcepack/comments/wpcg0a/hi_i_want_to_learn_what_does_the_ascent_and_chars/
+
+# Make any item edible to detect right click, then use cooldowns
+# /give @p stick[use_cooldown={seconds:5,cooldown_group:"namespace:your/mother"},consumable={consume_seconds:3,on_consume_effects:[{type:"minecraft:clear_all_effects"}]}] 64
+
+Automatic animal breeding
+
+A tag for all non-right-clickable items, like bow, where we can't add right-click functionality
+
+# Like the survival tweaks, would be nice if we could tweak the original items.
+The python code for that datapack would be so clean...

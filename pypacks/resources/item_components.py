@@ -2,6 +2,33 @@ from typing import Any, Literal
 
 from dataclasses import dataclass, field
 
+
+# ==========================================================================================
+
+@dataclass
+class AttributeModifier:
+    """Adds an attribute modifier.
+    Warning, some only work when using the right equipment, e.g. mining efficiency only works with an axe on wood, or pickaxe on stone."""
+    attribute_type: Literal[
+        "armor", "armor_toughness", "attack_damage", "attack_knockback", "generic.attack_reach", "attack_speed", "flying_speed",
+        "follow_range", "knockback_resistance", "luck", "max_absorption", "max_health", "movement_speed", "scale", "step_height",
+        "jump_strength", "block_interaction_range", "entity_interaction_range", "spawn_reinforcements", "block_break_speed",
+        "gravity", "safe_fall_distance", "fall_damage_multiplier", "burning_time", "explosion_knockback_resistance", "mining_efficiency",
+        "movement_efficiency", "oxygen_bonus", "sneaking_speed", "submerged_mining_speed", "sweeping_damage_ratio", "tempt_range",
+        "water_movement_efficiency"
+    ]
+    slot: Literal["any", "hand", "armor", "mainhand", "offhand", "head", "chest", "legs", "feet", "body"] = "any"
+    amount: int = 1
+    operation: Literal["add_value", "add_multiplied_base", "add_multiplied_total"] = "add_value"
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.attribute_type,
+            "amount": self.amount,
+            "operation": self.operation,
+            "id": f"attribute_modifier.{self.attribute_type}",
+        }
+
 # ==========================================================================================
 
 
@@ -103,6 +130,8 @@ class LodestoneTracker:
     dimension: Literal["overworld", "nether", "end"] = "overworld"
     tracked: bool = True
 
+    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:compass"])
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "target": {
@@ -152,6 +181,8 @@ class Instrument:
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
     instrument_range: int = 256  #  A non-negative float for the range of the sound (normal horns are 256).
 
+    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:goat_horn"])
+
     def to_dict(self) -> dict[str, Any]:
         # TODO: Allow a sound_id OR sound_event, or CustomSound (needs datapack though ):  )
         #DEFAULTS = "ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn", "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"
@@ -169,6 +200,19 @@ class Instrument:
 # ==========================================================================================
 
 
+
+@dataclass
+class WritableBookContent:
+    # https://minecraft.wiki/w/Data_component_format#writable_book_content
+    pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
+
+    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:writable_book"])
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"pages": [str(x) for x in self.pages]}
+
+
+
 @dataclass
 class WrittenBookContent:
     # https://minecraft.wiki/w/Data_component_format#written_book_content
@@ -176,15 +220,26 @@ class WrittenBookContent:
     author: str = "PyPacks"
     pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
 
+    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:written_book"])
+
     def to_dict(self) -> dict[str, Any]:
-        # pages_formatted = 
         return {
             "title": self.title,
             "author": self.author,
-            # "pages": [to_snbt(page) for page in self.pages],
             "pages": [str(x) for x in self.pages],
         }
 
+
+# # ==========================================================================================
+
+EnchantmentType = Literal[
+    "aqua_affinity", "bane_of_arthropods", "binding_curse", "blast_protection", "breach", "channeling",
+    "density", "depth_strider", "efficiency", "feather_falling", "fire_aspect", "fire_protection", "flame",
+    "fortune", "frost_walker", "impaling", "infinity", "knockback", "looting", "loyalty", "luck_of_the_sea",
+    "lure", "mending", "multishot", "piercing", "power", "projectile_protection", "protection", "punch",
+    "quick_charge", "respiration", "riptide", "sharpness", "silk_touch", "smite", "soul_speed", "sweeping_edge",
+    "swift_sneak", "thorns", "unbreaking", "vanishing_curse", "wind_burst",
+]
 
 # ==========================================================================================
 
@@ -193,9 +248,18 @@ class WrittenBookContent:
 class CustomItemData:
     durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#max_damage
     lost_durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#damage
+    enchantment_glint_override: bool = False  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
     glider: bool = False  # https://minecraft.wiki/w/Data_component_format#glider
     unbreakable: bool = False  # https://minecraft.wiki/w/Data_component_format#unbreakable
     destroyed_in_lava: bool = True  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
+    hide_tooltip: bool = False  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
+    hide_additional_tooltip: bool = False  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
+    repaired_by: list[str] | None = None  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
+    repair_cost: int | None = None  # https://minecraft.wiki/w/Data_component_format#repair_cost
+
+    enchantments: dict[EnchantmentType, int] | None = None  # https://minecraft.wiki/w/Data_component_format#enchantments
+    player_head_username: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile
+
     equippable_slots: "Equippable | None" = None  # https://minecraft.wiki/w/Data_component_format#equippable
     consumable: "Consumable | None" = None  # https://minecraft.wiki/w/Data_component_format#consumable
     food: "Food | None" = None  # https://minecraft.wiki/w/Data_component_format#food
@@ -205,26 +269,37 @@ class CustomItemData:
     tool: "Tool | None" = None
     instrument: "Instrument | None" = None
     written_book_content: "WrittenBookContent | None" = None
+    writable_book_content: "WritableBookContent | None" = None
+    attribute_modifiers: list[AttributeModifier] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        # assert self.durability is None or self.durability >= 0, "durability must be a non-negative integer"
         assert self.durability is None or self.durability > 0, "durability must be a positive integer"
         assert self.lost_durability is None or self.lost_durability >= 0, "lost_durability must be a non-negative integer"
         return {
-            "max_damage":           self.durability if self.durability is not None else None,
-            "damage":               self.lost_durability if self.lost_durability is not None else None,
-            "glider":               {} if self.glider else None,
-            "unbreakable":          {"show_in_tooltip": False} if self.unbreakable else None,
-            "damage_resistant":     {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me
-            "equippable":           self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
-            "consumable":           self.consumable.to_dict() if self.consumable is not None else None,
-            "food":                 self.food.to_dict() if self.food is not None else None,
-            "use_remainder":        self.use_remainder.to_dict() if self.use_remainder is not None else None,
-            "jukebox_playable":     self.jukebox_playable.to_dict() if self.jukebox_playable is not None else None,
-            "lodestone_tracker":    self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
-            "tool":                 self.tool.to_dict() if self.tool is not None else None,
-            "instrument":           self.instrument.to_dict() if self.instrument is not None else None,
-            "written_book_content": self.written_book_content.to_dict() if self.written_book_content is not None else None,
+            "max_damage":                 self.durability if self.durability is not None else None,
+            "damage":                     self.lost_durability if self.lost_durability is not None else None,
+            "enchantment_glint_override": True if self.enchantment_glint_override else None,
+            "glider":                     {} if self.glider else None,
+            "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
+            "damage_resistant":           {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me
+            "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
+            "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
+            "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
+            "repair_cost":                self.repair_cost if self.repair_cost is not None else None,
+
+            "enchantments":               self.enchantments if self.enchantments is not None else None,
+            "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
+            "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
+            "consumable":                 self.consumable.to_dict() if self.consumable is not None else None,
+            "food":                       self.food.to_dict() if self.food is not None else None,
+            "use_remainder":              self.use_remainder.to_dict() if self.use_remainder is not None else None,
+            "jukebox_playable":           self.jukebox_playable.to_dict() if self.jukebox_playable is not None else None,
+            "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
+            "tool":                       self.tool.to_dict() if self.tool is not None else None,
+            "instrument":                 self.instrument.to_dict() if self.instrument is not None else None,
+            "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
+            "profile":                    self.player_head_username if self.player_head_username is not None else None,
+            "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
 # Added data component use_remainder, which can have a single item stack as value. If present, will replace the item if its stack count has decreased after use.
@@ -232,8 +307,8 @@ class CustomItemData:
 
 # attribute_modifiers PROBABLY
 # banner_patterns
-# base_color # MEH
-# bees MEH
+# base_color - for shields # MEH
+# bees - for beehives/nests MEH
 # block_entity_data MEH
 # block_state MEH
 # bucket_entity_data MEH
@@ -249,27 +324,20 @@ class CustomItemData:
 
 # debug_stick_state no.
 # death_protection HMMMM (totem of undying)
-# dyed_color MEH
-# enchantable # MAYBE?
-# enchantment_glint_override MEH
-# enchantments
-# entity_data MEH
+# dyed_color - leather armor only? MEH
+# enchantable # NOT YET (custom enchants maybe?)
+# entity_data MEH - For paintings, armor stands and such
 # equippable REDO, more stuff
 # firework_explosion MEH
 # fireworks MEH
-# hide_additional_tooltip
-# hide_tooltip PROBABLY
 # intangible_projectile MEH
 # note_block_sound
 # ominous_bottle_amplifier
 # potion_contents
-# profile (for heads)
-# recipes
-# repairable
-# repair_cost
+# profile (for heads), done half, done profiles not arbitrary data
+# recipes  - for knowledge book
 # stored_enchantments MEH
 # suspicious_stew_effects MEH
 # tooltip_style maybe?
 # trim MEH
 # use_cooldown
-# writable_book_content MEH

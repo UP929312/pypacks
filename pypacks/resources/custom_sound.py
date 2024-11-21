@@ -1,23 +1,9 @@
-import json
 from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
-"""
-{
-  "rick_roll": {
-    "sounds": [
-      {
-        "name": "pypacks_testing:rick_roll",
-        "volume": 1.0,
-        "pitch": 1.0
-      }
-    ]
-  }
-}
-"""
 
 @dataclass
 class CustomSound:

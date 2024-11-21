@@ -13,7 +13,7 @@ from .image_generation import add_icon_to_base
 
 
 BASE_IMAGES = [f"{PYPACKS_ROOT}/assets/images/{x}.png" for x in (
-    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base", "logo"
+    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base", "logo",
 )]
 
 def generate_resource_pack(datapack: "Datapack") -> None:
@@ -50,6 +50,10 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{category.name}_category_icon.png", "wb") as file:
             file.write(add_icon_to_base(image_path=category.image_path))
 
+    # Custom back button:
+    with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/satchel_icon.png", "wb") as file:
+        file.write(add_icon_to_base(image_path=f"{PYPACKS_ROOT}/assets/images/satchel.png"))
+    # ================================================================================================
     # Copy over the base images to the resource pack (icons, spacers, etc)
     for image in BASE_IMAGES:
         image_name = image.split("/")[-1].removesuffix(".png")
@@ -68,13 +72,14 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     # ================================================================================================
 
 
-
 def generate_font_pack(datapack: "Datapack") -> None:
     # Create the providers file & mapping
     chars = [f"\\uE{i:03}" for i in range(0, 100)]  # Generate \uE000 - \uE999
     mapping = {}
     providers = []
-    BASE_IMAGE_COUNT, CUSTOM_ITEM_COUNT, CATEGORY_COUNT = len(BASE_IMAGES), len(datapack.custom_items), len(datapack.reference_book_categories)
+    ref_book_items = [f"{PYPACKS_ROOT}/assets/images/satchel.png"]
+    BASE_IMAGE_COUNT, CUSTOM_ITEM_COUNT, CUSTOM_REF_BOOK_ICONS, CATEGORY_COUNT = len(BASE_IMAGES), len(datapack.custom_items), len(ref_book_items), len(datapack.reference_book_categories)
+    # TODO: Clean this up, so many loops.
     # Create the fonts for all the base images
     for i, image in enumerate(BASE_IMAGES):
         image_name = image.split("/")[-1].removesuffix(".png")
@@ -82,21 +87,21 @@ def generate_font_pack(datapack: "Datapack") -> None:
         height = get_png_dimensions(image)[1]
         provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{image_name}.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
         providers.append(provider)
-    # TODO: Somehow make these one loop?
     # Create the fonts for all the custom items
     for i, item in enumerate(datapack.custom_items, BASE_IMAGE_COUNT):
         mapping[f"{item.item_id}_icon"] = chars[i]
         height = get_png_dimensions(image_bytes=item.icon_image_bytes)[1]
         provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{item.item_id}_icon.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
         providers.append(provider)
-    # Create the fonts for all the categories, but not the icons, they're next
-    # for i, category in enumerate(datapack.reference_book_categories, BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT):
-    #     mapping[category.name.lower()+"_category"] = chars[i]
-    #     height = get_png_dimensions(file_path=category.image_path)[1]
-    #     provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{category.name.lower()}_category.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
-    #     providers.append(provider)
+    # Create custom buttons
+    for i, icon_path in enumerate(ref_book_items, BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT):
+        icon_name = icon_path.split("/")[-1].removesuffix(".png")
+        mapping[f"{icon_name}_icon"] = chars[i]
+        height = 20  # get_png_dimensions(image_path=icon_path)[1]
+        provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{icon_name}_icon.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
+        providers.append(provider)
     # Create the fonts for all the category icons
-    for i, category in enumerate(datapack.reference_book_categories, BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT+CATEGORY_COUNT):
+    for i, category in enumerate(datapack.reference_book_categories, BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT+CUSTOM_REF_BOOK_ICONS):
         mapping[category.name.lower()+"_category_icon"] = chars[i]
         height = get_png_dimensions(image_bytes=category.icon_image_bytes)[1]
         provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{category.name.lower()}_category_icon.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
@@ -137,27 +142,26 @@ def generate_base_pack(datapack: "Datapack") -> None:
     #     f.write("say Tick!")
 
     # ================================================================================================
-
-    # Shaped & Shapeless crafting recipes (add recipe files)
-    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "recipe"), exist_ok=True)  # makes /data/{datapack.namespace}/recipe
-    for recipe in datapack.base_recipes:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/recipe/{recipe.name}.json", "w") as f:
-            f.write(recipe.to_file_contents())
-
-    # ================================================================================================
     # Items
 
     # Add to give all command
     book = ReferenceBook(datapack.custom_items)
-    all_items = datapack.custom_items + [book] + datapack.custom_paintings
+    all_items = [book] + datapack.custom_items + datapack.custom_paintings + datapack.custom_jukebox_songs
     with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give_all.mcfunction", "w") as f:
         f.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in all_items]))
     # And give the book
     with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give_reference_book.mcfunction", "w") as f:
         f.write(f"\n# Give the book\n{book.generate_give_command(datapack)}")
     # ================================================================================================
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "recipe"), exist_ok=True)  # makes /data/{datapack.namespace}/recipe
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "painting_variant"), exist_ok=True)
-    # Paintings
-    for painting in datapack.custom_paintings:
-        painting.create_json_file(datapack)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "jukebox_song"), exist_ok=True)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "tags"), exist_ok=True)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "advancement"), exist_ok=True)
+    # Recipes, Paintings, Jukebox songs, Tags, Advancements
+    for item in datapack.custom_recipes+datapack.custom_jukebox_songs+datapack.custom_paintings+datapack.custom_tags+datapack.custom_advancements:
+        item.create_json_file(datapack)
 
+    # Testing command
+    shutil.copyfile(f"{PYPACKS_ROOT}/scripts/setup_testing.mcfunction", f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/setup_testing.mcfunction")
+    # ================================================================================================
