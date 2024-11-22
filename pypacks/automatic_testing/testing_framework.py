@@ -1,4 +1,4 @@
-from pypacks.automatic_testing.testing_blocks import Air, Hopper, Furnace, AutoCrafter, BlockType
+from pypacks.automatic_testing.testing_blocks import *
 from math import sqrt
 import os
 
@@ -9,7 +9,10 @@ class TestList:
 
     def to_file(self, path: str, origin_relative_x: int, origin_relative_y: int, origin_relative_z: int) -> None:
         with open(path, "w") as file:
-            file.write("\n".join([test.generate_commands(origin_relative_x, origin_relative_y, test_index*2+origin_relative_z) for test_index, test in enumerate(self.tests)]))
+            clear_space = f"#Empty aread\nfill ~-3 ~2 ~2 ~3 ~7 ~{2+(len(self.tests)*2)} air\n\n"
+            commands = "\n".join([test.generate_commands(origin_relative_x, origin_relative_y, test_index*2+origin_relative_z) for test_index, test in enumerate(self.tests)])
+            file.write(clear_space+commands)
+
 
 class Test:
     def __init__(self, name: str, blocks: list[BlockType]) -> None:
@@ -19,28 +22,28 @@ class Test:
 
     def generate_commands(self, x: int, y: int, z: int) -> str:
         # Figure out what size square the list is in:
-        lines = [self.blocks[i*self.size:(i+1)*self.size] for i in range(self.size)][::-1]
+        lines = [self.blocks[i*self.size:(i+1)*self.size] for i in range(self.size)]
         commands = []
         for relative_y, line in enumerate(lines):
             for relative_x, block in enumerate(line):
-                command = block.to_setblock_command(x, y+relative_y, z+relative_x)
+                command = block.to_setblock_command(x+(self.size-relative_x), y+(self.size-relative_y), z)
                 commands.append(command)
         return f"# {self.name}\n"+"\n".join(commands) + "\n"
 
 furnace_test = Test("Furnace Test", [  # type: ignore
     Air(), Hopper(["minecraft:porkchop"]), Air(),
-    Air(), Furnace(), Air(),
-    Air(), Hopper(), Air(),
+    Air(), Furnace(),                      Air(),  # fmt: skip
+    Air(), ExpectedHopper(""),             Air(),  # fmt: skip
 ])
 custom_furnace_recipe_test = Test("Custom Furnace Recipe Test", [  # type: ignore
     Air(), Hopper(["minecraft:feather"]), Air(),
-    Air(), Furnace(), Air(),
-    Air(), Hopper(), Air(),
+    Air(), Furnace(),                     Air(),  # fmt: skip
+    Air(), ExpectedHopper(""),            Air(),  # fmt: skip
 ])
 custom_crafting_recipe_test = Test("Custom Crafting Recipe Test", [  # type: ignore
     Air(), Hopper({"minecraft:iron_ingot": 4}), Air(),
-    Air(), AutoCrafter([1, 3, 4, 5, 7]), Air(),
-    Air(), Hopper(), Air(),
+    Air(), AutoCrafter([1, 3, 4, 5, 7]),        AddedRedstoneBlock(),  # fmt: skip
+    Air(), ExpectedHopper(""),                  RemovedRedstoneBlock(),  # fmt: skip
 ])
 
 test_list = TestList([furnace_test, custom_furnace_recipe_test, custom_crafting_recipe_test])

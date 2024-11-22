@@ -53,6 +53,7 @@ class Equippable:
 
 @dataclass
 class Consumable:
+    # https://minecraft.wiki/w/Data_component_format#consumable
     # https://www.minecraft.net/en-us/article/minecraft-snapshot-24w34a
     consume_seconds: float = 1.6  # how long it takes to consume the item in seconds
     animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] | None = None  # the animation to play when consuming the item
@@ -67,7 +68,7 @@ class Consumable:
             "consume_seconds": self.consume_seconds,
             "animation": self.animation,
             "sound": self.sound,  # "entity.generic.eat"
-            "has_consume_particles": True if self.has_consume_particles else None,
+            "has_consume_particles": False if not self.has_consume_particles else None,  # Defaults to True
             "on_consume_effects": self.on_consume_effects,
         }
 
@@ -242,6 +243,7 @@ EnchantmentType = Literal[
 ]
 
 # ==========================================================================================
+
 
 
 @dataclass

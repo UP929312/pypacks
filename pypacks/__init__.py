@@ -1,4 +1,4 @@
-from pypacks.resources.custom_advancement import CustomAdvancement
+from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.item_components import CustomItemData, Equippable, Consumable, Food, UseRemainder, JukeboxPlayable, LodestoneTracker, ToolRule, Tool, Instrument, WrittenBookContent, AttributeModifier
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong

@@ -1,8 +1,6 @@
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
-This works for outputs, but I'm not sure about inputs... NOT POSSIBLE Custom crafter???
+This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 
-
-Categories need more work (in progress)
 # Make some part of the logo clickable would be fun.
 
 Advancements
@@ -13,8 +11,6 @@ Advancements
 # Paintings require a world reset
 
 # Improve testing setup, it's a nice start though.
-
-# When generating categories, we're not creating the icons properly (or the font bit)
 
 # JUKEBOX SONGS - Length is messed up... Hmmmm
 

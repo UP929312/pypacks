@@ -27,6 +27,7 @@ colour_code_mappings = {
     # "&n": "underline",
     # "&o": "italic",
     # "&r": "reset",
+    # obfuscated?
 }
 
 
@@ -64,6 +65,14 @@ def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False) -> st
     # To auto untalicise, add {"italics": False} to each dictionary
     split_text = [x | ({"italic": False} if auto_unitalicise else {}) for x in split_text]
     return json.dumps(split_text)
+
+
+def remove_colour_codes(text: str) -> str:
+    """Removes Minecraft colour codes from a string"""
+    string = text[:]
+    for code in colour_code_mappings:
+        string = string.replace(code, "")
+    return string
 
 
 def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None = None) -> tuple[int, int]:

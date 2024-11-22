@@ -38,14 +38,25 @@ class ExpectedHopper(Hopper):
     
     def to_setblock_command(self, x, y, z) -> str:
         return f"setblock ~{x} ~{y} ~{z} minecraft:hopper[]"
-    
+
+
 class AutoCrafter:
-    def __init__(self,slots_disabled: list[int] = []) -> None:
-        self.slots_disabled = slots_disabled
+    def __init__(self, slots_disabled: list[int] | None = None) -> None:
+        self.slots_disabled = slots_disabled or []
     
     def to_setblock_command(self, x, y, z) -> str:
         disabled_slots_string = ("{disabled_slots:" + f"[I; {', '.join([str(x) for x in self.slots_disabled])}]" + "}") if self.slots_disabled else ""
         return f"setblock ~{x} ~{y} ~{z} minecraft:crafter[]{disabled_slots_string}"
 
 
-BlockType = TypeVar("BlockType", Air, Hopper, Furnace, ExpectedHopper, AutoCrafter)
+class RemovedRedstoneBlock:
+    def to_setblock_command(self, x, y, z) -> str:
+        return f"setblock ~{x} ~{y} ~{z} minecraft:redstone_block"
+
+
+class AddedRedstoneBlock:
+    def to_setblock_command(self, x, y, z) -> str:
+        return f"setblock ~{x} ~{y} ~{z} minecraft:redstone_block"
+
+
+BlockType = TypeVar("BlockType", Air, Hopper, Furnace, ExpectedHopper, AutoCrafter, RemovedRedstoneBlock, AddedRedstoneBlock)

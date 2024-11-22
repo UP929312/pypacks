@@ -47,7 +47,7 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     for category in datapack.reference_book_categories:
         # shutil.copyfile(category.image_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{category.name}_category.png")
         # Copy & generate the icon, too
-        with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{category.name}_category_icon.png", "wb") as file:
+        with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{category.name.lower()}_category_icon.png", "wb") as file:
             file.write(add_icon_to_base(image_path=category.image_path))
 
     # Custom back button:
@@ -59,10 +59,12 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         image_name = image.split("/")[-1].removesuffix(".png")
         shutil.copyfile(image, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{image_name}.png")
 
+    # Paintings
     for painting in datapack.custom_paintings:
         shutil.copyfile(painting.image_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/painting/{painting.internal_name}.png")
 
     # ================================================================================================
+    # Sounds
     for sound in datapack.custom_sounds:
         shutil.copyfile(sound.ogg_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/sounds/{sound.internal_name}.ogg")
 
@@ -80,6 +82,7 @@ def generate_font_pack(datapack: "Datapack") -> None:
     ref_book_items = [f"{PYPACKS_ROOT}/assets/images/satchel.png"]
     BASE_IMAGE_COUNT, CUSTOM_ITEM_COUNT, CUSTOM_REF_BOOK_ICONS, CATEGORY_COUNT = len(BASE_IMAGES), len(datapack.custom_items), len(ref_book_items), len(datapack.reference_book_categories)
     # TODO: Clean this up, so many loops.
+
     # Create the fonts for all the base images
     for i, image in enumerate(BASE_IMAGES):
         image_name = image.split("/")[-1].removesuffix(".png")
@@ -143,6 +146,7 @@ def generate_base_pack(datapack: "Datapack") -> None:
 
     # ================================================================================================
     # Items
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "give"), exist_ok=True)  # makes /data/{datapack_name}/function/give
 
     # Add to give all command
     book = ReferenceBook(datapack.custom_items)
@@ -152,15 +156,25 @@ def generate_base_pack(datapack: "Datapack") -> None:
     # And give the book
     with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give_reference_book.mcfunction", "w") as f:
         f.write(f"\n# Give the book\n{book.generate_give_command(datapack)}")
+
+    # Create the give command for use in books
+    for custom_item in datapack.custom_items:
+        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give/{custom_item.item_id}.mcfunction", "w") as f:
+            f.write(custom_item.generate_give_command(datapack))
     # ================================================================================================
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "recipe"), exist_ok=True)  # makes /data/{datapack.namespace}/recipe
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "painting_variant"), exist_ok=True)
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "jukebox_song"), exist_ok=True)
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "tags"), exist_ok=True)
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "advancement"), exist_ok=True)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "right_click"), exist_ok=True)
     # Recipes, Paintings, Jukebox songs, Tags, Advancements
     for item in datapack.custom_recipes+datapack.custom_jukebox_songs+datapack.custom_paintings+datapack.custom_tags+datapack.custom_advancements:
         item.create_json_file(datapack)
+
+    for item in [x for x in datapack.custom_items if x.on_right_click]:
+        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/right_click/{item.item_id}.mcfunction", "w") as f:
+            f.write(f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{item.item_id}\n{item.on_right_click}")
 
     # Testing command
     shutil.copyfile(f"{PYPACKS_ROOT}/scripts/setup_testing.mcfunction", f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/setup_testing.mcfunction")
