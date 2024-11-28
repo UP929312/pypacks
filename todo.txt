@@ -1,14 +1,35 @@
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
+# Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
-# Make some part of the logo clickable would be fun.
+# Raycasting is done for right click, since it'll be run *after* the block is placed, why not just look *until* we find the block?
+# MACROS FOR RIGHT CLICK AND RAYCASTING
 
-Advancements
+# Merge on_load
+
+Let's do raycasting.
+Custom blocks!!! ---------------
+
+LOOT STUFF IS GOING TO BE HARDDDD
+
+interaction entity for detecting right click on blocks!
+
+# Change datapack init to take custom_content: list[a, b, c]
+
+For an "install" stuff, just give them an achievement and don't revoke!
+
+# Make some part of the logo clickable would be fun. Maybe a link to the project?
+
+Look into resizing the main logo instead of giving it a height that's right
+
+# Signs with data, maybe even Command()?
+
 # Advancements (maybe even give one for loading the datapack for the first time?)
+# Use remainder components
 
 # Loot tables
 
-# Paintings require a world reset
+# INFO: Paintings require a world reset
 
 # Improve testing setup, it's a nice start though.
 
@@ -28,9 +49,6 @@ Advancements
 
 # For the ref book, have a 2nd row of invisible icons so the buttons and hover work well
 
-# Book - We need to work out how many categories there are, so we can automatically generate the category image, or we can down
-what we're currently doing and fill it in with stuff.
-
 python -m pip install -e .
 
 # Maybe load in all the regular tags and stuff, sort of like how he pre-makes all the item attributes
@@ -44,16 +62,9 @@ python -m pip install -e .
 
 # Lodestone tracker component data is broken, spins randomly (Because we're not in the nether?)
 
-# Custom recipe for our items? I guess you can just add them manually? I guess we need to show the user how to obtain stuff, e.g. smelting, crafting, etc.
-
-# § -> &a
+# § -> &a - Kinda
 
 # Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
-
-
-# IN MISODE CRAFTLESS, Creative_slot_lock???
-
-# Crafting recipe categories = Literal["blocks", "building", "equipment", "food", "misc", "redstone"] | None = None
 
 Added minecraft:extended_view boolean property
 Returns true if player has requested extended details by holding shift key down (maybe only if they're not in the inventory?)
@@ -62,12 +73,9 @@ Only works when item is displayed in UI  - Better text on shift!
 
 # https://www.reddit.com/r/mcresourcepack/comments/wpcg0a/hi_i_want_to_learn_what_does_the_ascent_and_chars/
 
-# Make any item edible to detect right click, then use cooldowns
-# /give @p stick[use_cooldown={seconds:5,cooldown_group:"namespace:your/mother"},consumable={consume_seconds:3,on_consume_effects:[{type:"minecraft:clear_all_effects"}]}] 64
-
 Automatic animal breeding
 
 A tag for all non-right-clickable items, like bow, where we can't add right-click functionality
 
 # Like the survival tweaks, would be nice if we could tweak the original items.
-The python code for that datapack would be so clean...
+The python code for that datapack would be so clean... We'd need to recreate every vanilla item/tool first, maybe do it anyway?

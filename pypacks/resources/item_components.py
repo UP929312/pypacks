@@ -95,6 +95,7 @@ class Food:
 
 @dataclass
 class UseRemainder:
+    # TODO: Allow this to have components!
     item: str
     count: int = 1
 
@@ -153,6 +154,7 @@ class ToolRule:
 
     def to_dict(self) -> dict[str, Any]:
         return {"blocks": self.blocks, "speed": self.speed, "correct_for_drops": self.correct_for_drops}
+
 
 @dataclass
 class Tool:
@@ -231,7 +233,21 @@ class WrittenBookContent:
         }
 
 
-# # ==========================================================================================
+# ==========================================================================================
+
+@dataclass
+class Cooldown:
+    seconds: float = 5.0
+    cooldown_group: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "seconds": self.seconds,
+            "cooldown_group": self.cooldown_group,
+        }
+
+# ==========================================================================================
+
 
 EnchantmentType = Literal[
     "aqua_affinity", "bane_of_arthropods", "binding_curse", "blast_protection", "breach", "channeling",
@@ -243,7 +259,6 @@ EnchantmentType = Literal[
 ]
 
 # ==========================================================================================
-
 
 
 @dataclass
@@ -261,7 +276,9 @@ class CustomItemData:
 
     enchantments: dict[EnchantmentType, int] | None = None  # https://minecraft.wiki/w/Data_component_format#enchantments
     player_head_username: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile
+    custom_head_texture: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile
 
+    cooldown: "Cooldown | None" = None
     equippable_slots: "Equippable | None" = None  # https://minecraft.wiki/w/Data_component_format#equippable
     consumable: "Consumable | None" = None  # https://minecraft.wiki/w/Data_component_format#consumable
     food: "Food | None" = None  # https://minecraft.wiki/w/Data_component_format#food
@@ -274,9 +291,15 @@ class CustomItemData:
     writable_book_content: "WritableBookContent | None" = None
     attribute_modifiers: list[AttributeModifier] | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def __post_init__(self) -> None:
         assert self.durability is None or self.durability > 0, "durability must be a positive integer"
         assert self.lost_durability is None or self.lost_durability >= 0, "lost_durability must be a non-negative integer"
+        assert (self.lost_durability is None or self.durability is None) or self.lost_durability <= self.durability, "lost_durability must be less than or equal to durability"
+        assert self.repair_cost is None or self.repair_cost >= 0, "repair_cost must be a non-negative integer"
+        assert not (self.player_head_username and self.custom_head_texture), "Cannot have both player_head_username and custom_head_texture"
+
+    def to_dict(self) -> dict[str, Any]:
+        profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
         return {
             "max_damage":                 self.durability if self.durability is not None else None,
             "damage":                     self.lost_durability if self.lost_durability is not None else None,
@@ -289,6 +312,7 @@ class CustomItemData:
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
             "repair_cost":                self.repair_cost if self.repair_cost is not None else None,
 
+            "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "enchantments":               self.enchantments if self.enchantments is not None else None,
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
@@ -300,14 +324,11 @@ class CustomItemData:
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
             "instrument":                 self.instrument.to_dict() if self.instrument is not None else None,
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
-            "profile":                    self.player_head_username if self.player_head_username is not None else None,
+            "profile":                    self.player_head_username if self.player_head_username else profile,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
-# Added data component use_remainder, which can have a single item stack as value. If present, will replace the item if its stack count has decreased after use.
-# Added data component use_cooldown. If present, will apply a cooldown to all items of the same type when it has been used. It is an object with fields seconds (positive float) and cooldownGroup (resource location). Weird casing is a typo and is corrected in the next snapshot.
 
-# attribute_modifiers PROBABLY
 # banner_patterns
 # base_color - for shields # MEH
 # bees - for beehives/nests MEH
@@ -342,4 +363,3 @@ class CustomItemData:
 # suspicious_stew_effects MEH
 # tooltip_style maybe?
 # trim MEH
-# use_cooldown

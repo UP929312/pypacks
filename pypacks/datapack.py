@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
+from pypacks.resources.mcfunction import MCFunction
+from pypacks.raycasting import generate_functions, ray_transitive_blocks_tag
 
 from pypacks.image_generation import add_icon_to_base
 
@@ -11,24 +13,37 @@ if TYPE_CHECKING:
 
     # from pypacks.resources.custom_advancement import CustomAdvancement
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.custom_block import CustomBlock
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
+    from pypacks.resources.custom_loot_table import CustomLootTable
     from pypacks.resources.custom_painting import CustomPainting
+    from pypacks.resources.custom_predicate import Predicate
     from pypacks.resources.custom_recipe import Recipe
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_tag import CustomTag
 
 class Datapack:
     def __init__(
-        self, name: str, description: str, namespace: str, pack_icon_path: str | None = None,
+        self,
+        name: str,
+        description: str,
+        namespace: str,
+        pack_icon_path: str | None = None,
         world_name: str | None = None,
-        datapack_output_path: str = "", resource_pack_path: str = "",
+        datapack_output_path: str = "",
+        resource_pack_path: str = "",
+
         custom_advancements: list["CustomAdvancement"] | None = None,
+        custom_blocks: list["CustomBlock"] | None = None,
         custom_items: list["CustomItem"] | None = None,
         custom_jukebox_songs: list["CustomJukeboxSong"] | None = None,
+        custom_loot_tables: list["CustomLootTable"] | None = None,
         custom_paintings: list["CustomPainting"] | None = None,
+        custom_predicates: list["Predicate"] | None = None,
         custom_recipes: list["Recipe"] | None = None,
         custom_sounds: list["CustomSound"] | None = None,
         custom_tags: list["CustomTag"] | None = None,
+        mcfunctions: list["MCFunction"] | None = None,
     ) -> None:
         """Given a nice name for the datapack, a description, a namespace (usually a version of the datapack without spaces or punctuation, all lowercase),
         A path to a pack icon (optional), a world name (if you're not passing in a datapack output path, so it'll automatically be put in that world)
@@ -43,6 +58,7 @@ class Datapack:
         self.world_name = world_name
 
         self.custom_advancements = custom_advancements or []
+        self.custom_blocks = custom_blocks or []
         self.custom_recipes = custom_recipes or []
         self.custom_items = custom_items or []
         self.custom_tags = custom_tags or []
@@ -52,8 +68,13 @@ class Datapack:
         if self.resource_pack_path == "":
             self.resource_pack_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\resourcepacks\\{name}"
 
-        self.data_pack_format_version = 60
+        self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
+
+        # ==================================================================================
+        # Adding all the blocks' items to the list
+        for block in self.custom_blocks:
+            self.custom_items.append(block.block_item)  # type: ignore
 
         # REFERENCE BOOK CATEGORIES ==================================================================================
         # Get all the categories by removing duplicates via name
@@ -72,12 +93,21 @@ class Datapack:
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
 
+        self.custom_loot_tables = custom_loot_tables or []
+        assert self.custom_loot_tables == [], "Custom loot tables are not yet supported"
+        self.custom_predicates = custom_predicates or []
         self.custom_paintings = custom_paintings or []
         self.custom_sounds = custom_sounds or []
         self.custom_jukebox_songs = custom_jukebox_songs or []
+        self.mcfunctions = mcfunctions or []
+
+        if self.custom_blocks:
+            self.mcfunctions.extend(generate_functions(self))
+            self.custom_tags.append(ray_transitive_blocks_tag)
+
+        self.mcfunctions.append(MCFunction("load", [f"say Loaded into {self.name}!\nfunction {self.namespace}:raycast/load"]))
 
         self.font_mapping = {}  # Is populated later
-
         self.generate_pack()
 
     def generate_pack(self) -> None:

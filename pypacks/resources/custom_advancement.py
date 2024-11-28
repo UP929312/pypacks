@@ -1,6 +1,6 @@
 import json
 from typing import Literal, Any, TYPE_CHECKING
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pypacks.utils import recusively_remove_nones_from_dict
 
@@ -20,26 +20,29 @@ class Criteria:
 
 @dataclass
 class CustomAdvancement:
-    """Rewarded loot is a """
-    name: str
-    title: str
-    description: str
+    """Rewarded loot is the reference to a LootTable"""
+    # https://minecraft.wiki/w/Advancement_definition
+    internal_name: str
     criteria: list[Criteria]
     rewarded_loot: str | None = None  # The resource location of a loot table.
     rewarded_recipes: str | None = None  # The resource location of a recipe.
     rewarded_experience: int | None = None  # To give an amount of experience. Defaults to 0.
     rewarded_function: str | None = None  # To run a function. Function tags are not allowed.
+    hidden: bool = False
 
+    title: str = "Unknown"
+    description: str = "Unknown"
     parent: str | None = None
     icon_item: str = "minecraft:target"
     frame: Literal["task", "challenge", "goal"] = "task"
     root_background: str = "minecraft:textures/gui/advancements/backgrounds/adventure.png"
     show_toast: bool = True
     announce_to_chat: bool = False
-    hidden: bool = False
     send_telemetry_event: bool = False
 
-    def to_dict(self) -> dict[str, Any]:
+    datapack_subdirectory_name: str = field(init=False, default="advancement")
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return recusively_remove_nones_from_dict({
             "parent": self.parent,
             "display": {
@@ -50,8 +53,7 @@ class CustomAdvancement:
                 "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
                 "show_toast": False if not self.show_toast else None,
                 "announce_to_chat": False if not self.announce_to_chat else None,
-                "hidden": True if self.hidden else None,
-            },
+            } if not self.hidden else None,
             "criteria": {
                 x.name: {"trigger": x.trigger, "conditions": x.conditions}
                 for x in self.criteria
@@ -59,6 +61,7 @@ class CustomAdvancement:
             "requirements": [
                 [x.name for x in self.criteria],
             ],
+            # "requirements": [[x.name] for x in self.criteria],  # This means we AND all requirements
             "rewards": {
                 "experience": self.rewarded_experience,
                 "recipes": self.rewarded_recipes,
@@ -68,29 +71,21 @@ class CustomAdvancement:
             "sends_telemetry_event": True if self.send_telemetry_event else None,
         })
 
-    def create_json_file(self, datapack: "Datapack") -> None:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/advancement/{self.name}.json", "w") as f:
-            json.dump(self.to_dict(), f, indent=4)
-
+    def create_datapack_files(self, datapack: "Datapack") -> None:
+        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(datapack), file, indent=4)
 
     @staticmethod
     def generate_right_click_functionality(item: "CustomItem", datapack: "Datapack") -> "CustomAdvancement":
-        criteria = Criteria(f"eating_{item.item_id}", "minecraft:using_item", {
+        criteria = Criteria(f"eating_{item.internal_name}", "minecraft:using_item", {
             "item": {
-                "components": {
-                    "minecraft:custom_data": {f"custom_right_click_for_{item.item_id}": True},
-                    # Don't need any of this anymore, used to work for 1 item but 2 broke it
-                    # "minecraft:food": {
-                    #     "nutrition": 0,
-                    #     "saturation": 0,
-                    #     "can_always_eat": True,
-                    #     "eat_seconds": 1_000_000,  # Doesn't seem to work... hence the custom_data
-                    # }
-                }
+                "predicates": {  # We use predicates instead of components because components require exact match, predicates require minimum match
+                    "minecraft:custom_data": {f"custom_right_click_for_{item.internal_name}": True},
+                },
             }
         })
         eating_advancement = CustomAdvancement(
-            f"custom_right_click_for_{item.item_id}", f"Ignore me {item.item_id}", "Nothing to see here", [criteria],
-            hidden=True, rewarded_function=f"{datapack.namespace}:right_click/{item.item_id}"
+            f"custom_right_click_for_{item.internal_name}", [criteria],
+            hidden=True, rewarded_function=f"{datapack.namespace}:right_click/{item.internal_name}"
         )
         return eating_advancement

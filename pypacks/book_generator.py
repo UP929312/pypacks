@@ -1,14 +1,13 @@
-import json
 from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING
 
-from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.item_components import CustomItemData, WrittenBookContent
 from pypacks.resources.custom_recipe import SmithingTrimRecipe
-from pypacks.utils import chunk_list, remove_colour_codes, PYPACKS_ROOT
+from pypacks.utils import PYPACKS_ROOT, chunk_list, remove_colour_codes
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
+    from pypacks.resources.custom_item import CustomItem
 
 ICONS_PER_ROW = 5
 ROWS_PER_PAGE = 4
@@ -47,33 +46,38 @@ class ReferenceBookCategory:
 
 @dataclass
 class ItemPage:
-    item: CustomItem
+    item: "CustomItem"
     datapack: "Datapack"
     back_button_page: int
 
     def get_title(self) -> dict[str, Any]:
         return {
-            "text": f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}\n\n", "underlined": True, "bold": True,
+            "text": f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", "underlined": True, "bold": True,
             "hoverEvent": {"action": "show_item", "contents": {
                 "id": self.item.base_item, "count": 1, "tag": {"display": {"Name": self.item.custom_name or self.item.base_item}}
             }},
-            "clickEvent": {"action": "run_command", "value": f"/function {self.datapack.namespace}:give/{self.item.item_id}"},
+            "clickEvent": {"action": "run_command", "value": f"/function {self.datapack.namespace}:give/{self.item.internal_name}"},
         }
 
     def generate_page(self) -> list[dict[str, Any]]:
+        from pypacks.resources.custom_item import CustomItem
+
         title: dict[str, Any] = self.get_title()
-        obtain_method = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and x.result == self.item.item_id]
-        # print([x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and x.result == self.item.item_id])
         # Get all the ways to craft it
-        if not obtain_method:
-            obtain_method_data: dict[str, Any] = {"text": "No recipes found\n\n", "underlined": False, "bold": False}
+        non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
+        obtain_methods = [x for x in non_smithing_trim_recipes if (x.result.internal_name if isinstance(x.result, CustomItem) else x.result) == self.item.internal_name]
+        if obtain_methods:
+            obtain_method_data: dict[str, Any] = {"text": f"Found recipe!", "underlined": False, "bold": False}  # {obtain_methods[0].ingredients}
         else:
-            obtain_method_data: dict[str, Any] = {}
+            obtain_method_data: dict[str, Any] = {"text": "No recipes found", "underlined": False, "bold": False}
         return [
             title,
             generate_backslashes(2),
+            RedirectButton.generate_icon(self.datapack.font_mapping[f"{self.item.internal_name}_icon"], self.datapack),
+            generate_backslashes(2),
             obtain_method_data,
-            RedirectButton.generate_icon(self.datapack.font_mapping[f"{self.item.item_id}_icon"], self.datapack),
+            generate_backslashes(8),
+            generate_icon_row_spacing(self.datapack, 90), RedirectButton(self.datapack.font_mapping["satchel_icon"], "Go to the categories page", self.back_button_page).get_json_data(self.datapack),
         ]
 
 
@@ -99,7 +103,7 @@ class RedirectButton:
     def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
         return_value = self.generate_icon(self.unicode_char, datapack)
         if self.hover_text is not None:
-            # print(self.hover_text)
+            # rint(self.hover_text)
             return_value |= {"hoverEvent": {"action": "show_text", "contents": self.hover_text}}
         if self.go_to_page is not None:
             return_value |= {"clickEvent": {"action": "change_page", "value": str(self.go_to_page)}}
@@ -149,7 +153,7 @@ class GridPage:
 class ReferenceBook:
     # /give @p written_book[written_book_content={"title": "abc", "author": "Title", "pages": ['[{"text": "Testing\\n"}, {"text": "Testing\\n"}, {text: "\\uE004\\uE004\\uE004\\uE006\\uE004\\uE006\\uE004\\uE006\\uE004\\uE006\\uE004\\uE006\\uE004\\uE006\\uE004", color: "white", font: "pypacks_testing:test_font_image"}]']}]
 
-    def __init__(self, items: list[CustomItem]) -> None:
+    def __init__(self, items: list["CustomItem"]) -> None:
         self.items = items
 
     def generate_cover_page(self, datapack: "Datapack") -> list[dict[str, str | bool]]:
@@ -168,7 +172,6 @@ class ReferenceBook:
         
         # Cover (1)
         cover_page = self.generate_cover_page(datapack)
-        # print(cover_page)
 
         # Categories (2)
         category_page = GridPage("Categories", [
@@ -179,18 +182,18 @@ class ReferenceBook:
 
         category_items_pages = []
         # Item list page(s) (3+)
-        for category in datapack.reference_book_categories:
+        for category_index, category in enumerate(datapack.reference_book_categories):
             # This shows lists of items per category, the button takes you to the individual item page, which comes after all
             # The cover & category pages, so it's index is CATEGORIES_PAGE + item_index
             item_list_icons = [
                 RedirectButton(
-                    datapack.font_mapping[f"{item.item_id}_icon"],
+                    datapack.font_mapping[f"{item.internal_name}_icon"],
                     remove_colour_codes(item.custom_name or item.base_item),  #colour_codes_to_json_format(item.custom_name or item.base_item)
                     ITEM_PAGE+item_index,
                 )
                 for item_index, item in enumerate(datapack.custom_items) if item.book_category.name == category.name
             ]
-            icon_list_page = GridPage(f"{category.name.title()} items", item_list_icons, datapack, back_button_page=CATEGORIES_PAGE).elements
+            icon_list_page = GridPage(f"{category.name.title()} items", item_list_icons, datapack, back_button_page=CATEGORIES_PAGE+category_index).elements
             category_items_pages.append(icon_list_page)
 
         # Item page(s) (x+)
@@ -207,11 +210,14 @@ class ReferenceBook:
         return [cover_page, category_page, *category_items_pages, *item_pages, blank_page]
 
     def generate_give_command(self, datapack: "Datapack") -> str:
+        from pypacks.resources.custom_item import CustomItem
+
         pages = self.generate_pages(datapack)
-        custom_data = CustomItemData(written_book_content=WrittenBookContent(f"{datapack.name} Reference Book", "PyPacks", pages))
-        custom_item = CustomItem("minecraft:written_book", f"{datapack.name}_reference_book", additional_item_data=custom_data)
+        custom_item_data = CustomItemData(written_book_content=WrittenBookContent(f"{datapack.name} Reference Book", "PyPacks", pages))
+        custom_item = CustomItem("minecraft:written_book", f"{datapack.name}_reference_book", additional_item_data=custom_item_data)
         return custom_item.generate_give_command(datapack)
 
 # =======================================================================================================================================
 
-# DEFAULT_REF_BOOK_CATEGORY = ReferenceBookCategory("Miscellaneous", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")
+# https://github.com/misode/misode.github.io/blob/master/public/images/crafting_table.png
+DEFAULT_REF_BOOK_CATEGORY = ReferenceBookCategory("Miscellaneous", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join

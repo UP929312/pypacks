@@ -1,6 +1,7 @@
 import json
 import io
 import os
+import pathlib
 from typing import Any
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
@@ -78,17 +79,17 @@ def remove_colour_codes(text: str) -> str:
 def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None = None) -> tuple[int, int]:
     """Returns width, height of the image"""
     if file_path is not None:
-        with open(file_path, 'rb') as f:
-            f.seek(16)  # Width and height start at byte 16
-            width = int.from_bytes(f.read(4), 'big')
-            height = int.from_bytes(f.read(4), 'big')
+        with open(file_path, 'rb') as file:
+            file.seek(16)  # Width and height start at byte 16
+            width = int.from_bytes(file.read(4), 'big')
+            height = int.from_bytes(file.read(4), 'big')
     else:
         # TODO: The same, one with a context manager, one without...
         assert image_bytes is not None, "Must provide image bytes if not providing file_path"
-        f = io.BytesIO(image_bytes)
-        f.seek(16)  # Width and height start at byte 16
-        width = int.from_bytes(f.read(4), 'big')
-        height = int.from_bytes(f.read(4), 'big')
+        file = io.BytesIO(image_bytes)
+        file.seek(16)  # Width and height start at byte 16
+        width = int.from_bytes(file.read(4), 'big')
+        height = int.from_bytes(file.read(4), 'big')
     assert width == height, "Image must be square"
     assert width == 1 or width % 2 == 0, "Image width must be divisible by 16"
     assert height == 1 or height % 2 == 0, "Image height must be divisible by 16"
@@ -97,6 +98,19 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
     # rint(file_path, width, height)
     return width, height
 
+
+def resolve_default_item_image(base_item: str) -> str:
+    path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{base_item.removeprefix('minecraft:')}.png")
+    if not path.exists():
+        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{base_item.removeprefix('minecraft:')}_00.png")  # Clocks, compasses, etc.
+    if not path.exists():
+        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/unknown.png")  # Others, player head
+    return str(path)
+
+
+def pascal_to_snake(name: str) -> str:
+    return ''.join(['_' + i.lower() if i.isupper() else i for i in name]).lstrip('_')
+
 # def get_ogg_duration(audio_bytes: bytes) -> float:
 #     f = io.BytesIO(audio_bytes)
 #     sample_rate = None
@@ -104,7 +118,7 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
     
 #     while True:
 #         # Read OGG page header (27 bytes minimum)
-#         header = f.read(27)
+#         header = file.read(27)
 #         if len(header) < 27:
 #             break
 
@@ -113,11 +127,11 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
 
 #         # Number of segments in the page
 #         segment_count = header[26]
-#         segment_table = f.read(segment_count)
+#         segment_table = file.read(segment_count)
 
 #         # Calculate total size of this page's payload
 #         segment_size = sum(segment_table)
-#         payload_data = f.read(segment_size)
+#         payload_data = file.read(segment_size)
 
 #         # Extract granule position (bytes 6-13 of the header)
 #         granule_pos = int.from_bytes(header[6:14], 'little')
@@ -132,12 +146,12 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
 #                 sample_rate = int.from_bytes(payload_data[index + 11:index + 15], 'little')
 
 #     # Debugging: Log values to validate correctness
-#     print(f"Last granule position: {last_granule_pos}")
-#     print(f"Sample rate: {sample_rate}")
+#     rint(f"Last granule position: {last_granule_pos}")
+#     rint(f"Sample rate: {sample_rate}")
 
 #     if sample_rate and last_granule_pos:
 #         duration = last_granule_pos / sample_rate
-#         print(f"Calculated duration: {duration} seconds")
+#         rint(f"Calculated duration: {duration} seconds")
 #         return duration
 #     else:
 #         raise ValueError("Could not determine file duration")

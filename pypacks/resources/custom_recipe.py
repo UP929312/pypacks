@@ -1,6 +1,6 @@
 import json
-from dataclasses import dataclass
-from typing import TypeVar, Any, TYPE_CHECKING
+from dataclasses import dataclass, field
+from typing import TypeVar, Any, TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -8,37 +8,44 @@ if TYPE_CHECKING:
 from pypacks.resources.custom_item import CustomItem
 
 StringOrItemOrTag = TypeVar("StringOrItemOrTag", str, CustomItem)
+StringOrCustomItem = TypeVar("StringOrCustomItem", str, CustomItem)
+RecipeCategory = Literal["blocks", "building", "equipment", "food", "misc", "redstone"]
 
 # https://minecraft.wiki/w/Recipe
 
 @dataclass
 class GenericRecipe:
-    name: str
+    internal_name: str
+
+    datapack_subdirectory_name: str = field(init=False, default="recipe")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         raise NotImplementedError
     
-    def format_item_or_string(self, item_or_string: str | CustomItem) -> str:
-        if isinstance(item_or_string, CustomItem):
+    def format_item_or_string(self, item_or_string: "str | CustomItem") -> str:
+        if isinstance(item_or_string, CustomItem):  # TODO: Invert this, and then remove the import?
             return item_or_string.base_item
         return item_or_string
 
-    def create_json_file(self, datapack: "Datapack") -> None:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/recipe/{self.name}.json", "w") as f:
-            json.dump(self.to_dict(datapack), f, indent=4)
+    def create_datapack_files(self, datapack: "Datapack") -> None:
+        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(datapack), file, indent=4)
+
 
 @dataclass
 class ShapelessCraftingRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     ingredients: list[list[str] | str]
     # Ingredients can either be a list of Items (i.e. a flint and iron ingot makes a flint and steel), or a list of lists,
     # which allows you to put multiple items in, e.g. making a chest from all the types of wood.
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
     amount: int = 1
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:crafting_shapeless",
+            "category": self.recipe_category,
             "ingredients": self.ingredients,
             "result": {
                 "id": self.format_item_or_string(self.result),
@@ -52,11 +59,12 @@ class ShapelessCraftingRecipe(GenericRecipe):
 
 @dataclass
 class ShapedCraftingRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     rows: list[str]
     keys: dict[str, list[str] | str]
-    result: StringOrItemOrTag  # type: ignore[abc]
+    result: StringOrCustomItem  # type: ignore[abc]
     amount: int = 1
+    recipe_category: RecipeCategory = "misc"
 
     def __post_init__(self) -> None:
         assert 0 < len(self.rows) <= 3, "Rows must be a list of 1-3 strings"
@@ -68,6 +76,7 @@ class ShapedCraftingRecipe(GenericRecipe):
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:crafting_shaped",
+            "category": self.recipe_category,
             "pattern": self.removed_nones_rows,
             "key": self.keys,
             "result": {
@@ -83,14 +92,16 @@ class ShapedCraftingRecipe(GenericRecipe):
 
 @dataclass
 class CraftingTransmuteRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     input_item: str
     material_item: str
     result: str
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
         return {
             "type": "minecraft:crafting_shapeless",
+            "category": self.recipe_category,
             "input": self.input_item,
             "material": self.material_item,
             "result": self.result,
@@ -99,15 +110,17 @@ class CraftingTransmuteRecipe(GenericRecipe):
 
 @dataclass
 class FurnaceRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     ingredient: str
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
     experience: int | None = 1
     cooking_time_ticks: int = 200
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:smelting",
+            "category": self.recipe_category,
             "ingredient": self.ingredient,
             "result": {
                 "id": self.format_item_or_string(self.result),
@@ -122,15 +135,17 @@ class FurnaceRecipe(GenericRecipe):
 
 @dataclass
 class BlastFurnaceRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     ingredient: str
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
     experience: int | None = 1
     cooking_time_ticks: int = 200
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:blasting",
+            "category": self.recipe_category,
             "ingredient": self.ingredient,
             "result": {
                 "id": self.format_item_or_string(self.result),
@@ -145,15 +160,17 @@ class BlastFurnaceRecipe(GenericRecipe):
 
 @dataclass
 class CampfireRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     ingredient: str
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
     experience: int | None = 1
     cooking_time_ticks: int = 200
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:campfire_cooking",
+            "category": self.recipe_category,
             "ingredient": self.ingredient,
             "result": {
                 "id": self.format_item_or_string(self.result),
@@ -165,29 +182,24 @@ class CampfireRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_components_dict(datapack)
         return data
 
+
 @dataclass
 class SmithingTransformRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     template_item: str
     base_item: str
     addition_item: str
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:smithing_transform",
-            "template": {
-                "item": self.template_item,
-            },
-            "base": {
-                "item": self.base_item,
-            },
-            "addition": {
-                "item": self.addition_item,
-            },
-            "result": {
-                "item": self.format_item_or_string(self.result),
-            }
+            "category": self.recipe_category,
+            "template": {"item": self.template_item},
+            "base": {"item": self.base_item},
+            "addition": {"item": self.addition_item},
+            "result": {"item": self.format_item_or_string(self.result)},
         }
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_components_dict(datapack)
@@ -196,7 +208,7 @@ class SmithingTransformRecipe(GenericRecipe):
 
 @dataclass
 class SmithingTrimRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     template_item: str
     base_item: str
     addition_item: str
@@ -218,15 +230,17 @@ class SmithingTrimRecipe(GenericRecipe):
 
 @dataclass
 class SmokerRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     ingredient: str
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
     experience: int | None = 1
     cooking_time_ticks: int = 200
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:smoking",
+            "category": self.recipe_category,
             "ingredient": self.ingredient,
             "result": {
                 "id": self.format_item_or_string(self.result),
@@ -241,14 +255,16 @@ class SmokerRecipe(GenericRecipe):
 
 @dataclass
 class StonecutterRecipe(GenericRecipe):
-    name: str
+    internal_name: str
     ingredient: str
-    result: StringOrItemOrTag  # type: ignore
+    result: StringOrCustomItem  # type: ignore
     count: int = 1
+    recipe_category: RecipeCategory = "misc"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:stonecutting",
+            "category": self.recipe_category,
             "ingredient": self.ingredient,
             "result": {
                 "id": self.format_item_or_string(self.result),
