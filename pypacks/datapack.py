@@ -1,9 +1,10 @@
 import os
-# from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
+from pypacks.resources.custom_font import CustomFont
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.raycasting import generate_raycasting_functions, generate_place_functions, ray_transitive_blocks_tag
 
@@ -12,7 +13,6 @@ from pypacks.image_generation import add_icon_to_base
 if TYPE_CHECKING:
     from pypacks.book_generator import ReferenceBookCategory
 
-    # from pypacks.resources.custom_advancement import CustomAdvancement
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_block import CustomBlock
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
@@ -23,59 +23,39 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_tag import CustomTag
 
+
+@dataclass
 class Datapack:
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        namespace: str,
-        pack_icon_path: str | None = None,
-        world_name: str | None = None,
-        datapack_output_path: str = "",
-        resource_pack_path: str = "",
+    """Given a nice name for the datapack, a description, a namespace (usually a version of the datapack without spaces or punctuation, all lowercase),
+    A path to a pack icon (optional), a world name (if you're not passing in a datapack output path, so it'll automatically be put in that world)
+    A datapack output path (where the datapack will be saved, optional), a resource pack path (where the resource pack will be saved),
+    And a list of custom elements."""
+    name: str
+    description: str
+    namespace: str
+    pack_icon_path: str | None = None
+    world_name: str | None = None
+    datapack_output_path: str = ""
+    resource_pack_path: str = ""
 
-        custom_advancements: list["CustomAdvancement"] | None = None,
-        custom_blocks: list["CustomBlock"] | None = None,
-        custom_items: list["CustomItem"] | None = None,
-        custom_jukebox_songs: list["CustomJukeboxSong"] | None = None,
-        custom_loot_tables: list["CustomLootTable"] | None = None,
-        custom_paintings: list["CustomPainting"] | None = None,
-        custom_predicates: list["Predicate"] | None = None,
-        custom_recipes: list["Recipe"] | None = None,
-        custom_sounds: list["CustomSound"] | None = None,
-        custom_tags: list["CustomTag"] | None = None,
-        mcfunctions: list["MCFunction"] | None = None,
-    ) -> None:
-        """Given a nice name for the datapack, a description, a namespace (usually a version of the datapack without spaces or punctuation, all lowercase),
-        A path to a pack icon (optional), a world name (if you're not passing in a datapack output path, so it'll automatically be put in that world)
-        A datapack output path (where the datapack will be saved, optional), a resource pack path (where the resource pack will be saved),
-        And a list of custom elements."""
-        self.name = name
-        self.description = description
-        self.namespace = namespace
-        self.pack_icon_path = pack_icon_path
-        self.datapack_output_path = datapack_output_path
-        self.resource_pack_path = resource_pack_path
-        self.world_name = world_name
+    custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
+    custom_blocks: list["CustomBlock"] = field(default_factory=list)
+    custom_items: list["CustomItem"] = field(default_factory=list)
+    custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
+    custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
+    custom_paintings: list["CustomPainting"] = field(default_factory=list)
+    custom_predicates: list["Predicate"] = field(default_factory=list)
+    custom_recipes: list["Recipe"] = field(default_factory=list)  # type: ignore
+    custom_sounds: list["CustomSound"] = field(default_factory=list)
+    custom_tags: list["CustomTag"] = field(default_factory=list)
+    mcfunctions: list["MCFunction"] = field(default_factory=list)
 
-        self.custom_advancements = custom_advancements or []
-        self.custom_blocks = custom_blocks or []
-        self.custom_recipes = custom_recipes or []
-        self.custom_items = custom_items or []
-        self.custom_tags = custom_tags or []
-
-        self.custom_loot_tables = custom_loot_tables or []
+    def __post_init__(self) -> None:
         assert self.custom_loot_tables == [], "Custom loot tables are not yet supported"
-        self.custom_predicates = custom_predicates or []
-        self.custom_paintings = custom_paintings or []
-        self.custom_sounds = custom_sounds or []
-        self.custom_jukebox_songs = custom_jukebox_songs or []
-        self.mcfunctions = mcfunctions or []
-
         if self.datapack_output_path == "" and self.world_name:
-            self.datapack_output_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\saves\\{world_name}\\datapacks\\{name}"
+            self.datapack_output_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\saves\\{self.world_name}\\datapacks\\{self.name}"
         if self.resource_pack_path == "":
-            self.resource_pack_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\resourcepacks\\{name}"
+            self.resource_pack_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\resourcepacks\\{self.name}"
 
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
@@ -96,7 +76,6 @@ class Datapack:
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
-
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
@@ -111,13 +90,13 @@ class Datapack:
 
         self.mcfunctions.append(MCFunction("load", [f"say Loaded into {self.name}!\nfunction {self.namespace}:raycast/load"]))
 
-        self.font_mapping = {}  # Is populated later
         self.generate_pack()
+
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")
         print(f"Generating resource pack @ {self.resource_pack_path}")
         # Needs to go in this order
         generate_resource_pack(self)
-        generate_font_pack(self)
+        self.font_mapping = generate_font_pack(self)
         generate_base_pack(self)

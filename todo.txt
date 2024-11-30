@@ -7,10 +7,6 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 
 # Merge on_load
 
-MAKE DATAPACKS DATACLASSES?
-
-# Todo: Font handler class, it's a mess tbh
-
 # Hmmm, what about a mapping of item to image? Could generate it automatically? Maybe from the model file?
 
 # Current plan for breaking is to check every tick if any of the display entities are in air, and if so, delete the items and re-spawn them

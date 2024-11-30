@@ -98,6 +98,17 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
     # rint(file_path, width, height)
     return width, height
 
+def get_png_height(file_path: str | None = None, image_bytes: bytes | None = None) -> int:
+    """Returns the height of the image"""
+    if file_path is not None:
+        return get_png_dimensions(file_path=file_path)[1]
+    else:
+        return get_png_dimensions(image_bytes=image_bytes)[1]
+
+
+def inline_open(file_path: str, mode: str = "rb") -> Any:
+    with open(file_path, mode) as file:
+        return file.read()
 
 def resolve_default_item_image(base_item: str) -> str:
     path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{base_item.removeprefix('minecraft:')}.png")

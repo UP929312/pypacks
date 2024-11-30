@@ -4,17 +4,20 @@ import shutil
 from typing import TYPE_CHECKING
 
 from pypacks.book_generator import ReferenceBook
+from pypacks.resources.custom_font import CustomFont, BookImage
 
 if TYPE_CHECKING:
     from .datapack import Datapack
 
-from .utils import PYPACKS_ROOT, get_png_dimensions
+from .utils import PYPACKS_ROOT, inline_open
 from .image_generation import add_icon_to_base
 
 
-BASE_IMAGES = [f"{PYPACKS_ROOT}/assets/images/{x}.png" for x in (  # TODO: os.pathlib.join
+BASE_IMAGES: dict[str, bytes] = {x: inline_open(f"{PYPACKS_ROOT}/assets/images/{x}.png", "rb") for x in (  # TODO: os.pathlib.join
     "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base", "logo", # "logo_512_x_512",
-)]
+)}
+ref_book_items = [f"{PYPACKS_ROOT}/assets/images/satchel.png"]
+
 
 def generate_resource_pack(datapack: "Datapack") -> None:
     os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "items"), exist_ok=True)
@@ -54,9 +57,9 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         file.write(add_icon_to_base(image_path=f"{PYPACKS_ROOT}/assets/images/satchel.png"))
     # ================================================================================================
     # Copy over the base images to the resource pack (icons, spacers, etc)
-    for image in BASE_IMAGES:
+    for image in BASE_IMAGES.keys():
         image_name = image.split("/")[-1].removesuffix(".png")
-        shutil.copyfile(image, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{image_name}.png")
+        shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/{image}.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{image_name}.png")
 
     # Paintings
     for painting in datapack.custom_paintings:
@@ -82,52 +85,35 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         custom_block.create_resource_pack_files(datapack)
 
 
-def generate_font_pack(datapack: "Datapack") -> None:
-    # Create the providers file & mapping
-    chars = [f"\\uE{i:03}" for i in range(0, 100)]  # Generate \uE000 - \uE999
-    mapping = {}
-    providers = []
-    ref_book_items = [f"{PYPACKS_ROOT}/assets/images/satchel.png"]
-    BASE_IMAGE_COUNT, CUSTOM_ITEM_COUNT, CUSTOM_REF_BOOK_ICONS, CATEGORY_COUNT = len(BASE_IMAGES), len(datapack.custom_items), len(ref_book_items), len(datapack.reference_book_categories)
-    # TODO: Clean this up, so many loops.
-
-    # Create the fonts for all the base images
-    for i, image in enumerate(BASE_IMAGES):
-        image_name = image.split("/")[-1].removesuffix(".png")
-        mapping[image_name] = chars[i]
-        height = get_png_dimensions(image)[1]
-        provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{image_name}.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
-        providers.append(provider)
-    # Create the fonts for all the custom items
-    for i, item in enumerate(datapack.custom_items, BASE_IMAGE_COUNT):
-        mapping[f"{item.internal_name}_icon"] = chars[i]
-        height = get_png_dimensions(image_bytes=item.icon_image_bytes)[1]
-        provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{item.internal_name}_icon.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
-        providers.append(provider)
-    # Create custom buttons
-    for i, icon_path in enumerate(ref_book_items, BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT):
-        icon_name = icon_path.split("/")[-1].removesuffix(".png")
-        mapping[f"{icon_name}_icon"] = chars[i]
-        height = 20  # get_png_dimensions(image_path=icon_path)[1]
-        provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{icon_name}_icon.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
-        providers.append(provider)
-    # Create the fonts for all the category icons
-    for i, category in enumerate(datapack.reference_book_categories, BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT+CUSTOM_REF_BOOK_ICONS):
-        mapping[category.name.lower()+"_category_icon"] = chars[i]
-        height = get_png_dimensions(image_bytes=category.icon_image_bytes)[1]
-        provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{category.name.lower()}_category_icon.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
-        providers.append(provider)
-    # for i, image_name in enumerate(["logo_512_x_512"], BASE_IMAGE_COUNT+CUSTOM_ITEM_COUNT+CUSTOM_REF_BOOK_ICONS+CATEGORY_COUNT):
-    #     mapping[image_name] = chars[i]
-    #     height = 100
-    #     provider = {"type": "bitmap", "file": f"{datapack.namespace}:font/{image_name}.png", "height": height, "ascent": min(height//2, 16), "chars": [chars[i]]}
-    #     providers.append(provider)
-
+def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
+    # TODO: Could this move to the reference book generator?
     # https://www.youtube.com/watch?v=i4l2Ym_0VZg   <- Just cool
-    with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/font/all_fonts.json", "w") as file:
-        file.write(json.dumps({"providers": providers}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes
-    datapack.font_mapping = mapping
+    # Create the providers file
+    all_elements = [
+        *[   # BASE IMAGES, Spaces, Empty icon, logo
+            BookImage(name=image_name, image_bytes=image_bytes)
+            for image_name, image_bytes in BASE_IMAGES.items()
+        ],
+        *[  # Custom items
+            BookImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
+            for item in datapack.custom_items
+        ],
+        *[  # Satchel, not much else
+            BookImage(icon_path.split("/")[-1].removesuffix(".png")+"_icon", image_bytes=inline_open(icon_path), height=20, y_offset=10)
+            for icon_path in ref_book_items
+        ],
+        *[  # Category icons
+            BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[abc]
+            for category in datapack.reference_book_categories
+        ],
+        # *[  # Logo (scaled, better resolution)
+        #     BookImage(image_name, image_bytes)
+        #     for image_name, image_bytes in [("logo_512_x_512", inline_open(f"{PYPACKS_ROOT}/assets/images/logo_512_x_512.png"))]
+    ]
 
+    custom_font = CustomFont("all_fonts", all_elements)
+    custom_font.create_resource_pack_files(datapack)
+    return custom_font.font_mapping
 
 def generate_base_pack(datapack: "Datapack") -> None:
     os.makedirs(os.path.join(datapack.datapack_output_path), exist_ok=True)
