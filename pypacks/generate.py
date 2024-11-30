@@ -167,22 +167,21 @@ def generate_base_pack(datapack: "Datapack") -> None:
 
     for item in (
         datapack.custom_items+datapack.custom_recipes+datapack.custom_jukebox_songs+datapack.custom_predicates+
-        datapack.custom_paintings+datapack.custom_advancements+datapack.custom_loot_tables
+        datapack.custom_paintings+datapack.custom_advancements+datapack.custom_loot_tables+
+        datapack.mcfunctions+datapack.custom_tags
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, item.datapack_subdirectory_name), exist_ok=True)
+        if hasattr(item, "sub_directories"):
+            os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)  # type: ignore
         item.datapack_subdirectory_name
         item.create_datapack_files(datapack)
 
-    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "custom_blocks"), exist_ok=True)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "place"), exist_ok=True)
     for custom_block in datapack.custom_blocks:
         # f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block, predicate=!{namespace}:check_vanilla_blocks] at @s run function {datapack.namespace}:custom_blocks/destroy"
         os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "custom_blocks", custom_block.internal_name), exist_ok=True)
         custom_block.create_datapack_files(datapack)
-
-    for item in datapack.mcfunctions+datapack.custom_tags:
-        os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)
-        item.create_datapack_files(datapack)
 
     # Testing command
     # shutil.copyfile(f"{PYPACKS_ROOT}/scripts/setup_testing.mcfunction", f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/setup_testing.mcfunction")

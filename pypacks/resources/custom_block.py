@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 
 from pypacks.resources.custom_predicate import Predicate
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
+from pypacks.resources.mcfunction import MCFunction
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -57,7 +58,6 @@ class CustomBlock:
         pass
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
-        # initial_place_function_content, execute_as_file_content = self.generate_place_function(datapack)
         condition = {
             "location": [
                 {
@@ -71,25 +71,25 @@ class CustomBlock:
             ]
         }
         criteria = Criteria(f"placed_{self.internal_name}", "minecraft:placed_block", conditions=condition)
-        # advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=f"{datapack.namespace}:custom_blocks/{self.internal_name}/place", hidden=True)
+        # advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=f"{datapack.namespace}:place/right_click_initial_{self.block_item.internal_name}", hidden=True)
         advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=f"{datapack.namespace}:give/musical_horn", hidden=True)
         advancement.create_datapack_files(datapack)
 
-    def generate_place_function(self, datapack: "Datapack") -> tuple[str, str]:
+    def generate_place_function(self, datapack: "Datapack") -> tuple["MCFunction", "MCFunction"]:
         # We need to generate a 3d cube texture for the block.
         # We use item models because we can't give the block_display custom textures.
         # summon minecraft:item_display ~ ~ ~ {"item": {"id": "sponge", "components": {"item_model": "pypacks_testing:item/ruby_ore"}}}
         # item replace entity @e[type=minecraft:block_display] container.0 with minecraft:sponge[minecraft:item_model="pypacks_testing:item/ruby_ore"]
         initial_place_function_content = [
-            f"tag @s add {datapack.namespace}.placer",
-            f"setblock ~ ~ ~ air",
-            f"setblock ~ ~ ~ {self.base_block}",
+            # f"tag @s add {datapack.namespace}.placer",
+            # f"setblock ~ ~ ~ air",
+            # f"setblock ~ ~ ~ {self.base_block}",
             f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {datapack.namespace}:custom_blocks/{self.internal_name}/place_secondary",
-            f"tag @s remove {datapack.namespace}.placer",
+            # f"tag @s remove {datapack.namespace}.placer",
         ]
         # Has to be secondary so we have @s set correctly.
         execute_as_file_content = [
-            f"tag @s add {datapack.namespace}.block_display.{self.internal_name}",
+            # f"tag @s add {datapack.namespace}.block_display.{self.internal_name}",
             # f"tag @s add global.ignore",
             # f"tag @s add global.ignore.kill",
             # f"tag @s add smithed.entity",
@@ -105,4 +105,19 @@ class CustomBlock:
             # For item displays, container.0 is just the item it is displaying.
             f"item replace entity @s container.0 with minecraft:sponge[minecraft:item_model='{datapack.namespace}:item/{self.internal_name}']"
         ]
-        return "\n".join(initial_place_function_content), "\n".join(execute_as_file_content)
+        return (
+            MCFunction(f"right_click_initial_{self.block_item.internal_name}", initial_place_function_content, ["place"]),  # type: ignore[union-attr]
+            MCFunction(f"run_as_item_display_{self.block_item.internal_name}", execute_as_file_content, ["place"]),  # type: ignore[union-attr]
+        )
+    
+    def generate_raycast_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
+        hit_block = MCFunction("hit_block", [
+            "# Mark the ray as having found a block",
+            "scoreboard players set #hit raycast 1",
+            "",
+            "# Running custom commands since the block was found",
+            "setblock ~ ~ ~ minecraft:stone",
+            ],
+            ["raycast"],
+        )
+        return hit_block,

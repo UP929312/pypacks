@@ -263,8 +263,8 @@ EnchantmentType = Literal[
 
 @dataclass
 class CustomItemData:
-    durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#max_damage
-    lost_durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#damage
+    durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#max_damage  <-- Tools only
+    lost_durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#damage  <-- Tools only
     enchantment_glint_override: bool = False  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
     glider: bool = False  # https://minecraft.wiki/w/Data_component_format#glider
     unbreakable: bool = False  # https://minecraft.wiki/w/Data_component_format#unbreakable
@@ -272,11 +272,13 @@ class CustomItemData:
     hide_tooltip: bool = False  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
     hide_additional_tooltip: bool = False  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] | None = None  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
-    repair_cost: int | None = None  # https://minecraft.wiki/w/Data_component_format#repair_cost
+    repair_cost: int | None = None  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only
 
     enchantments: dict[EnchantmentType, int] | None = None  # https://minecraft.wiki/w/Data_component_format#enchantments
-    player_head_username: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile
-    custom_head_texture: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile
+    loaded_projectiles: list[str] | None = None  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
+    player_head_username: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    custom_head_texture: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = None  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
 
     cooldown: "Cooldown | None" = None
     equippable_slots: "Equippable | None" = None  # https://minecraft.wiki/w/Data_component_format#equippable
@@ -286,9 +288,9 @@ class CustomItemData:
     jukebox_playable: "JukeboxPlayable | None" = None
     lodestone_tracker: "LodestoneTracker | None" = None
     tool: "Tool | None" = None
-    instrument: "Instrument | None" = None
-    written_book_content: "WrittenBookContent | None" = None
-    writable_book_content: "WritableBookContent | None" = None
+    instrument: "Instrument | None" = None  # <-- Goat horn only
+    written_book_content: "WrittenBookContent | None" = None  # <-- Written book only
+    writable_book_content: "WritableBookContent | None" = None  # <-- Book and Quill only
     attribute_modifiers: list[AttributeModifier] | None = None
 
     def __post_init__(self) -> None:
@@ -312,8 +314,12 @@ class CustomItemData:
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
             "repair_cost":                self.repair_cost if self.repair_cost is not None else None,
 
-            "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "enchantments":               self.enchantments if self.enchantments is not None else None,
+            "charged_projectiles":        [{"id": projectile for projectile in self.loaded_projectiles}] if self.loaded_projectiles is not None else None,
+            "profile":                    self.player_head_username if self.player_head_username else profile,
+            "ominous_bottle_amplifier":   self.ominous_bottle_amplifier if self.ominous_bottle_amplifier is not None else None,
+
+            "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
             "consumable":                 self.consumable.to_dict() if self.consumable is not None else None,
@@ -324,13 +330,12 @@ class CustomItemData:
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
             "instrument":                 self.instrument.to_dict() if self.instrument is not None else None,
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
-            "profile":                    self.player_head_username if self.player_head_username else profile,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
 
-# banner_patterns
-# base_color - for shields # MEH
+# banner_patterns  MEH
+# base_color - for shields MEH
 # bees - for beehives/nests MEH
 # block_entity_data MEH
 # block_state MEH
@@ -338,7 +343,6 @@ class CustomItemData:
 # bundle_contents Mehh
 # can_break Mehhh
 # can_place_on Meh
-# charged_projectiles HMMM
 # consumable More work for effects and sound.
 # container YES (for chests) =======================================
 # container_loot MEH
@@ -355,11 +359,9 @@ class CustomItemData:
 # fireworks MEH
 # intangible_projectile MEH
 # note_block_sound
-# ominous_bottle_amplifier
 # potion_contents
-# profile (for heads), done half, done profiles not arbitrary data
 # recipes  - for knowledge book
-# stored_enchantments MEH
+# stored_enchantments MEH - For enchanted books?
 # suspicious_stew_effects MEH
 # tooltip_style maybe?
 # trim MEH

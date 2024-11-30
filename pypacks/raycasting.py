@@ -6,7 +6,14 @@ from pypacks.resources.custom_tag import CustomTag
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
-def generate_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
+def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
+    arguments = {
+        "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
+        "failed_function": f"{datapack.namespace}:raycast/failed",
+        "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+    }
+    formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
+
     failed = MCFunction("failed", [
         "# Commands to run when the raycast has failed to detect a block",
         "say Ray casting failed, oops!",
@@ -15,7 +22,7 @@ def generate_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
     )
 
     hit_block = MCFunction("hit_block", [
-        " # Mark the ray as having found a block",
+        "# Mark the ray as having found a block",
         "scoreboard players set #hit raycast 1",
         "",
         "# Running custom commands since the block was found",
@@ -26,7 +33,7 @@ def generate_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
 
     ray = MCFunction("ray", [
         "# Run a function if a block was detected",
-        f"execute unless block ~ ~ ~ #{datapack.namespace}:ray_transitive_blocks run function {datapack.namespace}:raycast/hit_block",
+        f"$execute unless block ~ ~ ~ $(ray_transitive_blocks) run function $(hit_block_function)",
         "",
         "# Add one distance to the ray",
         "scoreboard players add #distance raycast 1",
@@ -35,10 +42,10 @@ def generate_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
         "particle minecraft:cloud ~ ~ ~",
         "",
         "# If the raycast failed, run the failed function",
-        f"execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function {datapack.namespace}:raycast/failed",
+        f"$execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function $(failed_function)",
         "",
         "# Advance forward and run the ray again if no block was found",
-        f"execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {datapack.namespace}:raycast/ray",
+        f"execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {datapack.namespace}:raycast/ray {formatted_arguments}",
         ],
         ["raycast"],
     )
@@ -59,7 +66,7 @@ def generate_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
         "playsound minecraft:ui.button.click block @s ~ ~ ~",
         "",
         "# Activating the raycast. This function will call itself until it is done (at height of player - 1.62 blocks high)",
-        f"execute positioned ~ ~1.62 ~ run function {datapack.namespace}:raycast/ray",
+        f"execute positioned ~ ~1.62 ~ run function {datapack.namespace}:raycast/ray {formatted_arguments}",
         "",
         "# Raycasting finished, removing tag from the raycaster.",
         "tag @s remove is_raycasting",
@@ -67,6 +74,9 @@ def generate_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
         ["raycast"],
     )
     return failed, hit_block, load_ray, ray, start_ray
+
+def generate_place_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
+    return ()
 
 raycast_transitive_blocks = [
     "minecraft:air",
@@ -95,4 +105,5 @@ raycast_transitive_blocks = [
     "minecraft:crimson_roots",
     "minecraft:hanging_roots",
 ]
+
 ray_transitive_blocks_tag = CustomTag("ray_transitive_blocks", ["block"], raycast_transitive_blocks)

@@ -3,9 +3,17 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
 # Raycasting is done for right click, since it'll be run *after* the block is placed, why not just look *until* we find the block?
-# MACROS FOR RIGHT CLICK AND RAYCASTING
+# Create the right click macros for custom blocks
 
 # Merge on_load
+
+MAKE DATAPACKS DATACLASSES?
+
+# Todo: Font handler class, it's a mess tbh
+
+# Hmmm, what about a mapping of item to image? Could generate it automatically? Maybe from the model file?
+
+# Current plan for breaking is to check every tick if any of the display entities are in air, and if so, delete the items and re-spawn them
 
 Let's do raycasting.
 Custom blocks!!! ---------------
@@ -13,6 +21,8 @@ Custom blocks!!! ---------------
 LOOT STUFF IS GOING TO BE HARDDDD
 
 interaction entity for detecting right click on blocks!
+
+Add loaded_projectiles validation, i.e. arrows and fireworks and stuff
 
 # Change datapack init to take custom_content: list[a, b, c]
 

@@ -1,10 +1,11 @@
 import os
+# from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.raycasting import generate_functions, ray_transitive_blocks_tag
+from pypacks.raycasting import generate_raycasting_functions, generate_place_functions, ray_transitive_blocks_tag
 
 from pypacks.image_generation import add_icon_to_base
 
@@ -63,6 +64,14 @@ class Datapack:
         self.custom_items = custom_items or []
         self.custom_tags = custom_tags or []
 
+        self.custom_loot_tables = custom_loot_tables or []
+        assert self.custom_loot_tables == [], "Custom loot tables are not yet supported"
+        self.custom_predicates = custom_predicates or []
+        self.custom_paintings = custom_paintings or []
+        self.custom_sounds = custom_sounds or []
+        self.custom_jukebox_songs = custom_jukebox_songs or []
+        self.mcfunctions = mcfunctions or []
+
         if self.datapack_output_path == "" and self.world_name:
             self.datapack_output_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\saves\\{world_name}\\datapacks\\{name}"
         if self.resource_pack_path == "":
@@ -70,11 +79,6 @@ class Datapack:
 
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
-
-        # ==================================================================================
-        # Adding all the blocks' items to the list
-        for block in self.custom_blocks:
-            self.custom_items.append(block.block_item)  # type: ignore
 
         # REFERENCE BOOK CATEGORIES ==================================================================================
         # Get all the categories by removing duplicates via name
@@ -93,17 +97,17 @@ class Datapack:
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
 
-        self.custom_loot_tables = custom_loot_tables or []
-        assert self.custom_loot_tables == [], "Custom loot tables are not yet supported"
-        self.custom_predicates = custom_predicates or []
-        self.custom_paintings = custom_paintings or []
-        self.custom_sounds = custom_sounds or []
-        self.custom_jukebox_songs = custom_jukebox_songs or []
-        self.mcfunctions = mcfunctions or []
+        # ==================================================================================
+        # Adding all the blocks' items to the list
+        for block in self.custom_blocks:
+            self.custom_items.append(block.block_item)  # type: ignore
+            self.mcfunctions.extend(block.generate_place_function(self))
 
         if self.custom_blocks:
-            self.mcfunctions.extend(generate_functions(self))
+            self.mcfunctions.extend(generate_raycasting_functions(self))
             self.custom_tags.append(ray_transitive_blocks_tag)
+            self.mcfunctions.extend(generate_place_functions(self))
+        # ==================================================================================
 
         self.mcfunctions.append(MCFunction("load", [f"say Loaded into {self.name}!\nfunction {self.namespace}:raycast/load"]))
 
