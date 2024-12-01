@@ -36,9 +36,9 @@ class CustomItem:
         ):
             raise ValueError("You can't have both on_right_click and consumable/food!")
 
-        from pypacks.book_generator import DEFAULT_REF_BOOK_CATEGORY  # Circular imports
+        from pypacks.book_generator import MISCELLANOUS_REF_BOOK_CATEGORY  # Circular imports
         if self.book_category is None:
-            self.book_category = DEFAULT_REF_BOOK_CATEGORY
+            self.book_category = MISCELLANOUS_REF_BOOK_CATEGORY
 
         self.custom_data |= {"pypacks_custom_item": self.internal_name}
 

@@ -14,6 +14,9 @@ class MCFunction:
 
     datapack_subdirectory_name: str = field(init=False, default="function")
 
+    def get_reference(self, datapack: "Datapack") -> str:
+        return f"{datapack.namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
+
     def create_datapack_files(self, datapack: "Datapack") -> None:
         path = os.path.join(datapack.datapack_output_path, "data", datapack.namespace, self.__class__.datapack_subdirectory_name,
                             *self.sub_directories, f"{self.internal_name}.mcfunction")

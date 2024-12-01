@@ -19,7 +19,7 @@ class BookImage:
 
 @dataclass
 class CustomFont:
-    """Adds a custom font to the resource pack."""
+    """Adds a custom font to the resource pack. Not invokable manually, used internally (for now)"""
     name: str
     font_elements: list[BookImage]
 

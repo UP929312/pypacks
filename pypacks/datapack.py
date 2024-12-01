@@ -4,11 +4,10 @@ from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
-from pypacks.resources.custom_font import CustomFont
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.raycasting import generate_raycasting_functions, generate_place_functions, ray_transitive_blocks_tag
-
 from pypacks.image_generation import add_icon_to_base
+
 
 if TYPE_CHECKING:
     from pypacks.book_generator import ReferenceBookCategory
@@ -60,7 +59,32 @@ class Datapack:
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
 
-        # REFERENCE BOOK CATEGORIES ==================================================================================
+        self.add_internal_functions()
+        self.generate_pack()
+
+    def add_internal_functions(self) -> None:
+        # ============================================================================================================
+        for item in [x for x in self.custom_items if x.on_right_click]:
+            self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
+        # ==================================================================================
+        # Adding all the blocks' items to the list
+        for block in self.custom_blocks:
+            self.custom_items.append(block.block_item)  # The custom item
+            self.mcfunctions.append(block.generate_revoke_function(self))  # Intermediate functions, e.g. revoke_and_run (revoke advancement)
+            self.mcfunctions.extend(block.generate_raycast_functions(self))  # Raycasting functions
+            self.mcfunctions.extend(block.setup_item_display(self))  # Setup, e.g. spawn item_display, scale, etc
+            self.custom_advancements.append(block.create_advancement(self))  # Advancement for placing the block
+
+        if self.custom_blocks:
+            self.mcfunctions.extend(generate_raycasting_functions(self))
+            self.custom_tags.append(ray_transitive_blocks_tag)
+            self.mcfunctions.extend(generate_place_functions(self))  # Currently does nothing
+        # ==================================================================================
+        # Adding all the paintings' items to the list
+        for painting in self.custom_paintings:
+            self.custom_items.append(painting.generate_custom_item(self))
+        # ==================================================================================
+        # REFERENCE BOOK CATEGORIES
         # Get all the categories by removing duplicates via name
         # Can't use set() because they're unhashable
         self.reference_book_categories: list["ReferenceBookCategory"] = []
@@ -73,25 +97,9 @@ class Datapack:
         for category in self.reference_book_categories:
             # TODO: Remove this, I want multiple pages where possible
             assert len([x for x in self.custom_items if x.book_category.name == category.name]) <= 18, f"Category {category.name} has too many items (>18)!"
-        # ============================================================================================================
-        for item in [x for x in self.custom_items if x.on_right_click]:
-            self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
-        # ==================================================================================
-        # Adding all the blocks' items to the list
-        for block in self.custom_blocks:
-            self.custom_items.append(block.block_item)  # type: ignore
-            self.mcfunctions.extend(block.generate_place_function(self))
-
-        if self.custom_blocks:
-            self.mcfunctions.extend(generate_raycasting_functions(self))
-            self.custom_tags.append(ray_transitive_blocks_tag)
-            self.mcfunctions.extend(generate_place_functions(self))
         # ==================================================================================
 
         self.mcfunctions.append(MCFunction("load", [f"say Loaded into {self.name}!\nfunction {self.namespace}:raycast/load"]))
-
-        self.generate_pack()
-
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")

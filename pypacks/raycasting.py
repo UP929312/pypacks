@@ -13,10 +13,22 @@ def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...
         "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
     }
     formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
+    arguments_replacements = {
+        "hit_block_function": f"$(hit_block_function)",
+        "failed_function": f"$(failed_function)",
+        "ray_transitive_blocks": f"$(ray_transitive_blocks)",
+    }
+    formatted_arguments_replacements = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments_replacements.items()]) + "}"
 
     failed = MCFunction("failed", [
         "# Commands to run when the raycast has failed to detect a block",
         "say Ray casting failed, oops!",
+        ],
+        ["raycast"],
+    )
+
+    load_ray = MCFunction("load", [
+        "scoreboard objectives add raycast dummy",
         ],
         ["raycast"],
     )
@@ -39,19 +51,20 @@ def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...
         "scoreboard players add #distance raycast 1",
         "",
         "# Added: Particle for debugging",
-        "particle minecraft:cloud ~ ~ ~",
+        "# particle minecraft:cloud ~ ~ ~",
         "",
         "# If the raycast failed, run the failed function",
         f"$execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function $(failed_function)",
         "",
         "# Advance forward and run the ray again if no block was found",
-        f"execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {datapack.namespace}:raycast/ray {formatted_arguments}",
+        f"$execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {datapack.namespace}:raycast/ray {formatted_arguments_replacements}",
         ],
         ["raycast"],
     )
 
-    load_ray = MCFunction("load", [
-        "scoreboard objectives add raycast dummy",
+    # Change start ray to take an input too, so we don't have to pass it *all* in everytime.
+    populate_start_ray = MCFunction("populate_start_ray", [
+        f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
         ],
         ["raycast"],
     )
@@ -66,14 +79,14 @@ def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...
         "playsound minecraft:ui.button.click block @s ~ ~ ~",
         "",
         "# Activating the raycast. This function will call itself until it is done (at height of player - 1.62 blocks high)",
-        f"execute positioned ~ ~1.62 ~ run function {datapack.namespace}:raycast/ray {formatted_arguments}",
+        f"$execute positioned ~ ~1.62 ~ run function {datapack.namespace}:raycast/ray {formatted_arguments_replacements}",
         "",
         "# Raycasting finished, removing tag from the raycaster.",
         "tag @s remove is_raycasting",
         ],
         ["raycast"],
     )
-    return failed, hit_block, load_ray, ray, start_ray
+    return failed, hit_block, load_ray, ray, populate_start_ray, start_ray
 
 def generate_place_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
     return ()

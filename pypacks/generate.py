@@ -81,8 +81,8 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
     # ================================================================================================
     # Custom Blocks
-    for custom_block in datapack.custom_blocks:
-        custom_block.create_resource_pack_files(datapack)
+    # for custom_block in datapack.custom_blocks:
+    #     custom_block.create_resource_pack_files(datapack)
 
 
 def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
@@ -164,10 +164,12 @@ def generate_base_pack(datapack: "Datapack") -> None:
         item.create_datapack_files(datapack)
 
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "place"), exist_ok=True)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "intermediate_place"), exist_ok=True)
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "place_block_raycast"), exist_ok=True)
     for custom_block in datapack.custom_blocks:
         # f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block, predicate=!{namespace}:check_vanilla_blocks] at @s run function {datapack.namespace}:custom_blocks/destroy"
         os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "custom_blocks", custom_block.internal_name), exist_ok=True)
-        custom_block.create_datapack_files(datapack)
+        # custom_block.create_datapack_files(datapack)
 
     # Testing command
     # shutil.copyfile(f"{PYPACKS_ROOT}/scripts/setup_testing.mcfunction", f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/setup_testing.mcfunction")

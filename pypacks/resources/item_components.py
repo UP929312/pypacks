@@ -33,6 +33,17 @@ class AttributeModifier:
 
 
 @dataclass
+class EntityData:
+    """Adds entity data to the item. Used in paintings, armor stands, item frames, etc"""
+    data: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        return self.data
+
+# ==========================================================================================
+
+
+@dataclass
 class Equippable:
     slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"]
     equip_sound: str | None = None  # Sound event to play when the item is equipped
@@ -280,6 +291,7 @@ class CustomItemData:
     custom_head_texture: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = None  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
 
+    entity_data: "EntityData | None" = None
     cooldown: "Cooldown | None" = None
     equippable_slots: "Equippable | None" = None  # https://minecraft.wiki/w/Data_component_format#equippable
     consumable: "Consumable | None" = None  # https://minecraft.wiki/w/Data_component_format#consumable
@@ -319,6 +331,7 @@ class CustomItemData:
             "profile":                    self.player_head_username if self.player_head_username else profile,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier if self.ominous_bottle_amplifier is not None else None,
 
+            "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
@@ -353,7 +366,6 @@ class CustomItemData:
 # death_protection HMMMM (totem of undying)
 # dyed_color - leather armor only? MEH
 # enchantable # NOT YET (custom enchants maybe?)
-# entity_data MEH - For paintings, armor stands and such
 # equippable REDO, more stuff
 # firework_explosion MEH
 # fireworks MEH
