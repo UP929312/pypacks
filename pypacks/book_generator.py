@@ -76,7 +76,7 @@ class ItemPage:
             RedirectButton.generate_icon(self.datapack.font_mapping[f"{self.item.internal_name}_icon"], self.datapack),
             generate_backslashes(2),
             obtain_method_data,
-            generate_backslashes(8),
+            generate_backslashes(7),
             generate_icon_row_spacing(self.datapack, 90), RedirectButton(self.datapack.font_mapping["satchel_icon"], "Go to the categories page", self.back_button_page).get_json_data(self.datapack),
         ]
 
@@ -158,7 +158,8 @@ class ReferenceBook:
 
     def generate_cover_page(self, datapack: "Datapack") -> list[dict[str, str | bool]]:
         logo_line = generate_icon_row_spacing(datapack, LOGO_HORIZONTAL_SPACER)
-        logo_line["text"] += datapack.font_mapping["logo"]
+        # logo_line["text"] += datapack.font_mapping["logo"]
+        logo_line["text"] += datapack.font_mapping["logo_256_x_256"]
         return [{"text": f"{datapack.name} Reference Book\n\n", "underlined": True}, logo_line]
         # ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾
 
@@ -175,8 +176,8 @@ class ReferenceBook:
 
         # Categories (2)
         category_page = GridPage("Categories", [
-                RedirectButton(datapack.font_mapping[f"{category.name.lower()}_category_icon"], f"Go to the `{category.name}` category", CATEGORIES_PAGE+i)
-                for i, category in enumerate(datapack.reference_book_categories, 1)
+                RedirectButton(datapack.font_mapping[f"{category.name.lower()}_category_icon"], f"Go to the `{category.name}` category", CATEGORIES_PAGE)
+                for category in datapack.reference_book_categories
             ], datapack, back_button_page=None,
         ).elements
 
@@ -220,5 +221,5 @@ class ReferenceBook:
 # =======================================================================================================================================
 
 # https://github.com/misode/misode.github.io/blob/master/public/images/crafting_table.png
-MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("Miscellaneous", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join
-PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Miscellaneous", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join
+MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("Misc", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join
+PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Paintings", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join

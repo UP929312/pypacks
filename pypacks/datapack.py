@@ -70,10 +70,8 @@ class Datapack:
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
             self.custom_items.append(block.block_item)  # The custom item
-            self.mcfunctions.append(block.generate_revoke_function(self))  # Intermediate functions, e.g. revoke_and_run (revoke advancement)
-            self.mcfunctions.extend(block.generate_raycast_functions(self))  # Raycasting functions
-            self.mcfunctions.extend(block.setup_item_display(self))  # Setup, e.g. spawn item_display, scale, etc
             self.custom_advancements.append(block.create_advancement(self))  # Advancement for placing the block
+            self.mcfunctions.extend(block.generate_functions(self))  # Raycasting functions
 
         if self.custom_blocks:
             self.mcfunctions.extend(generate_raycasting_functions(self))
@@ -83,6 +81,8 @@ class Datapack:
         # Adding all the paintings' items to the list
         for painting in self.custom_paintings:
             self.custom_items.append(painting.generate_custom_item(self))
+        for song in self.custom_jukebox_songs:
+            self.custom_items.append(song.generate_custom_item(self))
         # ==================================================================================
         # REFERENCE BOOK CATEGORIES
         # Get all the categories by removing duplicates via name

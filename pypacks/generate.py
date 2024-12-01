@@ -14,7 +14,7 @@ from .image_generation import add_icon_to_base
 
 
 BASE_IMAGES: dict[str, bytes] = {x: inline_open(f"{PYPACKS_ROOT}/assets/images/{x}.png", "rb") for x in (  # TODO: os.pathlib.join
-    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base", "logo", # "logo_512_x_512",
+    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base", "logo",
 )}
 ref_book_items = [f"{PYPACKS_ROOT}/assets/images/satchel.png"]
 
@@ -71,6 +71,9 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     for asset in os.listdir(f"{PYPACKS_ROOT}/assets/images/recipes"):
         shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/recipes/{asset}", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/{asset}")
 
+    # Annoyingly putting this here manually:
+    shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/logo_256_x_256.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/logo_256_x_256.png")
+
     # ================================================================================================
     # Sounds
     for sound in datapack.custom_sounds:
@@ -83,7 +86,6 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     # Custom Blocks
     # for custom_block in datapack.custom_blocks:
     #     custom_block.create_resource_pack_files(datapack)
-
 
 def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
     # TODO: Could this move to the reference book generator?
@@ -106,9 +108,10 @@ def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
             BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[abc]
             for category in datapack.reference_book_categories
         ],
-        # *[  # Logo (scaled, better resolution)
-        #     BookImage(image_name, image_bytes)
-        #     for image_name, image_bytes in [("logo_512_x_512", inline_open(f"{PYPACKS_ROOT}/assets/images/logo_512_x_512.png"))]
+        *[  # Logo (scaled, better resolution)
+            BookImage(image_name, image_bytes, height=100, y_offset=16)
+            for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/logo_256_x_256.png")),]
+        ],
     ]
 
     custom_font = CustomFont("all_fonts", all_elements)
@@ -139,10 +142,8 @@ def generate_base_pack(datapack: "Datapack") -> None:
     # Give commands
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "give"), exist_ok=True)  # makes /data/{datapack_name}/function/give
 
-    # Add to give all command
-    all_items = datapack.custom_items + datapack.custom_paintings + datapack.custom_jukebox_songs
     with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give_all.mcfunction", "w") as file:
-        file.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in all_items]))
+        file.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in datapack.custom_items]))
     # And give the book
     book = ReferenceBook(datapack.custom_items)
     with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give_reference_book.mcfunction", "w") as file:
@@ -162,14 +163,6 @@ def generate_base_pack(datapack: "Datapack") -> None:
             os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)  # type: ignore
         item.datapack_subdirectory_name
         item.create_datapack_files(datapack)
-
-    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "place"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "intermediate_place"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "place_block_raycast"), exist_ok=True)
-    for custom_block in datapack.custom_blocks:
-        # f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block, predicate=!{namespace}:check_vanilla_blocks] at @s run function {datapack.namespace}:custom_blocks/destroy"
-        os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "custom_blocks", custom_block.internal_name), exist_ok=True)
-        # custom_block.create_datapack_files(datapack)
 
     # Testing command
     # shutil.copyfile(f"{PYPACKS_ROOT}/scripts/setup_testing.mcfunction", f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/setup_testing.mcfunction")

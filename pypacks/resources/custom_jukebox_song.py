@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 
 # from pypacks.utils import get_ogg_duration
+from pypacks.resources.custom_item import CustomItem
+from pypacks.resources.item_components import CustomItemData, JukeboxPlayable
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -36,6 +38,13 @@ class CustomJukeboxSong:
         with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(datapack), file, indent=4)
 
+    def generate_custom_item(self, datapack: "Datapack") -> "CustomItem":
+        return CustomItem(
+            "minecraft:music_disc_cat",
+            self.internal_name,
+            self.internal_name.replace("_", " ").title(),
+            additional_item_data=CustomItemData(jukebox_playable=JukeboxPlayable(f"{datapack.namespace}:{self.internal_name}", True))
+        )
+
     def generate_give_command(self, datapack: "Datapack") -> str:
-        data = '{"song": "%s:%s"}' % (datapack.namespace, self.internal_name)
-        return 'give @p minecraft:music_disc_cat[jukebox_playable=%s]' % data
+        return self.generate_custom_item(datapack).generate_give_command(datapack)

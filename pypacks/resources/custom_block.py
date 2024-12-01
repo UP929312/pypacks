@@ -1,9 +1,7 @@
 import json
-import shutil
 from typing import TYPE_CHECKING, Literal
 from dataclasses import dataclass, field
 
-from pypacks.resources.custom_predicate import Predicate
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
 
@@ -23,18 +21,9 @@ class FacePaths:
 
 # TODO: Support non cubes? Player heads? Custom models?
 
-# TODO MASTER:
-# 1. Setup custom items for the custom blocks, perhaps it takes an item field, and you just pass in a custom item?
-# 2. Tag all custom items (for blocks) with some tag, so when we're writing the predicate, we can check if it's a custom block.
-# 3. Write predicates which check if the block is a custom block, and if it is, we can run the custom block function.
+# TODO:
+# Implement destroying them :)
 
-# ORRR, do we do it the other way around? Add the custom block data to the item?
-
-
-# TODO 2
-# We invoke the function nicely, we now need to setup the raycasting.
-# It needs to have a block type which it'll detect, but we can pass that in no problem.
-# Once it detects, the place function should call the setup_item_display.
 
 @dataclass
 class CustomBlock:
@@ -74,55 +63,15 @@ class CustomBlock:
             ]
         }
         criteria = Criteria(f"placed_{self.internal_name}", "minecraft:placed_block", conditions=condition)
-        rewarded_function = f"{datapack.namespace}:intermediate_place/revoke_and_run_{self.block_item.internal_name}"
+        rewarded_function = f"{datapack.namespace}:custom_blocks/revoke_and_run/revoke_and_run_{self.block_item.internal_name}"
         advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=rewarded_function, hidden=True)
         return advancement
 
-    def generate_revoke_function(self, datapack: "Datapack") -> "MCFunction":
-        revoke_and_run_mcfunction = MCFunction(f"revoke_and_run_{self.internal_name}", [
-                f"advancement revoke @s only {datapack.namespace}:placed_{self.internal_name}",
-                f"function pypacks_testing:place_block_raycast/populate_start_ray_for_{self.internal_name}",
-            ],
-            ["intermediate_place"],
-        )
-        return revoke_and_run_mcfunction
-
-    def generate_raycast_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
-        hit_block = MCFunction(f"hit_block_{self.internal_name}", [
-            "# Mark the ray as having found a block",
-            "scoreboard players set #hit raycast 1",  # TODO: Set this in raycasting instead...
-            "",
-            "# Running custom commands since the block was found",
-            # "setblock ~ ~ ~ minecraft:cobblestone",
-            f"function {datapack.namespace}:place/setup_entities_for_place_{self.block_item.internal_name}"
-            ],
-            ["hit_block"],
-        )
-        arguments = {
-            "hit_block_function": f"{hit_block.get_reference(datapack)}",
-            "failed_function": f"{datapack.namespace}:raycast/failed",
-            "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
-        }
-        formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
-        populate_start_ray = MCFunction(f"populate_start_ray_for_{self.internal_name}", [
-                f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
-            ],
-            ["place_block_raycast"],
-        )
-        return hit_block, populate_start_ray
-
-    def setup_item_display(self, datapack: "Datapack") -> tuple["MCFunction", "MCFunction"]:
-        # summon minecraft:item_display ~ ~ ~ {"item": {"id": "sponge", "components": {"item_model": "pypacks_testing:item/ruby_ore"}}}
-        # item replace entity @e[type=minecraft:block_display] container.0 with minecraft:sponge[minecraft:item_model="pypacks_testing:item/ruby_ore"]
-
-        # Spawn the item display, then call the setup on it directly.
-        spawn_item_display = MCFunction(f"setup_entities_for_place_{self.block_item.internal_name}", [
-            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {datapack.namespace}:place/run_as_item_display_{self.internal_name}",
-            ],
-            ["place"],
-        )
+    def generate_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
+        # These are in reverse order (pretty much), so we can reference them in the next function.
+        # ============================================================================================================
         # Has to be secondary so we have @s set correctly.
-        execute_as_item_display = MCFunction(f"run_as_item_display_{self.internal_name}", [
+        execute_as_item_display = MCFunction(f"execute_on_item_display_{self.internal_name}", [
             # f"tag @s add {datapack.namespace}.block_display.{self.internal_name}",
             # f"tag @s add global.ignore",
             # f"tag @s add global.ignore.kill",
@@ -139,6 +88,41 @@ class CustomBlock:
             # For item displays, container.0 is just the item it is displaying.
             f"item replace entity @s container.0 with minecraft:sponge[minecraft:item_model='{datapack.namespace}:{self.internal_name}']",
             ],
-            ["place"],
+            ["custom_blocks", "execute_on_item_display"],
         )
-        return (spawn_item_display, execute_as_item_display)
+        # Spawn the item display, then call the setup on it directly.
+        spawn_item_display = MCFunction(f"setup_item_display_{self.block_item.internal_name}", [
+            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {execute_as_item_display.get_reference(datapack)}",
+            ],
+            ["custom_blocks", "setup_item_display"],
+        )
+        # ============================================================================================================
+        hit_block = MCFunction(f"hit_block_{self.internal_name}", [
+            "# Mark the ray as having found a block",
+            "scoreboard players set #hit raycast 1",  # TODO: Set this in raycasting instead...
+            "",
+            "# Running custom commands since the block was found",
+            f"function {spawn_item_display.get_reference(datapack)}",
+            ],
+            ["custom_blocks", "hit_block"],
+        )
+        arguments = {
+            "hit_block_function": f"{hit_block.get_reference(datapack)}",
+            "failed_function": f"{datapack.namespace}:raycast/failed",
+            "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+        }
+        formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
+        populate_start_ray = MCFunction(f"populate_start_ray_{self.internal_name}", [
+                f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
+            ],
+            ["custom_blocks", "populate_start_ray"],
+        )
+        # ============================================================================================================
+        revoke_and_run_mcfunction = MCFunction(f"revoke_and_run_{self.internal_name}", [
+                f"advancement revoke @s only {datapack.namespace}:placed_{self.internal_name}",
+                f"function {populate_start_ray.get_reference(datapack)}",
+            ],
+            ["custom_blocks", "revoke_and_run"],
+        )
+        # ============================================================================================================
+        return execute_as_item_display, spawn_item_display, hit_block, populate_start_ray, revoke_and_run_mcfunction

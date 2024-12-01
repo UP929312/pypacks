@@ -2,10 +2,9 @@
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
- For custom blocks, have all the functions in one method, and use .reference()
+# custom blocks destruction
 
-# Raycasting is done for right click, since it'll be run *after* the block is placed, why not just look *until* we find the block?
-# Create the right click macros for custom blocks
+# Reference book items need to have their hover image set, instead of being the default =====
 
 # Merge on_load
 

@@ -16,6 +16,10 @@ class BookImage:
     height: int | None = None  # Override, if a custom height is passed in, it won't use the image_bytes height
     y_offset: int | None = None  # Is vertical + up, not shifted down
 
+    def __post_init__(self) -> None:
+        assert self.height is None or 0 < self.height <= 256, "Height must be between 1 and 256"
+        assert 0 < get_png_height(image_bytes=self.image_bytes) <= 256, "Image height must be between 1 and 256"
+
 
 @dataclass
 class CustomFont:
