@@ -99,7 +99,11 @@ class Datapack:
             assert len([x for x in self.custom_items if x.book_category.name == category.name]) <= 18, f"Category {category.name} has too many items (>18)!"
         # ==================================================================================
 
-        self.mcfunctions.append(MCFunction("load", [f"say Loaded into {self.name}!\nfunction {self.namespace}:raycast/load"]))
+        self.mcfunctions.append(MCFunction("load", [
+            f"function {self.namespace}:raycast/load",
+            f"gamerule maxCommandChainLength {10_000_000}",
+            f"say Loaded into {self.name}!",
+        ]))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")

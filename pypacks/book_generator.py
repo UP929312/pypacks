@@ -54,7 +54,8 @@ class ItemPage:
         return {
             "text": f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", "underlined": True, "bold": True,
             "hoverEvent": {"action": "show_item", "contents": {
-                "id": self.item.base_item, "count": 1, "tag": {"display": {"Name": self.item.custom_name or self.item.base_item}}
+                "id": self.item.base_item, "components": self.item.to_dict(self.datapack),
+                # "id": self.item.base_item, "tag": {"display": {"Name": self.item.custom_name or self.item.base_item}}
             }},
             "clickEvent": {"action": "run_command", "value": f"/function {self.datapack.namespace}:give/{self.item.internal_name}"},
         }
@@ -79,7 +80,6 @@ class ItemPage:
             generate_backslashes(7),
             generate_icon_row_spacing(self.datapack, 90), RedirectButton(self.datapack.font_mapping["satchel_icon"], "Go to the categories page", self.back_button_page).get_json_data(self.datapack),
         ]
-
 
 
 # =======================================================================================================================================
@@ -158,8 +158,7 @@ class ReferenceBook:
 
     def generate_cover_page(self, datapack: "Datapack") -> list[dict[str, str | bool]]:
         logo_line = generate_icon_row_spacing(datapack, LOGO_HORIZONTAL_SPACER)
-        # logo_line["text"] += datapack.font_mapping["logo"]
-        logo_line["text"] += datapack.font_mapping["logo_256_x_256"]
+        logo_line["text"] += datapack.font_mapping["logo_256_x_256"] # "logo"
         return [{"text": f"{datapack.name} Reference Book\n\n", "underlined": True}, logo_line]
         # ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾
 

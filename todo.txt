@@ -2,9 +2,9 @@
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
-# custom blocks destruction
+# Custom blocks destruction
 
-# Reference book items need to have their hover image set, instead of being the default =====
+# Cooldown for right clickable items
 
 # Merge on_load
 

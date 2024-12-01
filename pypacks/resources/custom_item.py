@@ -3,8 +3,8 @@ import shutil
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
-from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image
-from pypacks.resources.item_components import Consumable, Food, Cooldown, CustomItemData
+from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
+from pypacks.resources.item_components import Consumable, Food, CustomItemData
 from pypacks.image_generation import add_icon_to_base
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ class CustomItem:
     base_item: str  # What item to base it on
     internal_name: str  # Internal name of the item
     custom_name: str | None = None  # Display name of the item
-    lore: list[str] | None = None
+    lore: list[str] = field(default_factory=list)  # Lore of the item
     max_stack_size: int = 64  # Max stack size of the item (1-99)
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = None
     texture_path: str | None = None
@@ -68,22 +68,8 @@ class CustomItem:
         self.custom_data |= tag
 
     def to_components_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        """Used for the results key in a recipe"""
-        data = {}
-        data["custom_data"] = self.custom_data
-        if self.custom_name:  # TODO: item_name???
-            data["custom_name"] = colour_codes_to_json_format(self.custom_name, auto_unitalicise=True)
-        if self.max_stack_size != 64:
-            data["max_stack_size"] = self.max_stack_size
-        if self.rarity:
-            data["rarity"] = self.rarity
-        if self.texture_path:
-            data["item_model"] = f"{datapack.namespace}:{self.internal_name}"
-        if self.lore:
-            data["lore"] = [colour_codes_to_json_format(line) for line in self.lore]
-        if self.additional_item_data:
-            data |= self.additional_item_data.to_dict()
-        return data
+        """Used for the results key in a recipe, DEPRECATED"""  # TODO: Remove this
+        return self.to_dict(datapack)
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         # The resource pack requires 3 things:
@@ -115,16 +101,24 @@ class CustomItem:
             with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/right_click/{self.internal_name}.mcfunction", "w") as file:
                 file.write(f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}\n{self.on_right_click}")
 
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        return recusively_remove_nones_from_dict({
+            "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True) if self.custom_name is not None else None,  # type: ignore
+            "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
+            "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
+            "rarity": self.rarity,
+            "item_model": f"{datapack.namespace}:{self.internal_name}" if self.texture_path else None,
+            "custom_data": self.custom_data,
+            # "additional_item_data": self.additional_item_data.to_dict() if self.additional_item_data else None,
+        })
+
     def generate_give_command(self, datapack: "Datapack") -> str:
-        item_name = to_component_string({"item_name": colour_codes_to_json_format(self.custom_name)}) if self.custom_name else None
-        lore = to_component_string({"lore": [colour_codes_to_json_format(line, auto_unitalicise=True) for line in self.lore]}) if self.lore else None
-        custom_data = to_component_string({"custom_data": self.custom_data}) if self.custom_data else None
-        max_stack_size = to_component_string({"max_stack_size": self.max_stack_size}) if self.max_stack_size != 64 else None
-        rarity = to_component_string({"rarity": self.rarity}) if self.rarity is not None else None
-        item_model = to_component_string({"minecraft:item_model": f"{datapack.namespace}:{self.internal_name}"}) if self.texture_path else None
-        additional_item_data_string = to_component_string(self.additional_item_data.to_dict()) if self.additional_item_data else None
-        # TODO: Figure out a way to not need to do this?
+        components = ", ".join([
+            to_component_string({key: value})
+            for key, value in self.to_dict(datapack).items()
+        ])
+        additional_item_data_string = to_component_string(self.additional_item_data.to_dict()) if self.additional_item_data else None  # Also strips None
+        # TODO: Figure out a way to not have to do this?
         if self.base_item in ["minecraft:written_book", "written_book"] and additional_item_data_string is not None:
             additional_item_data_string = additional_item_data_string.replace("\\\\", "\\").replace("\\n", "\\\\n")
-        all_custom_data = ", ".join([x for x in (item_name, lore, custom_data, max_stack_size, rarity, item_model, additional_item_data_string) if x is not None])
-        return f"give @p {self.base_item}[{all_custom_data}]"
+        return f"give @p {self.base_item}[{components}{', ' if components and additional_item_data_string else ''}{additional_item_data_string if additional_item_data_string else ''}]"
