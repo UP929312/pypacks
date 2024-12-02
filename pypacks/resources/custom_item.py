@@ -117,7 +117,10 @@ class CustomItem:
             to_component_string({key: value})
             for key, value in self.to_dict(datapack).items()
         ])
-        additional_item_data_string = to_component_string(self.additional_item_data.to_dict()) if self.additional_item_data else None  # Also strips None
+        additional_item_data_string = (
+            to_component_string(self.additional_item_data.to_dict(datapack))    # Also strips None
+            if self.additional_item_data else None
+        )
         # TODO: Figure out a way to not have to do this?
         if self.base_item in ["minecraft:written_book", "written_book"] and additional_item_data_string is not None:
             additional_item_data_string = additional_item_data_string.replace("\\\\", "\\").replace("\\n", "\\\\n")

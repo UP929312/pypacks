@@ -7,9 +7,11 @@ Custom blocks!!! ---------------
 # When we're doing raycasting, we need to also update the ray transitive blocks! (set to base_block)
 # Custom blocks can be destroyed, but only in Creative, and drops currently aren't working
 
+# Descriptors for integers & type validation
+
 # Cooldown for right clickable items
 
-# Merge on_load
+# Merge on_load with an inputted one... Using /function
 
 # TODO: Should the custom font class also move the images over? Probably...
 
@@ -34,7 +36,6 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # Signs with data, maybe even Command()?
 
 # Advancements (maybe even give one for loading the datapack for the first time?)
-# Use remainder components (currently just supports string, or item to give.)
 
 # Loot tables
 

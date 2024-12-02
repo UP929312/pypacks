@@ -103,7 +103,6 @@ INEDIBLE_ITEMS = [
     "minecraft:goat_horn",
     "minecraft:experience_bottle",
     "minecraft:firework_rocket",
-
 ]
 
 # A lot more

@@ -23,7 +23,7 @@ class GenericRecipe:
         raise NotImplementedError
     
     def format_item_or_string(self, item_or_string: "str | CustomItem") -> str:
-        if isinstance(item_or_string, CustomItem):  # TODO: Invert this, and then remove the import?
+        if isinstance(item_or_string, CustomItem):
             return item_or_string.base_item
         return item_or_string
 

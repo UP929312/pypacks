@@ -21,7 +21,7 @@ class Predicate:
 
     datapack_subdirectory_name: str = field(init=False, default="predicate")
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, datapack: "Datapack") -> dict[str, str]:
         return {
             "condition": self.condition,
             **(self.extra_data or {})
@@ -29,7 +29,7 @@ class Predicate:
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(), file, indent=4)
+            json.dump(self.to_dict(datapack), file, indent=4)
 
 # The root element of the predicate.
 #  condition: The resource location of the condition type to check.

@@ -1,6 +1,11 @@
 from typing import Any, Literal
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pypacks.datapack import Datapack
+    from pypacks.resources.custom_item import CustomItem
 
 
 # ==========================================================================================
@@ -106,15 +111,15 @@ class Food:
 
 @dataclass
 class UseRemainder:
-    # TODO: Allow this to have components!
-    item: str
+    item: "str | CustomItem"
     count: int = 1
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
         return {
-            "id": self.item,
+            "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "count": self.count,
-        }
+        } | {"components": self.item.to_dict(datapack)} if isinstance(self.item, CustomItem) else {}
 
 
 # ==========================================================================================
@@ -312,7 +317,7 @@ class CustomItemData:
         assert self.repair_cost is None or self.repair_cost >= 0, "repair_cost must be a non-negative integer"
         assert not (self.player_head_username and self.custom_head_texture), "Cannot have both player_head_username and custom_head_texture"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
         return {
             "max_damage":                 self.durability if self.durability is not None else None,
@@ -337,7 +342,7 @@ class CustomItemData:
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
             "consumable":                 self.consumable.to_dict() if self.consumable is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,
-            "use_remainder":              self.use_remainder.to_dict() if self.use_remainder is not None else None,
+            "use_remainder":              self.use_remainder.to_dict(datapack) if self.use_remainder is not None else None,
             "jukebox_playable":           self.jukebox_playable.to_dict() if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
