@@ -1,4 +1,3 @@
-import json
 from typing import TYPE_CHECKING, Literal
 from dataclasses import dataclass, field
 
@@ -22,7 +21,7 @@ class FacePaths:
 # TODO: Support non cubes? Player heads? Custom models?
 
 # TODO:
-# Implement destroying them :)
+# Implement destroying them :) - Done, but needs drops, deletion of drops, etc
 
 
 @dataclass
@@ -38,7 +37,7 @@ class CustomBlock:
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc
     # silk_touch_drops: "CustomItem | str | None | Literal['self']" = "self"
 
-    block_item: "CustomItem" = field(init=False, default=None)  # type: ignore[abc]
+    block_item: "CustomItem" = field(init=False, default=None)  # type: ignore[assignment]
 
     @classmethod
     def from_item(cls, item: "CustomItem", drops: "CustomItem | None | Literal['self']" = "self") -> "CustomBlock":
@@ -73,16 +72,11 @@ class CustomBlock:
         # Has to be secondary so we have @s set correctly.
         execute_as_item_display = MCFunction(f"execute_on_item_display_{self.internal_name}", [
             # f"tag @s add {datapack.namespace}.block_display.{self.internal_name}",
-            # f"tag @s add global.ignore",
-            # f"tag @s add global.ignore.kill",
-            # f"tag @s add smithed.entity",
-            # f"tag @s add smithed.block",
             # f"tag @s add {datapack.namespace}.custom_block",
             # f"tag @s add {datapack.namespace}.{self.internal_name}",
-            # f"tag @s add {datapack.namespace}.vanilla.{self.base_block}",
 
             # Make it _slightly_ bigger than the block, so it hides the original (only a tiny bit bigger), to stop z-fighting too.
-            f"data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",
+            "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",
             "data modify entity @s brightness set value {block: 15, sky: 15}",
 
             # For item displays, container.0 is just the item it is displaying.
@@ -97,19 +91,11 @@ class CustomBlock:
             ["custom_blocks", "setup_item_display"],
         )
         # ============================================================================================================
-        hit_block = MCFunction(f"hit_block_{self.internal_name}", [
-            "# Mark the ray as having found a block",
-            "scoreboard players set #hit raycast 1",  # TODO: Set this in raycasting instead...
-            "",
-            "# Running custom commands since the block was found",
-            f"function {spawn_item_display.get_reference(datapack)}",
-            ],
-            ["custom_blocks", "hit_block"],
-        )
         arguments = {
-            "hit_block_function": f"{hit_block.get_reference(datapack)}",
+            "hit_block_function": f"{spawn_item_display.get_reference(datapack)}",
             "failed_function": f"{datapack.namespace}:raycast/failed",
-            "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+            "ray_transitive_blocks": f"{self.base_block}",
+            "if_or_unless": "if",
         }
         formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
         populate_start_ray = MCFunction(f"populate_start_ray_{self.internal_name}", [
@@ -125,4 +111,4 @@ class CustomBlock:
             ["custom_blocks", "revoke_and_run"],
         )
         # ============================================================================================================
-        return execute_as_item_display, spawn_item_display, hit_block, populate_start_ray, revoke_and_run_mcfunction
+        return execute_as_item_display, spawn_item_display, populate_start_ray, revoke_and_run_mcfunction

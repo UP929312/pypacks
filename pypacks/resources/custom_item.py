@@ -21,11 +21,11 @@ class CustomItem:
     max_stack_size: int = 64  # Max stack size of the item (1-99)
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = None
     texture_path: str | None = None
-    custom_data: dict[str, Any] = field(default_factory=dict)  # type: ignore[abc]   # Is populated in post_init if it's none
+    custom_data: dict[str, Any] = field(default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: str | None = None  # Function to call when the item is right clicked
     additional_item_data: "CustomItemData | None" = None
     reference_book_description: str | None = None
-    book_category: "ReferenceBookCategory" = None  # type: ignore[abc]  # This is set in post_init
+    book_category: "ReferenceBookCategory" = None  # type: ignore[assignment]  # This is set in post_init
 
     is_block: bool = field(init=False, default=False)
     datapack_subdirectory_name: None = field(init=False, default=None)
@@ -103,7 +103,7 @@ class CustomItem:
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return recusively_remove_nones_from_dict({
-            "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True) if self.custom_name is not None else None,  # type: ignore
+            "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
             "rarity": self.rarity,

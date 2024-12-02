@@ -66,11 +66,13 @@ class ItemPage:
         title: dict[str, Any] = self.get_title()
         # Get all the ways to craft it
         non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
-        obtain_methods = [x for x in non_smithing_trim_recipes if (x.result.internal_name if isinstance(x.result, CustomItem) else x.result) == self.item.internal_name]
+        obtain_methods = [x for x in non_smithing_trim_recipes if (
+            x.result.internal_name if isinstance(x.result, CustomItem) else x.result  # type: ignore[attr-defined]
+        ) == self.item.internal_name]
         if obtain_methods:
             obtain_method_data: dict[str, Any] = {"text": f"Found recipe!", "underlined": False, "bold": False}  # {obtain_methods[0].ingredients}
         else:
-            obtain_method_data: dict[str, Any] = {"text": "No recipes found", "underlined": False, "bold": False}
+            obtain_method_data = {"text": "No recipes found", "underlined": False, "bold": False}
         return [
             title,
             generate_backslashes(2),
@@ -207,7 +209,7 @@ class ReferenceBook:
         # Blank page:
         blank_page = [{"text": "This page is intentionally left blank", "underlined": False, "bold": False}]
 
-        return [cover_page, category_page, *category_items_pages, *item_pages, blank_page]
+        return [cover_page, category_page, *category_items_pages, *item_pages, blank_page]  # type: ignore[list-item]
 
     def generate_give_command(self, datapack: "Datapack") -> str:
         from pypacks.resources.custom_item import CustomItem

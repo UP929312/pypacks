@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
 # from pypacks.utils import get_ogg_duration
@@ -26,11 +26,11 @@ class CustomJukeboxSong:
     #             rint("Guessed song length: ", get_ogg_duration(file.read()))
     #             # self.length_in_seconds = get_ogg_duration(file.read())
 
-    def to_dict(self, datapack: "Datapack") -> dict:
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return {
             "sound_event": {"sound_id": f"{datapack.namespace}:{self.internal_name}"},
             "description": {"text": self.description, "color": "white"},
-            "length_in_seconds": float(self.length_in_seconds),  # type: ignore[union-attr]
+            "length_in_seconds": float(self.length_in_seconds),
             "comparator_output": self.comparator_output,
         }
 

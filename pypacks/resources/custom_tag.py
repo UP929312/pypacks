@@ -15,7 +15,7 @@ class CustomTag:
 
     datapack_subdirectory_name: str = field(init=False, default="tags")
 
-    def to_dict(self, datapack: "Datapack") -> dict:
+    def to_dict(self, datapack: "Datapack") -> dict[str, bool | list[str]]:
         return {
             "replace": self.replace,
             "values": self.values

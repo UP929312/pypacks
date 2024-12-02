@@ -17,7 +17,7 @@ class TestList:
 class Test:
     def __init__(self, name: str, blocks: list[BlockType]) -> None:
         self.name = name
-        self.blocks = blocks
+        self.blocks: list["BlockType"] = blocks  # type: ignore[assignment]
         self.size = int(sqrt(len(self.blocks)))
 
     def generate_commands(self, x: int, y: int, z: int) -> str:

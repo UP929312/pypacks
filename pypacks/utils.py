@@ -60,12 +60,12 @@ def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False) -> st
     # Split on colour codes, but keep the original colour codes
     split_text = [x for x in text.split("&") if x]
     # Split on the first character of each colour code
-    split_text = [(x[0], x[1:]) if f"&{x[0]}" in colour_code_mappings else ("&f", x) for x in split_text]
+    colour_code_and_text = [(x[0], x[1:]) if f"&{x[0]}" in colour_code_mappings else ("&f", x) for x in split_text]
     # Convert the colour codes to JSON format
-    split_text = [{"text": x[1], "color": colour_code_mappings.get("&" + x[0], "white")} for x in split_text]
+    json_data = [{"text": x[1], "color": colour_code_mappings.get("&" + x[0], "white")} for x in colour_code_and_text]
     # To auto untalicise, add {"italics": False} to each dictionary
-    split_text = [x | ({"italic": False} if auto_unitalicise else {}) for x in split_text]
-    return json.dumps(split_text)
+    italics_removed = [x | ({"italic": False} if auto_unitalicise else {}) for x in json_data]
+    return json.dumps(italics_removed)
 
 
 def remove_colour_codes(text: str) -> str:
@@ -86,10 +86,10 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
     else:
         # TODO: The same, one with a context manager, one without...
         assert image_bytes is not None, "Must provide image bytes if not providing file_path"
-        file = io.BytesIO(image_bytes)
-        file.seek(16)  # Width and height start at byte 16
-        width = int.from_bytes(file.read(4), 'big')
-        height = int.from_bytes(file.read(4), 'big')
+        file_io = io.BytesIO(image_bytes)
+        file_io.seek(16)  # Width and height start at byte 16
+        width = int.from_bytes(file_io.read(4), 'big')
+        height = int.from_bytes(file_io.read(4), 'big')
     assert width == height, "Image must be square"
     assert width == 1 or width % 2 == 0, "Image width must be divisible by 16"
     assert height == 1 or height % 2 == 0, "Image height must be divisible by 16"

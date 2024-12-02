@@ -30,9 +30,9 @@ def add_icon_to_base(image_path: str | None = None, image_bytes: bytes | None = 
     base.paste(image, (x, y), image)
 
     # Save the image to a byte array
-    img_byte_arr = io.BytesIO()
-    base.save(img_byte_arr, format='PNG')
-    img_byte_arr = img_byte_arr.getvalue()
+    img_byte_arr_io = io.BytesIO()
+    base.save(img_byte_arr_io, format='PNG')
+    img_byte_arr = img_byte_arr_io.getvalue()
     return img_byte_arr
 
 # def generate_recipe_usage_image(recipe: "Recipe") -> None:

@@ -84,7 +84,7 @@ class CustomLootTable:
     datapack_subdirectory_name: str = field(init=False, default="loot_table")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        data = {}
+        data: dict[str, str] = {}
         return data
 
     def create_datapack_files(self, datapack: "Datapack") -> None:

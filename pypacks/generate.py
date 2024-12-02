@@ -105,7 +105,7 @@ def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
             for icon_path in ref_book_items
         ],
         *[  # Category icons
-            BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[abc]
+            BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[arg-type]
             for category in datapack.reference_book_categories
         ],
         *[  # Logo (scaled, better resolution)
@@ -136,8 +136,8 @@ def generate_base_pack(datapack: "Datapack") -> None:
     with open(f"{datapack.datapack_output_path}/data/minecraft/tags/function/load.json", "w") as file:
         json.dump({"values": [f"{datapack.namespace}:load"]}, file, indent=4)
 
-    # with open(f"{datapack.datapack_output_path}/data/minecraft/tags/function/tick.json", "w") as file:
-    #     json.dump({"values": [f"{datapack.namespace}:tick"]}, file, indent=4)
+    with open(f"{datapack.datapack_output_path}/data/minecraft/tags/function/tick.json", "w") as file:
+        json.dump({"values": [f"{datapack.namespace}:tick"]}, file, indent=4)
     # ================================================================================================
     # Give commands
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "give"), exist_ok=True)  # makes /data/{datapack_name}/function/give

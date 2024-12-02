@@ -53,7 +53,7 @@ class ShapelessCraftingRecipe(GenericRecipe):
             }
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index, call-overload]
         return data
 
 
@@ -62,7 +62,7 @@ class ShapedCraftingRecipe(GenericRecipe):
     internal_name: str
     rows: list[str]
     keys: dict[str, list[str] | str]
-    result: StringOrCustomItem  # type: ignore[abc]
+    result: StringOrCustomItem  # type: ignore[valid-type]
     amount: int = 1
     recipe_category: RecipeCategory = "misc"
 
@@ -86,7 +86,7 @@ class ShapedCraftingRecipe(GenericRecipe):
             "show_notification": True,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index, call-overload]
         return data
 
 
@@ -129,7 +129,7 @@ class FurnaceRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index]
         return data
 
 
@@ -154,7 +154,7 @@ class BlastFurnaceRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index]
         return data
 
 
@@ -179,7 +179,7 @@ class CampfireRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index]
         return data
 
 
@@ -202,7 +202,7 @@ class SmithingTransformRecipe(GenericRecipe):
             "result": {"item": self.format_item_or_string(self.result)},
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index]
         return data
 
 
@@ -249,7 +249,7 @@ class SmokerRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index]
         return data
 
 
@@ -272,7 +272,7 @@ class StonecutterRecipe(GenericRecipe):
             }
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_components_dict(datapack)
+            data["result"]["components"] = self.result.to_components_dict(datapack)  # type: ignore[index]
         return data
 
 

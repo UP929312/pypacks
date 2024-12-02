@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.raycasting import generate_raycasting_functions, generate_place_functions, ray_transitive_blocks_tag
+from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
 from pypacks.image_generation import add_icon_to_base
 
 
@@ -74,9 +74,8 @@ class Datapack:
             self.mcfunctions.extend(block.generate_functions(self))  # Raycasting functions
 
         if self.custom_blocks:
-            self.mcfunctions.extend(generate_raycasting_functions(self))
+            self.mcfunctions.extend(generate_default_raycasting_functions(self))
             self.custom_tags.append(ray_transitive_blocks_tag)
-            self.mcfunctions.extend(generate_place_functions(self))  # Currently does nothing
         # ==================================================================================
         # Adding all the paintings' items to the list
         for painting in self.custom_paintings:
@@ -92,7 +91,7 @@ class Datapack:
             if item.book_category.name not in [x.name for x in self.reference_book_categories]:
                 item.book_category.icon_image_bytes = add_icon_to_base(image_path=item.book_category.image_path)
                 self.reference_book_categories.append(item.book_category)
-        assert len(self.reference_book_categories) <= 20, "There can only be 12 reference book categories!"
+        assert len(self.reference_book_categories) <= 20, "There can only be 20 reference book categories!"
         # Make sure none of the categories are too filled
         for category in self.reference_book_categories:
             # TODO: Remove this, I want multiple pages where possible
@@ -103,6 +102,9 @@ class Datapack:
             f"function {self.namespace}:raycast/load",
             f"gamerule maxCommandChainLength {10_000_000}",
             f"say Loaded into {self.name}!",
+        ]))
+        self.mcfunctions.append(MCFunction("tick", [
+            "execute at @e[type=item_display] if block ~ ~ ~ #minecraft:air run kill @n[type=item_display]",  # we should somehow tag this?
         ]))
 
     def generate_pack(self) -> None:

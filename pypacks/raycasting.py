@@ -6,18 +6,31 @@ from pypacks.resources.custom_tag import CustomTag
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
-def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
+
+# This is a simple raycasting system that can be used to detect blocks in a line of sight.
+# It takes 4 inputs, the hit block function, the failed function, the ray transitive blocks,
+# and if the we should check if the ray_transitive_blocks is present or absent.
+# An example of this is:
+# {
+#     "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
+#     "failed_function": f"{datapack.namespace}:raycast/failed",
+#     "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+#     "if_or_unless": "unless",
+# }
+# Which runs the default raycast/hit_block, the default raycast/failed, a list of blocks which can be passed though
+# And also that we should end the ray unless we hit one of the blocks.
+# If we set it to "if", we will stop the ray "if" we hit a block.
+
+
+def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
     arguments = {
         "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
         "failed_function": f"{datapack.namespace}:raycast/failed",
         "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+        "if_or_unless": "unless",
     }
     formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
-    arguments_replacements = {
-        "hit_block_function": f"$(hit_block_function)",
-        "failed_function": f"$(failed_function)",
-        "ray_transitive_blocks": f"$(ray_transitive_blocks)",
-    }
+    arguments_replacements = {key: f"$({key})" for key in arguments.keys()}
     formatted_arguments_replacements = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments_replacements.items()]) + "}"
 
     failed = MCFunction("failed", [
@@ -33,19 +46,26 @@ def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...
         ["raycast"],
     )
 
-    hit_block = MCFunction("hit_block", [
-        "# Mark the ray as having found a block",
-        "scoreboard players set #hit raycast 1",
-        "",
+    hit_block_default = MCFunction("hit_block", [
         "# Running custom commands since the block was found",
         "setblock ~ ~ ~ minecraft:stone",
         ],
         ["raycast"],
     )
 
+    # This exists as an intermediate to set the scoreboard value *and then* calling the function, otherwise overriding it requires the scoreboard line.
+    hit_block_set_score = MCFunction("hit_block_set_score", [
+        "# Mark the ray as having found a block",
+        "scoreboard players set #hit raycast 1",
+        "$function $(hit_block_function)",  # Call the hit block function
+        ],
+        ["raycast"],
+    )
+
     ray = MCFunction("ray", [
         "# Run a function if a block was detected",
-        f"$execute unless block ~ ~ ~ $(ray_transitive_blocks) run function $(hit_block_function)",
+        # f"$execute unless block ~ ~ ~ $(ray_transitive_blocks) run function {hit_block_set_score.get_reference(datapack)} {{\"hit_block_function\": \"$(hit_block_function)\"}}",
+        f"$execute $(if_or_unless) block ~ ~ ~ $(ray_transitive_blocks) run function {hit_block_set_score.get_reference(datapack)} {{\"hit_block_function\": \"$(hit_block_function)\"}}",
         "",
         "# Add one distance to the ray",
         "scoreboard players add #distance raycast 1",
@@ -62,7 +82,7 @@ def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...
         ["raycast"],
     )
 
-    # Change start ray to take an input too, so we don't have to pass it *all* in everytime.
+    # This exists so we don't have to have everything in start_ray duplicated, as an interface, almost.
     populate_start_ray = MCFunction("populate_start_ray", [
         f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
         ],
@@ -86,10 +106,7 @@ def generate_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...
         ],
         ["raycast"],
     )
-    return failed, hit_block, load_ray, ray, populate_start_ray, start_ray
-
-def generate_place_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
-    return ()
+    return failed, load_ray, hit_block_default, hit_block_set_score, ray, populate_start_ray, start_ray
 
 raycast_transitive_blocks = [
     "minecraft:air",

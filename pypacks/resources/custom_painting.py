@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
 # from pypacks.utils import get_png_dimensions
@@ -26,7 +26,7 @@ class CustomPainting:
         assert 1 <= self.width_in_blocks <= 16, "Width must be between 1 and 16"
         assert 1 <= self.height_in_blocks <= 16, "Height must be between 1 and 16"
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, str]:
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "asset_id": f"{datapack.namespace}:{self.internal_name}",
             "width": self.width_in_blocks,
