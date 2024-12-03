@@ -78,7 +78,8 @@ def remove_colour_codes(text: str) -> str:
     return string
 
 
-def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None = None) -> tuple[int, int]:
+def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None = None, enforce_square: bool = True,
+                       enforce_factor_of_two: bool = True) -> tuple[int, int]:
     """Returns width, height of the image"""
     if file_path is not None:
         with open(file_path, 'rb') as file:
@@ -92,25 +93,29 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
         file_io.seek(16)  # Width and height start at byte 16
         width = int.from_bytes(file_io.read(4), 'big')
         height = int.from_bytes(file_io.read(4), 'big')
-    assert width == height, "Image must be square"
-    assert width == 1 or width % 2 == 0, "Image width must be divisible by 16"
-    assert height == 1 or height % 2 == 0, "Image height must be divisible by 16"
-    assert 1 <= width <= 512, "Image width must be between 1 and 512"
-    assert 1 <= height <= 512, "Image height must be between 1 and 512"
+    if enforce_square:
+        assert width == height, "Image must be square"
+    if enforce_factor_of_two:
+        assert width == 1 or width % 2 == 0, f"Image width must be divisible by 16, {width} is not"
+        assert height == 1 or height % 2 == 0, f"Image height must be divisible by 16, {height} is not"
+    assert 1 <= width <= 512, f"Image width must be between 1 and 512, {width} is not"
+    assert 1 <= height <= 512, f"Image height must be between 1 and 512, {height} is not"
     # rint(file_path, width, height)
     return width, height
 
-def get_png_height(file_path: str | None = None, image_bytes: bytes | None = None) -> int:
+
+def get_png_height(file_path: str | None = None, image_bytes: bytes | None = None,
+                   enforce_square: bool = False, enforce_factor_of_two: bool = False) -> int:
     """Returns the height of the image"""
     if file_path is not None:
-        return get_png_dimensions(file_path=file_path)[1]
-    else:
-        return get_png_dimensions(image_bytes=image_bytes)[1]
+        return get_png_dimensions(file_path=file_path, enforce_square=enforce_square, enforce_factor_of_two=enforce_factor_of_two)[1]
+    return get_png_dimensions(image_bytes=image_bytes, enforce_square=enforce_square, enforce_factor_of_two=enforce_factor_of_two)[1]
 
 
 def inline_open(file_path: str, mode: str = "rb") -> Any:
     with open(file_path, mode) as file:
         return file.read()
+
 
 def resolve_default_item_image(base_item: str) -> str:
     no_minecraft = base_item.removeprefix('minecraft:')
@@ -128,6 +133,7 @@ def resolve_default_item_image(base_item: str) -> str:
 
 def pascal_to_snake(name: str) -> str:
     return ''.join(['_' + i.lower() if i.isupper() else i for i in name]).lstrip('_')
+
 
 # def get_ogg_duration(audio_bytes: bytes) -> float:
 #     f = io.BytesIO(audio_bytes)

@@ -4,6 +4,7 @@ import shutil
 from typing import TYPE_CHECKING
 
 from pypacks.book_generator import ReferenceBook
+from pypacks.resources.custom_recipe import ShapelessCraftingRecipe
 from pypacks.resources.custom_font import CustomFont, BookImage
 
 if TYPE_CHECKING:
@@ -20,6 +21,7 @@ CUSTOM_SIZE_IMAGES: dict[str, tuple[bytes, int, int]] = {
     x: (inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{x}.png", "rb"), size, y_offset)
     for (x, size, y_offset) in (
         ("more_info_icon", 16, 12),
+        ("crafting_icon", 16, 12),
     )
 }
 ref_book_items = [f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.png"]
@@ -72,13 +74,13 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
             BookImage(name=image_name, image_bytes=image_bytes)
             for image_name, image_bytes in BASE_IMAGES.items()
         ],
-        *[
+        *[  # Currently just the more_info_icon
             BookImage(name=image_name, image_bytes=image_bytes, height=size, y_offset=y_offset)
             for image_name, (image_bytes, size, y_offset) in CUSTOM_SIZE_IMAGES.items()
         ],
-        *[  # Custom items
-            BookImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
-            for item in datapack.custom_items
+        *[  # Logo (scaled, better resolution)
+            BookImage(image_name, image_bytes, height=100, y_offset=16)
+            for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png")),]
         ],
         *[  # Satchel, not much else
             BookImage(icon_path.split("/")[-1].removesuffix(".png")+"_icon", image_bytes=inline_open(icon_path), height=20, y_offset=10)
@@ -88,9 +90,13 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
             BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[arg-type]
             for category in datapack.reference_book_categories
         ],
-        *[  # Logo (scaled, better resolution)
-            BookImage(image_name, image_bytes, height=100, y_offset=16)
-            for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png")),]
+        *[  # Custom items
+            BookImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
+            for item in datapack.custom_items
+        ],
+        *[  # Custom recipes
+            BookImage(f"crafting_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.crafting_image_bytes, y_offset=6)  # type: ignore
+            for custom_recipe in [x for x in datapack.custom_recipes if isinstance(x, ShapelessCraftingRecipe) and x.is_custom_item]
         ],
     ]
     return CustomFont("all_fonts", all_elements)

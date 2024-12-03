@@ -19,7 +19,7 @@ class BookImage:
 
     def __post_init__(self) -> None:
         assert self.height is None or 0 < self.height <= 256, "Height must be between 1 and 256"
-        assert 0 < get_png_height(image_bytes=self.image_bytes) <= 256, "Image height must be between 1 and 256"
+        assert 0 < get_png_height(image_bytes=self.image_bytes, enforce_square=False) <= 256, "Image height must be between 1 and 256"
 
 
 @dataclass

@@ -5,6 +5,7 @@ from typing import TypeVar, Any, TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
+from pypacks.image_generation.recipe_image_data import generate_crafting_image
 from pypacks.resources.custom_item import CustomItem
 
 StringOrItemOrTag = TypeVar("StringOrItemOrTag", str, CustomItem)
@@ -12,6 +13,7 @@ StringOrCustomItem = TypeVar("StringOrCustomItem", str, CustomItem)
 RecipeCategory = Literal["blocks", "building", "equipment", "food", "misc", "redstone"]
 
 # https://minecraft.wiki/w/Recipe
+
 
 @dataclass
 class GenericRecipe:
@@ -41,6 +43,11 @@ class ShapelessCraftingRecipe(GenericRecipe):
     result: StringOrCustomItem  # type: ignore
     amount: int = 1
     recipe_category: RecipeCategory = "misc"
+
+    def __post_init__(self) -> None:
+        assert 0 < len(self.ingredients) <= 9, "Ingredients must be a list of 1-9 items"
+        self.crafting_image_bytes = generate_crafting_image(self)
+        self.is_custom_item = isinstance(self.result, CustomItem)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
