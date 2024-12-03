@@ -6,7 +6,7 @@ from pypacks.generate import generate_base_pack, generate_resource_pack, generat
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
-from pypacks.image_generation import add_icon_to_base
+from pypacks.image_generation.ref_book_icon_gen import add_icon_to_base
 
 
 if TYPE_CHECKING:

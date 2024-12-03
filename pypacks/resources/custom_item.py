@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
 from pypacks.resources.item_components import Consumable, Food, CustomItemData
-from pypacks.image_generation import add_icon_to_base
+from pypacks.image_generation.ref_book_icon_gen import add_icon_to_base
 
 if TYPE_CHECKING:
     from pypacks.book_generator import ReferenceBookCategory

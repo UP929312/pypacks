@@ -4,6 +4,8 @@ import os
 import pathlib
 from typing import Any
 
+from .scripts.texture_mapping import ITEM_TO_SPECIAL_TEXTURE_MAPPING
+
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 
 colour_code_mappings = {
@@ -111,11 +113,16 @@ def inline_open(file_path: str, mode: str = "rb") -> Any:
         return file.read()
 
 def resolve_default_item_image(base_item: str) -> str:
-    path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{base_item.removeprefix('minecraft:')}.png")
+    no_minecraft = base_item.removeprefix('minecraft:')
+    path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{no_minecraft}.png")
+    if no_minecraft in ITEM_TO_SPECIAL_TEXTURE_MAPPING:
+        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{ITEM_TO_SPECIAL_TEXTURE_MAPPING[no_minecraft]}.png")
+    if no_minecraft in ["player_head", "zombie_head", "creeper_head", "skeleton_skull", "wither_skeleton_skull", "dragon_head"]:
+        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/player_head.png")
+    if no_minecraft.endswith("spawn_egg"):
+        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/spawn_egg.png")
     if not path.exists():
-        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{base_item.removeprefix('minecraft:')}_00.png")  # Clocks, compasses, etc.
-    if not path.exists():
-        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/unknown.png")  # Others, player head
+        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/unknown.png")  # Others, player head
     return str(path)
 
 

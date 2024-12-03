@@ -1,14 +1,14 @@
 import io
-from typing import TYPE_CHECKING
+# from typing import TYPE_CHECKING
 
 from PIL import Image
 
-from .utils import PYPACKS_ROOT, resolve_default_item_image, pascal_to_snake
-from .assets.recipe_image_data import *
+# from ..utils import PYPACKS_ROOT, resolve_default_item_image, pascal_to_snake
+from .recipe_image_data import *
 
-if TYPE_CHECKING:
-    from .resources.custom_item import CustomItem
-    from .resources.custom_recipe import Recipe
+# if TYPE_CHECKING:
+#     from ..resources.custom_item import CustomItem
+#     from ..resources.custom_recipe import Recipe
 
 def add_icon_to_base(image_path: str | None = None, image_bytes: bytes | None = None) -> bytes:
     if image_path is not None:
@@ -23,7 +23,7 @@ def add_icon_to_base(image_path: str | None = None, image_bytes: bytes | None = 
         image.thumbnail((16, 16))
 
     # Load base image
-    base = Image.open(f"{PYPACKS_ROOT}/assets/images/icon_base.png")
+    base = Image.open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/icon_base.png")
 
     # Put image on base, but not the image background (alpha channel), and center it
     x, y = (base.width - image.width) // 2, (base.height - image.height) // 2

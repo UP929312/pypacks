@@ -2,22 +2,22 @@
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
+# Implement reference book description (custom textures???)
+# I guess we can put it in the lore of the item on hover.
+
 Custom blocks!!! ---------------
 # Custom blocks destruction
-# When we're doing raycasting, we need to also update the ray transitive blocks! (set to base_block)
 # Custom blocks can be destroyed, but only in Creative, and drops currently aren't working
 
-# Descriptors for integers & type validation
+# Descriptors for integers & type validation? Probably just use Pydantic...
+
+# For "how to obtain" in custom item pages, use a hover effect ):
 
 # Cooldown for right clickable items
 
 # Merge on_load with an inputted one... Using /function
 
 # TODO: Should the custom font class also move the images over? Probably...
-
-# Hmmm, what about a mapping of item to image? Could generate it automatically? Maybe from the model file? For the ref book icons
-
-# Implement reference book description
 
 # Current plan for breaking is to check every tick if any of the display entities are in air, and if so, delete the items and re-spawn them
 

@@ -40,6 +40,42 @@ class ReferenceBookCategory:
         assert " " not in self.name, "Category name cannot contain spaces"
 
 
+@dataclass
+class GenericIcon:
+    unicode_char: str
+    hover_text: str | None = None
+    go_to_page: int | None = None
+
+    def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
+        return_value = self.generate_icon(self.unicode_char, datapack)
+        if self.hover_text is not None:
+            return_value |= {"hoverEvent": {"action": "show_text", "contents": self.hover_text}}
+        if self.go_to_page is not None:
+            return_value |= {"clickEvent": {"action": "change_page", "value": str(self.go_to_page)}}
+        return return_value
+        # import json
+        # return_value["hoverEvent"] = {"action": "show_item", "contents": {
+        #     "id": self.item.base_item, "count": 1, "tag": json.dumps({"display": {"Name": self.item.custom_name or self.item.base_item}})
+        # }}
+    
+    @staticmethod
+    def generate_icon(unicode_char: str, datapack: "Datapack") -> dict[str, Any]:
+        return {"text": f"{unicode_char}{datapack.font_mapping['empty_1_x_1']}", "font": f"{datapack.namespace}:all_fonts",
+                "color": "white", "underlined": False, "bold": False}
+
+
+@dataclass
+class MoreInfoIcon(GenericIcon):
+    unicode_char: str
+    item: "CustomItem" = None  # type: ignore[assignment]
+
+    def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
+        hover_content = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n"
+        hover_content += self.item.reference_book_description if self.item.reference_book_description else "No description available"
+        hover_data = {"hoverEvent": {"action": "show_text", "contents": hover_content}}
+        data = super().get_json_data(datapack) | hover_data
+        return data
+        # https://www.planetminecraft.com/blog/showing-hover-event-items-in-written-books/
 
 # =======================================================================================================================================
 
@@ -55,7 +91,6 @@ class ItemPage:
             "text": f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", "underlined": True, "bold": True,
             "hoverEvent": {"action": "show_item", "contents": {
                 "id": self.item.base_item, "components": self.item.to_dict(self.datapack),
-                # "id": self.item.base_item, "tag": {"display": {"Name": self.item.custom_name or self.item.base_item}}
             }},
             "clickEvent": {"action": "run_command", "value": f"/function {self.datapack.namespace}:give/{self.item.internal_name}"},
         }
@@ -73,13 +108,17 @@ class ItemPage:
             obtain_method_data: dict[str, Any] = {"text": f"Found recipe!", "underlined": False, "bold": False}  # {obtain_methods[0].ingredients}
         else:
             obtain_method_data = {"text": "No recipes found", "underlined": False, "bold": False}
+        give_item_icon = GenericIcon(self.datapack.font_mapping[f"{self.item.internal_name}_icon"])
+        more_info_icon = MoreInfoIcon(self.datapack.font_mapping["more_info_icon"], item=self.item)
         return [
             title,
             generate_backslashes(2),
-            RedirectButton.generate_icon(self.datapack.font_mapping[f"{self.item.internal_name}_icon"], self.datapack),
+            give_item_icon.get_json_data(self.datapack),
             generate_backslashes(2),
             obtain_method_data,
-            generate_backslashes(7),
+            generate_backslashes(2),
+            generate_icon_row_spacing(self.datapack, 2), more_info_icon.get_json_data(self.datapack),
+            generate_backslashes(3),
             generate_icon_row_spacing(self.datapack, 90), RedirectButton(self.datapack.font_mapping["satchel_icon"], "Go to the categories page", self.back_button_page).get_json_data(self.datapack),
         ]
 
@@ -88,32 +127,12 @@ class ItemPage:
 
 
 @dataclass
-class RedirectButton:
+class RedirectButton(GenericIcon):
     unicode_char: str
-    hover_text: str | None
-    go_to_page: int | None
     # "hoverEvent": {"action": "show_text", "contents": ""}
     # "clickEvent": {"action": "change_page", "value": str(get_page_number(result_item))}
     # "clickEvent": {"action": "open_url", "value": str(get_page_number(result_item))}
     # "show_item": {"id": "minecraft:stone", "count": 1, "tag": {"display": {"Name": "Stone"}}}
-
-    @staticmethod
-    def generate_icon(unicode_char: str, datapack: "Datapack") -> dict[str, Any]:
-        return {"text": f"{unicode_char}{datapack.font_mapping['empty_1_x_1']}", "font": f"{datapack.namespace}:all_fonts",
-                "color": "white", "underlined": False, "bold": False}
-
-    def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
-        return_value = self.generate_icon(self.unicode_char, datapack)
-        if self.hover_text is not None:
-            # rint(self.hover_text)
-            return_value |= {"hoverEvent": {"action": "show_text", "contents": self.hover_text}}
-        if self.go_to_page is not None:
-            return_value |= {"clickEvent": {"action": "change_page", "value": str(self.go_to_page)}}
-        return return_value
-        # import json
-        # return_value["hoverEvent"] = {"action": "show_item", "contents": {
-        #     "id": self.item.base_item, "count": 1, "tag": json.dumps({"display": {"Name": self.item.custom_name or self.item.base_item}})
-        # }}
 
 
 # =======================================================================================================================================
@@ -222,5 +241,5 @@ class ReferenceBook:
 # =======================================================================================================================================
 
 # https://github.com/misode/misode.github.io/blob/master/public/images/crafting_table.png
-MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("Misc", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join
-PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Paintings", f"{PYPACKS_ROOT}/assets/images/miscellaneous_icon.png")  # TODO: os.pathlib.join
+MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("Misc", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/miscellaneous_icon.png")  # TODO: os.pathlib.join
+PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Paintings", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/miscellaneous_icon.png")  # TODO: os.pathlib.join

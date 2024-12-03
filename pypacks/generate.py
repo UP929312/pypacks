@@ -10,13 +10,19 @@ if TYPE_CHECKING:
     from .datapack import Datapack
 
 from .utils import PYPACKS_ROOT, inline_open
-from .image_generation import add_icon_to_base
+from .image_generation.ref_book_icon_gen import add_icon_to_base
 
 
-BASE_IMAGES: dict[str, bytes] = {x: inline_open(f"{PYPACKS_ROOT}/assets/images/{x}.png", "rb") for x in (  # TODO: os.pathlib.join
-    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base", "logo",
+BASE_IMAGES: dict[str, bytes] = {x: inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{x}.png", "rb") for x in (  # TODO: os.pathlib.join
+    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base",
 )}
-ref_book_items = [f"{PYPACKS_ROOT}/assets/images/satchel.png"]
+CUSTOM_SIZE_IMAGES: dict[str, tuple[bytes, int, int]] = {
+    x: (inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{x}.png", "rb"), size, y_offset)
+    for (x, size, y_offset) in (
+        ("more_info_icon", 16, 12),
+    )
+}
+ref_book_items = [f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.png"]
 
 
 def generate_resource_pack(datapack: "Datapack") -> None:
@@ -54,25 +60,23 @@ def generate_resource_pack(datapack: "Datapack") -> None:
 
     # Custom back button:
     with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/satchel_icon.png", "wb") as file:
-        file.write(add_icon_to_base(image_path=f"{PYPACKS_ROOT}/assets/images/satchel.png"))
+        file.write(add_icon_to_base(image_path=f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.png"))
     # ================================================================================================
     # Copy over the base images to the resource pack (icons, spacers, etc)
     for image in BASE_IMAGES.keys():
         image_name = image.split("/")[-1].removesuffix(".png")
-        shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/{image}.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{image_name}.png")
+        shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{image}.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{image_name}.png")
 
     # Paintings
     for painting in datapack.custom_paintings:
         shutil.copyfile(painting.image_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/painting/{painting.internal_name}.png")
 
     # Default assets
-    for asset in os.listdir(f"{PYPACKS_ROOT}/assets/images/blocks"):
-        shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/blocks/{asset}", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/{asset}")
     for asset in os.listdir(f"{PYPACKS_ROOT}/assets/images/recipes"):
         shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/recipes/{asset}", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/{asset}")
 
     # Annoyingly putting this here manually:
-    shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/logo_256_x_256.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/logo_256_x_256.png")
+    shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/logo_256_x_256.png")
 
     # ================================================================================================
     # Sounds
@@ -96,6 +100,10 @@ def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
             BookImage(name=image_name, image_bytes=image_bytes)
             for image_name, image_bytes in BASE_IMAGES.items()
         ],
+        *[
+            BookImage(name=image_name, image_bytes=image_bytes, height=size, y_offset=y_offset)
+            for image_name, (image_bytes, size, y_offset) in CUSTOM_SIZE_IMAGES.items()
+        ],
         *[  # Custom items
             BookImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
             for item in datapack.custom_items
@@ -110,7 +118,7 @@ def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
         ],
         *[  # Logo (scaled, better resolution)
             BookImage(image_name, image_bytes, height=100, y_offset=16)
-            for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/logo_256_x_256.png")),]
+            for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png")),]
         ],
     ]
 
@@ -140,7 +148,7 @@ def generate_base_pack(datapack: "Datapack") -> None:
         json.dump({"values": [f"{datapack.namespace}:tick"]}, file, indent=4)
     # ================================================================================================
     # Give commands
-    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "give"), exist_ok=True)  # makes /data/{datapack_name}/function/give
+    os.makedirs(os.path.join(datapack.datapack_output_path, "data", datapack.namespace, "function", "give"), exist_ok=True)
 
     with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give_all.mcfunction", "w") as file:
         file.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in datapack.custom_items]))
