@@ -71,8 +71,8 @@ class CustomBlock:
         # ============================================================================================================
         # Has to be secondary so we have @s set correctly.
         execute_as_item_display = MCFunction(f"execute_on_item_display_{self.internal_name}", [
+            f"tag @s add {datapack.namespace}.custom_block",
             # f"tag @s add {datapack.namespace}.block_display.{self.internal_name}",
-            # f"tag @s add {datapack.namespace}.custom_block",
             # f"tag @s add {datapack.namespace}.{self.internal_name}",
 
             # Make it _slightly_ bigger than the block, so it hides the original (only a tiny bit bigger), to stop z-fighting too.

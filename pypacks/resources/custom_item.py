@@ -67,10 +67,6 @@ class CustomItem:
             self.additional_item_data = CustomItemData(consumable=consumable, food=food)  # , cooldown=cooldown
         self.custom_data |= tag
 
-    def to_components_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        """Used for the results key in a recipe, DEPRECATED"""  # TODO: Remove this
-        return self.to_dict(datapack)
-
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         # The resource pack requires 3 things:
         # 1. The model definition/config (in items/<internal_name>.json)

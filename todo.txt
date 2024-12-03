@@ -2,9 +2,6 @@
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
-# Implement reference book description (custom textures???)
-# I guess we can put it in the lore of the item on hover.
-
 Custom blocks!!! ---------------
 # Custom blocks destruction
 # Custom blocks can be destroyed, but only in Creative, and drops currently aren't working
@@ -14,6 +11,7 @@ Custom blocks!!! ---------------
 # Descriptors for integers & type validation? Probably just use Pydantic...
 
 # For "how to obtain" in custom item pages, use a hover effect ):
+# HALF DONE ^
 
 # Cooldown for right clickable items
 
@@ -40,6 +38,8 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # Loot tables
 
 # INFO: Paintings require a world reset
+
+# Type hint all the modifiers for items, like the extra reach and such.
 
 # Improve testing setup, it's a nice start though.
 

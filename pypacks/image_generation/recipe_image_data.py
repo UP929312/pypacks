@@ -17,7 +17,7 @@ crafting_recipe = {
     6: (2, 2+16+2+16+2),
     7: (2+16+3, 2+16+2+16+2),
     8: (2+16+3+16+2, 2+16+2+16+2),
-    "result": (97, 19),
+    "result": (96, 19),
 }
 
 def generate_crafting_image(recipe: "ShapedCraftingRecipe | ShapelessCraftingRecipe") -> bytes:

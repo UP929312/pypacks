@@ -263,4 +263,4 @@ class ReferenceBook:
 
 # https://github.com/misode/misode.github.io/blob/master/public/images/crafting_table.png
 MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("Misc", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/miscellaneous_icon.png")  # TODO: os.pathlib.join
-PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Paintings", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/miscellaneous_icon.png")  # TODO: os.pathlib.join
+PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Paintings", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/painting.png")  # TODO: os.pathlib.join

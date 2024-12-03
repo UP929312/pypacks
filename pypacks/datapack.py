@@ -104,12 +104,13 @@ class Datapack:
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [
-            "execute at @e[type=item_display] if block ~ ~ ~ #minecraft:air run kill @n[type=item_display]",  # we should somehow tag this?
+            f"execute at @e[type=item_display, tag={self.namespace}.custom_block] if block ~ ~ ~ #minecraft:air run kill @n[type=item_display, tag={self.namespace}.custom_block]",
         ]))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")
         print(f"Generating resource pack @ {self.resource_pack_path}")
+        print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
         # Needs to go in this order
         self.custom_font = generate_font_pack(self)
         self.font_mapping = self.custom_font.get_mapping()

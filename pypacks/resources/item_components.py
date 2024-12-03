@@ -3,8 +3,10 @@ from typing import Any, Literal
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
+    from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_item import CustomItem
 
 
@@ -119,7 +121,7 @@ class UseRemainder:
         return {
             "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "count": self.count,
-        } | {"components": self.item.to_dict(datapack)} if isinstance(self.item, CustomItem) else {}
+        } | ({"components": self.item.to_dict(datapack)} if isinstance(self.item, CustomItem) else {})
 
 
 # ==========================================================================================
@@ -195,22 +197,23 @@ class Instrument:
     """Used for the goat horn, can take a default minecraft sound or a custom sound, create a custom sound using CustomSound, then 
     For sound_id, use {namespace}:{sound_internal_name}"""
     # https://minecraft.wiki/w/Data_component_format#instrument
-    sound_id: str | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn", "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]  # https://minecraft.wiki/w/Sounds.json#Sound_events
+    # https://minecraft.wiki/w/Sounds.json#Sound_events
+    sound_id: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
+                                            "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
     description: str | None = None  # A string for the description of the sound.
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
     instrument_range: int = 256  #  A non-negative float for the range of the sound (normal horns are 256).
 
     allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:goat_horn"])
 
-    def to_dict(self) -> dict[str, Any]:
-        # TODO: Allow a sound_id OR sound_event, or CustomSound (needs datapack though ):  )
-        #DEFAULTS = "ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn", "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"
-        assert self.use_duration >= 0, "use_duration must be a non-negative integer"
-        assert self.instrument_range >= 0, "range must be a non-negative integer"
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_sound import CustomSound
+        assert 0 < self.use_duration <= 60, "use_duration must be a non-negative integer"
+        assert 0 < self.instrument_range, "range must be a non-negative integer"
         return {
             "description": self.description,
             "range": self.instrument_range,
-            "sound_event": {"sound_id": self.sound_id},
+            "sound_event": {"sound_id": f"{datapack.namespace}:{self.sound_id.internal_name}" if isinstance(self.sound_id, CustomSound) else self.sound_id},
             "use_duration": self.use_duration,
         }
 
@@ -346,7 +349,7 @@ class CustomItemData:
             "jukebox_playable":           self.jukebox_playable.to_dict() if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
-            "instrument":                 self.instrument.to_dict() if self.instrument is not None else None,
+            "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
