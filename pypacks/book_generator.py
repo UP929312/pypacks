@@ -8,6 +8,7 @@ from pypacks.utils import PYPACKS_ROOT, chunk_list, remove_colour_codes
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.custom_recipe import Recipe
 
 ICONS_PER_ROW = 5
 ROWS_PER_PAGE = 4
@@ -66,7 +67,6 @@ class GenericIcon:
 
 @dataclass
 class MoreInfoIcon(GenericIcon):
-    unicode_char: str
     item: "CustomItem" = None  # type: ignore[assignment]
 
     def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
@@ -76,6 +76,18 @@ class MoreInfoIcon(GenericIcon):
         data = super().get_json_data(datapack) | hover_data
         return data
         # https://www.planetminecraft.com/blog/showing-hover-event-items-in-written-books/
+
+
+@dataclass
+class RecipeIcon(GenericIcon):
+    recipe: "Recipe" = None  # type: ignore[assignment]
+
+    def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
+        # hover_content = f"Recipe for {remove_colour_codes(self.recipe.result.custom_name or self.recipe.result.base_item)}:\n\n"
+        hover_content = ""
+        hover_data = {"hoverEvent": {"action": "show_text", "contents": hover_content}}
+        data = super().get_json_data(datapack) | hover_data
+        return data
 
 # =======================================================================================================================================
 
@@ -101,21 +113,22 @@ class ItemPage:
         title: dict[str, Any] = self.get_title()
         # Get all the ways to craft it
         non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
-        obtain_methods = [x for x in non_smithing_trim_recipes if (
+        recipes = [x for x in non_smithing_trim_recipes if (
             x.result.internal_name if isinstance(x.result, CustomItem) else x.result  # type: ignore[attr-defined]
         ) == self.item.internal_name]
-        if obtain_methods:
-            obtain_method_data: dict[str, Any] = {"text": f"Found recipe!", "underlined": False, "bold": False}  # {obtain_methods[0].ingredients}
-        else:
-            obtain_method_data = {"text": "No recipes found", "underlined": False, "bold": False}
+        # obtain_methods = [RecipeIcon(self.datapack.font_mapping["crafting_icon"], recipe=x) for x in recipes]
+        obtain_methods = False
+        obtain_method_data = [{"text": f"Found recipe!", "underlined": False, "bold": False}] if obtain_methods else [{"text": f"No recipe found!", "underlined": False, "bold": False}]
+        
         give_item_icon = GenericIcon(self.datapack.font_mapping[f"{self.item.internal_name}_icon"])
         more_info_icon = MoreInfoIcon(self.datapack.font_mapping["more_info_icon"], item=self.item)
+
         return [
             title,
             generate_backslashes(2),
             give_item_icon.get_json_data(self.datapack),
             generate_backslashes(2),
-            obtain_method_data,
+            *obtain_method_data,
             generate_backslashes(2),
             generate_icon_row_spacing(self.datapack, 2), more_info_icon.get_json_data(self.datapack),
             generate_backslashes(3),
@@ -128,7 +141,7 @@ class ItemPage:
 
 @dataclass
 class RedirectButton(GenericIcon):
-    unicode_char: str
+    """A generic redirect button that can be used to go to a different page"""
     # "hoverEvent": {"action": "show_text", "contents": ""}
     # "clickEvent": {"action": "change_page", "value": str(get_page_number(result_item))}
     # "clickEvent": {"action": "open_url", "value": str(get_page_number(result_item))}

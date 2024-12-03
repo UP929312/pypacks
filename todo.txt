@@ -9,6 +9,8 @@ Custom blocks!!! ---------------
 # Custom blocks destruction
 # Custom blocks can be destroyed, but only in Creative, and drops currently aren't working
 
+# Hud overlay would be cool! Something about the pack?
+
 # Descriptors for integers & type validation? Probably just use Pydantic...
 
 # For "how to obtain" in custom item pages, use a hover effect ):
@@ -16,8 +18,6 @@ Custom blocks!!! ---------------
 # Cooldown for right clickable items
 
 # Merge on_load with an inputted one... Using /function
-
-# TODO: Should the custom font class also move the images over? Probably...
 
 # Current plan for breaking is to check every tick if any of the display entities are in air, and if so, delete the items and re-spawn them
 

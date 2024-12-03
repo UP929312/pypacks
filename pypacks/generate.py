@@ -27,71 +27,43 @@ ref_book_items = [f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.pn
 
 def generate_resource_pack(datapack: "Datapack") -> None:
     os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "items"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "font"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "sounds"), exist_ok=True)
     os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "models", "item"), exist_ok=True)
     os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "item"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "font"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "painting"), exist_ok=True)
 
     # ================================================================================================
-
     # pack.mcmeta
     with open(f"{datapack.resource_pack_path}/pack.mcmeta", "w") as file:
         json.dump({"pack": {"pack_format": datapack.resource_pack_format_version, "description": datapack.description}}, file, indent=4)
-
     # pack.png
     if datapack.pack_icon_path is not None:
-        with open(datapack.pack_icon_path, "rb") as file:
-            image_contents = file.read()
-        with open(f"{datapack.resource_pack_path}/pack.png", "wb") as file:
-            file.write(image_contents)
-
+        shutil.copyfile(datapack.pack_icon_path, f"{datapack.resource_pack_path}/pack.png")
+    # ================================================================================================
+    # All the fonts and images for the reference book
+    if datapack.font_mapping:
+        datapack.custom_font.create_resource_pack_files(datapack)
     # ================================================================================================
     # Custom item images, model.json, item.json, etc
     for custom_item in datapack.custom_items:
         custom_item.create_resource_pack_files(datapack)
     # ================================================================================================
-    # Copy from file_location to the resource pack
-    for category in datapack.reference_book_categories:
-        # Copy & generate the icon, too
-        with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{category.name.lower()}_category_icon.png", "wb") as file:
-            file.write(add_icon_to_base(image_path=category.image_path))
-
     # Custom back button:
     with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/satchel_icon.png", "wb") as file:
         file.write(add_icon_to_base(image_path=f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.png"))
     # ================================================================================================
-    # Copy over the base images to the resource pack (icons, spacers, etc)
-    for image in BASE_IMAGES.keys():
-        image_name = image.split("/")[-1].removesuffix(".png")
-        shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{image}.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{image_name}.png")
-
     # Paintings
     for painting in datapack.custom_paintings:
-        shutil.copyfile(painting.image_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/painting/{painting.internal_name}.png")
-
-    # Default assets
-    for asset in os.listdir(f"{PYPACKS_ROOT}/assets/images/recipes"):
-        shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/recipes/{asset}", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/{asset}")
-
-    # Annoyingly putting this here manually:
-    shutil.copyfile(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png", f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/logo_256_x_256.png")
-
+        painting.create_resource_pack_files(datapack)
     # ================================================================================================
     # Sounds
+    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "sounds"), exist_ok=True)
     for sound in datapack.custom_sounds:
         shutil.copyfile(sound.ogg_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/sounds/{sound.internal_name}.ogg")
-
     # Create the sounds.json file.
     with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/sounds.json", "w") as file:
         json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
     # ================================================================================================
-    # Custom Blocks
-    # for custom_block in datapack.custom_blocks:
-    #     custom_block.create_resource_pack_files(datapack)
 
-def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
+def generate_font_pack(datapack: "Datapack") -> "CustomFont":
     # TODO: Could this move to the reference book generator?
     # https://www.youtube.com/watch?v=i4l2Ym_0VZg   <- Just cool
     # Create the providers file
@@ -121,10 +93,7 @@ def generate_font_pack(datapack: "Datapack") -> dict[str, str]:
             for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png")),]
         ],
     ]
-
-    custom_font = CustomFont("all_fonts", all_elements)
-    custom_font.create_resource_pack_files(datapack)
-    return custom_font.font_mapping
+    return CustomFont("all_fonts", all_elements)
 
 def generate_base_pack(datapack: "Datapack") -> None:
     os.makedirs(os.path.join(datapack.datapack_output_path), exist_ok=True)
@@ -132,14 +101,11 @@ def generate_base_pack(datapack: "Datapack") -> None:
     # pack.mcmeta
     with open(f"{datapack.datapack_output_path}/pack.mcmeta", "w") as file:
         json.dump({"pack": {"pack_format": datapack.data_pack_format_version, "description": datapack.description}}, file, indent=4)
-
     # pack.png
     if datapack.pack_icon_path is not None:
         shutil.copyfile(datapack.pack_icon_path, f"{datapack.datapack_output_path}/pack.png")
     # ================================================================================================
     # Load + Tick functions
-
-    # Make the load and tick functions
     os.makedirs(os.path.join(datapack.datapack_output_path, "data", "minecraft", "tags", "function"), exist_ok=True)  # makes /data/minecraft/tags/function
     with open(f"{datapack.datapack_output_path}/data/minecraft/tags/function/load.json", "w") as file:
         json.dump({"values": [f"{datapack.namespace}:load"]}, file, indent=4)

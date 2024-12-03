@@ -111,6 +111,7 @@ class Datapack:
         print(f"Generating data pack @ {self.datapack_output_path}")
         print(f"Generating resource pack @ {self.resource_pack_path}")
         # Needs to go in this order
+        self.custom_font = generate_font_pack(self)
+        self.font_mapping = self.custom_font.get_mapping()
         generate_resource_pack(self)
-        self.font_mapping = generate_font_pack(self)
         generate_base_pack(self)

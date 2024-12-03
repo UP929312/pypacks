@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -27,9 +28,6 @@ class CustomFont:
     name: str
     font_elements: list[BookImage]
 
-    def __post_init__(self) -> None:
-        self.font_mapping = self.get_mapping()
-
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
         return {element.name.split("\\")[-1].removesuffix('.png'): f"\\uE{i:03}" for i, element in enumerate(self.font_elements)}
@@ -48,5 +46,10 @@ class CustomFont:
         ]
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
+        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "font"), exist_ok=True)
+        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "font"), exist_ok=True)
+        for font_element in self.font_elements:
+            with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{font_element.name}.png", "wb") as file:
+                file.write(font_element.image_bytes)
         with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/font/{self.name}.json", "w") as file:
             file.write(json.dumps({"providers": self.to_dict(datapack)}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes
