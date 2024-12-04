@@ -1,11 +1,15 @@
 import json
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Any
 from dataclasses import dataclass, field
 
+from networkx import min_cost_flow
+
 from pypacks.resources.custom_predicate import Predicate
+from pypacks.utils import recusively_remove_nones_from_dict
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
+    from pypacks.resources.custom_item import CustomItem
 
 LootContextTypes = Literal["empty", "chest", "fishing", "entity", "equipment", "archaeology", "vault",
                           "gift", "barter", "advancement_reward", "generic", "block", "sheering"]
@@ -47,13 +51,20 @@ class ItemModifier:
     # https://minecraft.wiki/w/Item_modifier
     pass
 
+
 class NumberProvider:
     # https://minecraft.wiki/w/Loot_table#Number_provider
     pass
 
+
 class Entry:
     # https://minecraft.wiki/w/Loot_table#Entry
-    pass
+    item: "str | CustomItem"
+    # functions: list[ItemModifier] | None = None
+    # conditions: list[Predicate] | None = None
+    # weight: int = 1
+    # quality: int = 0
+
 
 # class RandomSequence:
 #     # https://minecraft.wiki/w/Random_sequence_format#NBT_structure
@@ -63,34 +74,98 @@ class Entry:
 
 
 @dataclass
+class SingleItemEntry:
+    item: "str | CustomItem"
+    min_count: int = 1
+    max_count: int = 1
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
+        regular_data = self.item.to_dict(datapack) if isinstance(self.item, CustomItem) else {}
+        components = self.item.additional_item_data.to_dict(datapack) if isinstance(self.item, CustomItem) and self.item.additional_item_data is not None else {}
+        combined = recusively_remove_nones_from_dict(regular_data | components)
+        return_data = {
+                    "type": "minecraft:item",
+                    "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": self.min_count,
+                                "max": self.max_count
+                            }
+                        },
+                    ]
+                }
+        if combined:
+            return_data["functions"].append({"function": "minecraft:set_components", "components": combined})
+        return return_data
+
+
+@dataclass
+class SimpleRangePool:
+    item: "str | CustomItem"
+    min_count: int = 1
+    max_count: int = 1
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        return {
+            "rolls": 1,
+            "entries": [SingleItemEntry(self.item, self.min_count, self.max_count).to_dict(datapack)]
+        }
+
+
+@dataclass
+class SingleItemPool:
+    item: "str | CustomItem"
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        return SimpleRangePool(self.item, min_count=1, max_count=1).to_dict(datapack)
+
+
+@dataclass
 class Pool:
     # https://minecraft.wiki/w/Loot_table#Pool
     conditions: list[Predicate] | None
     functions: list[ItemModifier] | None
-    rolls: NumberProvider
-    bonus_rolls: NumberProvider | None
-    entries: list[Entry]
+    rolls: NumberProvider | int = 1
+    bonus_rolls: NumberProvider | int | None = None
+    entries: list[Entry] = field(default_factory=list)
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        # data: dict[str, str] = {
+        #     "rolls": self.rolls,
+        #     "entries": [entry.to_dict(datapack) for entry in self.entries]
+        # }
+        # if self.bonus_rolls:
+        #     data["bonus_rolls"] = self.bonus_rolls
+        # if self.conditions:
+        #     data["conditions"] = [condition.to_dict(datapack) for condition in self.conditions]
+        # if self.functions:
+        #     data["functions"] = [function.to_dict(datapack) for function in self.functions]
+        return {}
 
 
 @dataclass
 class CustomLootTable:
     # https://minecraft.wiki/w/Loot_table
     internal_name: str
-    loot_table_type: LootContextTypes
-    functions: list[ItemModifier] | None = None   # God damn.
-    pools: list[dict[str, str]] | None = None
+    pools: list[Pool | SingleItemPool | SimpleRangePool]
+    # functions: list[ItemModifier] | None = None   # God damn.
     # random_sequence: RandomSequence | None
+    loot_table_type: LootContextTypes = "generic"
 
     datapack_subdirectory_name: str = field(init=False, default="loot_table")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        data: dict[str, str] = {}
-        return data
+        return recusively_remove_nones_from_dict({
+            "type": "generic",
+            "pools": [pool.to_dict(datapack) for pool in self.pools]  # type: ignore
+        })
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(datapack), file, indent=4)
 
     def generate_give_command(self, datapack: "Datapack") -> str:
-        data = '{"id": "minecraft:painting", "variant": "%s:%s"}' % (datapack.namespace, self.internal_name)
-        return 'give @p minecraft:painting[minecraft:entity_data=%s]' % data
+        return f"loot give @p loot {datapack.namespace}:{self.internal_name}"

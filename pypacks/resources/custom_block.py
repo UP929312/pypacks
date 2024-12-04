@@ -21,7 +21,7 @@ class FacePaths:
 # TODO: Support non cubes? Player heads? Custom models?
 
 # TODO:
-# Implement destroying them :) - Done, but needs drops, deletion of drops, etc
+# Implement destroying them :) - Done, but needs drops, probably loot tables?
 
 
 @dataclass
@@ -112,3 +112,12 @@ class CustomBlock:
         )
         # ============================================================================================================
         return execute_as_item_display, spawn_item_display, populate_start_ray, revoke_and_run_mcfunction
+
+    @staticmethod
+    def on_tick_function(datapack: "Datapack") -> "MCFunction":
+        return MCFunction(f"all_blocks_tick", [
+            # Kill all xp orbs and items, then kill the item display itself.
+            f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @e[type=experience_orb, distance=..0.5]",
+            f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @e[type=item, distance=..0.5]",
+            f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @s",
+        ], ["custom_blocks"])

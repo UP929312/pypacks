@@ -18,7 +18,7 @@ from .image_generation.ref_book_icon_gen import add_centered_overlay
 BASE_IMAGES: dict[str, str] = {x: f"{IMAGES_PATH}/reference_book_icons/{x}.png" for x in (  # TODO: os.pathlib.join
     "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "blank_icon",
 )}
-EXTRA_ICON_BASE_PATH = f"{IMAGES_PATH}/reference_book_icons/extra_icon_base.png"
+EXTRA_ICON_BASE_PATH = f"{IMAGES_PATH}/reference_book_icons/extra_icon_base_2.png"
 
 
 def generate_resource_pack(datapack: "Datapack") -> None:

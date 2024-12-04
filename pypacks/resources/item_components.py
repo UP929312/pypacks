@@ -34,6 +34,7 @@ class AttributeModifier:
             "amount": self.amount,
             "operation": self.operation,
             "id": f"attribute_modifier.{self.attribute_type}",
+            "slot": self.slot,
         }
 
 # ==========================================================================================
@@ -78,6 +79,7 @@ class Consumable:
     sound: str | None = None  # the sound to play when consuming the item
     has_consume_particles: bool = True  # whether to show particles when consuming the item
     on_consume_effects: list[str] | None = None  # a list of status effects to apply when consuming the item
+    # TODO: Consume sounds and effects
 
     def to_dict(self) -> dict[str, Any]:
         assert self.sound is None, "sound is not yet supported"

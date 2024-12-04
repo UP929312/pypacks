@@ -50,7 +50,6 @@ class Datapack:
     mcfunctions: list["MCFunction"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        assert not self.custom_loot_tables, "Custom loot tables are not yet supported"
         if self.datapack_output_path == "" and self.world_name:
             self.datapack_output_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\saves\\{self.world_name}\\datapacks\\{self.name}"
         if self.resource_pack_path == "":
@@ -75,6 +74,7 @@ class Datapack:
 
         if self.custom_blocks:
             self.mcfunctions.extend(generate_default_raycasting_functions(self))
+            self.mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
             self.custom_tags.append(ray_transitive_blocks_tag)
         # ==================================================================================
         # Adding all the paintings' items to the list
@@ -104,8 +104,7 @@ class Datapack:
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [
-            # TODO: Replace this to kill @s, right?
-            f"execute at @e[type=item_display, tag={self.namespace}.custom_block] if block ~ ~ ~ #minecraft:air run kill @n[type=item_display, tag={self.namespace}.custom_block]",
+            f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ]))
 
     def generate_pack(self) -> None:

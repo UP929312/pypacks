@@ -4,12 +4,15 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 
 # Move all the internal functions and textures into an "internal" subdir
 
+Toggle tooltips can be a map of name to bool?
+https://misode.github.io/loot-table/?share=hVw5RcKDED
+
 Custom blocks!!! ---------------
 # Custom blocks destruction
-# Custom blocks can be destroyed, but only in Creative, and drops currently aren't working
+# Custom blocks can be destroyed, drops currently are in progress
 
 # Split the reference book stuff out into it's own section...
-# Category, description, wiki link? If it's in the book?
+# Category, description, wiki link? If it's in the book (hidden=False)?
 
 # Hud overlay would be cool! Something about the pack?
 
