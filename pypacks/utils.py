@@ -7,6 +7,7 @@ from typing import Any
 from .scripts.texture_mapping import ITEM_TO_SPECIAL_TEXTURE_MAPPING
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
+IMAGES_PATH = f"{PYPACKS_ROOT}/assets/images"
 
 colour_code_mappings = {
     "&0": "black",
@@ -139,7 +140,7 @@ def pascal_to_snake(name: str) -> str:
 #     f = io.BytesIO(audio_bytes)
 #     sample_rate = None
 #     last_granule_pos = None
-    
+
 #     while True:
 #         # Read OGG page header (27 bytes minimum)
 #         header = file.read(27)

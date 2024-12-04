@@ -1,3 +1,5 @@
+import os
+import shutil
 from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
@@ -19,6 +21,10 @@ class CustomSound:
     def __post_init__(self) -> None:
         assert 0 <= self.volume <= 1, "Volume must be between 0 and 1"
         assert 0.5 <= self.pitch <= 2, "Pitch must be between 0.5 and 2"
+    
+    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "sounds"), exist_ok=True)
+        shutil.copyfile(self.ogg_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/sounds/{self.internal_name}.ogg")
 
     def create_sound_entry(self, datapack: "Datapack") -> dict[str, list[dict[str, Any]] | str]:
         return {

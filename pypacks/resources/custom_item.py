@@ -1,11 +1,12 @@
 import json
+import os
 import shutil
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
 from pypacks.resources.item_components import Consumable, Food, CustomItemData
-from pypacks.image_generation.ref_book_icon_gen import add_icon_to_base
+from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
 
 if TYPE_CHECKING:
     from pypacks.book_generator import ReferenceBookCategory
@@ -48,9 +49,9 @@ class CustomItem:
         if self.texture_path is None:
             path = resolve_default_item_image(self.base_item)
             with open(path, "rb") as file:
-                self.icon_image_bytes = add_icon_to_base(image_bytes=file.read())
+                self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
         else:
-            self.icon_image_bytes = add_icon_to_base(image_path=self.texture_path)
+            self.icon_image_bytes = add_centered_overlay(image_path=self.texture_path)
 
     def add_right_click_functionality(self) -> None:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""
@@ -74,6 +75,10 @@ class CustomItem:
         # 3. The texture itself (in textures/item/<internal_name>.png)
 
         if self.texture_path is not None:
+            os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "models", "item"), exist_ok=True)
+            os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "items"), exist_ok=True)
+            os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "item"), exist_ok=True)
+
             layers = {("all" if self.is_block else "layer0"): f"{datapack.namespace}:item/{self.internal_name}"}
             parent = "minecraft:block/cube_all" if self.is_block else "minecraft:item/generated" 
             with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/models/item/{self.internal_name}.json", "w") as file:

@@ -30,7 +30,7 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         "if_or_unless": "unless",
     }
     formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
-    arguments_replacements = {key: f"$({key})" for key in arguments.keys()}
+    arguments_replacements = {key: f"$({key})" for key in arguments}
     formatted_arguments_replacements = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments_replacements.items()]) + "}"
 
     failed = MCFunction("failed", [
@@ -74,7 +74,7 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         "# particle minecraft:cloud ~ ~ ~",
         "",
         "# If the raycast failed, run the failed function",
-        f"$execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function $(failed_function)",
+        "$execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function $(failed_function)",
         "",
         "# Advance forward and run the ray again if no block was found",
         f"$execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {datapack.namespace}:raycast/ray {formatted_arguments_replacements}",

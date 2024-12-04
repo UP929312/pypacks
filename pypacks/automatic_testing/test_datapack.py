@@ -11,5 +11,5 @@ namespace = "pypacks_tests"
 
 datapack = Datapack(
     datapack_name, "The testing framework datapack", namespace, world_name=world_name,
-    custom_recipes=recipes,
+    custom_recipes=recipes,  # type: ignore[arg-type]
 )

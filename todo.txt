@@ -2,9 +2,14 @@
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
+# Move all the internal functions and textures into an "internal" subdir
+
 Custom blocks!!! ---------------
 # Custom blocks destruction
 # Custom blocks can be destroyed, but only in Creative, and drops currently aren't working
+
+# Split the reference book stuff out into it's own section...
+# Category, description, wiki link? If it's in the book?
 
 # Hud overlay would be cool! Something about the pack?
 

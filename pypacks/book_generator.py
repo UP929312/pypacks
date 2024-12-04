@@ -2,9 +2,8 @@ from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING
 
 from pypacks.resources.item_components import CustomItemData, WrittenBookContent
-from pypacks.resources.custom_recipe import SmithingTrimRecipe
+from pypacks.resources.custom_recipe import FurnaceRecipe, SmithingTrimRecipe
 from pypacks.utils import PYPACKS_ROOT, chunk_list, remove_colour_codes
-from pypacks.image_generation.recipe_image_data import generate_crafting_image
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -59,7 +58,7 @@ class GenericIcon:
         # return_value["hoverEvent"] = {"action": "show_item", "contents": {
         #     "id": self.item.base_item, "count": 1, "tag": json.dumps({"display": {"Name": self.item.custom_name or self.item.base_item}})
         # }}
-    
+
     @staticmethod
     def generate_icon(unicode_char: str, datapack: "Datapack") -> dict[str, Any]:
         return {"text": f"{unicode_char}{datapack.font_mapping['empty_1_x_1']}", "font": f"{datapack.namespace}:all_fonts",
@@ -73,6 +72,7 @@ class GiveItemIcon(GenericIcon):
     def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
         existing = super().get_json_data(datapack)
         new = existing | {"clickEvent": {"action": "run_command", "value": f"/function {datapack.namespace}:give/{self.item.internal_name}"}}
+        new |= {"hoverEvent": {"action": "show_item", "contents": {"id": self.item.base_item, "components": self.item.to_dict(datapack)}}}
         return new
 
 
@@ -94,7 +94,8 @@ class RecipeIcon(GenericIcon):
     recipe: "Recipe" = None  # type: ignore[assignment]
 
     def get_json_data(self, datapack: "Datapack") -> dict[str, Any]:
-        hover_content = {"text": datapack.font_mapping[f"crafting_recipe_for_{self.recipe.internal_name}_icon"], "font": f"{datapack.namespace}:all_fonts"}
+        hover_content = {"text": datapack.font_mapping[f"custom_recipe_for_{self.recipe.internal_name}_icon"],
+                         "font": f"{datapack.namespace}:all_fonts"}
         hover_data = {"hoverEvent": {"action": "show_text", "contents": hover_content}}
         data = super().get_json_data(datapack) | hover_data
         return data
@@ -111,35 +112,39 @@ class ItemPage:
     def get_title(self) -> dict[str, Any]:
         return {
             "text": f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", "underlined": True, "bold": True,
-            "hoverEvent": {"action": "show_item", "contents": {
-                "id": self.item.base_item, "components": self.item.to_dict(self.datapack),
-            }},
         }
-
-    def generate_page(self) -> list[dict[str, Any]]:
+    
+    def generate_info_icons(self) -> list[GenericIcon]:
         from pypacks.resources.custom_item import CustomItem
         from pypacks.resources.custom_recipe import ShapelessCraftingRecipe, ShapedCraftingRecipe
 
-        title: dict[str, Any] = self.get_title()
-        # Get all the ways to craft it
         non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
         recipes = [x for x in non_smithing_trim_recipes if (
-            x.result.internal_name if isinstance(x.result, CustomItem) else x.result  # type: ignore[attr-defined]
+            x.result.internal_name if isinstance(x.result, CustomItem) else x.result
         ) == self.item.internal_name]
-        crafting_recipes = [x for x in recipes if isinstance(x, (ShapelessCraftingRecipe, ShapedCraftingRecipe))]
-        crafting_recipe_icons = [RecipeIcon(self.datapack.font_mapping["crafting_icon"], recipe=x)  # type: ignore
-                                  for x in crafting_recipes]
+        crafting_recipe_icons = [RecipeIcon(self.datapack.font_mapping["crafting_table_icon"], recipe=x)
+                                 for x in recipes if isinstance(x, (ShapelessCraftingRecipe, ShapedCraftingRecipe))]
+        furnace_recipe_icons = [
+            RecipeIcon(self.datapack.font_mapping["furnace_icon"], recipe=x)
+            for x in recipes if isinstance(x, FurnaceRecipe)
+        ]
+        # crafting_recipe_icons = []
+        # furnace_recipe_icons = []
+        more_info_icon = MoreInfoIcon(self.datapack.font_mapping["information_icon"], item=self.item)
+        return [more_info_icon, *crafting_recipe_icons, *furnace_recipe_icons]
 
+    def generate_page(self) -> list[dict[str, Any]]:
+        title: dict[str, Any] = self.get_title()
         give_item_icon = GiveItemIcon(self.datapack.font_mapping[f"{self.item.internal_name}_icon"], item=self.item)
-        more_info_icon = MoreInfoIcon(self.datapack.font_mapping["more_info_icon"], item=self.item)
+        # Get all the ways to craft it, info, etc
+        more_info_icons = self.generate_info_icons()
 
         return [
             title,
             generate_backslashes(2),
             give_item_icon.get_json_data(self.datapack),
             generate_backslashes(4),
-            generate_icon_row_spacing(self.datapack, 2), more_info_icon.get_json_data(self.datapack),
-            *[x.get_json_data(self.datapack) for x in crafting_recipe_icons],
+            *[x.get_json_data(self.datapack) for x in more_info_icons],
             generate_backslashes(5),
             generate_icon_row_spacing(self.datapack, 90), RedirectButton(self.datapack.font_mapping["satchel_icon"], "Go to the categories page", self.back_button_page).get_json_data(self.datapack),
         ]
@@ -175,10 +180,10 @@ class GridPage:
             elements.extend(self.make_row(self.datapack, [], row_index=len(groups_of_six)+i))
         self.elements = elements
 
-    def make_row(self, datapack: "Datapack", icons: list[RedirectButton], row_index: int, default_icon: str = "icon_base") -> list[dict[str, str | bool]]:
+    def make_row(self, datapack: "Datapack", icons: list[RedirectButton], row_index: int, filler_icon: str = "blank_icon") -> list[dict[str, str | bool]]:
         """Takes a list of items to display only those (up to) ICONS_PER_ROW"""
         if len(icons) < ICONS_PER_ROW:
-            icons += [RedirectButton(datapack.font_mapping[default_icon], "", None) for _ in range(ICONS_PER_ROW-len(icons))]
+            icons += [RedirectButton(datapack.font_mapping[filler_icon], "", None) for _ in range(ICONS_PER_ROW-len(icons))]
         if self.back_button_page is not None and row_index == ROWS_PER_PAGE-1:
             GO_TO_CATEGORIES_BUTTON = RedirectButton(datapack.font_mapping["satchel_icon"], "Go to the categories page", self.back_button_page)
             icons[-1] = GO_TO_CATEGORIES_BUTTON
@@ -201,7 +206,7 @@ class ReferenceBook:
     def generate_cover_page(self, datapack: "Datapack") -> list[dict[str, str | bool]]:
         logo_line = generate_icon_row_spacing(datapack, LOGO_HORIZONTAL_SPACER)
         logo_line["text"] += datapack.font_mapping["logo_256_x_256"] # "logo"
-        return [{"text": f"{datapack.name} Reference Book\n\n", "underlined": True}, logo_line]
+        return [{"text": f"{datapack.name} Reference Book\n\n\n", "underlined": True}, logo_line]
         # ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾
 
     def generate_pages(self, datapack: "Datapack") -> list[list[dict[str, str | bool]]]:
@@ -211,7 +216,7 @@ class ReferenceBook:
         CATEGORY_ITEMS_PAGE = 3  # 3+   One for each category
         ITEM_PAGE  = CATEGORY_ITEMS_PAGE+len(datapack.reference_book_categories)  # After we have all the categories, start adding the individual items
         BLANK_PAGE = CATEGORY_ITEMS_PAGE*len(datapack.reference_book_categories)+len(datapack.custom_items)+1
-        
+
         # Cover (1)
         cover_page = self.generate_cover_page(datapack)
 

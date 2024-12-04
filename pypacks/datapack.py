@@ -6,7 +6,7 @@ from pypacks.generate import generate_base_pack, generate_resource_pack, generat
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
-from pypacks.image_generation.ref_book_icon_gen import add_icon_to_base
+from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
 
 
 if TYPE_CHECKING:
@@ -44,13 +44,13 @@ class Datapack:
     custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
     custom_paintings: list["CustomPainting"] = field(default_factory=list)
     custom_predicates: list["Predicate"] = field(default_factory=list)
-    custom_recipes: list["Recipe"] = field(default_factory=list)  # type: ignore
+    custom_recipes: list["Recipe"] = field(default_factory=list)
     custom_sounds: list["CustomSound"] = field(default_factory=list)
     custom_tags: list["CustomTag"] = field(default_factory=list)
     mcfunctions: list["MCFunction"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        assert self.custom_loot_tables == [], "Custom loot tables are not yet supported"
+        assert not self.custom_loot_tables, "Custom loot tables are not yet supported"
         if self.datapack_output_path == "" and self.world_name:
             self.datapack_output_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\saves\\{self.world_name}\\datapacks\\{self.name}"
         if self.resource_pack_path == "":
@@ -89,7 +89,7 @@ class Datapack:
         self.reference_book_categories: list["ReferenceBookCategory"] = []
         for item in self.custom_items:
             if item.book_category.name not in [x.name for x in self.reference_book_categories]:
-                item.book_category.icon_image_bytes = add_icon_to_base(image_path=item.book_category.image_path)
+                item.book_category.icon_image_bytes = add_centered_overlay(image_path=item.book_category.image_path)
                 self.reference_book_categories.append(item.book_category)
         assert len(self.reference_book_categories) <= 20, "There can only be 20 reference book categories!"
         # Make sure none of the categories are too filled
@@ -104,6 +104,7 @@ class Datapack:
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [
+            # TODO: Replace this to kill @s, right?
             f"execute at @e[type=item_display, tag={self.namespace}.custom_block] if block ~ ~ ~ #minecraft:air run kill @n[type=item_display, tag={self.namespace}.custom_block]",
         ]))
 

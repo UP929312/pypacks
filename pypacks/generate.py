@@ -4,34 +4,24 @@ import shutil
 from typing import TYPE_CHECKING
 
 from pypacks.book_generator import ReferenceBook
-from pypacks.resources.custom_recipe import ShapelessCraftingRecipe
+from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES
 from pypacks.resources.custom_font import CustomFont, BookImage
+from pypacks.resources.custom_item import CustomItem
 
 if TYPE_CHECKING:
     from .datapack import Datapack
 
-from .utils import PYPACKS_ROOT, inline_open
-from .image_generation.ref_book_icon_gen import add_icon_to_base
+from .utils import inline_open, IMAGES_PATH
+from .image_generation.ref_book_icon_gen import add_centered_overlay
 
 
-BASE_IMAGES: dict[str, bytes] = {x: inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{x}.png", "rb") for x in (  # TODO: os.pathlib.join
-    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "icon_base",
+BASE_IMAGES: dict[str, str] = {x: f"{IMAGES_PATH}/reference_book_icons/{x}.png" for x in (  # TODO: os.pathlib.join
+    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "blank_icon",
 )}
-CUSTOM_SIZE_IMAGES: dict[str, tuple[bytes, int, int]] = {
-    x: (inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/{x}.png", "rb"), size, y_offset)
-    for (x, size, y_offset) in (
-        ("more_info_icon", 16, 12),
-        ("crafting_icon", 16, 12),
-    )
-}
-ref_book_items = [f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.png"]
+EXTRA_ICON_BASE_PATH = f"{IMAGES_PATH}/reference_book_icons/extra_icon_base.png"
 
 
 def generate_resource_pack(datapack: "Datapack") -> None:
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "items"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "models", "item"), exist_ok=True)
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "item"), exist_ok=True)
-
     # ================================================================================================
     # pack.mcmeta
     with open(f"{datapack.resource_pack_path}/pack.mcmeta", "w") as file:
@@ -44,22 +34,10 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     if datapack.font_mapping:
         datapack.custom_font.create_resource_pack_files(datapack)
     # ================================================================================================
-    # Custom item images, model.json, item.json, etc
-    for custom_item in datapack.custom_items:
-        custom_item.create_resource_pack_files(datapack)
+    # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder)
+    for element in datapack.custom_items+datapack.custom_paintings+datapack.custom_sounds:
+        element.create_resource_pack_files(datapack)
     # ================================================================================================
-    # Custom back button:
-    with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/satchel_icon.png", "wb") as file:
-        file.write(add_icon_to_base(image_path=f"{PYPACKS_ROOT}/assets/images/reference_book_icons/satchel.png"))
-    # ================================================================================================
-    # Paintings
-    for painting in datapack.custom_paintings:
-        painting.create_resource_pack_files(datapack)
-    # ================================================================================================
-    # Sounds
-    os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "sounds"), exist_ok=True)
-    for sound in datapack.custom_sounds:
-        shutil.copyfile(sound.ogg_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/sounds/{sound.internal_name}.ogg")
     # Create the sounds.json file.
     with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/sounds.json", "w") as file:
         json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
@@ -71,21 +49,14 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
     # Create the providers file
     all_elements = [
         *[   # BASE IMAGES, Spaces, Empty icon, logo
-            BookImage(name=image_name, image_bytes=image_bytes)
-            for image_name, image_bytes in BASE_IMAGES.items()
+            BookImage(name=image_name, image_bytes=inline_open(image_path))
+            for image_name, image_path in BASE_IMAGES.items()
         ],
-        *[  # Currently just the more_info_icon
-            BookImage(name=image_name, image_bytes=image_bytes, height=size, y_offset=y_offset)
-            for image_name, (image_bytes, size, y_offset) in CUSTOM_SIZE_IMAGES.items()
-        ],
-        *[  # Logo (scaled, better resolution)
-            BookImage(image_name, image_bytes, height=100, y_offset=16)
-            for image_name, image_bytes in [("logo_256_x_256", inline_open(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/logo_256_x_256.png")),]
-        ],
-        *[  # Satchel, not much else
-            BookImage(icon_path.split("/")[-1].removesuffix(".png")+"_icon", image_bytes=inline_open(icon_path), height=20, y_offset=10)
-            for icon_path in ref_book_items
-        ],
+        # Logo (scaled, better resolution)
+        BookImage("logo_256_x_256", inline_open(f"{IMAGES_PATH}/reference_book_icons/logo_256_x_256.png"), height=100, y_offset=16),
+        BookImage("satchel_icon", add_centered_overlay(image_bytes=inline_open(f"{IMAGES_PATH}/reference_book_icons/satchel.png")), height=20, y_offset=10),
+        BookImage("information_icon", add_centered_overlay(image_bytes=inline_open(f"{IMAGES_PATH}/reference_book_icons/information_icon.png"),
+                                                           base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=16, y_offset=12),
         *[  # Category icons
             BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[arg-type]
             for category in datapack.reference_book_categories
@@ -95,8 +66,15 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
             for item in datapack.custom_items
         ],
         *[  # Custom recipes
-            BookImage(f"crafting_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.crafting_image_bytes, y_offset=6)  # type: ignore
-            for custom_recipe in [x for x in datapack.custom_recipes if isinstance(x, ShapelessCraftingRecipe) and x.is_custom_item]
+            BookImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.recipe_image_bytes, y_offset=6)  # type: ignore
+            for custom_recipe in [x for x in datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and isinstance(x.result, CustomItem)]
+        ],
+        *[  # Custom recipe icons
+            BookImage(f"{recipe.recipe_block_name}_icon",
+                      image_bytes=add_centered_overlay(image_path=f"{IMAGES_PATH}/recipe_icons/{recipe.recipe_block_name}.png",
+                                                       base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False),
+                      height=16, y_offset=12)
+            for recipe in ALL_RECIPES
         ],
     ]
     return CustomFont("all_fonts", all_elements)
