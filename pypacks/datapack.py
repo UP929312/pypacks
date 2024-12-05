@@ -37,6 +37,10 @@ class Datapack:
     datapack_output_path: str = ""
     resource_pack_path: str = ""
 
+    # TODO
+    # on_tick_command: str | None = None
+    # on_load_command: str | None = None
+
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
@@ -68,7 +72,10 @@ class Datapack:
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
-            self.custom_items.append(block.block_item)  # The custom item
+            if block.block_item is not None:
+                self.custom_items.append(block.block_item)  # The custom item
+            if block.drops is not None:
+                self.custom_loot_tables.append(block.drops)  # type: ignore[abc] # The loot table (will never be self, gets overriden)
             self.custom_advancements.append(block.create_advancement(self))  # Advancement for placing the block
             self.mcfunctions.extend(block.generate_functions(self))  # Raycasting functions
 
@@ -102,6 +109,9 @@ class Datapack:
             f"function {self.namespace}:raycast/load",
             f"gamerule maxCommandChainLength {10_000_000}",
             f"say Loaded into {self.name}!",
+        ]))
+        self.mcfunctions.append(MCFunction("run", [
+            f"$$",
         ]))
         self.mcfunctions.append(MCFunction("tick", [
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",

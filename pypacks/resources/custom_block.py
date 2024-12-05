@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.custom_loot_table import CustomLootTable, SingleItemPool
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -33,19 +34,30 @@ class CustomBlock:
     name: str
     base_block: str = "minecraft:stone"
     block_texture: str = "new_example_block"  #  | FacePaths
-    drops: "CustomItem | None | Literal['self']" = "self"
+    drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
+    silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc
-    # silk_touch_drops: "CustomItem | str | None | Literal['self']" = "self"
 
-    block_item: "CustomItem" = field(init=False, default=None)  # type: ignore[assignment]
+    block_item: "CustomItem | None" = field(init=False, default=None)  # Used by datapack to create the custom icons
+
+    def fix_self_blockdrop(self) -> None:
+        from pypacks.resources.custom_item import CustomItem
+        if self.drops == "self":
+            if self.block_item is not None:
+                self.drops = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.block_item)])
+            else:
+                raise ValueError("If drops is set to 'self', then block_item must be set.")
+        elif isinstance(self.drops, (CustomItem, str)):
+            self.drops = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.drops)])
 
     @classmethod
-    def from_item(cls, item: "CustomItem", drops: "CustomItem | None | Literal['self']" = "self") -> "CustomBlock":
+    def from_item(cls, item: "CustomItem", drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
         assert item.custom_name is not None
         assert item.texture_path is not None
         item.is_block = True
         class_ = cls(item.internal_name, item.custom_name, item.base_item, item.texture_path, drops=drops)
         class_.block_item = item
+        class_.fix_self_blockdrop()
         return class_
 
     def create_advancement(self, datapack: "Datapack") -> "CustomAdvancement":
@@ -62,7 +74,7 @@ class CustomBlock:
             ]
         }
         criteria = Criteria(f"placed_{self.internal_name}", "minecraft:placed_block", conditions=condition)
-        rewarded_function = f"{datapack.namespace}:custom_blocks/revoke_and_run/revoke_and_run_{self.block_item.internal_name}"
+        rewarded_function = f"{datapack.namespace}:custom_blocks/revoke_and_run/revoke_and_run_{self.internal_name}"
         advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=rewarded_function, hidden=True)
         return advancement
 
@@ -85,7 +97,7 @@ class CustomBlock:
             ["custom_blocks", "execute_on_item_display"],
         )
         # Spawn the item display, then call the setup on it directly.
-        spawn_item_display = MCFunction(f"setup_item_display_{self.block_item.internal_name}", [
+        spawn_item_display = MCFunction(f"setup_item_display_{self.internal_name}", [
             f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {execute_as_item_display.get_reference(datapack)}",
             ],
             ["custom_blocks", "setup_item_display"],
@@ -119,5 +131,9 @@ class CustomBlock:
             # Kill all xp orbs and items, then kill the item display itself.
             f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @e[type=experience_orb, distance=..0.5]",
             f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @e[type=item, distance=..0.5]",
+            # Use macros here, somehow?
+            # f"function pypacks_testing:run {{selector: \"@s\"}}"
+            # f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run loot spawn ~ ~ ~ loot {datapack.namespace}:{self.internal_name}_block_drop_loot_table",            
+            # Frick, how are we going to spawn custom loot depending on the block if we have to have a tick func per item display?
             f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @s",
         ], ["custom_blocks"])

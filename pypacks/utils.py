@@ -2,9 +2,13 @@ import json
 import io
 import os
 import pathlib
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .scripts.texture_mapping import ITEM_TO_SPECIAL_TEXTURE_MAPPING
+
+if TYPE_CHECKING:
+    from pypacks.datapack import Datapack
+    from pypacks.resources.custom_item import CustomItem
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 IMAGES_PATH = f"{PYPACKS_ROOT}/assets/images"
@@ -33,6 +37,16 @@ colour_code_mappings = {
     # "&r": "reset",
     # obfuscated?
 }
+
+
+def extract_item_type_and_components(item: "str | CustomItem", datapack: "Datapack") -> tuple[str, dict[str, Any]]:
+    """Returns the item (type) and components fixed"""
+    from pypacks.resources.custom_item import CustomItem
+    regular_data = item.to_dict(datapack) if isinstance(item, CustomItem) else {}
+    components = item.additional_item_data.to_dict(datapack) if isinstance(item, CustomItem) and item.additional_item_data is not None else {}
+    combined = recusively_remove_nones_from_dict(regular_data | components)
+    item_type = item.base_item if isinstance(item, CustomItem) else item
+    return item_type, combined
 
 
 def recusively_remove_nones_from_dict(obj: dict[str, Any]) -> dict[str, Any]:
