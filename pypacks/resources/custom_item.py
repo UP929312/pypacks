@@ -18,18 +18,18 @@ class CustomItem:
     base_item: str  # What item to base it on
     internal_name: str  # Internal name of the item
     custom_name: str | None = None  # Display name of the item
-    lore: list[str] = field(default_factory=list)  # Lore of the item
-    max_stack_size: int = 64  # Max stack size of the item (1-99)
-    rarity: Literal["common", "uncommon", "rare", "epic"] | None = None
-    texture_path: str | None = None
-    custom_data: dict[str, Any] = field(default_factory=dict)  # Is populated in post_init if it's none
+    lore: list[str] = field(repr=False, default_factory=list)  # Lore of the item
+    max_stack_size: int = field(repr=False, default=64)  # Max stack size of the item (1-99)
+    rarity: Literal["common", "uncommon", "rare", "epic"] | None = field(repr=False, default=None)
+    texture_path: str | None = field(repr=False, default=None)
+    custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: str | None = None  # Function to call when the item is right clicked
-    additional_item_data: "CustomItemData | None" = None
-    reference_book_description: str | None = None
-    book_category: "ReferenceBookCategory" = None  # type: ignore[assignment]  # This is set in post_init
+    additional_item_data: "CustomItemData | None" = field(repr=False, default=None)
+    reference_book_description: str | None = field(repr=False, default=None)
+    book_category: "ReferenceBookCategory" = field(repr=False, default=None)  # type: ignore[assignment]  # This is set in post_init
 
-    is_block: bool = field(init=False, default=False)
-    datapack_subdirectory_name: None = field(init=False, default=None)
+    is_block: bool = field(init=False, repr=False, default=False)
+    datapack_subdirectory_name: None = field(init=False, repr=False, default=None)
 
     def __post_init__(self) -> None:
         if self.on_right_click and self.additional_item_data is not None and (

@@ -19,7 +19,7 @@ class Predicate:
     condition: PredicateConditionType
     extra_data: dict[str, Any] | None = None
 
-    datapack_subdirectory_name: str = field(init=False, default="predicate")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="predicate")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
         return {

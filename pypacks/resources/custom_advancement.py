@@ -40,7 +40,7 @@ class CustomAdvancement:
     announce_to_chat: bool = False
     send_telemetry_event: bool = False
 
-    datapack_subdirectory_name: str = field(init=False, default="advancement")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="advancement")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return recusively_remove_nones_from_dict({

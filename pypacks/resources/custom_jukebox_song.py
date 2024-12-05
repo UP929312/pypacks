@@ -18,7 +18,7 @@ class CustomJukeboxSong:
     comparator_output: int
     length_in_seconds: float #  | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
 
-    datapack_subdirectory_name: str = field(init=False, default="jukebox_song")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="jukebox_song")
 
     # def __post_init__(self) -> None:
     #     if True:#if self.length_in_seconds is None:

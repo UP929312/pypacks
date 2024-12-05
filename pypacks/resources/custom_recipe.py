@@ -19,7 +19,7 @@ RecipeCategory = Literal["blocks", "building", "equipment", "food", "misc", "red
 class GenericRecipe:
     internal_name: str
 
-    datapack_subdirectory_name: str = field(init=False, default="recipe")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="recipe")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         raise NotImplementedError
@@ -44,7 +44,7 @@ class ShapelessCraftingRecipe(GenericRecipe):
     amount: int = 1
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="crafting_table")
+    recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
 
     def __post_init__(self) -> None:
         assert 0 < len(self.ingredients) <= 9, "Ingredients must be a list of 1-9 items"
@@ -75,7 +75,7 @@ class ShapedCraftingRecipe(GenericRecipe):
     amount: int = 1
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="crafting_table")
+    recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
 
     def __post_init__(self) -> None:
         assert 0 < len(self.rows) <= 3, "Rows must be a list of 1-3 strings"
@@ -111,7 +111,7 @@ class CraftingTransmuteRecipe(GenericRecipe):
     result: str
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="crafting_table")
+    recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
 
     # def __post_init__(self) -> None:
         # self.recipe_image_bytes = generate_recipe_image(self)
@@ -135,7 +135,7 @@ class FurnaceRecipe(GenericRecipe):
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="furnace")
+    recipe_block_name: str = field(init=False, repr=False, default="furnace")
 
     def __post_init__(self) -> None:
         self.recipe_image_bytes = generate_recipe_image(self)
@@ -165,7 +165,7 @@ class BlastFurnaceRecipe(GenericRecipe):
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="blast_furnace")
+    recipe_block_name: str = field(init=False, repr=False, default="blast_furnace")
 
     # def __post_init__(self) -> None:
     #     self.recipe_block_name = "blast_furnace"
@@ -195,7 +195,7 @@ class CampfireRecipe(GenericRecipe):
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="campfire")
+    recipe_block_name: str = field(init=False, repr=False, default="campfire")
 
     # def __post_init__(self) -> None:
     #     self.recipe_block_name = "campfire"
@@ -225,7 +225,7 @@ class SmithingTransformRecipe(GenericRecipe):
     result: StringOrCustomItem
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="smithing_table")
+    recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
     # def __post_init__(self) -> None:
     #     self.recipe_block_name = "smithing_table"
@@ -251,7 +251,7 @@ class SmithingTrimRecipe(GenericRecipe):
     base_item: str
     addition_item: str
 
-    recipe_block_name: str = field(init=False, default="smithing_table")
+    recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
     # def __post_init__(self) -> None:
     #     self.recipe_block_name = "smithing_table"
@@ -280,7 +280,7 @@ class SmokerRecipe(GenericRecipe):
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="smoker")
+    recipe_block_name: str = field(init=False, repr=False, default="smoker")
 
     # def __post_init__(self) -> None:
     #     self.recipe_block_name = "smoker"
@@ -309,7 +309,7 @@ class StonecutterRecipe(GenericRecipe):
     count: int = 1
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, default="stonecutter")
+    recipe_block_name: str = field(init=False, repr=False, default="stonecutter")
 
     # def __post_init__(self) -> None:
     #     self.recipe_block_name = "stonecutter"

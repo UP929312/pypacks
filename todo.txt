@@ -3,31 +3,31 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
 # Move all the internal functions and textures into an "internal" subdir
+Custom blocks!!! ---------------
+
+Loot table progress
 
 Toggle tooltips can be a map of name to bool?
 https://misode.github.io/loot-table/?share=hVw5RcKDED
 
-Custom blocks!!! ---------------
-# Custom blocks destruction
-# Custom blocks can be destroyed, drops currently are in progress
 
-# Split the reference book stuff out into it's own section...
+# Split the reference book stuff out into it's own section when initialising the item, e.g. reference_book_config=()...
 # Category, description, wiki link? If it's in the book (hidden=False)?
 
-# Hud overlay would be cool! Something about the pack?
-
-# Descriptors for integers & type validation? Probably just use Pydantic...
-
 # For "how to obtain" in custom item pages, use a hover effect ):
-# HALF DONE ^
+# HALF DONE ^ Just need to do the rest of the recipe types
+
+# Naturally occuring ore veins! Would be maybe tricky...
+
+# Type hint all the modifiers for items, like the extra reach and such.
 
 # Cooldown for right clickable items
 
 # Merge on_load with an inputted one... Using /function
 
-# Current plan for breaking is to check every tick if any of the display entities are in air, and if so, delete the items and re-spawn them
+# Hud overlay would be cool! Something about the pack?
 
-LOOT STUFF IS GOING TO BE HARDDDD
+# Descriptors for integers & type validation? Probably just use Pydantic... Maybe just asserts?
 
 interaction entity for detecting right click on blocks! If we ever add custom invs
 
@@ -43,11 +43,7 @@ For an "install" stuff, just give them an achievement and don't revoke!
 
 # Advancements (maybe even give one for loading the datapack for the first time?)
 
-# Loot tables
-
 # INFO: Paintings require a world reset
-
-# Type hint all the modifiers for items, like the extra reach and such.
 
 # Improve testing setup, it's a nice start though.
 

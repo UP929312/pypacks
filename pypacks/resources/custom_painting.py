@@ -22,7 +22,7 @@ class CustomPainting:
     width_in_blocks: int = 1
     height_in_blocks: int = 1
 
-    datapack_subdirectory_name: str = field(init=False, default="painting_variant")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="painting_variant")
 
     def __post_init__(self) -> None:
         assert 1 <= self.width_in_blocks <= 16, "Width must be between 1 and 16"

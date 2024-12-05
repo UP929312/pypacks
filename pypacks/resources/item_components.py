@@ -152,7 +152,7 @@ class LodestoneTracker:
     dimension: Literal["overworld", "nether", "end"] = "overworld"
     tracked: bool = True
 
-    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:compass"])
+    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:compass"])
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -206,7 +206,7 @@ class Instrument:
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
     instrument_range: int = 256  #  A non-negative float for the range of the sound (normal horns are 256).
 
-    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:goat_horn"])
+    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:goat_horn"])
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
@@ -230,7 +230,7 @@ class WritableBookContent:
     # https://minecraft.wiki/w/Data_component_format#writable_book_content
     pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
 
-    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:writable_book"])
+    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:writable_book"])
 
     def to_dict(self) -> dict[str, Any]:
         return {"pages": [str(x) for x in self.pages]}
@@ -244,7 +244,7 @@ class WrittenBookContent:
     author: str = "PyPacks"
     pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
 
-    allowed_items: list[str] = field(init=False, default_factory=lambda: ["minecraft:written_book"])
+    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:written_book"])
 
     def to_dict(self) -> dict[str, Any]:
         return {

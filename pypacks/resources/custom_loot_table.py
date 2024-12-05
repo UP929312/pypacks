@@ -136,8 +136,8 @@ class BinomialDistributionEntry(Entry):
 @dataclass
 class UniformDistributionEntry(Entry):
     item: "str | CustomItem"
-    min_count: int
-    max_count: int
+    min_count: int = 1
+    max_count: int = 1
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         item_type, combined_components = extract_item_type_and_components(self.item, datapack)
@@ -183,8 +183,8 @@ class Pool:
 @dataclass
 class SimpleRangePool:
     item: "str | CustomItem"
-    min_count: int = 1
-    max_count: int = 1
+    min_count: int
+    max_count: int
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return {
@@ -212,17 +212,20 @@ LootTablePool: TypeAlias = "Pool | SingleItemPool | SimpleRangePool"
 class CustomLootTable:
     # https://minecraft.wiki/w/Loot_table
     internal_name: str
-    pools: list[LootTablePool]
+    pools: list[LootTablePool] = field(default_factory=list)
     # functions: list[ItemModifier] | None = None   # God damn.
     # random_sequence: RandomSequence | None
     loot_table_type: LootContextTypes = "generic"
 
-    datapack_subdirectory_name: str = field(init=False, default="loot_table")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="loot_table")
+
+    def get_reference(self, datapack: "Datapack") -> str:
+        return f"{datapack.namespace}:{self.internal_name}"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
         return recusively_remove_nones_from_dict({
             "type": self.loot_table_type,
-            "pools": [pool.to_dict(datapack) for pool in self.pools]  # type: ignore
+            "pools": [pool.to_dict(datapack) for pool in self.pools]
         })
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
@@ -238,23 +241,27 @@ class SingleItemLootTable(CustomLootTable):
         self.internal_name = internal_name
         self.item = item
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        return recusively_remove_nones_from_dict({
-            "type": "generic",
-            "pools": [SingleItemPool(self.item).to_dict(datapack)]
-        })
+        super().__init__(internal_name, pools=[SingleItemPool(item)])
+
+    # def to_dict(self, datapack: "Datapack") -> dict[str, str]:
+    #     return recusively_remove_nones_from_dict({
+    #         "type": "generic",
+    #         "pools": [SingleItemPool(self.item).to_dict(datapack)]
+    #     })
 
 
 class SimpleRangeLootTable(CustomLootTable):
-    def __init__(self, internal_name, item: "str | CustomItem", min_count: int = 1, max_count: int = 1) -> None:
+    def __init__(self, internal_name: str, item: "str | CustomItem", min_count: int = 1, max_count: int = 1) -> None:
         self.internal_name = internal_name
         self.item = item
         self.min_count = min_count
         self.max_count = max_count
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        return recusively_remove_nones_from_dict({
-            "type": "generic",
-            "pools": [SimpleRangePool(self.item, self.min_count, self.max_count).to_dict(datapack)]
-        })
+        super().__init__(internal_name, pools=[SimpleRangePool(item, min_count, max_count)])
+
+    # def to_dict(self, datapack: "Datapack") -> dict[str, str]:
+    #     return recusively_remove_nones_from_dict({
+    #         "type": "generic",
+    #         "pools": [SimpleRangePool(self.item, self.min_count, self.max_count).to_dict(datapack)]
+    #     })
 

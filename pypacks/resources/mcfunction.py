@@ -12,7 +12,7 @@ class MCFunction:
     commands: list[str]
     sub_directories: list[str] = field(default_factory=list)  # Allow this to be a str
 
-    datapack_subdirectory_name: str = field(init=False, default="function")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="function")
 
     def get_reference(self, datapack: "Datapack") -> str:
         return f"{datapack.namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"

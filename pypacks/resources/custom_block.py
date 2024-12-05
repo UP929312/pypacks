@@ -38,17 +38,21 @@ class CustomBlock:
     silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc
 
-    block_item: "CustomItem | None" = field(init=False, default=None)  # Used by datapack to create the custom icons
+    block_item: "CustomItem | None" = field(init=False, repr=False, default=None)  # Used by datapack to create the custom icons
 
-    def fix_self_blockdrop(self) -> None:
+    def set_or_create_loot_table(self) -> None:
+
         from pypacks.resources.custom_item import CustomItem
+        self.loot_table = None
         if self.drops == "self":
             if self.block_item is not None:
-                self.drops = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.block_item)])
+                self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.block_item)])
             else:
                 raise ValueError("If drops is set to 'self', then block_item must be set.")
         elif isinstance(self.drops, (CustomItem, str)):
-            self.drops = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.drops)])
+            self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.drops)])
+        elif isinstance(self.drops, CustomLootTable):
+            self.loot_table = self.drops
 
     @classmethod
     def from_item(cls, item: "CustomItem", drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
@@ -57,7 +61,7 @@ class CustomBlock:
         item.is_block = True
         class_ = cls(item.internal_name, item.custom_name, item.base_item, item.texture_path, drops=drops)
         class_.block_item = item
-        class_.fix_self_blockdrop()
+        class_.set_or_create_loot_table()
         return class_
 
     def create_advancement(self, datapack: "Datapack") -> "CustomAdvancement":
@@ -84,8 +88,7 @@ class CustomBlock:
         # Has to be secondary so we have @s set correctly.
         execute_as_item_display = MCFunction(f"execute_on_item_display_{self.internal_name}", [
             f"tag @s add {datapack.namespace}.custom_block",
-            # f"tag @s add {datapack.namespace}.block_display.{self.internal_name}",
-            # f"tag @s add {datapack.namespace}.{self.internal_name}",
+            f"tag @s add {datapack.namespace}.custom_block.{self.internal_name}",
 
             # Make it _slightly_ bigger than the block, so it hides the original (only a tiny bit bigger), to stop z-fighting too.
             "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",
@@ -123,17 +126,21 @@ class CustomBlock:
             ["custom_blocks", "revoke_and_run"],
         )
         # ============================================================================================================
-        return execute_as_item_display, spawn_item_display, populate_start_ray, revoke_and_run_mcfunction
+        on_destroy_no_silk_touch_function = MCFunction(f"on_destroy_no_silk_touch_{self.internal_name}", [
+                f"kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
+                f"kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
+                f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(datapack)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
+                f"kill @s"  # Kill the item display
+            ],
+            ["custom_blocks", "on_destroy"],
+        )
+        # ============================================================================================================
+        return execute_as_item_display, spawn_item_display, populate_start_ray, revoke_and_run_mcfunction, on_destroy_no_silk_touch_function
 
     @staticmethod
     def on_tick_function(datapack: "Datapack") -> "MCFunction":
         return MCFunction(f"all_blocks_tick", [
-            # Kill all xp orbs and items, then kill the item display itself.
-            f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @e[type=experience_orb, distance=..0.5]",
-            f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @e[type=item, distance=..0.5]",
-            # Use macros here, somehow?
-            # f"function pypacks_testing:run {{selector: \"@s\"}}"
-            # f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run loot spawn ~ ~ ~ loot {datapack.namespace}:{self.internal_name}_block_drop_loot_table",            
-            # Frick, how are we going to spawn custom loot depending on the block if we have to have a tick func per item display?
-            f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block] at @s if block ~ ~ ~ minecraft:air run kill @s",
+            # Kill all xp orbs and items, spawn the loot, then kill the item display itself.
+            *[f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block.{custom_block.internal_name}] at @s if block ~ ~ ~ minecraft:air run function {datapack.namespace}:custom_blocks/on_destroy/on_destroy_no_silk_touch_{custom_block.internal_name}"
+              for custom_block in datapack.custom_blocks],
         ], ["custom_blocks"])

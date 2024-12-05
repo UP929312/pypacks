@@ -16,7 +16,7 @@ class CustomSound:
     subtitle: str = ""
     stream: bool = False
 
-    datapack_subdirectory_name: str = field(init=False, default="sound")
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="sound")
 
     def __post_init__(self) -> None:
         assert 0 <= self.volume <= 1, "Volume must be between 0 and 1"
