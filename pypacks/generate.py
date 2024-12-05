@@ -56,7 +56,7 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
         BookImage("logo_256_x_256", inline_open(f"{IMAGES_PATH}/reference_book_icons/logo_256_x_256.png"), height=100, y_offset=16),
         BookImage("satchel_icon", add_centered_overlay(image_bytes=inline_open(f"{IMAGES_PATH}/reference_book_icons/satchel.png")), height=20, y_offset=10),
         BookImage("information_icon", add_centered_overlay(image_bytes=inline_open(f"{IMAGES_PATH}/reference_book_icons/information_icon.png"),
-                                                           base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=16, y_offset=12),
+                                                           base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=18, y_offset=14),
         *[  # Category icons
             BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[arg-type]
             for category in datapack.reference_book_categories
@@ -73,7 +73,7 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
             BookImage(f"{recipe.recipe_block_name}_icon",
                       image_bytes=add_centered_overlay(image_path=f"{IMAGES_PATH}/recipe_icons/{recipe.recipe_block_name}.png",
                                                        base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False),
-                      height=16, y_offset=12)
+                      height=18, y_offset=14)
             for recipe in ALL_RECIPES
         ],
     ]

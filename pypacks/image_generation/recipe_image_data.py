@@ -26,21 +26,40 @@ crafting_recipe_coords: CoordMappingType = {
 
 furnace_recipe_coords: CoordMappingType = {
     0: (3, 3),
+    1: (3, 3),
     "result": (62, 20),
+}
+
+stonecutter_recipe_coords: CoordMappingType = {
+    0: (3, 21),
+    1: (35, 4),
+    "result": (125, 20),
+}
+
+campfire_recipe_coords: CoordMappingType = {
+    0: (3, 3),
+    "result": (62, 20),
+}
+
+smithing_recipe_coords: CoordMappingType = {
+    0: (8, 48),
+    1: (26, 48),
+    2: (44, 48),
+    "result": (97, 48),
 }
 
 # =================================================================================================###################
 
 def place_ingredients_on_image(
-    image_path: str, ingredients: list[str], result: "str | CustomItem", coord_mapping: dict[int | str, tuple[int, int]]
+    recipe: "Recipe", ingredients: list[str], result: "str | CustomItem", coord_mapping: dict[int | str, tuple[int, int]]
 ) -> "ImageType":
     from pypacks.resources.custom_item import CustomItem
 
     # BASE
-    base_image = Image.open(image_path).convert("RGBA")
+    base_image = Image.open(f"{IMAGES_PATH}/recipe_bases/{recipe.recipe_block_name}.png").convert("RGBA")
     # INGREDIENTS
     for i, ingredient in enumerate(ingredients):
-        with Image.open(resolve_default_item_image(ingredient)) as ingredient_image:
+        with Image.open(resolve_default_item_image(ingredient) if not isinstance(ingredient, CustomItem) else ingredient.texture_path) as ingredient_image:  # type: ignore
             ingredient_image = ingredient_image.convert("RGBA")
             base_image.paste(ingredient_image, coord_mapping[i], ingredient_image)
     # RESULT
@@ -57,9 +76,8 @@ def place_ingredients_on_image(
 
 
 def generate_shapeless_crafting_image(recipe: "ShapelessCraftingRecipe") -> "ImageType":
-    # recipe.ingredients = [recipe.ingredients[1]]*9
     return place_ingredients_on_image(
-        f"{IMAGES_PATH}/recipe_bases/crafting_3_x_3.png",
+        recipe,
         [ingredient[0] if isinstance(ingredient, list) else ingredient for ingredient in recipe.ingredients],
         recipe.result,
         crafting_recipe_coords,
@@ -73,33 +91,87 @@ def generate_shaped_crafting_image(recipe: "ShapedCraftingRecipe") -> "ImageType
     # The keys sometimes return multiple items, get the first item if it's a list
     ingredients_flattened = [x[0] if isinstance(x, list) else x for x in ingredients_replaced]
     return place_ingredients_on_image(
-        f"{IMAGES_PATH}/recipe_bases/crafting_3_x_3.png",
+        recipe,
         ingredients_flattened,
         recipe.result,
         crafting_recipe_coords,
     )
 
-def generate_furnace_recipe_image(recipe: "FurnaceRecipe") -> "ImageType":
+def generate_crafting_transmute_crafting_image(recipe: "CraftingTransmuteRecipe") -> "ImageType":
     return place_ingredients_on_image(
-        f"{IMAGES_PATH}/recipe_bases/furnace.png",
+        recipe,
+        [recipe.input_item[0] if isinstance(recipe.input_item, list) else recipe.input_item, recipe.material_item],
+        recipe.result,
+        crafting_recipe_coords,
+    )
+
+def generate_furnace_recipe_image(recipe: "FurnaceRecipe | BlastFurnaceRecipe | SmokerRecipe") -> "ImageType":
+    return place_ingredients_on_image(
+        recipe,
         [recipe.ingredient],
         recipe.result,
         furnace_recipe_coords,
     )
 
+def generate_stonecutter_recipe_image(recipe: "StonecutterRecipe") -> "ImageType":
+    return place_ingredients_on_image(
+        recipe,
+        [recipe.ingredient, recipe.result],  #type: ignore
+        recipe.result,
+        stonecutter_recipe_coords,
+    )
+
+def generate_campfire_recipe_image(recipe: "CampfireRecipe") -> "ImageType":
+    return place_ingredients_on_image(
+        recipe,
+        [recipe.ingredient],
+        recipe.result,
+        campfire_recipe_coords,
+    )
+
+def generate_smithing_trim_recipe_image(recipe: "SmithingTrimRecipe") -> "ImageType":
+    return place_ingredients_on_image(
+        recipe,
+        [recipe.base_item, recipe.addition_item, recipe.template_item],
+        recipe.base_item,
+        smithing_recipe_coords,
+    )
+
+def generate_smithing_transform_recipe_image(recipe: "SmithingTransformRecipe") -> "ImageType":
+    return place_ingredients_on_image(
+        recipe,
+        [recipe.base_item, recipe.addition_item, recipe.template_item],
+        recipe.result,
+        smithing_recipe_coords,
+    )
 
 # =================================================================================================###################
 
 
 def generate_recipe_image(recipe: "Recipe") -> bytes:
-    from pypacks.resources.custom_recipe import ShapedCraftingRecipe, ShapelessCraftingRecipe, FurnaceRecipe
+    from pypacks.resources.custom_recipe import (
+        ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, StonecutterRecipe,
+        SmokerRecipe, BlastFurnaceRecipe, CampfireRecipe, SmithingTrimRecipe, SmithingTransformRecipe
+    )
 
-    if isinstance(recipe, ShapelessCraftingRecipe):
-        image = generate_shapeless_crafting_image(recipe)
-    elif isinstance(recipe, ShapedCraftingRecipe):
-        image = generate_shaped_crafting_image(recipe)
-    elif isinstance(recipe, FurnaceRecipe):
-        image = generate_furnace_recipe_image(recipe)
+    class_to_function = {
+        ShapelessCraftingRecipe: generate_shapeless_crafting_image,
+        ShapedCraftingRecipe: generate_shaped_crafting_image,
+        CraftingTransmuteRecipe: generate_crafting_transmute_crafting_image,
+
+        FurnaceRecipe: generate_furnace_recipe_image,
+        SmokerRecipe: generate_furnace_recipe_image,
+        BlastFurnaceRecipe: generate_furnace_recipe_image,
+
+        StonecutterRecipe: generate_stonecutter_recipe_image,
+        CampfireRecipe: generate_campfire_recipe_image,
+
+        SmithingTrimRecipe: generate_smithing_trim_recipe_image,
+        SmithingTransformRecipe: generate_smithing_transform_recipe_image,
+    }
+    function = class_to_function[type(recipe)]  # type: ignore
+    image = function(recipe)
+
     # RETURN (CONVERT TO BYTES)
     # image.show()
     img_bytes_io_arr = io.BytesIO()

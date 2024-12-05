@@ -111,10 +111,10 @@ class CraftingTransmuteRecipe(GenericRecipe):
     result: str
     recipe_category: RecipeCategory = "misc"
 
-    recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
+    recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
 
-    # def __post_init__(self) -> None:
-        # self.recipe_image_bytes = generate_recipe_image(self)
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
         return {
@@ -167,8 +167,8 @@ class BlastFurnaceRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="blast_furnace")
 
-    # def __post_init__(self) -> None:
-    #     self.recipe_block_name = "blast_furnace"
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -197,8 +197,8 @@ class CampfireRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="campfire")
 
-    # def __post_init__(self) -> None:
-    #     self.recipe_block_name = "campfire"
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -227,8 +227,8 @@ class SmithingTransformRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
-    # def __post_init__(self) -> None:
-    #     self.recipe_block_name = "smithing_table"
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -253,21 +253,15 @@ class SmithingTrimRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
-    # def __post_init__(self) -> None:
-    #     self.recipe_block_name = "smithing_table"
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return {
             "type": "minecraft:smithing_trim",
-            "template": {
-                "item": self.template_item,
-            },
-            "base": {
-                "item": self.base_item,
-            },
-            "addition": {
-                "item": self.addition_item,
-            },
+            "template": {"item": self.template_item},
+            "base": {"item": self.base_item},
+            "addition": {"item": self.addition_item},
         }
 
 
@@ -282,8 +276,8 @@ class SmokerRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smoker")
 
-    # def __post_init__(self) -> None:
-    #     self.recipe_block_name = "smoker"
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -311,8 +305,8 @@ class StonecutterRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="stonecutter")
 
-    # def __post_init__(self) -> None:
-    #     self.recipe_block_name = "stonecutter"
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {

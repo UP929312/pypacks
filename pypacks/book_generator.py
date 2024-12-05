@@ -2,13 +2,12 @@ from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING
 
 from pypacks.resources.item_components import CustomItemData, WrittenBookContent
-from pypacks.resources.custom_recipe import FurnaceRecipe, SmithingTrimRecipe
+from pypacks.resources.custom_recipe import *
 from pypacks.utils import PYPACKS_ROOT, chunk_list, remove_colour_codes
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.custom_item import CustomItem
-    from pypacks.resources.custom_recipe import Recipe
 
 ICONS_PER_ROW = 5
 ROWS_PER_PAGE = 4
@@ -116,22 +115,30 @@ class ItemPage:
     
     def generate_info_icons(self) -> list[GenericIcon]:
         from pypacks.resources.custom_item import CustomItem
-        from pypacks.resources.custom_recipe import ShapelessCraftingRecipe, ShapedCraftingRecipe
 
         non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
         recipes = [x for x in non_smithing_trim_recipes if (
             x.result.internal_name if isinstance(x.result, CustomItem) else x.result
         ) == self.item.internal_name]
-        crafting_recipe_icons = [RecipeIcon(self.datapack.font_mapping["crafting_table_icon"], recipe=x)
-                                 for x in recipes if isinstance(x, (ShapelessCraftingRecipe, ShapedCraftingRecipe))]
-        furnace_recipe_icons = [
-            RecipeIcon(self.datapack.font_mapping["furnace_icon"], recipe=x)
-            for x in recipes if isinstance(x, FurnaceRecipe)
+        recipe_to_font_icon = {
+            ShapelessCraftingRecipe: self.datapack.font_mapping["crafting_table_icon"],
+            ShapedCraftingRecipe: self.datapack.font_mapping["crafting_table_icon"],
+            CraftingTransmuteRecipe: self.datapack.font_mapping["crafting_table_transmute_icon"],
+            FurnaceRecipe: self.datapack.font_mapping["furnace_icon"],
+            StonecutterRecipe: self.datapack.font_mapping["stonecutter_icon"],
+            BlastFurnaceRecipe: self.datapack.font_mapping["furnace_icon"],
+            SmokerRecipe: self.datapack.font_mapping["furnace_icon"],
+            StonecutterRecipe: self.datapack.font_mapping["stonecutter_icon"],
+            CampfireRecipe: self.datapack.font_mapping["campfire_icon"],
+            SmithingTransformRecipe: self.datapack.font_mapping["smithing_table_icon"],
+            SmithingTrimRecipe: self.datapack.font_mapping["smithing_table_icon"],
+        }
+        recipe_icons = [
+            RecipeIcon(recipe_to_font_icon[type(x)], recipe=x)
+            for x in recipes if type(x) in recipe_to_font_icon
         ]
-        # crafting_recipe_icons = []
-        # furnace_recipe_icons = []
         more_info_icon = MoreInfoIcon(self.datapack.font_mapping["information_icon"], item=self.item)
-        return [more_info_icon, *crafting_recipe_icons, *furnace_recipe_icons]
+        return [more_info_icon, *recipe_icons]
 
     def generate_page(self) -> list[dict[str, Any]]:
         title: dict[str, Any] = self.get_title()

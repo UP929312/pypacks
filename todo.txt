@@ -5,7 +5,14 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 # Move all the internal functions and textures into an "internal" subdir
 Custom blocks!!! ---------------
 
+For rows in the item page, add a new Row() class, and maybe even a ListOfRows(), which takes a x length list
+Currently, Ruby has more than 5 items, which means it spill over horribly.
+
+Custom block stairs, slabs?
+
 Loot table progress
+
+Move self.recipe_image_bytes = generate_recipe_image(self) into Generic recipe?
 
 Toggle tooltips can be a map of name to bool?
 https://misode.github.io/loot-table/?share=hVw5RcKDED
