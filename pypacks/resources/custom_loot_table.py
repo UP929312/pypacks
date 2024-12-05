@@ -110,8 +110,8 @@ class SingleItemRangeEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [Function("minecraft:set_count", {"count": {"min": self.min_count, "max": self.max_count}})] +
-                ([Function("minecraft:set_components", {"components": combined_components})] if combined_components else []),
+                [Function("minecraft:set_count", {"count": {"min": self.min_count, "max": self.max_count}}).to_dict(datapack)] +
+                ([Function("minecraft:set_components", {"components": combined_components}).to_dict(datapack)] if combined_components else []),
         }
 
 
@@ -145,8 +145,8 @@ class UniformDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [Function("minecraft:set_count", {"uniform": {"min": self.min_count, "max": self.max_count}})] +
-                ([Function("minecraft:set_components", {"components": combined_components})] if combined_components else []),
+                [Function("minecraft:set_count", {"uniform": {"min": self.min_count, "max": self.max_count}}).to_dict(datapack)] +
+                ([Function("minecraft:set_components", {"components": combined_components}).to_dict(datapack)] if combined_components else []),
         }
 
 
