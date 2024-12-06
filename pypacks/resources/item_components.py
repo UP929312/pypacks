@@ -123,7 +123,7 @@ class UseRemainder:
         return {
             "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "count": self.count,
-        } | ({"components": self.item.to_dict(datapack)} if isinstance(self.item, CustomItem) else {})
+        } | ({"components": self.item.to_dict(datapack.namespace)} if isinstance(self.item, CustomItem) else {})
 
 
 # ==========================================================================================

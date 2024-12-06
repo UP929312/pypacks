@@ -21,6 +21,9 @@ class GenericRecipe:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="recipe")
 
+    def __post_init__(self) -> None:
+        self.recipe_image_bytes = generate_recipe_image(self)  # type: ignore
+
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         raise NotImplementedError
     
@@ -78,13 +81,12 @@ class ShapedCraftingRecipe(GenericRecipe):
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         assert 0 < len(self.rows) <= 3, "Rows must be a list of 1-3 strings"
         row_1 = self.rows[0]
         row_2 = self.rows[1] if len(self.rows) >= 2 else None
         row_3 = self.rows[2] if len(self.rows) == 3 else None
         self.removed_nones_rows = [x for x in [row_1, row_2, row_3] if x is not None]
-
-        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -113,9 +115,6 @@ class CraftingTransmuteRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
 
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
-
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
         return {
             "type": "minecraft:crafting_shapeless",
@@ -136,9 +135,6 @@ class FurnaceRecipe(GenericRecipe):
     recipe_category: RecipeCategory = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="furnace")
-
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -167,9 +163,6 @@ class BlastFurnaceRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="blast_furnace")
 
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
-
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:blasting",
@@ -196,9 +189,6 @@ class CampfireRecipe(GenericRecipe):
     recipe_category: RecipeCategory = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="campfire")
-
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -227,9 +217,6 @@ class SmithingTransformRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
-
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "type": "minecraft:smithing_transform",
@@ -253,9 +240,6 @@ class SmithingTrimRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
-
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         return {
             "type": "minecraft:smithing_trim",
@@ -275,9 +259,6 @@ class SmokerRecipe(GenericRecipe):
     recipe_category: RecipeCategory = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="smoker")
-
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
@@ -304,9 +285,6 @@ class StonecutterRecipe(GenericRecipe):
     recipe_category: RecipeCategory = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="stonecutter")
-
-    def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {

@@ -102,13 +102,13 @@ class CustomItem:
             with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/right_click/{self.internal_name}.mcfunction", "w") as file:
                 file.write(f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}\n{self.on_right_click}")
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         return recusively_remove_nones_from_dict({
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
             "rarity": self.rarity,
-            "item_model": f"{datapack.namespace}:{self.internal_name}" if self.texture_path else None,
+            "item_model": f"{datapack_namespace}:{self.internal_name}" if self.texture_path else None,
             "custom_data": self.custom_data,
             # "additional_item_data": self.additional_item_data.to_dict() if self.additional_item_data else None,
         })
@@ -116,7 +116,7 @@ class CustomItem:
     def generate_give_command(self, datapack: "Datapack") -> str:
         components = ", ".join([
             to_component_string({key: value})
-            for key, value in self.to_dict(datapack).items()
+            for key, value in self.to_dict(datapack.namespace).items()
         ])
         additional_item_data_string = (
             to_component_string(self.additional_item_data.to_dict(datapack))    # Also strips None
