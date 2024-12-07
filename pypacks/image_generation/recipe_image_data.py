@@ -169,8 +169,8 @@ def generate_recipe_image(recipe: "Recipe") -> bytes:
         SmithingTrimRecipe: generate_smithing_trim_recipe_image,
         SmithingTransformRecipe: generate_smithing_transform_recipe_image,
     }
-    function = class_to_function[type(recipe)]  # type: ignore
-    image = function(recipe)
+    function = class_to_function[type(recipe)]
+    image = function(recipe)  # type: ignore[operator]
 
     # RETURN (CONVERT TO BYTES)
     # image.show()

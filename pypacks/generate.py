@@ -16,7 +16,8 @@ from .image_generation.ref_book_icon_gen import add_centered_overlay
 
 
 BASE_IMAGES: dict[str, str] = {x: f"{IMAGES_PATH}/reference_book_icons/{x}.png" for x in (  # TODO: os.pathlib.join
-    "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", "empty_1_x_1", "blank_icon",
+    # "empty_16_x_16", "empty_8_x_8", "empty_4_x_4", "empty_2_x_2", 
+    "empty_1_x_1", "blank_icon",
 )}
 EXTRA_ICON_BASE_PATH = f"{IMAGES_PATH}/reference_book_icons/extra_icon_base_2.png"
 
@@ -58,7 +59,7 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
         BookImage("information_icon", add_centered_overlay(image_bytes=inline_open(f"{IMAGES_PATH}/reference_book_icons/information_icon.png"),
                                                            base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=18, y_offset=14),
         *[  # Category icons
-            BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)  # type: ignore[arg-type]
+            BookImage(f"{category.name.lower()}_category_icon", image_bytes=category.icon_image_bytes)
             for category in datapack.reference_book_categories
         ],
         *[  # Custom items
@@ -66,7 +67,7 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
             for item in datapack.custom_items
         ],
         *[  # Custom recipes
-            BookImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.recipe_image_bytes, y_offset=6)  # type: ignore
+            BookImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.recipe_image_bytes, y_offset=6)
             for custom_recipe in [x for x in datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and isinstance(x.result, CustomItem)]
         ],
         *[  # Custom recipe icons

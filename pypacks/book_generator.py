@@ -1,8 +1,9 @@
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 from pypacks.written_book_framework import (
-    ElementPage, GridPage, Icon, OnClickChangePage, OnHoverShowText, Text, FormattedWrittenBook, RightAlignedIcon,
+    ElementPage, GridPage, Icon, OnClickChangePage, OnHoverShowText, RowManager, Text, FormattedWrittenBook, RightAlignedIcon,
+    Row, FilledRow,
     OnClickRunCommand, OnHoverShowItem,
 )
 from pypacks.utils import PYPACKS_ROOT, remove_colour_codes
@@ -18,7 +19,7 @@ LOGO_HORIZONTAL_SPACER = 6
 class ReferenceBookCategory:
     name: str
     image_path: str
-    icon_image_bytes: bytes | None = None  # DON'T SET THIS MANUALLY
+    icon_image_bytes: bytes = None  # type: ignore  # DON'T SET THIS MANUALLY
 
     def __post_init__(self) -> None:
         assert " " not in self.name, "Category name cannot contain spaces"
@@ -26,17 +27,11 @@ class ReferenceBookCategory:
 @dataclass
 class ItemPage:
     item: "CustomItem"
-    datapack: "Datapack"
-    back_button_page: int
-    
-    def generate_info_icons(self) -> list[Icon]:
-        from pypacks.resources.custom_item import CustomItem
+    datapack: "Datapack" = field(repr=False)
+    back_button_page: int = field(repr=False)
 
-        non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
-        recipes = [x for x in non_smithing_trim_recipes if (
-            x.result.internal_name if isinstance(x.result, CustomItem) else x.result
-        ) == self.item.internal_name]
-        recipe_to_font_icon = {
+    def get_recipe_mappings(self) -> dict[type["Recipe"], str]:
+        return {
             ShapelessCraftingRecipe: self.datapack.font_mapping["crafting_table_icon"],
             ShapedCraftingRecipe: self.datapack.font_mapping["crafting_table_icon"],
             CraftingTransmuteRecipe: self.datapack.font_mapping["crafting_table_transmute_icon"],
@@ -49,6 +44,15 @@ class ItemPage:
             SmithingTransformRecipe: self.datapack.font_mapping["smithing_table_icon"],
             SmithingTrimRecipe: self.datapack.font_mapping["smithing_table_icon"],
         }
+    
+    def generate_info_icons(self) -> list[Icon]:
+        from pypacks.resources.custom_item import CustomItem
+
+        non_smithing_trim_recipes = [x for x in self.datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe)]
+        recipes = [x for x in non_smithing_trim_recipes if (
+            x.result.internal_name if isinstance(x.result, CustomItem) else x.result
+        ) == self.item.internal_name]
+        recipe_to_font_icon = self.get_recipe_mappings()
         recipe_icons = [
             Icon(recipe_to_font_icon[type(recipe)],
                  self.datapack.namespace,
@@ -57,14 +61,20 @@ class ItemPage:
             )
             for recipe in recipes if type(recipe) in recipe_to_font_icon
         ]
-        # more_info_icon = MoreInfoIcon(self.datapack.font_mapping["information_icon"], item=self.item)
-        #   return [more_info_icon, *recipe_icons]
-        return recipe_icons
+        # ============================================================================================================
+        # More info button
+        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n"
+        more_info_text += self.item.reference_book_description if self.item.reference_book_description else "No description available"
+        more_info_button = Icon(
+            self.datapack.font_mapping["information_icon"], self.datapack.namespace,
+            self.datapack.font_mapping["empty_1_x_1"],on_hover=OnHoverShowText(more_info_text)
+        )
+        return [more_info_button, *recipe_icons]
 
-    def get_json_data(self) -> list[dict[str, Any]]:
+    def get_json_data(self) -> list[dict[str, Any] | list[dict[str, Any]]]:
         return [x.get_json_data() for x in self.generate_page()]
 
-    def generate_page(self) -> list[Text | Icon | RightAlignedIcon]:
+    def generate_page(self) -> list["Text | Icon | RightAlignedIcon | Row | FilledRow"]:
         give_item_icon = Icon(
             self.datapack.font_mapping[f"{self.item.internal_name}_icon"],
             font_namespace=self.datapack.namespace,
@@ -72,18 +82,17 @@ class ItemPage:
             on_click=OnClickRunCommand(f"/function {self.datapack.namespace}:give/{self.item.internal_name}", self.datapack),
             on_hover=OnHoverShowItem(self.item, self.datapack.namespace),
         )
-        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n"
-        more_info_text += self.item.reference_book_description if self.item.reference_book_description else "No description available"
-
+        MORE_INFO_ICONS_PER_ROW = 5
+        MORE_INFO_ICONS_TRAILING_NEW_LINES = 3
+        more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.datapack.font_mapping["empty_1_x_1"],
+                                         self.datapack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES).rows
         return [
             Text(f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", underline=True, bold=True),
             Text("\n"*2),
             give_item_icon,
             Text("\n"*4),
-            # Get all the ways to craft it, info, etc
-            Icon(self.datapack.font_mapping["information_icon"], self.datapack.namespace, self.datapack.font_mapping["empty_1_x_1"], on_hover=OnHoverShowText(more_info_text)),
-            *self.generate_info_icons(),
-            Text("\n"*4),
+            *more_info_icon_rows,
+            Text("\n"*(4-(len(more_info_icon_rows)))),
             RightAlignedIcon(
                 self.datapack.font_mapping["satchel_icon"],
                 self.datapack.font_mapping["empty_1_x_1"],
@@ -162,12 +171,12 @@ class ReferenceBook:
             category_items_pages.append(icon_list_page)
 
         # Item page(s) (x+)
-        item_pages = []
+        item_pages: list[ElementPage] = []
         for item in datapack.custom_items:
             category_page_index = CATEGORY_ITEMS_PAGE+[x.name for x in datapack.reference_book_categories].index(item.book_category.name)
 
-            item_page: ElementPage = ItemPage(item, datapack, category_page_index)  # type: ignore
-            item_pages.append(item_page)
+            item_page = ItemPage(item, datapack, category_page_index)
+            item_pages.append(item_page)  # type: ignore
 
         # Blank page:
         blank_page = ElementPage([Text("This page is intentionally left blank")])

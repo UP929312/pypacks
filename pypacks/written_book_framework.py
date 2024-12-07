@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
 
 from pypacks.resources.item_components import CustomItemData, WrittenBookContent
-from pypacks.resources.custom_recipe import *  # type: ignore
+from pypacks.resources.custom_recipe import *
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 ICONS_PER_ROW = 5
 ROWS_PER_PAGE = 4
 PIXELS_PER_WIDTH = 113
+NEWLINES_BETWEEN_GRID_ROWS = 3
 
 ICON_ROW_INDENT = 2
 
@@ -64,8 +65,8 @@ class OnHoverShowItem:
 @dataclass
 class Row:
     elements: list["Text | Icon"]
-    indent_unicode_char: str = ""
-    font_namespace: str = ""
+    indent_unicode_char: str = field(repr=False, default="")
+    font_namespace: str = field(repr=False, default="")
 
     def get_json_data(self) -> list[dict[str, Any]]:
         regular_icons = [x.get_json_data() for x in self.elements]
@@ -78,19 +79,19 @@ class Row:
 @dataclass
 class FilledRow:
     elements: list["Text | Icon"]
-    indent_unicode_char: str = ""
-    font_namespace: str = ""
-    empty_icon_unicode_char: str | None = None
-    row_length: int = 0
+    indent_unicode_char: str = field(repr=False, default="")
+    font_namespace: str = field(repr=False, default="")
+    empty_icon_unicode_char: str | None = field(repr=False, default=None)
+    row_length: int = field(default=0)
 
     def get_json_data(self) -> list[dict[str, Any]]:
         icons = [x for x in self.elements]
         if len(icons) < self.row_length and self.empty_icon_unicode_char is not None:
             icons += [Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char)]*(self.row_length-len(self.elements))
         initial_padding = {
-            "text": (self.indent_unicode_char*ICON_ROW_INDENT), "color": "white",
+            "text": (self.indent_unicode_char*ICON_ROW_INDENT) , "color": "white",
             "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"
-        }
+        } if self.indent_unicode_char else {}
         return [initial_padding, *[x.get_json_data() for x in icons]]
 
 
@@ -98,54 +99,56 @@ class FilledRow:
 class RowManager:
     icons: list["Icon"]
     row_length: int = ICONS_PER_ROW
-    indent_unicode_char: str = ""
-    font_namespace: str = ""
-    empty_icon_unicode_char: str | None = None
+    indent_unicode_char: str = field(repr=False, default="")
+    font_namespace: str = field(repr=False, default="")
+    empty_icon_unicode_char: str | None = field(repr=False, default=None)
+    trailing_new_lines: int = 0
     # back_button_unicode_char: str | None = None
 
     def __post_init__(self) -> None:
-        self.rows: list[Row | FilledRow] = []
-        chunked_elements = chunk_list(self.icons, self.row_length)
-        self.rows.extend([
-            FilledRow(icon_group, self.indent_unicode_char, self.font_namespace, self.empty_icon_unicode_char, row_length=ICONS_PER_ROW)
+        empty_icon: "Icon | Text" = Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char)  # type: ignore
+        if self.empty_icon_unicode_char is None:
+            empty_icon = Text("")
+        inline_added_icons = [empty_icon]*(self.row_length-(len(self.icons) % self.row_length))
+        chunked_elements = chunk_list(self.icons+inline_added_icons, self.row_length)
+
+        self.rows: list[Row | FilledRow] = [
+            FilledRow(icon_group, self.indent_unicode_char, self.font_namespace, self.empty_icon_unicode_char, row_length=self.row_length)
             for icon_group in chunked_elements
-        ])
-        empty_icon = Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char)  # type: ignore
-        self.rows.extend([
-            Row([empty_icon]*ICONS_PER_ROW, self.indent_unicode_char, self.font_namespace)
-            if self.empty_icon_unicode_char
-            else Row([])
-            for _ in range(self.row_length-len(chunked_elements))
-        ])
+        ]
+        if self.empty_icon_unicode_char:
+            self.rows.extend([
+                Row([empty_icon]*self.row_length, self.indent_unicode_char, self.font_namespace)
+                for _ in range(self.row_length-len(chunked_elements))
+            ])
+        # Add in the newlines
+        for row in self.rows[:-1]:
+            row.elements.append(Text("\n"*self.trailing_new_lines))
+
         # if self.back_button_unicode_char:
         #     self.rows[-1].elements[-1] = Icon(self.back_button_unicode_char, self.font_namespace, self.indent_unicode_char, on_click=OnClickChangePage(0), on_hover=OnHoverShowText("Go back"))
-
-    def get_json_data(self) -> list[list[dict[str, Any]]]:
-        return [x.get_json_data() for x in self.rows]
 
 
 @dataclass
 class GridPage:
     title: "Text"
-    empty_icon_unicode_char: str | None
-    indent_unicode_char: str
-    font_namespace: str
+    empty_icon_unicode_char: str | None = field(repr=False)
+    indent_unicode_char: str = field(repr=False)
+    font_namespace: str = field(repr=False)
     icons: list["Icon"]
     icons_per_row: int = ICONS_PER_ROW
     rows_per_page: int = ROWS_PER_PAGE
-    back_button_unicode_char: str | None = None
-    back_button_page: int | None = None
+    back_button_unicode_char: str | None = field(repr=False, default=None)
+    back_button_page: int | None = field(repr=False, default=None)
 
     def __post_init__(self) -> None:
         assert len(self.icons) < (
             (self.icons_per_row*self.rows_per_page)-1 if self.back_button_page is not None else (self.icons_per_row*self.rows_per_page)
         ), "Too many icons for the grid"
-        self.elements: list["Row | FilledRow"] = [Row([self.title])]
-        row_manager = RowManager(self.icons, ICONS_PER_ROW, self.indent_unicode_char, self.font_namespace, self.empty_icon_unicode_char,
-                                 # self.back_button_unicode_char,
-                                )
-        self.elements.extend(row_manager.rows)
-
+        row_manager = RowManager(
+            self.icons, self.icons_per_row, self.indent_unicode_char, self.font_namespace, self.empty_icon_unicode_char, trailing_new_lines=NEWLINES_BETWEEN_GRID_ROWS,
+        )
+        self.elements = row_manager.rows
         # if self.back_button_page is not None and self.back_button_unicode_char is not None:
         #     self.elements[-1].back_button = Icon(self.back_button_unicode_char, self.font_namespace, self.indent_unicode_char,
         #                                          on_click=OnClickChangePage(self.back_button_page),
@@ -154,13 +157,10 @@ class GridPage:
     def get_json_data(self) -> list[dict[str, Any]]:
         # Make it one layer flatter
         # For each row, add some new lines after it
-        return_carriage = Row([Text("\n\n\n")]).get_json_data()
-        elements = (
-            [self.elements[0].get_json_data()+Row([Text("\n\n")]).get_json_data()]+
-            [x.get_json_data()+return_carriage for x in self.elements[1:]]
-        )
+        title = Row([self.title, Text("\n\n")])
+        elements = [x.get_json_data() for x in [title]+self.elements]
         # For each row, extract the elements and flatten
-        return [item for pair in elements for item in pair]
+        return elements  # type: ignore
 
 
 @dataclass
@@ -177,10 +177,10 @@ class ElementPage:
 @dataclass
 class Icon:
     unicode_char: str
-    font_namespace: str
-    indent_unicode_char: str
-    on_hover: OnHoverShowText | OnHoverShowItem | None = None
-    on_click: OnClickChangePage | OnClickRunCommand | None = None
+    font_namespace: str = field(repr=False)
+    indent_unicode_char: str = field(repr=False)
+    on_hover: OnHoverShowText | OnHoverShowItem | None = field(repr=False, default=None)
+    on_click: OnClickChangePage | OnClickRunCommand | None = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
         return_value = {"text": f"{self.unicode_char}{self.indent_unicode_char}", "color": "white", "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"}
@@ -211,11 +211,12 @@ class RightAlignedIcon:
     char_width: int
     font_namespace: str
     left_shift: int = 0  # If you want to move it slightly left?
-    on_hover: OnHoverShowText | None = None
-    on_click: OnClickChangePage | None = None
+    on_hover: OnHoverShowText | None = field(repr=False, default=None)
+    on_click: OnClickChangePage | None = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
         padding = (PIXELS_PER_WIDTH-self.char_width)-self.left_shift
+        # TODO: Use regular icon, just append the indent/padding
         return_value = {"text": (self.indent_unicode_char*padding)+f"{self.unicode_char}", "color": "white",
                         "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"}
         if self.on_hover:

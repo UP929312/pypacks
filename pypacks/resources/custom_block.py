@@ -20,9 +20,7 @@ class FacePaths:
     right: str | None
 
 # TODO: Support non cubes? Player heads? Custom models?
-
-# TODO:
-# Implement destroying them :) - Done, but needs drops, probably loot tables?
+# First, rotation
 
 
 @dataclass
@@ -41,7 +39,6 @@ class CustomBlock:
     block_item: "CustomItem | None" = field(init=False, repr=False, default=None)  # Used by datapack to create the custom icons
 
     def set_or_create_loot_table(self) -> None:
-
         from pypacks.resources.custom_item import CustomItem
         self.loot_table = None
         if self.drops == "self":
