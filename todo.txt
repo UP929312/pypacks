@@ -2,8 +2,15 @@
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 
+# We don't have to have special blocks for rotation... we can do the rotation ourselves...
+# Buttt, what do we do, make a custom model, just like the auto_generated one, with custom block faces? ooh.
 
 # Rotatable custom blocks
+
+# In the future, for custom inventories/block entities, do
+setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
+
+# For recipe images, also add the ingredients underneath, like "sticks: x1, diamonds: x2"
 
 # Calling string on an item returns it's base item? Then we can just do str(item) rather than item.base_item if isisntance(item, CustomItem) else item
 
