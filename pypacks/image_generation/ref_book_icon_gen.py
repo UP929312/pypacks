@@ -1,14 +1,16 @@
 import io
+from pathlib import Path
+
 from PIL import Image
 
 from pypacks.utils import IMAGES_PATH
 from .recipe_image_data import *
 
-ICON_BASE = f"{IMAGES_PATH}/reference_book_icons/icon_base.png"
+ICON_BASE = Path(IMAGES_PATH)/"reference_book_icons"/"icon_base.png"
 
 
 def add_centered_overlay(
-    image_bytes: bytes, base_image_path: str | None = None, resize_to_16x16: bool = True,
+    image_bytes: bytes, base_image_path: str | Path | None = None, resize_to_16x16: bool = True,
 ) -> bytes:
     image = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
 

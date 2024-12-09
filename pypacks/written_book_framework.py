@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
 
 from pypacks.resources.item_components import CustomItemData, WrittenBookContent
-from pypacks.resources.custom_recipe import *  # type: ignore[abc]
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
@@ -85,7 +84,7 @@ class FilledRow:
     row_length: int = field(default=0)
 
     def get_json_data(self) -> list[dict[str, Any]]:
-        icons = [x for x in self.elements]
+        icons = list(self.elements)  # Shallow copy
         if len(icons) < self.row_length and self.empty_icon_unicode_char is not None:
             icons += [Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char, include_formatting=False)]*(self.row_length-len(self.elements))
         initial_padding = {
@@ -184,7 +183,7 @@ class Icon:
     on_click: OnClickChangePage | OnClickRunCommand | None = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
-        return_value = {"text": f"{self.unicode_char}{self.indent_unicode_char}", "color": "white", "font": f"{self.font_namespace}:all_fonts"}
+        return_value: dict[str, Any] = {"text": f"{self.unicode_char}{self.indent_unicode_char}", "color": "white", "font": f"{self.font_namespace}:all_fonts"}
         if self.include_formatting:
             return_value |= {"color": "white", "underlined": False, "bold": False}
         if self.on_hover:

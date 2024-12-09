@@ -1,5 +1,5 @@
-import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,7 +18,8 @@ class MCFunction:
         return f"{datapack.namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
-        path = os.path.join(datapack.datapack_output_path, "data", datapack.namespace, self.__class__.datapack_subdirectory_name,
+        # Can't use / here because of *self.sub_directories
+        path = Path(datapack.datapack_output_path, "data", datapack.namespace, self.__class__.datapack_subdirectory_name,
                             *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
             file.write("\n".join(self.commands))

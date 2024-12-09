@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
@@ -47,12 +48,12 @@ class CustomPainting:
         return data
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(datapack), file, indent=4)
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
-        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "painting"), exist_ok=True)
-        shutil.copyfile(self.image_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/painting/{self.internal_name}.png")
+        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"painting", exist_ok=True)
+        shutil.copyfile(self.image_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"painting"/f"{self.internal_name}.png")
 
     def generate_custom_item(self, datapack: "Datapack") -> "CustomItem":
         return CustomItem(

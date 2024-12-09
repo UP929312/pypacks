@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TypeAlias, Any, TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
@@ -33,7 +34,7 @@ class GenericRecipe:
         return item_or_string
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(datapack), file, indent=4)
 
 

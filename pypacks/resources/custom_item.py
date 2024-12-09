@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -72,31 +73,31 @@ class CustomItem:
         # 3. The texture itself (in textures/item/<internal_name>.png)
 
         if self.texture_path is not None:
-            os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "models", "item"), exist_ok=True)
-            os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "items"), exist_ok=True)
-            os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "item"), exist_ok=True)
+            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
+            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
 
             layers = {("all" if self.is_block else "layer0"): f"{datapack.namespace}:item/{self.internal_name}"}
             parent = "minecraft:block/cube_all" if self.is_block else "minecraft:item/generated" 
-            with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/models/item/{self.internal_name}.json", "w") as file:
+            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
                 json.dump({"parent": parent, "textures": layers}, file, indent=4)
 
-            with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/items/{self.internal_name}.json", "w") as file:
+            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
                 json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
 
-            shutil.copyfile(self.texture_path, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/item/{self.internal_name}.png")
+            shutil.copyfile(self.texture_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png")
 
         # Create the icons for the custom items
-        with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/font/{self.internal_name}_icon.png", "wb") as file:
+        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font"/f"{self.internal_name}_icon.png", "wb") as file:
             file.write(self.icon_image_bytes)
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         # Create the give command for use in books
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/give/{self.internal_name}.mcfunction", "w") as file:
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w") as file:
             file.write(self.generate_give_command(datapack))
 
         if self.on_right_click is not None:
-            with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/function/right_click/{self.internal_name}.mcfunction", "w") as file:
+            with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"right_click"/f"{self.internal_name}.mcfunction", "w") as file:
                 file.write(f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}\n{self.on_right_click}")
 
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:

@@ -1,6 +1,7 @@
 import json
-from typing import Literal, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Literal, Any, TYPE_CHECKING
 
 from pypacks.utils import recusively_remove_nones_from_dict
 
@@ -72,7 +73,7 @@ class CustomAdvancement:
         })
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(datapack), file, indent=4)
 
     @staticmethod

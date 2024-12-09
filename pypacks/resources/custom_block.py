@@ -1,13 +1,12 @@
 import os
 import json
-import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 from dataclasses import dataclass, field
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.resources.custom_loot_table import CustomLootTable, SingleItemPool
-from pypacks.resources.constants import DIRECTION_TO_BLOCKS
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -16,8 +15,10 @@ if TYPE_CHECKING:
 # TODO: Support non cubes? Player heads? Custom models?
 # First, rotation
 
+
 @dataclass
 class FacePaths:
+    """This is used when rendering a simple symmetric block won't work (for now)"""
     # If a face is None, it will use the front texture
     front: str
     back: str | None
@@ -29,17 +30,17 @@ class FacePaths:
     def __post_init__(self) -> None:
         # We have 3 options, axial (NESW+Up+Down), cardinal (NESW), and on_axis (north-south, east-west, up-down)
         assert self.front is not None
-        if [x is None for x in [self.back, self.top, self.bottom, self.left, self.right]]:
+        if all([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]):
             self.direction_type = "symmetric"
             return
-        elif self.top is None and self.bottom is None and [x is not None for x in [self.back, self.left, self.right]]:
+        elif self.top is None and self.bottom is None and all([x is not None for x in [self.back, self.left, self.right]]):
             self.direction_type = "cardinal"
             return
         elif [x is not None for x in [self.back, self.top, self.bottom, self.left, self.right]]:
             self.direction_type = "axial"
             return
         raise ValueError("Invalid FacePaths object, must have one of:" +
-                         "Front | Front, Back, Left, Right | Front, Back, Top, Bottom, Left, Right")  # fmt: skip
+                         "Front | (Front, Back, Left, Right) | (Front, Back, Top, Bottom, Left, Right)")  # fmt: skip
 
     def create_resource_pack_files(self, block: "CustomBlock", datapack: "Datapack") -> None:
         # Requires the following file structure:
@@ -48,42 +49,44 @@ class FacePaths:
         # │       ├── blockstates/
         # │       │   └── <custom_block>.json
         # │       ├── models/
-        # │       │   └── block/
+        # │       │   └── item/
         # │       │       └── <custom_block>.json
         # │       └── textures/
-        # │           └── block/
+        # │           └── item/
         # │               ├── <custom_block>_top.png
         # │               ├── <custom_block>_bottom.png
         # │               ├── <custom_block>_north.png
         # │               ├── <custom_block>_south.png
         # │               ├── <custom_block>_east.png
         # │               └── <custom_block>_west.png
-        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "blockstates"), exist_ok=True)
-        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "models", "block"), exist_ok=True)
-        os.makedirs(os.path.join(datapack.resource_pack_path, "assets", datapack.namespace, "textures", "block"), exist_ok=True)
-        with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/blockstates/{block.internal_name}.json", "w") as file:
+        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
+        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
+        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates"/f"{block.internal_name}.json", "w") as file:
             json.dump({
                 "variants": {
                     "": {"model": f"{datapack.namespace}:block/{block.internal_name}"},
                 }
             }, file, indent=4)
 
-        with open(f"{datapack.resource_pack_path}/assets/{datapack.namespace}/models/block/{block.internal_name}.json", "w") as file:
+        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{block.internal_name}.json", "w") as file:
             json.dump({
                 "parent": "block/cube",
                 "textures": {
-                    "up": f"{datapack.namespace}:block/{self.top or self.front}",
-                    "down": f"{datapack.namespace}:block/{self.bottom or self.front}",
-                    "north": f"{datapack.namespace}:block/{self.back or self.front}",
-                    "south": f"{datapack.namespace}:block/{self.front}",
-                    "east": f"{datapack.namespace}:block/{self.right or self.front}",
-                    "west": f"{datapack.namespace}:block/{self.left or self.front}",
+                    "up": f"{datapack.namespace}:item/{block.internal_name}_top",
+                    "down": f"{datapack.namespace}:item/{block.internal_name}_bottom",
+                    "north": f"{datapack.namespace}:item/{block.internal_name}_back",
+                    "south": f"{datapack.namespace}:item/{block.internal_name}_front",
+                    "east": f"{datapack.namespace}:item/{block.internal_name}_right",
+                    "west": f"{datapack.namespace}:item/{block.internal_name}_left",
                 }
             }, file, indent=4)
 
-        for face in [self.front, self.back, self.top, self.bottom, self.left, self.right]:
-            if face is not None:
-                shutil.copyfile(face, f"{datapack.resource_pack_path}/assets/{datapack.namespace}/textures/block/{block.internal_name}_{face}.png")
+        for face in ["top", "bottom", "front", "back", "left", "right"]:
+            if getattr(self, face) is not None:
+                path = Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{block.internal_name}_{face}.png"
+                with open(path, "wb") as file:
+                    file.write(Path(getattr(self, face)).read_bytes())
 
 
 @dataclass
@@ -104,10 +107,6 @@ class CustomBlock:
     def __post_init__(self) -> None:
         if isinstance(self.block_texture, str):
             self.block_texture = FacePaths(self.block_texture, None, None, None, None, None)
-        if (self.block_texture.direction_type != "symmetric" and
-            self.base_block not in DIRECTION_TO_BLOCKS[self.block_texture.direction_type]
-           ):
-            raise ValueError(f"Block {self.base_block} cannot use this texture face paths! (Base block probably doesn't support these rotations)")
 
     def set_or_create_loot_table(self) -> None:
         """Takes a CustomItem, item_name, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
@@ -124,11 +123,11 @@ class CustomBlock:
             self.loot_table = self.drops
 
     @classmethod
-    def from_item(cls, item: "CustomItem", drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
+    def from_item(cls, item: "CustomItem", block_texture: str | FacePaths | None = None, drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
         """Used to create a new custom block."""
         assert item.custom_name is not None and item.texture_path is not None
         item.is_block = True
-        class_ = cls(item.internal_name, item.custom_name, item.base_item, item.texture_path, drops=drops)
+        class_ = cls(item.internal_name, item.custom_name, item.base_item, block_texture or item.texture_path, drops=drops)
         class_.block_item = item
         class_.set_or_create_loot_table()
         return class_
@@ -224,6 +223,7 @@ class CustomBlock:
               for custom_block in datapack.custom_blocks],
         ], ["custom_blocks"])
 
-    # def create_resource_pack_files(self, datapack: "Datapack") -> None:
-    #     assert isinstance(self.block_texture, FacePaths)
-    #     self.block_texture.create_resource_pack_files(self, datapack)
+    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+        assert isinstance(self.block_texture, FacePaths)
+        if self.block_texture.direction_type != "symmetric":
+            self.block_texture.create_resource_pack_files(self, datapack)

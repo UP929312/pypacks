@@ -1,9 +1,9 @@
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pypacks.written_book_framework import (
     ElementPage, GridPage, Icon, OnClickChangePage, OnHoverShowText, RowManager, Text, FormattedWrittenBook, RightAlignedIcon,
-    Row, FilledRow,
     OnClickRunCommand, OnHoverShowItem,
 )
 from pypacks.utils import PYPACKS_ROOT, remove_colour_codes
@@ -12,17 +12,17 @@ from pypacks.resources.custom_recipe import *
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.written_book_framework import Row, FilledRow
 
 LOGO_HORIZONTAL_SPACER = 6
 
 @dataclass
 class ReferenceBookCategory:
+    internal_name: str
     name: str
-    image_path: str
+    image_path: str | Path
     icon_image_bytes: bytes = None  # type: ignore  # DON'T SET THIS MANUALLY
 
-    def __post_init__(self) -> None:
-        assert " " not in self.name, "Category name cannot contain spaces"
 
 @dataclass
 class ItemPage:
@@ -44,7 +44,7 @@ class ItemPage:
             SmithingTransformRecipe: self.datapack.font_mapping["smithing_table_icon"],
             SmithingTrimRecipe: self.datapack.font_mapping["smithing_table_icon"],
         }
-    
+
     def generate_info_icons(self) -> list[Icon]:
         from pypacks.resources.custom_item import CustomItem
 
@@ -108,7 +108,7 @@ class ItemPage:
 @dataclass
 class ReferenceBook:
     items: list["CustomItem"]
-    
+
     def generate_cover_page(self, datapack: "Datapack") -> "ElementPage":
         return ElementPage([
             Text(f"{datapack.name} Reference Book\n\n\n", underline=True, text_color="black"),
@@ -134,7 +134,7 @@ class ReferenceBook:
             datapack.font_mapping["empty_1_x_1"],
             datapack.namespace,
             [
-                Icon(datapack.font_mapping[f"{category.name.lower()}_category_icon"],
+                Icon(datapack.font_mapping[f"{category.internal_name}_category_icon"],
                      datapack.namespace,
                      indent_unicode_char=datapack.font_mapping["empty_1_x_1"],
                      on_hover=OnHoverShowText(f"Go to the `{category.name}` category"),
@@ -194,5 +194,6 @@ class ReferenceBook:
 # =======================================================================================================================================
 
 # https://github.com/misode/misode.github.io/blob/master/public/images/crafting_table.png
-MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("Misc", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/miscellaneous_icon.png")  # TODO: os.pathlib.join
-PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("Paintings", f"{PYPACKS_ROOT}/assets/images/reference_book_icons/painting.png")  # TODO: os.pathlib.join
+MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("misc", "Misc", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"miscellaneous_icon.png")
+PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("paintings", "Paintings", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"painting.png")
+CUSTOM_BLOCKS_REF_BOOK_CATEGORY = ReferenceBookCategory("custom_blocks", "Custom Block", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"custom_block_icon.png")

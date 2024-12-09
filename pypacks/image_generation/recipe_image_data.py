@@ -1,5 +1,6 @@
 import io
 from PIL import Image
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.utils import IMAGES_PATH, resolve_default_item_image
@@ -56,7 +57,7 @@ def place_ingredients_on_image(
     from pypacks.resources.custom_item import CustomItem
 
     # BASE
-    base_image = Image.open(f"{IMAGES_PATH}/recipe_bases/{recipe.recipe_block_name}.png").convert("RGBA")
+    base_image = Image.open(Path(IMAGES_PATH)/"recipe_bases"/f"{recipe.recipe_block_name}.png").convert("RGBA")
     # INGREDIENTS
     for i, ingredient in enumerate(ingredients):
         with Image.open(resolve_default_item_image(ingredient) if not isinstance(ingredient, CustomItem) else ingredient.texture_path) as ingredient_image:  # type: ignore
@@ -73,7 +74,6 @@ def place_ingredients_on_image(
         base_image.paste(result_image, coord_mapping["result"], result_image)
     # RETURN
     return base_image
-
 
 def generate_shapeless_crafting_image(recipe: "ShapelessCraftingRecipe") -> "ImageType":
     return place_ingredients_on_image(

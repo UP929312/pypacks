@@ -1,7 +1,7 @@
 import json
 import io
 import os
-import pathlib
+from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
 from .scripts.texture_mapping import ITEM_TO_SPECIAL_TEXTURE_MAPPING
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
-IMAGES_PATH = os.path.join(PYPACKS_ROOT, "assets", "images")
+IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"
 
 colour_code_mappings = {
     "&0": "black",
@@ -127,22 +127,17 @@ def get_png_height(file_path: str | None = None, image_bytes: bytes | None = Non
     return get_png_dimensions(image_bytes=image_bytes, enforce_square=enforce_square, enforce_factor_of_two=enforce_factor_of_two)[1]
 
 
-def inline_open(file_path: str, mode: str = "rb") -> Any:
-    with open(file_path, mode) as file:
-        return file.read()
-
-
 def resolve_default_item_image(base_item: str) -> str:
     no_minecraft = base_item.removeprefix('minecraft:')
-    path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{no_minecraft}.png")
+    path = Path(PYPACKS_ROOT)/"assets"/"minecraft"/"item"/f"{no_minecraft}.png"
     if no_minecraft in ITEM_TO_SPECIAL_TEXTURE_MAPPING:
-        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/minecraft/item/{ITEM_TO_SPECIAL_TEXTURE_MAPPING[no_minecraft]}.png")
+        path = Path(PYPACKS_ROOT)/"assets"/"minecraft"/"item"/f"{ITEM_TO_SPECIAL_TEXTURE_MAPPING[no_minecraft]}.png"
     if no_minecraft in ["player_head", "zombie_head", "creeper_head", "skeleton_skull", "wither_skeleton_skull", "dragon_head"]:
-        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/player_head.png")
+        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"player_head.png"
     if no_minecraft.endswith("spawn_egg"):
-        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/spawn_egg.png")
+        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"spawn_egg.png"
     if not path.exists():
-        path = pathlib.Path(f"{PYPACKS_ROOT}/assets/images/reference_book_icons/unknown.png")  # Others, player head
+        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"unknown.png"  # Others, player head
     return str(path)
 
 

@@ -1,6 +1,7 @@
 import json
-from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
 # from pypacks.resources.custom_predicate import Predicate
 from pypacks.utils import recusively_remove_nones_from_dict, extract_item_type_and_components
@@ -229,7 +230,7 @@ class CustomLootTable:
         })
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(f"{datapack.datapack_output_path}/data/{datapack.namespace}/{self.__class__.datapack_subdirectory_name}/{self.internal_name}.json", "w") as file:
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(datapack), file, indent=4)
 
     def generate_give_command(self, datapack: "Datapack") -> str:
