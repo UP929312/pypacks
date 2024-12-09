@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
-IMAGES_PATH = f"{PYPACKS_ROOT}/assets/images"
+IMAGES_PATH = os.path.join(PYPACKS_ROOT, "assets", "images")
 
 colour_code_mappings = {
     "&0": "black",

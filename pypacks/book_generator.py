@@ -87,7 +87,7 @@ class ItemPage:
         more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.datapack.font_mapping["empty_1_x_1"],
                                          self.datapack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES).rows
         return [
-            Text(f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", underline=True, bold=True),
+            Text(f"{remove_colour_codes(self.item.custom_name or self.item.base_item)}", underline=True, bold=True, text_color="black"),
             Text("\n"*2),
             give_item_icon,
             Text("\n"*4),
@@ -111,9 +111,9 @@ class ReferenceBook:
     
     def generate_cover_page(self, datapack: "Datapack") -> "ElementPage":
         return ElementPage([
-            Text(f"{datapack.name} Reference Book\n\n\n", underline=True),
-            Text(datapack.font_mapping['empty_1_x_1']*LOGO_HORIZONTAL_SPACER, font=f"{datapack.namespace}:all_fonts"),  # SPACER
-            Text(datapack.font_mapping["logo_256_x_256"], font=f"{datapack.namespace}:all_fonts")
+            Text(f"{datapack.name} Reference Book\n\n\n", underline=True, text_color="black"),
+            Text(datapack.font_mapping['empty_1_x_1']*LOGO_HORIZONTAL_SPACER, font=f"{datapack.namespace}:all_fonts", text_color="white"),  # SPACER
+            Text(datapack.font_mapping["logo_256_x_256"], font=f"{datapack.namespace}:all_fonts", text_color="white")
         ])
 
     def generate_pages(self, datapack: "Datapack") -> list["ElementPage | GridPage"]:
@@ -129,7 +129,7 @@ class ReferenceBook:
 
         # Categories (2)
         category_page: GridPage = GridPage(
-            Text("Categories", underline=True),
+            Text("Categories", underline=True, text_color="black"),
             datapack.font_mapping["blank_icon"],
             datapack.font_mapping["empty_1_x_1"],
             datapack.namespace,
@@ -151,7 +151,7 @@ class ReferenceBook:
             # This shows lists of items per category, the button takes you to the individual item page, which comes after all
             # The cover & category pages, so it's index is CATEGORIES_PAGE + item_index
             icon_list_page = GridPage(
-                Text(f"{category.name.title()} items", underline=True),
+                Text(f"{category.name.title()} items", underline=True, text_color="black"),
                 empty_icon_unicode_char=datapack.font_mapping["blank_icon"],
                 indent_unicode_char=datapack.font_mapping["empty_1_x_1"],
                 font_namespace=datapack.namespace,

@@ -221,10 +221,10 @@ class SmithingTransformRecipe(GenericRecipe):
         data = {
             "type": "minecraft:smithing_transform",
             "category": self.recipe_category,
-            "template": {"item": self.template_item},
-            "base": {"item": self.base_item},
-            "addition": {"item": self.addition_item},
-            "result": {"item": self.format_item_or_string(self.result)},
+            "template": self.template_item,
+            "base": self.base_item,
+            "addition": self.addition_item,
+            "result": {"id": self.format_item_or_string(self.result)},
         }
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_dict(datapack.namespace)  # type: ignore[index, assignment]

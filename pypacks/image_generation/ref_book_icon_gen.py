@@ -8,15 +8,9 @@ ICON_BASE = f"{IMAGES_PATH}/reference_book_icons/icon_base.png"
 
 
 def add_centered_overlay(
-    image_path: str | None = None, image_bytes: bytes | None = None, base_image_path: str | None = None,
-    resize_to_16x16: bool = True,
+    image_bytes: bytes, base_image_path: str | None = None, resize_to_16x16: bool = True,
 ) -> bytes:
-    if image_path is not None:
-        # Load custom icon
-        image = Image.open(image_path).convert("RGBA")
-    else:
-        assert image_bytes is not None, "Must provide image path or image bytes"
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
 
     # If the image is bigger than 16x16, resize it
     if resize_to_16x16 and (image.width > 16 or image.height > 16):

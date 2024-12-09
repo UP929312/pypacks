@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
 from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
+from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
 
 
 if TYPE_CHECKING:
@@ -96,7 +96,8 @@ class Datapack:
         self.reference_book_categories: list["ReferenceBookCategory"] = []
         for item in self.custom_items:
             if item.book_category.name not in [x.name for x in self.reference_book_categories]:
-                item.book_category.icon_image_bytes = add_centered_overlay(image_path=item.book_category.image_path)
+                with open(item.book_category.image_path, "rb") as file:
+                    item.book_category.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
                 self.reference_book_categories.append(item.book_category)
         assert len(self.reference_book_categories) <= 20, "There can only be 20 reference book categories!"
         # Make sure none of the categories are too filled

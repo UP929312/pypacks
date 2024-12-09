@@ -46,12 +46,9 @@ class CustomItem:
         if self.on_right_click:
             self.add_right_click_functionality()
 
-        if self.texture_path is None:
-            path = resolve_default_item_image(self.base_item)
-            with open(path, "rb") as file:
-                self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
-        else:
-            self.icon_image_bytes = add_centered_overlay(image_path=self.texture_path)
+        path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
+        with open(path, "rb") as file:
+            self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
 
     def add_right_click_functionality(self) -> None:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""

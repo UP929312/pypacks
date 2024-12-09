@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
 
 from pypacks.resources.item_components import CustomItemData, WrittenBookContent
-from pypacks.resources.custom_recipe import *
+from pypacks.resources.custom_recipe import *  # type: ignore[abc]
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class OnHoverShowText:
     font: str = "minecraft:default"
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"hoverEvent": {"action": "show_text", "contents": {"text": self.text, "color": "white", "font": self.font}}}
+        return {"hoverEvent": {"action": "show_text", "contents": {"text": self.text, "font": self.font}}}
 
 
 @dataclass
@@ -87,7 +87,7 @@ class FilledRow:
     def get_json_data(self) -> list[dict[str, Any]]:
         icons = [x for x in self.elements]
         if len(icons) < self.row_length and self.empty_icon_unicode_char is not None:
-            icons += [Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char)]*(self.row_length-len(self.elements))
+            icons += [Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char, include_formatting=False)]*(self.row_length-len(self.elements))
         initial_padding = {
             "text": (self.indent_unicode_char*ICON_ROW_INDENT) , "color": "white",
             "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"
@@ -179,11 +179,14 @@ class Icon:
     unicode_char: str
     font_namespace: str = field(repr=False)
     indent_unicode_char: str = field(repr=False)
+    include_formatting: bool = True
     on_hover: OnHoverShowText | OnHoverShowItem | None = field(repr=False, default=None)
     on_click: OnClickChangePage | OnClickRunCommand | None = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
-        return_value = {"text": f"{self.unicode_char}{self.indent_unicode_char}", "color": "white", "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"}
+        return_value = {"text": f"{self.unicode_char}{self.indent_unicode_char}", "color": "white", "font": f"{self.font_namespace}:all_fonts"}
+        if self.include_formatting:
+            return_value |= {"color": "white", "underlined": False, "bold": False}
         if self.on_hover:
             return_value |= self.on_hover.get_json_data()
         if self.on_click:
@@ -197,11 +200,15 @@ class Text:
     underline: bool = False
     bold: bool = False
     font: str = "minecraft:default"
-    # succeeding_new_lines: int = 0
+    text_color: str | None = None
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"text": self.text, "color": "white" if self.font != "minecraft:default" else "black",
-                "underlined": self.underline, "bold": self.bold, "font": self.font}
+        return_value = {
+            "text": self.text, "underlined": self.underline, "bold": self.bold, "font": self.font,
+        }
+        if self.text_color is not None:
+            return_value |= {"color": self.text_color}
+        return return_value
 
 
 @dataclass
@@ -228,7 +235,6 @@ class RightAlignedIcon:
 
 # =======================================================================================================================================
 
-
 @dataclass
 class FormattedWrittenBook:
     pages: list[ElementPage | GridPage]
@@ -239,5 +245,5 @@ class FormattedWrittenBook:
         from pypacks.resources.custom_item import CustomItem
 
         custom_item_data = CustomItemData(written_book_content=WrittenBookContent(self.title, self.author, [x.get_json_data() for x in self.pages]))
-        custom_item = CustomItem("minecraft:written_book", self.title, additional_item_data=custom_item_data)
+        custom_item = CustomItem("minecraft:written_book", internal_name="formatted_written_book", additional_item_data=custom_item_data)
         return custom_item.generate_give_command(datapack)
