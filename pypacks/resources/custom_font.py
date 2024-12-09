@@ -50,7 +50,7 @@ class CustomFont:
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"font", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
         for font_element in self.font_elements:
-            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"font"/f"{font_element.name}.png", "wb") as file:
+            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font"/f"{font_element.name}.png", "wb") as file:
                 file.write(font_element.image_bytes)
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font"/f"{self.name}.json", "w") as file:
+        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"font"/f"{self.name}.json", "w") as file:
             file.write(json.dumps({"providers": self.to_dict(datapack)}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes

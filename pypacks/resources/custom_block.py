@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
 
 # TODO: Support non cubes? Player heads? Custom models?
-# First, rotation
 
 
 @dataclass
@@ -53,15 +52,11 @@ class FacePaths:
         # │       │       └── <custom_block>.json
         # │       └── textures/
         # │           └── item/
-        # │               ├── <custom_block>_top.png
-        # │               ├── <custom_block>_bottom.png
-        # │               ├── <custom_block>_north.png
-        # │               ├── <custom_block>_south.png
-        # │               ├── <custom_block>_east.png
-        # │               └── <custom_block>_west.png
+        # │               ├── <custom_block>_<top&bottom&front&back&left&right.png
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates"/f"{block.internal_name}.json", "w") as file:
             json.dump({
                 "variants": {
@@ -70,15 +65,19 @@ class FacePaths:
             }, file, indent=4)
 
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{block.internal_name}.json", "w") as file:
+            axial_mapping = {
+                "up": "top",
+                "down": "bottom",
+                "north": "back",
+                "south": "front",
+                "east": "right",
+                "west": "left",
+            }
             json.dump({
                 "parent": "block/cube",
                 "textures": {
-                    "up": f"{datapack.namespace}:item/{block.internal_name}_top",
-                    "down": f"{datapack.namespace}:item/{block.internal_name}_bottom",
-                    "north": f"{datapack.namespace}:item/{block.internal_name}_back",
-                    "south": f"{datapack.namespace}:item/{block.internal_name}_front",
-                    "east": f"{datapack.namespace}:item/{block.internal_name}_right",
-                    "west": f"{datapack.namespace}:item/{block.internal_name}_left",
+                    direction: f"{datapack.namespace}:item/{block.internal_name}_{face}"
+                    for direction, face in axial_mapping.items()
                 }
             }, file, indent=4)
 
@@ -107,6 +106,7 @@ class CustomBlock:
     def __post_init__(self) -> None:
         if isinstance(self.block_texture, str):
             self.block_texture = FacePaths(self.block_texture, None, None, None, None, None)
+        assert self.block_texture.direction_type in ["symmetric", "cardinal", "axial"]
 
     def set_or_create_loot_table(self) -> None:
         """Takes a CustomItem, item_name, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
@@ -151,18 +151,28 @@ class CustomBlock:
         advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=rewarded_function, hidden=True)
         return advancement
 
+    def generate_detect_rotation_function(self) -> "MCFunction":
+        # Detect and store player rotation (when needed)
+        return MCFunction(f"detect_rotation", [
+            f"execute store result score rotation player_yaw run data get entity @s Rotation[0] 1",
+            f"execute if score rotation player_yaw matches -45..45 run scoreboard players set rotation_group player_yaw 1",
+            f"execute if score rotation player_yaw matches 45..135 run scoreboard players set rotation_group player_yaw 2",
+            f"execute if score rotation player_yaw matches 135..180 run scoreboard players set rotation_group player_yaw 3",
+            f"execute if score rotation player_yaw matches -180..-135 run scoreboard players set rotation_group player_yaw 3",
+            f"execute if score rotation player_yaw matches -135..-45 run scoreboard players set rotation_group player_yaw 4",
+
+            f"execute store result score rotation player_pitch run data get entity @s Rotation[1] 1",
+            f"execute if score rotation player_pitch matches -90..-45 run scoreboard players set rotation_group player_pitch 1",  # Up
+            f"execute if score rotation player_pitch matches -45..45 run scoreboard players set rotation_group player_pitch 2",  # Flat
+            f"execute if score rotation player_pitch matches 45..90 run scoreboard players set rotation_group player_pitch 3",  # Down
+        ], ["custom_blocks"])
+
     def generate_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
         # These are in reverse order (pretty much), so we can reference them in the next function.
         # ============================================================================================================
-        # detect_rotation = MCFunction(f"detect_rotation_{self.internal_name}", [
-        #     f"execute if score #rotation {datapack.namespace}.data matches 0 if entity @s[y_rotation=-46..45] run scoreboard players set #rotation {datapack.namespace}.data 1",
-        #     f"execute if score #rotation {datapack.namespace}.data matches 0 if entity @s[y_rotation=45..135] run scoreboard players set #rotation {datapack.namespace}.data 2",
-        #     f"execute if score #rotation {datapack.namespace}.data matches 0 if entity @s[y_rotation=135..225] run scoreboard players set #rotation {datapack.namespace}.data 3",
-        #     f"execute if score #rotation {datapack.namespace}.data matches 0 if entity @s[y_rotation=225..315] run scoreboard players set #rotation {datapack.namespace}.data 4",
-        # ], ["custom_blocks"]),
-        # ============================================================================================================
         # Has to be secondary so we have @s set correctly.
         execute_as_item_display = MCFunction(f"execute_on_item_display_{self.internal_name}", [
+            # Give two tags:
             f"tag @s add {datapack.namespace}.custom_block",
             f"tag @s add {datapack.namespace}.custom_block.{self.internal_name}",
 
@@ -172,13 +182,29 @@ class CustomBlock:
 
             # For item displays, container.0 is just the item it is displaying.
             f"item replace entity @s container.0 with minecraft:sponge[minecraft:item_model='{datapack.namespace}:{self.internal_name}']",
+
+            # ============================================================================================================
+            # ROTATION:
+            # Player horizontal rotation (yaw) is -180 -> 180, with -180/180 (they're the same) being directly north
+            # North = 135 -> 180 & -180 -> -135  |  East = -135 -> -45  |  South = -45 -> 45  |  West = 45 -> 135
+            *([
+                f"execute if score rotation_group player_yaw matches {i} " + 
+                f"run execute at @s run rotate @s {(90 if self.block_texture.direction_type == 'axial' else 0)+(i*90)} 0"  # type: ignore[abc]
+                for i in [1, 2, 3, 4]
+            ] if self.block_texture.direction_type in ["cardinal", "axial"] else []),  # type: ignore[abc]
+
+            # This does the same, but for pitch, which is in the -90 -> 90 range.
+            *([
+                f"execute if score rotation_group player_pitch matches {i} run execute at @s run rotate @s ~ {angle}"
+                for i, angle in zip([1, 2, 3], [0, 90, 0])
+            ] if self.block_texture.direction_type == "axial" else []),  # type: ignore[abc]
+
             ],
             ["custom_blocks", "execute_on_item_display"],
         )
         # Spawn the item display, then call the setup on it directly.
         spawn_item_display = MCFunction(f"setup_item_display_{self.internal_name}", [
             f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {execute_as_item_display.get_reference(datapack)}",
-            # execute if score #rotation {datapack.namespace}.data matches {i+1} run setblock ~ ~ ~ {block_id}[facing={face}," + ",".join(block_states) + f"]{beautify_name}\n
             ],
             ["custom_blocks", "setup_item_display"],
         )
@@ -198,6 +224,7 @@ class CustomBlock:
         # ============================================================================================================
         revoke_and_run_mcfunction = MCFunction(f"revoke_and_run_{self.internal_name}", [
                 f"advancement revoke @s only {datapack.namespace}:placed_{self.internal_name}",
+                f"function {self.generate_detect_rotation_function().get_reference(datapack)}",
                 f"function {populate_start_ray.get_reference(datapack)}",
             ],
             ["custom_blocks", "revoke_and_run"],

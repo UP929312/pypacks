@@ -82,6 +82,7 @@ class Datapack:
         if self.custom_blocks:
             self.mcfunctions.extend(generate_default_raycasting_functions(self))
             self.mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
+            self.mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
             self.custom_tags.append(ray_transitive_blocks_tag)
         # ==================================================================================
         # Adding all the paintings' items to the list
@@ -109,6 +110,8 @@ class Datapack:
         self.mcfunctions.append(MCFunction("load", [
             f"function {self.namespace}:raycast/load",
             f"gamerule maxCommandChainLength {10_000_000}",
+            f"scoreboard objectives add player_yaw dummy",
+            f"scoreboard objectives add player_pitch dummy",
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [
