@@ -178,12 +178,13 @@ class Icon:
     unicode_char: str
     font_namespace: str = field(repr=False)
     indent_unicode_char: str = field(repr=False)
-    include_formatting: bool = True
+    include_formatting: bool = field(repr=False, default=True)
+    right_indentation: int = field(repr=False, default=1)
     on_hover: OnHoverShowText | OnHoverShowItem | None = field(repr=False, default=None)
     on_click: OnClickChangePage | OnClickRunCommand | None = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
-        return_value: dict[str, Any] = {"text": f"{self.unicode_char}{self.indent_unicode_char}", "color": "white", "font": f"{self.font_namespace}:all_fonts"}
+        return_value: dict[str, Any] = {"text": f"{self.unicode_char}{self.indent_unicode_char*self.right_indentation}", "color": "white", "font": f"{self.font_namespace}:all_fonts"}
         if self.include_formatting:
             return_value |= {"color": "white", "underlined": False, "bold": False}
         if self.on_hover:

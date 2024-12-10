@@ -54,10 +54,12 @@ class ItemPage:
         ) == self.item.internal_name]
         recipe_to_font_icon = self.get_recipe_mappings()
         recipe_icons = [
-            Icon(recipe_to_font_icon[type(recipe)],
-                 self.datapack.namespace,
-                 self.datapack.font_mapping["empty_1_x_1"],
-                 on_hover=OnHoverShowText(self.datapack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], font=f"{self.datapack.namespace}:all_fonts"),
+            Icon(
+                recipe_to_font_icon[type(recipe)],
+                self.datapack.namespace,
+                self.datapack.font_mapping["empty_1_x_1"],
+                right_indentation=3,
+                on_hover=OnHoverShowText(self.datapack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], font=f"{self.datapack.namespace}:all_fonts"),
             )
             for recipe in recipes if type(recipe) in recipe_to_font_icon
         ]
@@ -66,8 +68,11 @@ class ItemPage:
         more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n"
         more_info_text += self.item.reference_book_description if self.item.reference_book_description else "No description available"
         more_info_button = Icon(
-            self.datapack.font_mapping["information_icon"], self.datapack.namespace,
-            self.datapack.font_mapping["empty_1_x_1"],on_hover=OnHoverShowText(more_info_text)
+            self.datapack.font_mapping["information_icon"],
+            self.datapack.namespace,
+            self.datapack.font_mapping["empty_1_x_1"],
+            right_indentation=3,
+            on_hover=OnHoverShowText(more_info_text),
         )
         return [more_info_button, *recipe_icons]
 
