@@ -68,10 +68,10 @@ class FacePaths:
             axial_mapping = {
                 "up": "top",
                 "down": "bottom",
-                "north": "back",
-                "south": "front",
-                "east": "right",
-                "west": "left",
+                "north": "front",
+                "south": "back",
+                "east": "left",
+                "west": "right",
             }
             json.dump({
                 "parent": "block/cube",
@@ -196,7 +196,7 @@ class CustomBlock:
             # This does the same, but for pitch, which is in the -90 -> 90 range.
             *([
                 f"execute if score rotation_group player_pitch matches {i} run execute at @s run rotate @s ~ {angle}"
-                for i, angle in zip([1, 2, 3], [0, 90, 0])
+                for i, angle in zip([1, 2, 3], [90, 0, -90])
             ] if self.block_texture.direction_type == "axial" else []),  # type: ignore[abc]
 
             ],
