@@ -36,7 +36,7 @@ class Datapack:
     datapack_output_path: str = ""
     resource_pack_path: str = ""
 
-    # TODO
+    # TODO:
     # on_tick_command: str | None = None
     # on_load_command: str | None = None
 
@@ -118,7 +118,7 @@ class Datapack:
         print(f"Generating resource pack @ {self.resource_pack_path}")
         print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
         # Needs to go in this order
-        self.custom_font = generate_font_pack(self)
-        self.font_mapping = self.custom_font.get_mapping()
+        self.custom_fonts = [generate_font_pack(self)]
+        self.font_mapping = self.custom_fonts[0].get_mapping()
         generate_resource_pack(self)
         generate_base_pack(self)

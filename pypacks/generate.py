@@ -31,12 +31,8 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     if datapack.pack_icon_path is not None:
         shutil.copyfile(datapack.pack_icon_path, Path(datapack.resource_pack_path)/"pack.png")
     # ================================================================================================
-    # All the fonts and images for the reference book
-    if datapack.font_mapping:
-        datapack.custom_font.create_resource_pack_files(datapack)
-    # ================================================================================================
-    # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder)
-    for element in datapack.custom_items+datapack.custom_blocks+datapack.custom_paintings+datapack.custom_sounds:
+    # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder) & custom font (built in)
+    for element in datapack.custom_items+datapack.custom_blocks+datapack.custom_paintings+datapack.custom_sounds+datapack.custom_fonts:
         element.create_resource_pack_files(datapack)
     # ================================================================================================
     # Create the sounds.json file.
@@ -109,8 +105,6 @@ def generate_base_pack(datapack: "Datapack") -> None:
         file.write(f"\n# Give the book\n{book.generate_give_command(datapack)}")
     # ================================================================================================
     # Resources
-    os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"right_click", exist_ok=True)
-
     for item in (
         datapack.custom_items+datapack.custom_recipes+datapack.custom_jukebox_songs+datapack.custom_predicates+
         datapack.custom_paintings+datapack.custom_advancements+datapack.custom_loot_tables+

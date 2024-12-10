@@ -134,6 +134,8 @@ def resolve_default_item_image(base_item: str) -> str:
         path = Path(PYPACKS_ROOT)/"assets"/"minecraft"/"item"/f"{ITEM_TO_SPECIAL_TEXTURE_MAPPING[no_minecraft]}.png"
     if no_minecraft in ["player_head", "zombie_head", "creeper_head", "skeleton_skull", "wither_skeleton_skull", "dragon_head"]:
         path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"player_head.png"
+    if no_minecraft in ["white_banner", "orange_banner", "magenta_banner", "light_blue_banner", "yellow_banner", "lime_banner", "pink_banner", "gray_banner", "light_gray_banner", "cyan_banner", "purple_banner", "blue_banner", "brown_banner", "green_banner", "red_banner", "black_banner"]:
+        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"banner.png"
     if no_minecraft.endswith("spawn_egg"):
         path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"spawn_egg.png"
     if not path.exists():

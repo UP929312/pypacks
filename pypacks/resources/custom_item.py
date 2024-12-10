@@ -74,6 +74,7 @@ class CustomItem:
             os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
             os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
             os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
 
             layers = {("all" if self.is_block else "layer0"): f"{datapack.namespace}:item/{self.internal_name}"}
             parent = "minecraft:block/cube_all" if self.is_block else "minecraft:item/generated" 
@@ -95,6 +96,7 @@ class CustomItem:
             file.write(self.generate_give_command(datapack))
 
         if self.on_right_click is not None:
+            os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"right_click", exist_ok=True)
             with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"right_click"/f"{self.internal_name}.mcfunction", "w") as file:
                 file.write(f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}\n{self.on_right_click}")
 
