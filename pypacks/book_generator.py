@@ -1,12 +1,11 @@
-from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pypacks.written_book_framework import (
     ElementPage, GridPage, Icon, OnClickChangePage, OnHoverShowText, RowManager, Text, FormattedWrittenBook, RightAlignedIcon,
-    OnClickRunCommand, OnHoverShowItem,
+    OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw,
 )
-from pypacks.utils import PYPACKS_ROOT, remove_colour_codes
+from pypacks.utils import remove_colour_codes
 from pypacks.resources.custom_recipe import *
 
 if TYPE_CHECKING:
@@ -15,13 +14,6 @@ if TYPE_CHECKING:
     from pypacks.written_book_framework import Row, FilledRow
 
 LOGO_HORIZONTAL_SPACER = 6
-
-@dataclass
-class ReferenceBookCategory:
-    internal_name: str
-    name: str
-    image_path: str | Path
-    icon_image_bytes: bytes = None  # type: ignore  # DON'T SET THIS MANUALLY
 
 
 @dataclass
@@ -59,14 +51,16 @@ class ItemPage:
                 self.datapack.namespace,
                 self.datapack.font_mapping["empty_1_x_1"],
                 right_indentation=3,
-                on_hover=OnHoverShowText(self.datapack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], font=f"{self.datapack.namespace}:all_fonts"),
+                on_hover=OnHoverShowTextRaw([
+                    {"text": self.datapack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], "font": f"{self.datapack.namespace}:all_fonts"},
+                    {"text": "\n"*5, "font": f"minecraft:default"},
+                ]),
             )
             for recipe in recipes if type(recipe) in recipe_to_font_icon
         ]
         # ============================================================================================================
         # More info button
-        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n"
-        more_info_text += self.item.reference_book_description if self.item.reference_book_description else "No description available"
+        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n{self.item.ref_book_config.description}"
         more_info_button = Icon(
             self.datapack.font_mapping["information_icon"],
             self.datapack.namespace,
@@ -168,7 +162,8 @@ class ReferenceBook:
                         on_hover=OnHoverShowText(remove_colour_codes(item.custom_name or item.base_item)),
                         on_click=OnClickChangePage(ITEM_PAGE+item_index),
                     )
-                    for item_index, item in enumerate(datapack.custom_items) if item.book_category.name == category.name
+                    for item_index, item in enumerate(datapack.custom_items)
+                    if item.ref_book_config.category.name == category.name and not item.ref_book_config.hidden
                 ],
                 back_button_page=CATEGORIES_PAGE,
                 back_button_unicode_char=datapack.font_mapping["satchel_icon"],
@@ -178,7 +173,7 @@ class ReferenceBook:
         # Item page(s) (x+)
         item_pages: list[ElementPage] = []
         for item in datapack.custom_items:
-            category_page_index = CATEGORY_ITEMS_PAGE+[x.name for x in datapack.reference_book_categories].index(item.book_category.name)
+            category_page_index = CATEGORY_ITEMS_PAGE+[x.name for x in datapack.reference_book_categories].index(item.ref_book_config.category.name)
 
             item_page = ItemPage(item, datapack, category_page_index)
             item_pages.append(item_page)  # type: ignore
@@ -197,8 +192,3 @@ class ReferenceBook:
             author="Pypacks",
         ).generate_give_command(datapack)
 # =======================================================================================================================================
-
-# https://github.com/misode/misode.github.io/blob/master/public/images/crafting_table.png
-MISCELLANOUS_REF_BOOK_CATEGORY = ReferenceBookCategory("misc", "Misc", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"miscellaneous_icon.png")
-PAINTING_REF_BOOK_CATEGORY = ReferenceBookCategory("paintings", "Paintings", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"painting.png")
-CUSTOM_BLOCKS_REF_BOOK_CATEGORY = ReferenceBookCategory("custom_blocks", "Custom Block", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"custom_block_icon.png")

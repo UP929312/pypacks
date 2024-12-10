@@ -4,6 +4,13 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 
 # In the future, for custom inventories/block entities, do
 setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
+# execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
+
+# Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
+# Probably won't do because the give command, but what if we had a loot table setup for all blocks,
+# Then we can use that for block drops or for the give command (could just call it?)
+
+# For custom blocks, only drop their drop if they're not in creative
 
 # For recipe images, also add the ingredients underneath, like "sticks: x1, diamonds: x2"
 
@@ -14,18 +21,20 @@ REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its set
 
 # Move all the internal functions and textures into an "internal" subdir
 
-Space out the icons on "extra info row"
-
 Custom block stairs, slabs?
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "minecraft:block/acacia_planks",
+    "side": "minecraft:block/acacia_planks",
+    "top": "minecraft:block/acacia_planks"
+  }
+}
 
 Loot table progress
 
 Toggle tooltips can be a map of name to bool?
 https://misode.github.io/loot-table/?share=hVw5RcKDED
-
-
-# Split the reference book stuff out into it's own section when initialising the item, e.g. reference_book_config=()...
-# Category, description, wiki link? If it's in the book (hidden=False)?
 
 # Naturally occuring ore veins! Would be maybe tricky...
 
@@ -62,8 +71,6 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # Debug book with all the sounds? Could be fun, and helpful, sounds, fonts, paintings, etc.
 "Play sound" button in the book, with a list of all the sounds, and a play button next to them.
 
-# When creating instruments, optionally take a custom sound and do it for you. (Need datapack ]:)
-
 # Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with silk touch, etc.
 
 # For recipes, I suggest we suffix _<method> to it, so you can make stuff multiple ways, like beef can be smoked, furnaced and campfired
@@ -82,13 +89,9 @@ python -m pip install -e .
 
 # For things that are edible, add some lore? Same with equipable? "Can be used as a Glider", etc?
 
-# Make a tag by default for all items created by the datapack?
-
 # Lodestone tracker component data is broken, spins randomly (Because we're not in the nether?)
 
 # § -> &a - Kinda
-
-# Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
 
 Added minecraft:extended_view boolean property
 Returns true if player has requested extended details by holding shift key down (maybe only if they're not in the inventory?)

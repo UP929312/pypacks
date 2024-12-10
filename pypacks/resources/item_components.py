@@ -196,8 +196,7 @@ class Tool:
 
 @dataclass
 class Instrument:
-    """Used for the goat horn, can take a default minecraft sound or a custom sound, create a custom sound using CustomSound, then 
-    For sound_id, use {namespace}:{sound_internal_name}"""
+    """Used for the goat horn, can take a default minecraft sound or a custom sound"""
     # https://minecraft.wiki/w/Data_component_format#instrument
     # https://minecraft.wiki/w/Sounds.json#Sound_events
     sound_id: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",

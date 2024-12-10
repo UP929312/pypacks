@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 # from pypacks.utils import get_png_dimensions
 
 from pypacks.resources.custom_item import CustomItem
-from pypacks.book_generator import PAINTING_REF_BOOK_CATEGORY
+from pypacks.reference_book_config import PAINTING_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CONFIG
 from pypacks.resources.item_components import CustomItemData, EntityData
 
 if TYPE_CHECKING:
@@ -61,7 +61,7 @@ class CustomPainting:
             self.internal_name,
             self.title or self.internal_name,
             additional_item_data=CustomItemData(entity_data=EntityData({"id": "minecraft:painting", "variant": f"{datapack.namespace}:{self.internal_name}"})),
-            book_category=PAINTING_REF_BOOK_CATEGORY
+            ref_book_config=PAINTING_REF_BOOK_CONFIG
         )
 
     def generate_give_command(self, datapack: "Datapack") -> str:

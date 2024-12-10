@@ -72,6 +72,15 @@ class NumberProvider:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ================================================================================================================== #
 
+# "function": "minecraft:enchant_with_levels",`
+#               "levels": {
+#                 "type": "minecraft:uniform",
+#                 "max": 39.0,
+#                 "min": 20.0
+#               },
+#               "options": "#minecraft:on_random_loot"`
+
+
 
 @dataclass
 class Function:

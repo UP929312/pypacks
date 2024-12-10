@@ -14,6 +14,9 @@ class MCFunction:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="function")
 
+    def __post_init__(self) -> None:
+        assert len("".join(self.commands)) <= 2_000_000, "MCFunction files must be less than 2 million characters!"
+
     def get_reference(self, datapack: "Datapack") -> str:
         return f"{datapack.namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
 

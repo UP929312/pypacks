@@ -15,7 +15,6 @@ from pypacks.resources.custom_recipe import *
 from pypacks.resources.custom_sound import CustomSound
 from pypacks.resources.custom_tag import CustomTag
 
-from pypacks.book_generator import MISCELLANOUS_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
+from pypacks.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 
-from pypacks.book_generator import ReferenceBookCategory
 from pypacks.datapack import Datapack

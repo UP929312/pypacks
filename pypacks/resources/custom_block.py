@@ -53,6 +53,8 @@ class FacePaths:
         # │       └── textures/
         # │           └── item/
         # │               ├── <custom_block>_<top&bottom&front&back&left&right.png
+        if self.direction_type == "symmetric":
+            return
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
@@ -106,7 +108,7 @@ class CustomBlock:
     def __post_init__(self) -> None:
         if isinstance(self.block_texture, str):
             self.block_texture = FacePaths(self.block_texture, None, None, None, None, None)
-        assert self.block_texture.direction_type in ["symmetric", "cardinal", "axial"]
+        assert self.block_texture.direction_type in ["symmetric", "axial"]
 
     def set_or_create_loot_table(self) -> None:
         """Takes a CustomItem, item_name, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
@@ -189,11 +191,11 @@ class CustomBlock:
             # North = 135 -> 180 & -180 -> -135  |  East = -135 -> -45  |  South = -45 -> 45  |  West = 45 -> 135
             *([
                 f"execute if score rotation_group player_yaw matches {i} " + 
-                f"run execute at @s run rotate @s {(90 if self.block_texture.direction_type == 'axial' else 0)+(i*90)} 0"  # type: ignore[abc]
+                f"run execute at @s run rotate @s {(i+1)*90} 0"  # type: ignore[abc]
                 for i in [1, 2, 3, 4]
             ] if self.block_texture.direction_type in ["cardinal", "axial"] else []),  # type: ignore[abc]
 
-            # This does the same, but for pitch, which is in the -90 -> 90 range.
+            # This does the same, but for pitch, which is in the -90 -> 90 range (-90 = looking up, 90 = looking down).
             *([
                 f"execute if score rotation_group player_pitch matches {i} run execute at @s run rotate @s ~ {angle}"
                 for i, angle in zip([1, 2, 3], [90, 0, -90])
@@ -233,6 +235,7 @@ class CustomBlock:
         on_destroy_no_silk_touch_function = MCFunction(f"on_destroy_no_silk_touch_{self.internal_name}", [
                 f"kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
                 f"kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
+                f"kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
                 f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(datapack)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
                 f"kill @s"  # Kill the item display
             ],
@@ -252,5 +255,4 @@ class CustomBlock:
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         assert isinstance(self.block_texture, FacePaths)
-        if self.block_texture.direction_type != "symmetric":
-            self.block_texture.create_resource_pack_files(self, datapack)
+        self.block_texture.create_resource_pack_files(self, datapack)

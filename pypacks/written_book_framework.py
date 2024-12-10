@@ -50,6 +50,14 @@ class OnHoverShowText:
 
 
 @dataclass
+class OnHoverShowTextRaw:
+    text: dict[str, Any] | list[dict[str, Any]]
+
+    def get_json_data(self) -> dict[str, Any]:
+        return {"hoverEvent": {"action": "show_text", "contents": self.text}}
+
+
+@dataclass
 class OnHoverShowItem:
     custom_item: "CustomItem"
     datapack_namespace: str
@@ -180,7 +188,7 @@ class Icon:
     indent_unicode_char: str = field(repr=False)
     include_formatting: bool = field(repr=False, default=True)
     right_indentation: int = field(repr=False, default=1)
-    on_hover: OnHoverShowText | OnHoverShowItem | None = field(repr=False, default=None)
+    on_hover: OnHoverShowText | OnHoverShowTextRaw | OnHoverShowItem | None = field(repr=False, default=None)
     on_click: OnClickChangePage | OnClickRunCommand | None = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:

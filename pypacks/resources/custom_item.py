@@ -1,17 +1,18 @@
 import json
 import os
 import shutil
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
 from pypacks.resources.item_components import Consumable, Food, CustomItemData
 from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
+from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 
 if TYPE_CHECKING:
-    from pypacks.book_generator import ReferenceBookCategory
     from pypacks.datapack import Datapack
+    from pypacks.reference_book_config import RefBookConfig
 
 
 @dataclass
@@ -26,8 +27,7 @@ class CustomItem:
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: str | None = None  # Function to call when the item is right clicked
     additional_item_data: "CustomItemData | None" = field(repr=False, default=None)
-    reference_book_description: str | None = field(repr=False, default=None)
-    book_category: "ReferenceBookCategory" = field(repr=False, default=None)  # type: ignore[assignment]  # This is set in post_init
+    ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)  # type: ignore[assignment]  # Set in post_init, never None
 
     is_block: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: None = field(init=False, repr=False, default=None)
@@ -37,11 +37,6 @@ class CustomItem:
             self.additional_item_data.consumable is not None or self.additional_item_data.food is not None
         ):
             raise ValueError("You can't have both on_right_click and consumable/food!")
-
-        from pypacks.book_generator import MISCELLANOUS_REF_BOOK_CATEGORY  # Circular imports
-        if self.book_category is None:
-            self.book_category = MISCELLANOUS_REF_BOOK_CATEGORY
-
         self.custom_data |= {"pypacks_custom_item": self.internal_name}
 
         if self.on_right_click:
@@ -50,6 +45,9 @@ class CustomItem:
         path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
         with open(path, "rb") as file:
             self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
+
+    def __str__(self) -> "str":
+        return self.base_item  # This is used so we can cast CustomItem | str to string and always get a minecraft item
 
     def add_right_click_functionality(self) -> None:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""

@@ -5,13 +5,12 @@ from typing import TYPE_CHECKING
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
+from pypacks.reference_book_config import RefBookCategory
 from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
 from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
 
 
 if TYPE_CHECKING:
-    from pypacks.book_generator import ReferenceBookCategory
-
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_block import CustomBlock
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
@@ -94,17 +93,13 @@ class Datapack:
         # REFERENCE BOOK CATEGORIES
         # Get all the categories by removing duplicates via name
         # Can't use set() because they're unhashable
-        self.reference_book_categories: list["ReferenceBookCategory"] = []
-        for item in self.custom_items:
-            if item.book_category.name not in [x.name for x in self.reference_book_categories]:
-                with open(item.book_category.image_path, "rb") as file:
-                    item.book_category.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
-                self.reference_book_categories.append(item.book_category)
+        self.reference_book_categories = RefBookCategory.get_unique_categories([x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden])
         assert len(self.reference_book_categories) <= 20, "There can only be 20 reference book categories!"
         # Make sure none of the categories are too filled
         for category in self.reference_book_categories:
             # TODO: Remove this, I want multiple pages where possible
-            assert len([x for x in self.custom_items if x.book_category.name == category.name]) <= 18, f"Category {category.name} has too many items (>18)!"
+            assert len([x for x in self.custom_items if x.ref_book_config.category.name == category.name]) <= 18, \
+                   f"Category {category.name} has too many items (>18)!"
         # ==================================================================================
 
         self.mcfunctions.append(MCFunction("load", [

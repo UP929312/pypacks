@@ -45,7 +45,7 @@ def extract_item_type_and_components(item: "str | CustomItem", datapack: "Datapa
     regular_data = item.to_dict(datapack.namespace) if isinstance(item, CustomItem) else {}
     components = item.additional_item_data.to_dict(datapack) if isinstance(item, CustomItem) and item.additional_item_data is not None else {}
     combined = recusively_remove_nones_from_dict(regular_data | components)
-    item_type = item.base_item if isinstance(item, CustomItem) else item
+    item_type = item.base_item if isinstance(item, CustomItem) else item  # TODO: Convert to str(item)?
     return item_type, combined
 
 
