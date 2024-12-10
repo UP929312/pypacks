@@ -27,7 +27,7 @@ class CustomItem:
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: str | None = None  # Function to call when the item is right clicked
     additional_item_data: "CustomItemData | None" = field(repr=False, default=None)
-    ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)  # type: ignore[assignment]  # Set in post_init, never None
+    ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)
 
     is_block: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: None = field(init=False, repr=False, default=None)

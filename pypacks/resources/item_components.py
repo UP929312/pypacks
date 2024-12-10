@@ -41,29 +41,21 @@ class AttributeModifier:
 
 
 @dataclass
-class EntityData:
-    """Adds entity data to the item. Used in paintings, armor stands, item frames, etc"""
-    data: dict[str, Any]
-
-    def to_dict(self) -> dict[str, Any]:
-        return self.data
-
-# ==========================================================================================
-
-
-@dataclass
-class Equippable:
-    slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"]
-    equip_sound: str | None = None  # Sound event to play when the item is equipped
-    model: str | None = None
-    dispensable: bool = True  # whether the item can be equipped by using a Dispenser
+class BannerPattern:
+    """List of all patterns applied to the banner or the shield."""
+    # https://minecraft.wiki/w/Data_component_format#banner_patterns
+    pattern: Literal["base", "stripe_bottom", "stripe_top", "stripe_left", "stripe_right", "stripe_center", "stripe_middle", "stripe_downright",
+                     "stripe_downleft", "small_stripes", "cross", "straight_cross", "diagonal_left", "diagonal_right", "diagonal_up_left",
+                     "diagonal_up_right", "half_vertical", "half_vertical_right", "half_horizontal", "half_horizontal_bottom", "square_bottom_left",
+                     "square_bottom_right", "square_top_left", "square_top_right", "triangle_bottom", "triangle_top", "triangles_bottom",
+                     "triangles_top", "circle", "rhombus", "border", "curly_border", "bricks", "gradient", "gradient_up", "creeper", "skull",
+                     "flower", "mojang", "globe", "piglin", "flow", "guster"]  # The pattern type.
+    color: Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]  # The color for this pattern.
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "slot": self.slot,
-            "equip_sound": self.equip_sound,
-            "model": self.model,
-            "dispensable": True if self.dispensable else None,  # Defaults to False
+            "pattern": self.pattern,
+            "color": self.color,
         }
 
 
@@ -94,6 +86,78 @@ class Consumable:
 
 
 # ==========================================================================================
+
+
+@dataclass
+class EntityData:
+    """Adds entity data to the item. Used in paintings, armor stands, item frames, etc"""
+    data: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        return self.data
+
+# ==========================================================================================
+
+
+@dataclass
+class Equippable:
+    slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"]
+    equip_sound: str | None = None  # Sound event to play when the item is equipped
+    model: str | None = None
+    dispensable: bool = True  # whether the item can be equipped by using a Dispenser
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "slot": self.slot,
+            "equip_sound": self.equip_sound,
+            "model": self.model,
+            "dispensable": True if self.dispensable else None,  # Defaults to False
+        }
+
+
+# ==========================================================================================
+
+
+@dataclass
+class FireworkExplosion:
+    """The explosion effect stored by this firework star."""
+
+    shape: Literal["small_ball", "large_ball", "star", "creeper", "burst"]  # The shape of the explosion.
+    colors: list[int]  # The colors of the initial particles of the explosion, randomly selected from. This is a list of RGB ints, i.e. 0-16777215.
+    fade_colors: list[int]  # The colors of the fading particles of the explosion, randomly selected from. This is a list of RGB ints, i.e. 0-16777215.
+    has_trail: bool = False  # Whether or not the explosion has a trail effect (diamond).
+    has_twinkle: bool = False  # Whether or not the explosion has a twinkle effect (glowstone dust).
+
+    def to_dict(self) -> dict[str, Any]:
+        assert [0 <= x <= 16777215 for x in self.colors], "colours must be a list of RGB values, e.g. [16777215]"
+        assert [0 <= x <= 16777215 for x in self.fade_colors], "fade_colours must be a list of RGB values, e.g. [16777215]"
+        return {
+            "shape": self.shape,
+            "colors": self.colors,
+            "fade_colors": self.fade_colors,
+            "trail": True if self.has_trail else None,  # Defaults to False
+            "twinkle": True if self.has_twinkle else None,  # Defaults to False
+        }
+
+
+@dataclass
+class Firework:
+    """The effects and duration stored in a firework."""
+
+    explosions: list[FireworkExplosion]  # List of the explosion effects caused by this firework rocket.
+    flight_duration: int = 1  # The flight duration of this firework rocket, i.e. the number of gunpowders used to craft it.
+
+    def to_dict(self) -> dict[str, Any]:
+        assert len(self.explosions) <= 256, "Firework can only have a maximum of 256 explosions"
+        assert -128 <= self.flight_duration <= 127, "Flight duration must be an integer between -128 and 127"
+        return {
+            "explosions": [explosion.to_dict() for explosion in self.explosions],
+            "flight": self.flight_duration,
+        }
+
+
+# ==========================================================================================
+
 
 
 @dataclass
@@ -161,6 +225,31 @@ class LodestoneTracker:
                 "dimension": self.dimension,
             },
             "tracked": False if not self.tracked else None,  # Defaults to True
+        }
+
+
+# ==========================================================================================
+
+MapDecorationType = Literal[
+    "player", "frame", "red_marker", "blue_marker", "target_x", "target_point", "player_off_map", "player_off_limits", "mansion", "monument",
+    "banner_white", "banner_orange", "banner_magenta", "banner_light_blue", "banner_yellow", "banner_lime", "banner_pink", "banner_gray",
+    "banner_light_gray", "banner_cyan", "banner_purple", "banner_blue", "banner_brown", "banner_green", "banner_red", "banner_black",
+    "red_x", "desert_village", "plains_village", "savanna_village", "snowy_village", "taiga_village", "jungle_pyramid", "swamp_hut",
+]
+
+@dataclass(frozen=True)
+class MapDecoration:
+    type: MapDecorationType
+    x: int
+    z: int
+    rotation: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "x": self.x,
+            "z": self.z,
+            "rotation": self.rotation,
         }
 
 
@@ -283,36 +372,40 @@ EnchantmentType = Literal[
 
 @dataclass
 class CustomItemData:
-    durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#max_damage  <-- Tools only
-    lost_durability: int | None = None  # https://minecraft.wiki/w/Data_component_format#damage  <-- Tools only
-    enchantment_glint_override: bool = False  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
-    glider: bool = False  # https://minecraft.wiki/w/Data_component_format#glider
-    unbreakable: bool = False  # https://minecraft.wiki/w/Data_component_format#unbreakable
-    destroyed_in_lava: bool = True  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
-    hide_tooltip: bool = False  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
-    hide_additional_tooltip: bool = False  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
-    repaired_by: list[str] | None = None  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
-    repair_cost: int | None = None  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only
+    durability: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#max_damage  <-- Tools only
+    lost_durability: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage  <-- Tools only
+    enchantment_glint_override: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
+    glider: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#glider
+    unbreakable: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#unbreakable
+    destroyed_in_lava: bool = field(default=True, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
+    hide_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
+    hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
+    repaired_by: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
+    repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only
 
-    enchantments: dict[EnchantmentType, int] | None = None  # https://minecraft.wiki/w/Data_component_format#enchantments
-    loaded_projectiles: list[str] | None = None  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
-    player_head_username: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
-    custom_head_texture: "str | None" = None  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
-    ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = None  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
+    enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
+    loaded_projectiles: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
+    player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    custom_head_texture: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
 
-    entity_data: "EntityData | None" = None
-    cooldown: "Cooldown | None" = None
-    equippable_slots: "Equippable | None" = None  # https://minecraft.wiki/w/Data_component_format#equippable
-    consumable: "Consumable | None" = None  # https://minecraft.wiki/w/Data_component_format#consumable
-    food: "Food | None" = None  # https://minecraft.wiki/w/Data_component_format#food
-    use_remainder: "UseRemainder | None" = None
-    jukebox_playable: "JukeboxPlayable | None" = None
-    lodestone_tracker: "LodestoneTracker | None" = None
-    tool: "Tool | None" = None
-    instrument: "Instrument | None" = None  # <-- Goat horn only
-    written_book_content: "WrittenBookContent | None" = None  # <-- Written book only
-    writable_book_content: "WritableBookContent | None" = None  # <-- Book and Quill only
-    attribute_modifiers: list[AttributeModifier] | None = None
+    attribute_modifiers: list[AttributeModifier] | None = field(default=None, kw_only=True)
+    banner_patterns: list[BannerPattern] | None = field(default=None, kw_only=True)
+    cooldown: "Cooldown | None" = field(default=None, kw_only=True)
+    consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
+    entity_data: "EntityData | None" = field(default=None, kw_only=True)
+    equippable_slots: "Equippable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#equippable
+    firework_explosion: "FireworkExplosion | None" = field(default=None, kw_only=True)
+    firework: "Firework | None" = field(default=None, kw_only=True)
+    food: "Food | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#food
+    jukebox_playable: "JukeboxPlayable | None" = field(default=None, kw_only=True)
+    lodestone_tracker: "LodestoneTracker | None" = field(default=None, kw_only=True)
+    map_decorations: "list[MapDecoration] | None" = field(default=None, kw_only=True)
+    tool: "Tool | None" = field(default=None, kw_only=True)
+    instrument: "Instrument | None" = field(default=None, kw_only=True)  # <-- Goat horn only
+    use_remainder: "UseRemainder | None" = field(default=None, kw_only=True)
+    written_book_content: "WrittenBookContent | None" = field(default=None, kw_only=True)  # <-- Written book only
+    writable_book_content: "WritableBookContent | None" = field(default=None, kw_only=True)  # <-- Book and Quill only
 
     def __post_init__(self) -> None:
         assert self.durability is None or self.durability > 0, "durability must be a positive integer"
@@ -340,23 +433,26 @@ class CustomItemData:
             "profile":                    self.player_head_username if self.player_head_username else profile,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier if self.ominous_bottle_amplifier is not None else None,
 
-            "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
-            "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
-            "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
+            "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns is not None else None,
             "consumable":                 self.consumable.to_dict() if self.consumable is not None else None,
+            "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
+            "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
+            "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
+            "fireworks":                  self.firework.to_dict() if self.firework is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,
-            "use_remainder":              self.use_remainder.to_dict(datapack) if self.use_remainder is not None else None,
             "jukebox_playable":           self.jukebox_playable.to_dict() if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
+            "map_decorations":            {hash(x): x.to_dict() for x in self.map_decorations} if self.map_decorations is not None else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
             "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
+            "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
+            "use_remainder":              self.use_remainder.to_dict(datapack) if self.use_remainder is not None else None,
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
 
-# banner_patterns  MEH
 # base_color - for shields MEH
 # bees - for beehives/nests MEH
 # block_entity_data MEH
@@ -376,8 +472,6 @@ class CustomItemData:
 # dyed_color - leather armor only? MEH
 # enchantable # NOT YET (custom enchants maybe?)
 # equippable REDO, more stuff
-# firework_explosion MEH
-# fireworks MEH
 # intangible_projectile MEH
 # note_block_sound
 # potion_contents

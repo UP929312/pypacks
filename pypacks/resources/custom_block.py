@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.resources.custom_loot_table import CustomLootTable, SingleItemPool
+from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -101,7 +101,7 @@ class CustomBlock:
     block_texture: str | FacePaths
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
-    # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc
+    # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 
     block_item: "CustomItem | None" = field(init=False, repr=False, default=None)  # Used by datapack to create the custom icons
 
@@ -191,15 +191,15 @@ class CustomBlock:
             # North = 135 -> 180 & -180 -> -135  |  East = -135 -> -45  |  South = -45 -> 45  |  West = 45 -> 135
             *([
                 f"execute if score rotation_group player_yaw matches {i} " + 
-                f"run execute at @s run rotate @s {(i+1)*90} 0"  # type: ignore[abc]
+                f"run execute at @s run rotate @s {(i+1)*90} 0"
                 for i in [1, 2, 3, 4]
-            ] if self.block_texture.direction_type in ["cardinal", "axial"] else []),  # type: ignore[abc]
+            ] if self.block_texture.direction_type in ["cardinal", "axial"] else []),  # type: ignore[union-attr]
 
             # This does the same, but for pitch, which is in the -90 -> 90 range (-90 = looking up, 90 = looking down).
             *([
                 f"execute if score rotation_group player_pitch matches {i} run execute at @s run rotate @s ~ {angle}"
                 for i, angle in zip([1, 2, 3], [90, 0, -90])
-            ] if self.block_texture.direction_type == "axial" else []),  # type: ignore[abc]
+            ] if self.block_texture.direction_type == "axial" else []),  # type: ignore[union-attr]
 
             ],
             ["custom_blocks", "execute_on_item_display"],

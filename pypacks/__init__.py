@@ -1,14 +1,9 @@
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock, FacePaths
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.item_components import CustomItemData, EntityData, Equippable, Consumable, Food, UseRemainder, JukeboxPlayable, LodestoneTracker, ToolRule, Tool, Instrument, WrittenBookContent, AttributeModifier, Cooldown
+from pypacks.resources.item_components import CustomItemData, EntityData, Equippable, Consumable, FireworkExplosion, Firework, Food, UseRemainder, JukeboxPlayable, LodestoneTracker, MapDecoration, ToolRule, Tool, Instrument, WrittenBookContent, AttributeModifier, Cooldown
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
-from pypacks.resources.custom_loot_table import (
-    BinomialDistributionEntry, UniformDistributionEntry, SingleItemRangeEntry,
-    SingleItemPool, SimpleRangePool,
-    CustomLootTable, SimpleRangeLootTable, SingleItemLootTable,
-    LootContextTypes, LootContextPredicateTypes,
-)
+from pypacks.resources.custom_loot_tables import *
 from pypacks.resources.custom_painting import CustomPainting
 from pypacks.resources.custom_predicate import Predicate
 from pypacks.resources.custom_recipe import *

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_block import CustomBlock
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
-    from pypacks.resources.custom_loot_table import CustomLootTable
+    from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
     from pypacks.resources.custom_painting import CustomPainting
     from pypacks.resources.custom_predicate import Predicate
     from pypacks.resources.custom_recipe import Recipe

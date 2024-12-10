@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
-# from pypacks.resources.custom_predicate import Predicate
 from pypacks.utils import recusively_remove_nones_from_dict, extract_item_type_and_components
+from pypacks.resources.custom_loot_tables.functions import LootTableFunction
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -52,45 +52,6 @@ potential_context_parameters = {
 #     include_world_seed: bool = True
 #     salt: int = 0   # Data version = "4179"
 
-
-class ItemModifier:
-    # https://minecraft.wiki/w/Item_modifier
-    pass
-
-
-# ================================================================================================================== #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NUMBER PROVIDER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-# ================================================================================================================== #
-
-
-class NumberProvider:
-    # https://minecraft.wiki/w/Loot_table#Number_provider
-    pass
-
-
-# ================================================================================================================== #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-# ================================================================================================================== #
-
-# "function": "minecraft:enchant_with_levels",`
-#               "levels": {
-#                 "type": "minecraft:uniform",
-#                 "max": 39.0,
-#                 "min": 20.0
-#               },
-#               "options": "#minecraft:on_random_loot"`
-
-
-
-@dataclass
-class Function:
-    function_name: str
-    function_parameters: dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        return {"function": self.function_name, **self.function_parameters}
-
-
 # ================================================================================================================== #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ENTRY~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ================================================================================================================== #
@@ -106,6 +67,9 @@ class Entry:
     # weight: int = 1
     # quality: int = 0
 
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        return {}
+
 
 @dataclass
 class SingleItemRangeEntry(Entry):
@@ -120,8 +84,8 @@ class SingleItemRangeEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [Function("minecraft:set_count", {"count": {"min": self.min_count, "max": self.max_count}}).to_dict(datapack)] +
-                ([Function("minecraft:set_components", {"components": combined_components}).to_dict(datapack)] if combined_components else []),
+                [LootTableFunction("minecraft:set_count", {"count": {"min": self.min_count, "max": self.max_count}}).to_dict()] +
+                ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
         }
 
 
@@ -138,8 +102,8 @@ class BinomialDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [Function("minecraft:set_count", {"binomial": {"min": self.min_count, "max": self.max_count}})] +
-                ([Function("minecraft:set_components", {"components": combined_components})] if combined_components else []),
+                [LootTableFunction("minecraft:set_count", {"binomial": {"min": self.min_count, "max": self.max_count}})] +  # TODO: Remove this, use the number provider
+                ([LootTableFunction("minecraft:set_components", {"components": combined_components})] if combined_components else []),
         }
 
 
@@ -155,8 +119,8 @@ class UniformDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [Function("minecraft:set_count", {"uniform": {"min": self.min_count, "max": self.max_count}}).to_dict(datapack)] +
-                ([Function("minecraft:set_components", {"components": combined_components}).to_dict(datapack)] if combined_components else []),
+                [LootTableFunction("minecraft:set_count", {"uniform": {"min": self.min_count, "max": self.max_count}}).to_dict()] +
+                ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
         }
 
 
@@ -171,7 +135,7 @@ PoolTableEntry: TypeAlias = "SingleItemRangeEntry | BinomialDistributionEntry | 
 class Pool:
     # https://minecraft.wiki/w/Loot_table#Pool
     # conditions: list[Predicate] | None
-    functions: list[Function] | None
+    functions: list[LootTableFunction] | None
     rolls: int = 1
     bonus_rolls: int | None = None
     entries: list[Entry] = field(default_factory=list)
@@ -179,7 +143,7 @@ class Pool:
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         data = {
             "rolls": self.rolls,
-            "entries": [entry.to_dict(datapack) for entry in self.entries]  # type: ignore
+            "entries": [entry.to_dict(datapack) for entry in self.entries]
         }
         # if self.bonus_rolls:
         #     data["bonus_rolls"] = self.bonus_rolls
