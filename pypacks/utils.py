@@ -127,7 +127,7 @@ def get_png_height(file_path: str | None = None, image_bytes: bytes | None = Non
     return get_png_dimensions(image_bytes=image_bytes, enforce_square=enforce_square, enforce_factor_of_two=enforce_factor_of_two)[1]
 
 
-def resolve_default_item_image(base_item: str) -> str:
+def resolve_default_item_image(base_item: str) -> Path:
     no_minecraft = base_item.removeprefix('minecraft:')
     path = Path(PYPACKS_ROOT)/"assets"/"minecraft"/"item"/f"{no_minecraft}.png"
     if no_minecraft in ITEM_TO_SPECIAL_TEXTURE_MAPPING:
@@ -140,7 +140,7 @@ def resolve_default_item_image(base_item: str) -> str:
         path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"spawn_egg.png"
     if not path.exists():
         path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"unknown.png"  # Others, player head
-    return str(path)
+    return path
 
 
 def pascal_to_snake(name: str) -> str:

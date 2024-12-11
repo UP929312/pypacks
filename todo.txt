@@ -4,6 +4,8 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 
 # Optimise the loot tables to use number providers.
 
+# give @s filled_map[map_color=16711680]  # Red
+
 # In the future, for custom inventories/block entities, do
 setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
 # execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
