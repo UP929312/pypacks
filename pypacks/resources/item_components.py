@@ -121,20 +121,21 @@ class Equippable:
 @dataclass
 class FireworkExplosion:
     """The explosion effect stored by this firework star."""
+    # https://minecraft.wiki/w/Data_component_format#firework_explosion
 
     shape: Literal["small_ball", "large_ball", "star", "creeper", "burst"]  # The shape of the explosion.
     colors: list[int]  # The colors of the initial particles of the explosion, randomly selected from. This is a list of RGB ints, i.e. 0-16777215.
-    fade_colors: list[int]  # The colors of the fading particles of the explosion, randomly selected from. This is a list of RGB ints, i.e. 0-16777215.
+    fade_colors: list[int] = field(default_factory=list)  # The colors of the fading particles of the explosion, randomly selected from. This is a list of RGB ints, i.e. 0-16777215.
     has_trail: bool = False  # Whether or not the explosion has a trail effect (diamond).
     has_twinkle: bool = False  # Whether or not the explosion has a twinkle effect (glowstone dust).
 
     def to_dict(self) -> dict[str, Any]:
-        assert [0 <= x <= 16777215 for x in self.colors], "colours must be a list of RGB values, e.g. [16777215]"
-        assert [0 <= x <= 16777215 for x in self.fade_colors], "fade_colours must be a list of RGB values, e.g. [16777215]"
+        assert [0 <= x <= 16777215 for x in self.colors], f"colours must be a list of RGB values, e.g. [16777215], recieved: {self.colors}"
+        assert [0 <= x <= 16777215 for x in self.fade_colors] if self.fade_colors else True, f"fade_colours must be a list of RGB values, e.g. [16777215], recieved: {self.fade_colors}"
         return {
             "shape": self.shape,
             "colors": self.colors,
-            "fade_colors": self.fade_colors,
+            "fade_colors": self.fade_colors if self.fade_colors else None,  # (Can have no fade colours)
             "trail": True if self.has_trail else None,  # Defaults to False
             "twinkle": True if self.has_twinkle else None,  # Defaults to False
         }
@@ -142,7 +143,8 @@ class FireworkExplosion:
 
 @dataclass
 class Firework:
-    """The effects and duration stored in a firework."""
+    """The effects and duration stored in a firework.
+    Passing in a negative flight duration will act like a positive one, but the firework won't explode (just fly up for the duration)."""
 
     explosions: list[FireworkExplosion]  # List of the explosion effects caused by this firework rocket.
     flight_duration: int = 1  # The flight duration of this firework rocket, i.e. the number of gunpowders used to craft it.
@@ -152,7 +154,7 @@ class Firework:
         assert -128 <= self.flight_duration <= 127, "Flight duration must be an integer between -128 and 127"
         return {
             "explosions": [explosion.to_dict() for explosion in self.explosions],
-            "flight": self.flight_duration,
+            "flight_duration": self.flight_duration,
         }
 
 
@@ -382,6 +384,7 @@ class CustomItemData:
     hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only
+    map_color: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#map_color  <-- Maps only
 
     enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
     loaded_projectiles: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
@@ -395,8 +398,8 @@ class CustomItemData:
     consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
     entity_data: "EntityData | None" = field(default=None, kw_only=True)
     equippable_slots: "Equippable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#equippable
-    firework_explosion: "FireworkExplosion | None" = field(default=None, kw_only=True)
-    firework: "Firework | None" = field(default=None, kw_only=True)
+    firework_explosion: "FireworkExplosion | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#firework_explosion
+    firework: "Firework | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#firework
     food: "Food | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#food
     jukebox_playable: "JukeboxPlayable | None" = field(default=None, kw_only=True)
     lodestone_tracker: "LodestoneTracker | None" = field(default=None, kw_only=True)
@@ -427,9 +430,10 @@ class CustomItemData:
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
             "repair_cost":                self.repair_cost if self.repair_cost is not None else None,
+            "map_color":                  self.map_color if self.map_color is not None else None,
 
             "enchantments":               self.enchantments if self.enchantments is not None else None,
-            "charged_projectiles":        [{"id": projectile for projectile in self.loaded_projectiles}] if self.loaded_projectiles is not None else None,
+            "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
             "profile":                    self.player_head_username if self.player_head_username else profile,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier if self.ominous_bottle_amplifier is not None else None,
 

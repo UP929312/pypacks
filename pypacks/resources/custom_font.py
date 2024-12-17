@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class BookImage:
+class FontImage:
     """Represents an image in a book."""
     name: str
     image_bytes: bytes
@@ -22,12 +22,21 @@ class BookImage:
         assert self.height is None or 0 < self.height <= 256, "Height must be between 1 and 256"
         assert 0 < get_png_height(image_bytes=self.image_bytes, enforce_square=False) <= 256, "Image height must be between 1 and 256"
 
+    def to_dict(self, datapack: "Datapack", char: str) -> dict[str, Any]:
+        return {
+            "type": "bitmap",
+            "file": f"{datapack.namespace}:font/{self.name}.png",
+            "height": self.height if self.height is not None else get_png_height(image_bytes=self.image_bytes),
+            "ascent": self.y_offset if self.y_offset is not None else min(get_png_height(image_bytes=self.image_bytes) // 2, 16),
+            "chars": [char],
+        }
+
 
 @dataclass
 class CustomFont:
     """Adds a custom font to the resource pack. Not invokable manually, used internally (for now)"""
     name: str
-    font_elements: list[BookImage]
+    font_elements: list[FontImage]
 
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
@@ -36,21 +45,17 @@ class CustomFont:
     def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:
         mapping = self.get_mapping()
         return [
-            {
-                "type": "bitmap",
-                "file": f"{datapack.namespace}:font/{element.name}.png",
-                "height": element.height if element.height is not None else get_png_height(image_bytes=element.image_bytes),
-                "ascent": element.y_offset if element.y_offset is not None else min(get_png_height(image_bytes=element.image_bytes) // 2, 16),
-                "chars": [mapping[element.name]],
-            }
+            element.to_dict(datapack, mapping[element.name])
             for element in self.font_elements
         ]
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"font", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
+
         for font_element in self.font_elements:
             with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font"/f"{font_element.name}.png", "wb") as file:
                 file.write(font_element.image_bytes)
+
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"font"/f"{self.name}.json", "w") as file:
             file.write(json.dumps({"providers": self.to_dict(datapack)}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes

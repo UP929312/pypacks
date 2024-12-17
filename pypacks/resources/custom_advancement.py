@@ -9,7 +9,20 @@ if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.custom_item import CustomItem
 
-TriggerType = Literal["minecraft:allay_drop_item_on_block", "minecraft:any_block_use", "minecraft:avoid_vibration", "minecraft:bee_nest_destroyed", "minecraft:bred_animals", "minecraft:brewed_potion", "minecraft:changed_dimension", "minecraft:channeled_lightning", "minecraft:construct_beacon", "minecraft:consume_item", "minecraft:crafter_recipe_crafted", "minecraft:cured_zombie_villager", "minecraft:default_block_use", "minecraft:effects_changed", "minecraft:enchanted_item", "minecraft:enter_block", "minecraft:entity_hurt_player", "minecraft:entity_killed_player", "minecraft:fall_after_explosion", "minecraft:fall_from_height", "minecraft:filled_bucket", "minecraft:fishing_rod_hooked", "minecraft:hero_of_the_village", "minecraft:impossible", "minecraft:inventory_changed", "minecraft:item_durability_changed", "minecraft:item_used_on_block", "minecraft:kill_mob_near_sculk_catalyst", "minecraft:killed_by_crossbow", "minecraft:levitation", "minecraft:lightning_strike", "minecraft:location", "minecraft:nether_travel", "minecraft:placed_block", "minecraft:player_generates_container_loot", "minecraft:player_hurt_entity", "minecraft:player_interacted_with_entity", "minecraft:player_killed_entity", "minecraft:recipe_crafted", "minecraft:recipe_unlocked", "minecraft:ride_entity_in_lava", "minecraft:shot_crossbow", "minecraft:slept_in_bed", "minecraft:slide_down_block", "minecraft:started_riding", "minecraft:summoned_entity", "minecraft:tame_animal", "minecraft:target_hit", "minecraft:thrown_item_picked_up_by_entity", "minecraft:thrown_item_picked_up_by_player", "minecraft:tick", "minecraft:used_ender_eye", "minecraft:used_totem", "minecraft:using_item", "minecraft:villager_trade"]
+TriggerType = Literal["minecraft:allay_drop_item_on_block", "minecraft:any_block_use", "minecraft:avoid_vibration", "minecraft:bee_nest_destroyed",
+                      "minecraft:bred_animals", "minecraft:brewed_potion", "minecraft:changed_dimension", "minecraft:channeled_lightning",
+                      "minecraft:construct_beacon", "minecraft:consume_item", "minecraft:crafter_recipe_crafted", "minecraft:cured_zombie_villager",
+                      "minecraft:default_block_use", "minecraft:effects_changed", "minecraft:enchanted_item", "minecraft:enter_block",
+                      "minecraft:entity_hurt_player", "minecraft:entity_killed_player", "minecraft:fall_after_explosion", "minecraft:fall_from_height",
+                      "minecraft:filled_bucket", "minecraft:fishing_rod_hooked", "minecraft:hero_of_the_village", "minecraft:impossible",
+                      "minecraft:inventory_changed", "minecraft:item_durability_changed", "minecraft:item_used_on_block",
+                      "minecraft:kill_mob_near_sculk_catalyst", "minecraft:killed_by_crossbow", "minecraft:levitation", "minecraft:lightning_strike",
+                      "minecraft:location", "minecraft:nether_travel", "minecraft:placed_block", "minecraft:player_generates_container_loot",
+                      "minecraft:player_hurt_entity", "minecraft:player_interacted_with_entity", "minecraft:player_killed_entity", "minecraft:recipe_crafted",
+                      "minecraft:recipe_unlocked", "minecraft:ride_entity_in_lava", "minecraft:shot_crossbow", "minecraft:slept_in_bed",
+                      "minecraft:slide_down_block", "minecraft:started_riding", "minecraft:summoned_entity", "minecraft:tame_animal", "minecraft:target_hit",
+                      "minecraft:thrown_item_picked_up_by_entity", "minecraft:thrown_item_picked_up_by_player", "minecraft:tick", "minecraft:used_ender_eye",
+                      "minecraft:used_totem", "minecraft:using_item", "minecraft:villager_trade"]
 
 @dataclass
 class Criteria:
@@ -17,6 +30,12 @@ class Criteria:
     name: str
     trigger: TriggerType
     conditions: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "trigger": self.trigger,
+            "conditions": self.conditions,
+        }
 
 
 @dataclass
@@ -56,11 +75,10 @@ class CustomAdvancement:
                 "announce_to_chat": False if not self.announce_to_chat else None,
             } if not self.hidden else None,
             "criteria": {
-                x.name: {"trigger": x.trigger, "conditions": x.conditions}
-                for x in self.criteria
+                criteriom.name: criteriom.to_dict() for criteriom in self.criteria
             },
             "requirements": [
-                [x.name for x in self.criteria],
+                [x.name for x in self.criteria],  # TODO: Back to the below way?
             ],
             # "requirements": [[x.name] for x in self.criteria],  # This means we AND all requirements
             "rewards": {

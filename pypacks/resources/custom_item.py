@@ -117,7 +117,7 @@ class CustomItem:
             for key, value in self.to_dict(datapack.namespace).items()
         ])
         additional_item_data_string = (
-            to_component_string(self.additional_item_data.to_dict(datapack))    # Also strips None
+            to_component_string(self.additional_item_data.to_dict(datapack))  # Also strips None
             if self.additional_item_data else None
         )
         # TODO: Figure out a way to not have to do this?

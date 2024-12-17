@@ -1,10 +1,25 @@
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
+# Custom crafter and floor crafting would be nice to do...
+
+When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
+
+# Make datapack just take "custom content" and filter using isinstance?
+
+Make a wall of all the items, with an item frame of each item, and a command block and button, would be really cool.
+
+# Add simple minecraft colours, e.g. Pypacks.RED, Pypacks.GREEN, etc
+
+# Item additional data validation, like checking map colour on non-map items
 
 # Optimise the loot tables to use number providers.
 
-# give @s filled_map[map_color=16711680]  # Red
+# Analytics, python version, what custom content they added, etc - would be super useful with knowing where to focus development.
+
+# What happens if they have more than 18 songs or paintings?
+
+# Fireworks also take hex, that's just python, and convert it to int already
 
 # In the future, for custom inventories/block entities, do
 setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
@@ -25,7 +40,7 @@ REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its set
 
 # Move all the internal functions and textures into an "internal" subdir
 
-Custom block stairs, slabs?
+Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
 {
   "parent": "minecraft:block/stairs",
   "textures": {

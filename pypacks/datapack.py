@@ -74,7 +74,7 @@ class Datapack:
             if block.block_item is not None:
                 self.custom_items.append(block.block_item)  # The custom item
             if block.loot_table is not None:
-                self.custom_loot_tables.append(block.loot_table)
+                self.custom_loot_tables.append(block.loot_table)  # When breaking the block
             self.custom_advancements.append(block.create_advancement(self))  # Advancement for placing the block
             self.mcfunctions.extend(block.generate_functions(self))  # Raycasting functions
 
@@ -84,29 +84,26 @@ class Datapack:
             self.mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
             self.custom_tags.append(ray_transitive_blocks_tag)
         # ==================================================================================
-        # Adding all the paintings' items to the list
+        # Adding all the paintings' and jukebox's items to the list
         for painting in self.custom_paintings:
             self.custom_items.append(painting.generate_custom_item(self))
         for song in self.custom_jukebox_songs:
             self.custom_items.append(song.generate_custom_item(self))
         # ==================================================================================
         # REFERENCE BOOK CATEGORIES
-        # Get all the categories by removing duplicates via name
-        # Can't use set() because they're unhashable
         self.reference_book_categories = RefBookCategory.get_unique_categories([x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden])
-        assert len(self.reference_book_categories) <= 20, "There can only be 20 reference book categories!"
         # Make sure none of the categories are too filled
         for category in self.reference_book_categories:
             # TODO: Remove this, I want multiple pages where possible
             assert len([x for x in self.custom_items if x.ref_book_config.category.name == category.name]) <= 18, \
-                   f"Category {category.name} has too many items (>18)!"
+                   f"Category {category.name} has too many items (> 18)!"
         # ==================================================================================
 
         self.mcfunctions.append(MCFunction("load", [
             f"function {self.namespace}:raycast/load",
-            f"gamerule maxCommandChainLength {10_000_000}",
-            f"scoreboard objectives add player_yaw dummy",
-            f"scoreboard objectives add player_pitch dummy",
+            f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
+            f"scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
+            f"scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [

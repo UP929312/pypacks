@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pypacks.book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES
-from pypacks.resources.custom_font import CustomFont, BookImage
+from pypacks.resources.custom_font import CustomFont, FontImage
 from pypacks.resources.custom_item import CustomItem
 
 if TYPE_CHECKING:
@@ -46,28 +46,28 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
     # Create the providers file
     all_elements = [
         *[   # BASE IMAGES, Spaces, Empty icon, logo
-            BookImage(name=image_name, image_bytes=Path(image_path).read_bytes())
+            FontImage(name=image_name, image_bytes=Path(image_path).read_bytes())
             for image_name, image_path in BASE_IMAGES.items()
         ],
         # Logo (scaled, better resolution)
-        BookImage("logo_256_x_256", Path(IMAGES_PATH, "reference_book_icons", "logo_256_x_256.png").read_bytes(), height=100, y_offset=16),
-        BookImage("satchel_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
-        BookImage("information_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
+        FontImage("logo_256_x_256", Path(IMAGES_PATH, "reference_book_icons", "logo_256_x_256.png").read_bytes(), height=100, y_offset=16),
+        FontImage("satchel_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
+        FontImage("information_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
                                                            base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=18, y_offset=14),
         *[  # Category icons
-            BookImage(f"{category.internal_name}_category_icon", image_bytes=category.icon_image_bytes)
+            FontImage(f"{category.internal_name}_category_icon", image_bytes=category.icon_image_bytes)
             for category in datapack.reference_book_categories
         ],
         *[  # Custom items
-            BookImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
+            FontImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
             for item in datapack.custom_items
         ],
         *[  # Custom recipes
-            BookImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.recipe_image_bytes, y_offset=6)
+            FontImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.recipe_image_bytes, y_offset=6)
             for custom_recipe in [x for x in datapack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and isinstance(x.result, CustomItem)]
         ],
         *[  # Custom recipe icons
-            BookImage(f"{recipe.recipe_block_name}_icon",
+            FontImage(f"{recipe.recipe_block_name}_icon",
                       image_bytes=add_centered_overlay(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
                                                        base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False),
                       height=18, y_offset=14)

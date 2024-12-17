@@ -12,14 +12,15 @@ class RefBookCategory:
     image_path: str | Path
     icon_image_bytes: bytes = None  # type: ignore  # DON'T SET THIS MANUALLY
 
+    def __post_init__(self) -> None:
+        with open(self.image_path, "rb") as file:
+            self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
+
     @staticmethod
     def get_unique_categories(categories: list["RefBookCategory"]) -> list["RefBookCategory"]:
-        reference_book_categories: list["RefBookCategory"] = []
-        for category in categories:
-            if category.name not in [x.name for x in reference_book_categories]:
-                with open(category.image_path, "rb") as file:
-                    category.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
-                reference_book_categories.append(category)
+        # Get all the categories by removing duplicates via name
+        reference_book_categories = list({category.name: category for category in categories}.values())
+        assert len(reference_book_categories) <= 20, "There can only be 20 reference book categories!"
         return reference_book_categories
 
 
