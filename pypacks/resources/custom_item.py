@@ -5,10 +5,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
-from pypacks.resources.item_components import Consumable, Food, CustomItemData
 from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
 from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
+from pypacks.resources.item_components import Consumable, Food, CustomItemData
+from pypacks.resources.mcfunction import MCFunction
+from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -46,6 +47,8 @@ class CustomItem:
         with open(path, mode="rb") as file:
             self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
 
+        self.use_right_click_cooldown = getattr(getattr(self.additional_item_data, "cooldown", None), "seconds", None)
+
     def __str__(self) -> "str":
         return self.base_item  # This is used so we can cast CustomItem | str to string and always get a minecraft item
 
@@ -53,15 +56,12 @@ class CustomItem:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""
         consumable = Consumable(consume_seconds=1_000_000, animation="none", sound=None, has_consume_particles=False)
         food = Food(nutrition=0, saturation=0, can_always_eat=True)
-        # cooldown = Cooldown(5, f"custom_right_click_for_{self.internal_name}")
         tag = {f"custom_right_click_for_{self.internal_name}": True}
         if self.additional_item_data:
             self.additional_item_data.consumable = consumable
             self.additional_item_data.food = food
-            # if self.additional_item_data.cooldown is None:
-            #     self.additional_item_data.cooldown = cooldown
         else:
-            self.additional_item_data = CustomItemData(consumable=consumable, food=food)  # , cooldown=cooldown
+            self.additional_item_data = CustomItemData(consumable=consumable, food=food)
         self.custom_data |= tag
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
@@ -96,9 +96,22 @@ class CustomItem:
             file.write(self.generate_give_command(datapack))
 
         if self.on_right_click is not None:
-            os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"right_click", exist_ok=True)
-            with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"right_click"/f"{self.internal_name}.mcfunction", "w") as file:
-                file.write(f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}\n{self.on_right_click}")
+            revoke_and_call_mcfunction = MCFunction(
+                self.internal_name, [
+                    f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}",
+                ], ["right_click"]
+            )
+            if self.use_right_click_cooldown is not None:
+                action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
+                revoke_and_call_mcfunction.commands.extend([
+                    f"execute as @a[scores={{{self.internal_name}_cooldown=1..}}] run {action_bar_command}",
+                    f"execute as @s[scores={{{self.internal_name}_cooldown=0}}] run {self.on_right_click}",
+                    f"execute as @a[scores={{{self.internal_name}_cooldown=0}}] run scoreboard players set @s {self.internal_name}_cooldown {self.use_right_click_cooldown*20}",
+                ])
+            else:
+                revoke_and_call_mcfunction.commands.append(self.on_right_click)
+
+            revoke_and_call_mcfunction.create_datapack_files(datapack)  # TODO: Probably remove this?
 
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         return recusively_remove_nones_from_dict({

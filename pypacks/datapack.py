@@ -99,13 +99,22 @@ class Datapack:
         # ==================================================================================
 
         self.mcfunctions.append(MCFunction("load", [
-            f"function {self.namespace}:raycast/load",
+            f"function {self.namespace}:raycast/load",  # Something might use this but we can't be sure, so always load it
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
             "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
             "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
+            *[
+                f"scoreboard objectives add {item.internal_name}_cooldown dummy \"Cooldown Timer For {item.internal_name}\"" + "\n" +
+                f"execute as @a run scoreboard players set @s {item.internal_name}_cooldown 0"
+                for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
+            ],
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [
+            *[
+                f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
+                for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
+            ],
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ]))
 

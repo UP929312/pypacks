@@ -26,3 +26,15 @@ class MCFunction:
                             *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
             file.write("\n".join(self.commands))
+
+    # Untested
+    # def __or__(self, other: "MCFunction") -> "MCFunction":
+    #     # So we can merge functions by doing | on them
+    #     return MCFunction(
+    #         internal_name=f"{self.internal_name}",
+    #         commands=self.commands + other.commands,
+    #         sub_directories=self.sub_directories,
+    #     )
+
+    # def __ror__(self, other: "MCFunction") -> "MCFunction":
+    #     return self.__or__(other)

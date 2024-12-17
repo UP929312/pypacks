@@ -153,10 +153,13 @@ class FireworkExplosion:
         return {
             "shape": self.shape,
             "colors": self.colors,
+        } | ({
             "fade_colors": self.fade_colors if self.fade_colors else None,  # (Can have no fade colours)
+        } if self.fade_colors else {}) | ({
             "trail": True if self.has_trail else None,  # Defaults to False
+        } if self.has_trail else {}) | ({
             "twinkle": True if self.has_twinkle else None,  # Defaults to False
-        }
+        } if self.has_twinkle else {})
 
 
 @dataclass
