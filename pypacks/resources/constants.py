@@ -244,7 +244,7 @@ INEDIBLE_ITEMS = [
     "minecraft:ender_pearl",
     "minecraft:snowball",
     "minecraft:trident",
-    
+
     "minecraft:boat",
     "minecraft:crossbow",
     "minecraft:bow",

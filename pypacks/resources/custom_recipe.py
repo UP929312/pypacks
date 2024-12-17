@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 from pypacks.image_generation.recipe_image_data import generate_recipe_image
 from pypacks.resources.custom_item import CustomItem
 
-StringOrItemOrTag: TypeAlias = str | CustomItem
 StringOrCustomItem: TypeAlias = str | CustomItem
 RecipeCategory = Literal["blocks", "building", "equipment", "food", "misc", "redstone"]
 
@@ -27,7 +26,7 @@ class GenericRecipe:
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         raise NotImplementedError
-    
+
     def format_item_or_string(self, item_or_string: "str | CustomItem") -> str:
         if isinstance(item_or_string, CustomItem):
             return item_or_string.base_item
@@ -311,4 +310,3 @@ ALL_RECIPES: list[Recipe] = [
     ShapelessCraftingRecipe, ShapedCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,  # type: ignore[list-item]
     CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe,  # type: ignore[list-item]
 ]
-

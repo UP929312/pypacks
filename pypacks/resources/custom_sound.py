@@ -22,7 +22,7 @@ class CustomSound:
     def __post_init__(self) -> None:
         assert 0 <= self.volume <= 1, "Volume must be between 0 and 1"
         assert 0.5 <= self.pitch <= 2, "Pitch must be between 0.5 and 2"
-    
+
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"sounds", exist_ok=True)
         shutil.copyfile(self.ogg_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"sounds"/f"{self.internal_name}.ogg")
@@ -34,7 +34,7 @@ class CustomSound:
                     "name": f"{datapack.namespace}:{self.internal_name}",
                     "volume": self.volume,
                     "pitch": self.pitch,
-                    "stream": True if self.stream else False,
+                    "stream": self.stream,
                 }
             ]
         } | (  # Add subtitles if they're not empty

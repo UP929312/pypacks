@@ -73,7 +73,7 @@ class CopyCustomDataFunction:
     source_type: Literal["context", "storage"]  # Information of the block entity, entity or storage to copy NBT from.
     source_target: None | Literal["block_entity", "this", "killer", "direct_killer", "killer_player"] = None  # Included only if type is set to context. Specifies an entity or block entity from loot context to copy NBT from
     source_storage: None | str = None  # Included only if type is set to storage. A resource location specifying the storage ID to copy NBT from.
-    ops: list[CopyOperation] = field(default=list)  # type: ignore[arg-type]  # An NBT operation.  
+    ops: list[CopyOperation] = field(default=list)  # type: ignore[arg-type]  # An NBT operation.
 
     def to_dict(self) -> dict[str, Any]:
         assert self.ops, "At least one operation must be provided."
@@ -101,7 +101,7 @@ class CopyNameFunction:
         }
 
 
-@dataclass 
+@dataclass
 class CopyStateFunction:
     """Copies block state properties provided by loot context to the item's minecraft:block_state component."""
     block: str  # A block ID. Function fails if the block doesn't match the properties list.
@@ -129,7 +129,7 @@ class EnchantRandomlyFunction:
         } if self.options is not None else {}) | ({
             "onlyCompatible": self.only_compatible,
         } if not self.only_compatible else {})
-    
+
 
 @dataclass
 class EnchantWithLevelsFunction:
@@ -364,7 +364,7 @@ class SetContentsFunction:
     content_type: str  # The block entity type to be written in BlockEntityTag.id.
 
     def to_dict(self) -> dict[str, Any]:
-        raise Exception("This function is not yet implemented.")
+        raise Exception("This function is not yet implemented.")  # TODO: Do this
         return {
             "function": "minecraft:set_contents",
             "entries": [x.to_dict() for x in self.entries],  # TODO: This needs datapack (for some entries)...
@@ -415,7 +415,7 @@ class SetDamageFunction:
     """Sets the item's damage value (durability)."""
     damage: "ConstantNumberProvider | BinomialNumberProvider | ScoreboardNumberProvider | StorageNumberProvider | UniformNumberProvider"  # Specifies the damage fraction to set (1.0 is undamaged, 0.0 is zero durability left).
     add: bool = False  # If true, change is relative to current damage. Defaults to false.
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "function": "minecraft:set_damage",
@@ -429,7 +429,7 @@ class SetEnchantsFunction:
     """Sets the item's enchantments. A book converts to an enchanted book."""
     enchantments: dict[str, "ConstantNumberProvider | BinomialNumberProvider | ScoreboardNumberProvider | StorageNumberProvider | UniformNumberProvider"]  # Enchantments to set.
     add: bool = False  # Optional. If true, change is relative to current level. A nonexistent enchantment is presumed to start at 0. Defaults to false.
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "function": "minecraft:set_enchants",

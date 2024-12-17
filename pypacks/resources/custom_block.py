@@ -1,8 +1,8 @@
 import os
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Literal
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
@@ -27,15 +27,16 @@ class FacePaths:
     right: str | None
 
     def __post_init__(self) -> None:
+        # TODO: Replace this with other options, horizontally_rotatable, vertically_rotatable?
         # We have 3 options, axial (NESW+Up+Down), cardinal (NESW), and on_axis (north-south, east-west, up-down)
         assert self.front is not None
         if all([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]):
             self.direction_type = "symmetric"
             return
-        elif self.top is None and self.bottom is None and all([x is not None for x in [self.back, self.left, self.right]]):
+        if self.top is None and self.bottom is None and all([x is not None for x in [self.back, self.left, self.right]]):
             self.direction_type = "cardinal"
             return
-        elif [x is not None for x in [self.back, self.top, self.bottom, self.left, self.right]]:
+        if [x is not None for x in [self.back, self.top, self.bottom, self.left, self.right]]:
             self.direction_type = "axial"
             return
         raise ValueError("Invalid FacePaths object, must have one of:" +
@@ -111,7 +112,7 @@ class CustomBlock:
         assert self.block_texture.direction_type in ["symmetric", "axial"]
 
     def set_or_create_loot_table(self) -> None:
-        """Takes a CustomItem, item_name, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
+        """Takes a CustomItem, item type, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
         from pypacks.resources.custom_item import CustomItem
         self.loot_table = None
         if self.drops == "self":
@@ -142,7 +143,7 @@ class CustomBlock:
                     "condition": "minecraft:match_tool",
                     "predicate": {
                         "predicates": {
-                            "minecraft:custom_data": "{%s:'%s'}" % ("pypacks_custom_item", self.internal_name),
+                            "minecraft:custom_data": "{%s:'%s'}" % ("pypacks_custom_item", self.internal_name),  # TODO: {{}}?
                         }
                     }
                 }
@@ -155,18 +156,18 @@ class CustomBlock:
 
     def generate_detect_rotation_function(self) -> "MCFunction":
         # Detect and store player rotation (when needed)
-        return MCFunction(f"detect_rotation", [
-            f"execute store result score rotation player_yaw run data get entity @s Rotation[0] 1",
-            f"execute if score rotation player_yaw matches -45..45 run scoreboard players set rotation_group player_yaw 1",
-            f"execute if score rotation player_yaw matches 45..135 run scoreboard players set rotation_group player_yaw 2",
-            f"execute if score rotation player_yaw matches 135..180 run scoreboard players set rotation_group player_yaw 3",
-            f"execute if score rotation player_yaw matches -180..-135 run scoreboard players set rotation_group player_yaw 3",
-            f"execute if score rotation player_yaw matches -135..-45 run scoreboard players set rotation_group player_yaw 4",
+        return MCFunction("detect_rotation", [
+            "execute store result score rotation player_yaw run data get entity @s Rotation[0] 1",
+            "execute if score rotation player_yaw matches -45..45 run scoreboard players set rotation_group player_yaw 1",
+            "execute if score rotation player_yaw matches 45..135 run scoreboard players set rotation_group player_yaw 2",
+            "execute if score rotation player_yaw matches 135..180 run scoreboard players set rotation_group player_yaw 3",
+            "execute if score rotation player_yaw matches -180..-135 run scoreboard players set rotation_group player_yaw 3",
+            "execute if score rotation player_yaw matches -135..-45 run scoreboard players set rotation_group player_yaw 4",
 
-            f"execute store result score rotation player_pitch run data get entity @s Rotation[1] 1",
-            f"execute if score rotation player_pitch matches -90..-45 run scoreboard players set rotation_group player_pitch 1",  # Up
-            f"execute if score rotation player_pitch matches -45..45 run scoreboard players set rotation_group player_pitch 2",  # Flat
-            f"execute if score rotation player_pitch matches 45..90 run scoreboard players set rotation_group player_pitch 3",  # Down
+            "execute store result score rotation player_pitch run data get entity @s Rotation[1] 1",
+            "execute if score rotation player_pitch matches -90..-45 run scoreboard players set rotation_group player_pitch 1",  # Up
+            "execute if score rotation player_pitch matches -45..45 run scoreboard players set rotation_group player_pitch 2",  # Flat
+            "execute if score rotation player_pitch matches 45..90 run scoreboard players set rotation_group player_pitch 3",  # Down
         ], ["custom_blocks"])
 
     def generate_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
@@ -233,11 +234,11 @@ class CustomBlock:
         )
         # ============================================================================================================
         on_destroy_no_silk_touch_function = MCFunction(f"on_destroy_no_silk_touch_{self.internal_name}", [
-                f"kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
-                f"kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
-                f"kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
+                "kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
+                "kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
+                "kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
                 f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(datapack)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
-                f"kill @s"  # Kill the item display
+                "kill @s"  # Kill the item display
             ],
             ["custom_blocks", "on_destroy"],
         )
@@ -247,7 +248,7 @@ class CustomBlock:
     @staticmethod
     def on_tick_function(datapack: "Datapack") -> "MCFunction":
         """Runs every tick, but once per datapack, not per block."""
-        return MCFunction(f"all_blocks_tick", [
+        return MCFunction("all_blocks_tick", [
             # Kill all xp orbs and items, spawn the loot, then kill the item display itself.
             *[f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block.{custom_block.internal_name}] at @s if block ~ ~ ~ minecraft:air run function {datapack.namespace}:custom_blocks/on_destroy/on_destroy_no_silk_touch_{custom_block.internal_name}"
               for custom_block in datapack.custom_blocks],
@@ -256,3 +257,13 @@ class CustomBlock:
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         assert isinstance(self.block_texture, FacePaths)
         self.block_texture.create_resource_pack_files(self, datapack)
+
+    # def add_variants(self, datapack: "Datapack", stairs: bool = False, slabs: bool = False,) -> None:
+        # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
+        # Fences are too much work (maybe?)
+        # Walls aren't wood, but also like fences
+        # Doors and trapdoors need to flip and that's probably annoying to do.
+        # Pressure plates are buttons also need to react.
+        # Fencegates are doors, so they're out.
+        # Boat/boat chest??? Should be able to re-skin an entity?
+        # Signs and hanging signs are editable, so probably not them (for now)

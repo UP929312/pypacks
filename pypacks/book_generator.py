@@ -53,7 +53,7 @@ class ItemPage:
                 right_indentation=3,
                 on_hover=OnHoverShowTextRaw([
                     {"text": self.datapack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], "font": f"{self.datapack.namespace}:all_fonts"},
-                    {"text": "\n"*5, "font": f"minecraft:default"},
+                    {"text": "\n"*5, "font": "minecraft:default"},
                 ]),
             )
             for recipe in recipes if type(recipe) in recipe_to_font_icon
@@ -117,11 +117,11 @@ class ReferenceBook:
 
     def generate_pages(self, datapack: "Datapack") -> list["ElementPage | GridPage"]:
         # Page order is as follows:
-        COVER_PAGE = 1
+        # COVER_PAGE = 1
         CATEGORIES_PAGE = 2
         CATEGORY_ITEMS_PAGE = 3  # 3+   One for each category
         ITEM_PAGE  = CATEGORY_ITEMS_PAGE+len(datapack.reference_book_categories)  # After we have all the categories, start adding the individual items
-        BLANK_PAGE = CATEGORY_ITEMS_PAGE*len(datapack.reference_book_categories)+len(datapack.custom_items)+1
+        # BLANK_PAGE = CATEGORY_ITEMS_PAGE*len(datapack.reference_book_categories)+len(datapack.custom_items)+1
 
         # Cover (1)
         cover_page = self.generate_cover_page(datapack)

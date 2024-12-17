@@ -6,7 +6,6 @@ from pypacks.generate import generate_base_pack, generate_resource_pack, generat
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.reference_book_config import RefBookCategory
-from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
 from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
 
 
@@ -102,8 +101,8 @@ class Datapack:
         self.mcfunctions.append(MCFunction("load", [
             f"function {self.namespace}:raycast/load",
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
-            f"scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
-            f"scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
+            "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
+            "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
             f"say Loaded into {self.name}!",
         ]))
         self.mcfunctions.append(MCFunction("tick", [

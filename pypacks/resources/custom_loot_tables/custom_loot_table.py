@@ -61,7 +61,7 @@ potential_context_parameters = {
 class Entry:
     """Base entry"""
     # https://minecraft.wiki/w/Loot_table#Entry
-    
+
     # functions: list[ItemModifier] | None = None
     # conditions: list[Predicate] | None = None
     # weight: int = 1
@@ -151,7 +151,7 @@ class Pool:
         #     data["conditions"] = [condition.to_dict(datapack) for condition in self.conditions]
         # if self.functions:
         #     data["functions"] = [function.to_dict(datapack) for function in self.functions]
-        return {}
+        return data
 
 
 @dataclass
@@ -238,4 +238,3 @@ class SimpleRangeLootTable(CustomLootTable):
     #         "type": "generic",
     #         "pools": [SimpleRangePool(self.item, self.min_count, self.max_count).to_dict(datapack)]
     #     })
-

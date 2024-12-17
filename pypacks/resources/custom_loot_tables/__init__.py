@@ -6,7 +6,7 @@ from pypacks.resources.custom_loot_tables.custom_loot_table import (
 )
 from pypacks.resources.custom_loot_tables.functions import (  # All 39...
     ApplyBonusFunction, CopyComponentsFunction, CopyCustomDataFunction, CopyNameFunction, CopyStateFunction,
-    EnchantRandomlyFunction, EnchantWithLevelsFunction, EnchantedCountIncreaseFunction, 
+    EnchantRandomlyFunction, EnchantWithLevelsFunction, EnchantedCountIncreaseFunction,
     ExplorationMapFunction, ExplosionDecayFunction, FillPlayerHeadFunction, FilteredFunction,
     FurnaceMeltFunction, LimitCountFunction, ModifyContentsFunction,
     ReferenceCallFunction, SequenceFunction, SetAttributesFunction,

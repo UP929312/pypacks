@@ -42,8 +42,8 @@ class CustomItem:
         if self.on_right_click:
             self.add_right_click_functionality()
 
-        path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
-        with open(path, "rb") as file:
+        path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
+        with open(path, mode="rb") as file:
             self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
 
     def __str__(self) -> "str":
@@ -77,7 +77,7 @@ class CustomItem:
             os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
 
             layers = {("all" if self.is_block else "layer0"): f"{datapack.namespace}:item/{self.internal_name}"}
-            parent = "minecraft:block/cube_all" if self.is_block else "minecraft:item/generated" 
+            parent = "minecraft:block/cube_all" if self.is_block else "minecraft:item/generated"
             with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
                 json.dump({"parent": parent, "textures": layers}, file, indent=4)
 

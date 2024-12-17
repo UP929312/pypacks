@@ -1,7 +1,5 @@
-from typing import Any, Literal
-
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal
 
 
 if TYPE_CHECKING:
@@ -11,6 +9,7 @@ if TYPE_CHECKING:
 
 
 # ==========================================================================================
+
 
 @dataclass
 class AttributeModifier:
@@ -36,6 +35,7 @@ class AttributeModifier:
             "id": f"attribute_modifier.{self.attribute_type}",
             "slot": self.slot,
         }
+
 
 # ==========================================================================================
 
@@ -65,23 +65,41 @@ class BannerPattern:
 @dataclass
 class Consumable:
     # https://minecraft.wiki/w/Data_component_format#consumable
-    # https://www.minecraft.net/en-us/article/minecraft-snapshot-24w34a
+
     consume_seconds: float = 1.6  # how long it takes to consume the item in seconds
-    animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] | None = None  # the animation to play when consuming the item
+    animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] = "none"  # the animation to play when consuming the item
     sound: str | None = None  # the sound to play when consuming the item
     has_consume_particles: bool = True  # whether to show particles when consuming the item
-    on_consume_effects: list[str] | None = None  # a list of status effects to apply when consuming the item
+
+    # on_consume_effects: list["PotionEffect"] | None = None  # a list of status effects to apply when consuming the item
+    # on_consume_remove_effects: list["str | PotionEffect"] | Literal["all"] | None = None  # a list of status effects to remove when consuming the item
+    # on_consume_teleport_diameter: int | None = None  # the diameter of the teleportation area when consuming the item
     # TODO: Consume sounds and effects
+
+    # If type is apply_effects:
+    #     effects: A list of effect instances applied once consumed.
+    #     id: The ID of the effect.
+    #     amplifier: The amplifier of the effect, with level I having value 0. Optional, defaults to 0.
+    #     duration: The duration of the effect in ticks. Value -1 is treated as infinity. Values 0 or less than -2 are treated as 1. Optional, defaults to 1 tick.
+    #     ambient: Whether or not this is an effect provided by a beacon and therefore should be less intrusive on the screen. Optional, defaults to false.
+    #     show_particles: Whether or not this effect produces particles. Optional, defaults to true.
+    #     show_icon: Whether or not an icon should be shown for this effect. Optional, defaults to true.
+    #     probability: The chance for the above effects to be applied once consumed. Must be a positive float between 0.0 and 1.0. Defaults to 1.0.
+    #     If type is remove_effects:
+    #     effects: A set of effects removed once consumed, as either a single ID or list of IDs.
+    #     If type is clear_all_effects: Clears all effects of the consumer.
+    #     If type is teleport_randomly:
+    #     diameter: The diameter that the consumer is teleported within. Defaults to 16.0.
 
     def to_dict(self) -> dict[str, Any]:
         assert self.sound is None, "sound is not yet supported"
-        assert self.on_consume_effects is None, "on_consume_effects is not yet supported"
+        # assert self.on_consume_effects is None, "on_consume_effects is not yet supported"
         return {
             "consume_seconds": self.consume_seconds,
             "animation": self.animation,
             "sound": self.sound,  # "entity.generic.eat"
             "has_consume_particles": False if not self.has_consume_particles else None,  # Defaults to True
-            "on_consume_effects": self.on_consume_effects,
+            # "on_consume_effects": self.on_consume_effects,
         }
 
 
@@ -257,6 +275,39 @@ class MapDecoration:
 
 # ==========================================================================================
 
+PotionEffectType = Literal[
+    "speed", "slowness", "haste", "mining_fatigue", "strength", "instant_health", "instant_damage", "jump_boost", "nausea", "regeneration",
+    "resistance", "fire_resistance", "water_breathing", "invisibility", "blindness", "night_vision", "hunger", "weakness", "poison", "wither",
+    "health_boost", "absorption", "saturation", "glowing", "levitation", "luck", "unluck", "slow_falling", "conduit_power", "dolphins_grace",
+    "bad_omen", "hero_of_the_village", "darkness", "trial_omen", "raid_omen", "wind_charged", "weaving", "oozing", "infested",
+]
+
+
+@dataclass
+class PotionEffect:
+    """Adds an effect to the item, e.g. a potion effect"""
+    # https://minecraft.wiki/w/Effect
+
+    effect_name: PotionEffectType  # The ID of the effect, e.g. "jump_boost"
+    amplifier: int = 0  # The amplifier of the effect, with level I having value 0. Optional, defaults to 0.
+    duration: int | Literal["infinity"] = 1  # The duration of the effect in ticks. Value -1 is treated as infinity. Values 0 or less than -2 are treated as 1. Optional, defaults to 1 tick.
+    ambient: bool = False  # Whether or not this is an effect provided by a beacon and therefore should be less intrusive on the screen. Optional, defaults to false.
+    show_particles: bool = True  # Whether or not this effect produces particles. Optional, defaults to true.
+    show_icon: bool = True  # Whether or not an icon should be shown for this effect. Optional, defaults to true.
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.effect_name,
+            "amplifier": self.amplifier if self.amplifier != 0 else None,  # Defaults to 0
+            "duration": -1 if self.duration == "infinity" else self.duration,
+            "ambient": True if self.ambient else None,  # Defaults to False
+            "show_particles": False if not self.show_particles else None,  # Defaults to True
+            "show_icon": False if not self.show_icon else None,  # Defaults to True
+        }
+
+
+# ==========================================================================================
+
 @dataclass
 class ToolRule:
     blocks: str | list[str]  # The blocks to match with. Can be a block ID or a block tag with a #, or a list of block IDs.
@@ -425,7 +476,7 @@ class CustomItemData:
             "enchantment_glint_override": True if self.enchantment_glint_override else None,
             "glider":                     {} if self.glider else None,
             "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
-            "damage_resistant":           {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me
+            "damage_resistant":           {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me, well, replace is_fire for lava
             "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
@@ -477,6 +528,7 @@ class CustomItemData:
 # enchantable # NOT YET (custom enchants maybe?)
 # equippable REDO, more stuff
 # intangible_projectile MEH
+# map_id
 # note_block_sound
 # potion_contents
 # recipes  - for knowledge book

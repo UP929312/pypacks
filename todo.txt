@@ -1,17 +1,33 @@
+List:
+- Custom Right click - cooldown, or investigation into consume complete.
+- Custom blocks, rotatable esque arg
+- Custom blocks - Slab experiments
+- Custom blocks, no drops in creative
+- Custom blocks, silk touch
+- Item additional data validation
+
+
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 # Custom crafter and floor crafting would be nice to do...
 
+# For custom slabs and stairs, rework entirely how the base block is generated, then we can just treat it like nothing special.
+They should appear in the reference book under the item page though...
+
 When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
 
 # Make datapack just take "custom content" and filter using isinstance?
+
+# Combine all the map stuff into one field... Including id, decorations and map colour
+
+Silk touch for custom blocks
 
 Make a wall of all the items, with an item frame of each item, and a command block and button, would be really cool.
 
 # Add simple minecraft colours, e.g. Pypacks.RED, Pypacks.GREEN, etc
 
-# Item additional data validation, like checking map colour on non-map items
+# Item additional data validation, like checking map colour on non-map items, have a post-validator? Or a func?
 
 # Optimise the loot tables to use number providers.
 
@@ -27,7 +43,7 @@ setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
 
 # Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
 # Probably won't do because the give command, but what if we had a loot table setup for all blocks,
-# Then we can use that for block drops or for the give command (could just call it?)
+# Then we can use that for block drops or for the give command (could just call it?) Or custom blocks?
 
 # For custom blocks, only drop their drop if they're not in creative
 
@@ -38,7 +54,7 @@ setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
 REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its setting the same info, e.g. underline=True, underline=True,
 > REMOVE IT
 
-# Move all the internal functions and textures into an "internal" subdir
+# Move all the internal functions and textures into an "internal" subdir, e.g. functions/internal, textures/internal, etc
 
 Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
 {
