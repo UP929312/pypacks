@@ -74,22 +74,21 @@ class CustomItem:
         # 1. The model definition/config (in items/<internal_name>.json)
         # 2. The model components, including textures, parent, etc. (in models/item/<internal_name>.json)
         # 3. The texture itself (in textures/item/<internal_name>.png)
-
         if self.texture_path is not None:
-            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
-            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
-            os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
+            if not self.is_block:  # Create the item texture, but not if it's a block (that gets done by the custom block code)
+                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
+                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
 
-            layers = {("all" if self.is_block else "layer0"): f"{datapack.namespace}:item/{self.internal_name}"}
-            parent = "minecraft:block/cube_all" if self.is_block else "minecraft:item/generated"
-            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
-                json.dump({"parent": parent, "textures": layers}, file, indent=4)
+                layers = {"layer0": f"{datapack.namespace}:item/{self.internal_name}"}
+                with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
+                    json.dump({"parent": "minecraft:item/generated", "textures": layers}, file, indent=4)
 
-            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-                json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
+                with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+                    json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
 
-            shutil.copyfile(self.texture_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png")
+                shutil.copyfile(self.texture_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png")
 
         # Create the icons for the custom items
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font"/f"{self.internal_name}_icon.png", "wb") as file:

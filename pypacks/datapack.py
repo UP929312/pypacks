@@ -65,7 +65,6 @@ class Datapack:
         self.generate_pack()
 
     def add_internal_functions(self) -> None:
-        self.mcfunctions.append(create_wall(self.custom_items, self))
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
@@ -119,6 +118,7 @@ class Datapack:
             ],
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ]))
+        self.mcfunctions.append(create_wall(self.custom_items, self))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")

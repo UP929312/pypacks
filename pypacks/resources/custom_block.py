@@ -1,88 +1,14 @@
-import os
-import json
-from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
+from pypacks.resources.custom_block_models import FacePaths, AsymmetricCubeModel, SymmetricCubeModel
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.custom_item import CustomItem
-
-# TODO: Support non cubes? Player heads? Custom models?
-
-
-@dataclass
-class FacePaths:
-    """This is used when rendering a simple symmetric block won't work (for now)"""
-    # If a face is None, it will use the front texture
-    front: str
-    back: str | None
-    top: str | None
-    bottom: str | None
-    left: str | None
-    right: str | None
-    horizontally_rotatable: bool = False
-    vertically_rotatable: bool = False
-
-    def __post_init__(self) -> None:
-        # IGNORE, OUTDATED: We have 3 options, axial (NESW+Up+Down), cardinal (NESW), and on_axis (north-south, east-west, up-down)
-        assert self.front is not None
-        if all((x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]):  # If it's just the front face.
-            return
-        if any([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]):
-            raise ValueError("Invalid FacePaths object, must have one of: Front | (Front, Back, Top, Bottom, Left, Right)")
-
-    def create_resource_pack_files(self, block: "CustomBlock", datapack: "Datapack") -> None:
-        # Requires the following file structure:
-        # ├── assets/
-        # │   └── <datapack namespace>/
-        # │       ├── blockstates/
-        # │       │   └── <custom_block>.json
-        # │       ├── models/
-        # │       │   └── item/
-        # │       │       └── <custom_block>.json
-        # │       └── textures/
-        # │           └── item/
-        # │               ├── <custom_block>_<top&bottom&front&back&left&right.png
-        if not (self.horizontally_rotatable or self.vertically_rotatable):
-            return
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
-
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates"/f"{block.internal_name}.json", "w") as file:
-            json.dump({
-                "variants": {
-                    "": {"model": f"{datapack.namespace}:block/{block.internal_name}"},
-                }
-            }, file, indent=4)
-
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{block.internal_name}.json", "w") as file:
-            axial_mapping = {
-                "up": "top",
-                "down": "bottom",
-                "north": "front",
-                "south": "back",
-                "east": "left",
-                "west": "right",
-            }
-            json.dump({
-                "parent": "block/cube",
-                "textures": {
-                    direction: f"{datapack.namespace}:item/{block.internal_name}_{face}"
-                    for direction, face in axial_mapping.items()
-                }
-            }, file, indent=4)
-
-        for face in ["top", "bottom", "front", "back", "left", "right"]:
-            if getattr(self, face) is not None:
-                path = Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{block.internal_name}_{face}.png"
-                with open(path, "wb") as file:
-                    file.write(Path(getattr(self, face)).read_bytes())
 
 
 @dataclass
@@ -93,7 +19,7 @@ class CustomBlock:
     internal_name: str
     name: str
     base_block: str
-    block_texture: str | FacePaths
+    block_texture: "str | FacePaths"
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
@@ -103,6 +29,11 @@ class CustomBlock:
     def __post_init__(self) -> None:
         if isinstance(self.block_texture, str):
             self.block_texture = FacePaths(self.block_texture, None, None, None, None, None)
+
+        if self.block_texture.block_type == "symmetric_cube":
+            self.model_object = SymmetricCubeModel(self.internal_name, self.block_texture.front)
+        elif self.block_texture.block_type == "asymmetric_cube":
+            self.model_object = AsymmetricCubeModel(self.internal_name, self.block_texture)
 
     def set_or_create_loot_table(self) -> None:
         """Takes a CustomItem, item type, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
@@ -119,7 +50,7 @@ class CustomBlock:
             self.loot_table = self.drops
 
     @classmethod
-    def from_item(cls, item: "CustomItem", block_texture: str | FacePaths | None = None, drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
+    def from_item(cls, item: "CustomItem", block_texture: "str | FacePaths | None" = None, drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
         """Used to create a new custom block."""
         assert item.custom_name is not None and item.texture_path is not None
         item.is_block = True
@@ -194,10 +125,9 @@ class CustomBlock:
             *([
                 f"execute if score rotation_group player_pitch matches {i} run execute at @s run rotate @s ~ {angle}"
                 for i, angle in zip([1, 2, 3], [90, 0, -90])
-            ] if self.block_texture.vertically_rotatable else []),  # type: ignore[union-attr]
+            ] if self.block_texture.vertically_rotatable else []),
 
-            ],
-            ["custom_blocks", "execute_on_item_display"],
+            ], ["custom_blocks", "execute_on_item_display"],
         )
         # Spawn the item display, then call the setup on it directly.
         spawn_item_display = MCFunction(f"setup_item_display_{self.internal_name}", [
@@ -249,15 +179,4 @@ class CustomBlock:
         ], ["custom_blocks"])
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
-        assert isinstance(self.block_texture, FacePaths)
-        self.block_texture.create_resource_pack_files(self, datapack)
-
-    # def add_variants(self, datapack: "Datapack", stairs: bool = False, slabs: bool = False,) -> None:
-        # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
-        # Fences are too much work (maybe?)
-        # Walls aren't wood, but also like fences
-        # Doors and trapdoors need to flip and that's probably annoying to do.
-        # Pressure plates are buttons also need to react.
-        # Fencegates are doors, so they're out.
-        # Boat/boat chest??? Should be able to re-skin an entity?
-        # Signs and hanging signs are editable, so probably not them (for now)
+        self.model_object.create_resource_pack_files(datapack)
