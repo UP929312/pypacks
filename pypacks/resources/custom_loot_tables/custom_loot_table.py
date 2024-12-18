@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
 from pypacks.utils import recusively_remove_nones_from_dict, extract_item_type_and_components
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction
+from pypacks.resources.custom_loot_tables.number_provider import BinomialNumberProvider, UniformNumberProvider
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -93,8 +94,8 @@ class SingleItemRangeEntry(Entry):
 class BinomialDistributionEntry(Entry):
     """Binomial distribution entry for a single (custom) item."""
     item: "str | CustomItem"
-    min_count: int
-    max_count: int
+    n: int
+    p: float
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         item_type, combined_components = extract_item_type_and_components(self.item, datapack)
@@ -102,7 +103,7 @@ class BinomialDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [LootTableFunction("minecraft:set_count", {"binomial": {"min": self.min_count, "max": self.max_count}})] +  # TODO: Remove this, use the number provider
+                [LootTableFunction("minecraft:set_count", BinomialNumberProvider(self.n, self.p).to_dict()).to_dict()] +
                 ([LootTableFunction("minecraft:set_components", {"components": combined_components})] if combined_components else []),
         }
 
@@ -119,7 +120,7 @@ class UniformDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": item_type,
             "functions":
-                [LootTableFunction("minecraft:set_count", {"uniform": {"min": self.min_count, "max": self.max_count}}).to_dict()] +
+                [LootTableFunction("minecraft:set_count", UniformNumberProvider(self.min_count, self.max_count).to_dict()).to_dict()] +
                 ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
         }
 
@@ -187,7 +188,7 @@ class CustomLootTable:
     # https://minecraft.wiki/w/Loot_table
     internal_name: str
     pools: list[LootTablePool] = field(default_factory=list)
-    # functions: list[ItemModifier] | None = None   # God damn.
+    functions: list[LootTableFunction] = field(default_factory=list)
     # random_sequence: RandomSequence | None
     loot_table_type: LootContextTypes = "generic"
 
@@ -197,10 +198,15 @@ class CustomLootTable:
         return f"{datapack.namespace}:{self.internal_name}"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        return recusively_remove_nones_from_dict({
-            "type": self.loot_table_type,
-            "pools": [pool.to_dict(datapack) for pool in self.pools]
-        })
+        return recusively_remove_nones_from_dict(
+            {
+                "type": self.loot_table_type,
+                "pools": [pool.to_dict(datapack) for pool in self.pools],
+            } | ({
+                "functions": [function.to_dict() for function in self.functions]
+                } if self.functions else {}
+            )
+        )
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:

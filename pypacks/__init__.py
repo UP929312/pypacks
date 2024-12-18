@@ -1,3 +1,4 @@
+from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock, FacePaths
 from pypacks.resources.custom_item import CustomItem
@@ -9,6 +10,7 @@ from pypacks.resources.custom_predicate import Predicate
 from pypacks.resources.custom_recipe import *
 from pypacks.resources.custom_sound import CustomSound
 from pypacks.resources.custom_tag import CustomTag
+from pypacks.resources.mcfunction import MCFunction
 
 from pypacks.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 

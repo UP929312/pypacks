@@ -27,8 +27,9 @@ class UniformNumberProvider(NumberProvider):
 
 @dataclass
 class BinomialNumberProvider(NumberProvider):
-    n: float | int
-    p: float
+    """A random number following a binomial distribution."""
+    n: int  # Number provider. The amount of trials.
+    p: float  # Number provider. The probability of success on an individual trial.
 
     def to_dict(self) -> dict[str, Any]:
         return {"type": "minecraft:binomial", "n": self.n, "p": self.p}
