@@ -44,7 +44,7 @@ class CustomJukeboxSong:
             "minecraft:music_disc_cat",
             self.internal_name,
             self.internal_name.replace("_", " ").title(),
-            additional_item_data=CustomItemData(jukebox_playable=JukeboxPlayable(f"{datapack.namespace}:{self.internal_name}", True))
+            additional_item_data=CustomItemData(jukebox_playable=JukeboxPlayable(self))
         )
 
     def generate_give_command(self, datapack: "Datapack") -> str:

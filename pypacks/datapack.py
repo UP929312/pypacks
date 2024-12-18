@@ -67,6 +67,8 @@ class Datapack:
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
+            if item.use_right_click_cooldown is not None:
+                self.mcfunctions.append(item.create_right_click_revoke_advancement_function(self))
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:

@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
-# from pypacks.utils import get_png_dimensions
-
 from pypacks.resources.custom_item import CustomItem
 from pypacks.reference_book_config import PAINTING_REF_BOOK_CONFIG
 from pypacks.resources.item_components import CustomItemData, EntityData

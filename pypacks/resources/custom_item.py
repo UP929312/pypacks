@@ -100,23 +100,23 @@ class CustomItem:
         with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w") as file:
             file.write(self.generate_give_command(datapack))
 
-        if self.on_right_click is not None:
-            revoke_and_call_mcfunction = MCFunction(
-                self.internal_name, [
-                    f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}",
-                ], ["right_click"]
-            )
-            if self.use_right_click_cooldown is not None:
-                action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
-                revoke_and_call_mcfunction.commands.extend([
-                    f"execute as @a[scores={{{self.internal_name}_cooldown=1..}}] run {action_bar_command}",
-                    f"execute as @s[scores={{{self.internal_name}_cooldown=0}}] run {self.on_right_click}",
-                    f"execute as @a[scores={{{self.internal_name}_cooldown=0}}] run scoreboard players set @s {self.internal_name}_cooldown {self.use_right_click_cooldown*20}",
-                ])
-            else:
-                revoke_and_call_mcfunction.commands.append(self.on_right_click)
+    def create_right_click_revoke_advancement_function(self, datapack: "Datapack") -> MCFunction:
+        revoke_and_call_mcfunction = MCFunction(
+            self.internal_name, [
+                f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}",
+            ], ["right_click"]
+        )
+        if self.use_right_click_cooldown is not None:
+            action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
+            revoke_and_call_mcfunction.commands.extend([
+                f"execute as @a[scores={{{self.internal_name}_cooldown=1..}}] run {action_bar_command}",
+                f"execute as @s[scores={{{self.internal_name}_cooldown=0}}] run {self.on_right_click}",
+                f"execute as @a[scores={{{self.internal_name}_cooldown=0}}] run scoreboard players set @s {self.internal_name}_cooldown {self.use_right_click_cooldown*20}",
+            ])
+        else:
+            revoke_and_call_mcfunction.commands.append(self.on_right_click)  # type: ignore[abc]
 
-            revoke_and_call_mcfunction.create_datapack_files(datapack)  # TODO: Probably remove this?
+        return revoke_and_call_mcfunction
 
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         return recusively_remove_nones_from_dict({

@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING, Literal, TypedDict
 
+from pypacks.resources.item_components import PotionEffect
+
 
 if TYPE_CHECKING:
     from pypacks.resources.custom_loot_tables.custom_loot_table import Entry
@@ -563,15 +565,18 @@ class SetPotionFunction:
 @dataclass
 class SetStewEffectFunction:
     """Sets the status effects for suspicious stew. Fails if invoked on an item that is not suspicious stew."""
-    effects: list[dict[str, Any]]
-    # TODO: Add actual effects, which hold the form of:
-    # effect_type: The effect ID.
-    # duration: A number provider. The duration of the effect.
+    effects: dict[PotionEffect, int]  # A map of effect to duration
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "function": "minecraft:set_stew_effect",
-            "effects": self.effects,
+            "effects": [
+                {
+                    "type": effect.effect_name,
+                    "duration": effect.duration,
+                }
+                for effect in self.effects
+            ]
         }
 
 

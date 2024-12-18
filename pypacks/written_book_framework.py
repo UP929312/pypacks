@@ -231,14 +231,12 @@ class RightAlignedIcon:
 
     def get_json_data(self) -> dict[str, Any]:
         padding = (PIXELS_PER_WIDTH-self.char_width)-self.left_shift
-        # TODO: Use regular icon, just append the indent/padding
-        return_value = {"text": (self.indent_unicode_char*padding)+f"{self.unicode_char}", "color": "white",
-                        "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"}
-        if self.on_hover:
-            return_value |= self.on_hover.get_json_data()
-        if self.on_click:
-            return_value |= self.on_click.get_json_data()
-        return return_value
+        # This is slightly hacky, but we reverse them so the padding goes on the left
+        self.unicode_char, self.indent_unicode_char = self.indent_unicode_char, self.unicode_char
+        return Icon(
+            self.unicode_char*padding, self.font_namespace, indent_unicode_char=self.indent_unicode_char,
+            on_hover=self.on_hover, on_click=self.on_click
+        ).get_json_data()
 
 
 # =======================================================================================================================================

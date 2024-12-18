@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.custom_sound import CustomSound
+    from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem
 
 
@@ -68,10 +69,10 @@ class BannerPattern:
 class Consumable:
     # https://minecraft.wiki/w/Data_component_format#consumable
 
-    consume_seconds: float = 1.6  # how long it takes to consume the item in seconds
-    animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] = "none"  # the animation to play when consuming the item
-    sound: str | None = None  # the sound to play when consuming the item
-    has_consume_particles: bool = True  # whether to show particles when consuming the item
+    consume_seconds: float = 1.6  # How long it takes to consume the item in seconds
+    animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] = "none"  # The animation to play when consuming the item
+    sound: str | None = None  # The sound to play when consuming the item
+    has_consume_particles: bool = True  # Whether to show particles when consuming the item
 
     # on_consume_effects: list["PotionEffect"] | None = None  # a list of status effects to apply when consuming the item
     # on_consume_remove_effects: list["str | PotionEffect"] | Literal["all"] | None = None  # a list of status effects to remove when consuming the item
@@ -79,18 +80,13 @@ class Consumable:
     # TODO: Consume sounds and effects
 
     # If type is apply_effects:
-    #     effects: A list of effect instances applied once consumed.
+    #   effects: A list of effect instances applied once consumed.
     #     id: The ID of the effect.
-    #     amplifier: The amplifier of the effect, with level I having value 0. Optional, defaults to 0.
-    #     duration: The duration of the effect in ticks. Value -1 is treated as infinity. Values 0 or less than -2 are treated as 1. Optional, defaults to 1 tick.
-    #     ambient: Whether or not this is an effect provided by a beacon and therefore should be less intrusive on the screen. Optional, defaults to false.
-    #     show_particles: Whether or not this effect produces particles. Optional, defaults to true.
-    #     show_icon: Whether or not an icon should be shown for this effect. Optional, defaults to true.
     #     probability: The chance for the above effects to be applied once consumed. Must be a positive float between 0.0 and 1.0. Defaults to 1.0.
-    #     If type is remove_effects:
+    # If type is remove_effects:
     #     effects: A set of effects removed once consumed, as either a single ID or list of IDs.
-    #     If type is clear_all_effects: Clears all effects of the consumer.
-    #     If type is teleport_randomly:
+    # If type is clear_all_effects: Clears all effects of the consumer.
+    # If type is teleport_randomly:
     #     diameter: The diameter that the consumer is teleported within. Defaults to 16.0.
 
     def to_dict(self) -> dict[str, Any]:
@@ -222,12 +218,13 @@ class UseRemainder:
 
 @dataclass
 class JukeboxPlayable:
-    song: str = "pigstep"
-    show_in_tooltip: bool = False
+    song: "str | CustomJukeboxSong" = "pigstep"
+    show_in_tooltip: bool = True
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
         return {
-            "song": self.song,
+            "song": f"{datapack.namespace}:{self.song.internal_name}" if isinstance(self.song, CustomJukeboxSong) else self.song,
             "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
         }
 
@@ -505,7 +502,7 @@ class CustomItemData:
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
             "fireworks":                  self.firework.to_dict() if self.firework is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,
-            "jukebox_playable":           self.jukebox_playable.to_dict() if self.jukebox_playable is not None else None,
+            "jukebox_playable":           self.jukebox_playable.to_dict(datapack) if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
             "map_decorations":            {hash(x): x.to_dict() for x in self.map_decorations} if self.map_decorations is not None else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,

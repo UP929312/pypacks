@@ -8,6 +8,7 @@ List:
 
 When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
 
+# Dynamic border generation, would need to scale, somehow, to any size from 20x20->300x300
 
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
@@ -79,7 +80,7 @@ For an "install" stuff, just give them an achievement and don't revoke!
 
 # INFO: Paintings require a world reset
 
-# Improve testing setup, it's a nice start though.
+# Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)
 
 # JUKEBOX SONGS - Auto Length is messed up... Hmmmm
 

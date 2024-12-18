@@ -29,15 +29,12 @@ class FacePaths:
     vertically_rotatable: bool = False
 
     def __post_init__(self) -> None:
-        # TODO: Replace this with other options, horizontally_rotatable, vertically_rotatable?
-        # We have 3 options, axial (NESW+Up+Down), cardinal (NESW), and on_axis (north-south, east-west, up-down)
+        # IGNORE, OUTDATED: We have 3 options, axial (NESW+Up+Down), cardinal (NESW), and on_axis (north-south, east-west, up-down)
         assert self.front is not None
-        if (
-            any([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]) and not  # If it's not a symmetric block
-            all([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]])  # If it's just a symmetric block
-        ):  # TODO: Probably redo that ^
-            raise ValueError("Invalid FacePaths object, must have one of:" +
-                            "Front | (Front, Back, Left, Right) | (Front, Back, Top, Bottom, Left, Right)")  # fmt: skip
+        if all((x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]):  # If it's just the front face.
+            return
+        if any([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]):
+            raise ValueError("Invalid FacePaths object, must have one of: Front | (Front, Back, Top, Bottom, Left, Right)")
 
     def create_resource_pack_files(self, block: "CustomBlock", datapack: "Datapack") -> None:
         # Requires the following file structure:
@@ -51,7 +48,7 @@ class FacePaths:
         # │       └── textures/
         # │           └── item/
         # │               ├── <custom_block>_<top&bottom&front&back&left&right.png
-        if not (self.horizontally_rotatable and self.vertically_rotatable):
+        if not (self.horizontally_rotatable or self.vertically_rotatable):
             return
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
