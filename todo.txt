@@ -1,21 +1,23 @@
 List:
-- Custom blocks, rotatable esque arg
 - Custom blocks - Slab experiments
 - Custom blocks, no drops in creative
 - Custom blocks, silk touch
-- Item additional data validation
-
 
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 # Custom crafter and floor crafting would be nice to do...
 
+# Writablebook doesn't accept json??? Kinda broken
+
+# For custom blocks, only drop their drop if they're not in creative
+
 # For custom slabs and stairs, rework entirely how the base block is generated, then we can just treat it like nothing special.
 They should appear in the reference book under the item page though...
 
 When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
 
+# Change datapack init to take custom_content: list[a, b, c]
 # Make datapack just take "custom content" and filter using isinstance?
 
 # Combine all the map stuff into one field... Including id, decorations and map colour
@@ -25,8 +27,6 @@ Silk touch for custom blocks
 Make a wall of all the items, with an item frame of each item, and a command block and button, would be really cool.
 
 # Add simple minecraft colours, e.g. Pypacks.RED, Pypacks.GREEN, etc
-
-# Item additional data validation, like checking map colour on non-map items, have a post-validator? Or a func?
 
 # Optimise the loot tables to use number providers.
 
@@ -44,11 +44,9 @@ setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
 # Probably won't do because the give command, but what if we had a loot table setup for all blocks,
 # Then we can use that for block drops or for the give command (could just call it?) Or custom blocks?
 
-# For custom blocks, only drop their drop if they're not in creative
-
 # For recipe images, also add the ingredients underneath, like "sticks: x1, diamonds: x2"
 
-# Calling string on an item returns it's base item? Then we can just do str(item) rather than item.base_item if isisntance(item, CustomItem) else item
+# Calling __str__ on an item returns it's base item? Then we can just do str(item) rather than item.base_item if isisntance(item, CustomItem) else item
 
 REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its setting the same info, e.g. underline=True, underline=True,
 > REMOVE IT
@@ -67,14 +65,7 @@ Custom block stairs, slabs? What if we have a function which creates them all fr
 
 Loot table progress
 
-Toggle tooltips can be a map of name to bool?
-https://misode.github.io/loot-table/?share=hVw5RcKDED
-
 # Naturally occuring ore veins! Would be maybe tricky...
-
-# Type hint all the modifiers for items, like the extra reach and such.
-
-# Cooldown for right clickable items
 
 # Merge on_load with an inputted one... Using /function
 
@@ -84,30 +75,23 @@ https://misode.github.io/loot-table/?share=hVw5RcKDED
 
 interaction entity for detecting right click on blocks! If we ever add custom invs
 
-Add loaded_projectiles validation, i.e. arrows and fireworks and stuff
-
-# Change datapack init to take custom_content: list[a, b, c]
-
+# Advancements (One for loading the datapack for the first time)
 For an "install" stuff, just give them an achievement and don't revoke!
 
 # Make some part of the logo clickable would be fun. Maybe a link to the project?
 
 # Signs with data, maybe even Command()?
 
-# Advancements (maybe even give one for loading the datapack for the first time?)
-
 # INFO: Paintings require a world reset
 
 # Improve testing setup, it's a nice start though.
 
-# JUKEBOX SONGS - Length is messed up... Hmmmm
+# JUKEBOX SONGS - Auto Length is messed up... Hmmmm
 
 # Debug book with all the sounds? Could be fun, and helpful, sounds, fonts, paintings, etc.
 "Play sound" button in the book, with a list of all the sounds, and a play button next to them.
 
 # Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with silk touch, etc.
-
-# For recipes, I suggest we suffix _<method> to it, so you can make stuff multiple ways, like beef can be smoked, furnaced and campfired
 
 # ▙ is fun for stairs, ▄▄ for slab
 # ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾ 
@@ -119,11 +103,9 @@ python -m pip install -e .
 # Maybe load in all the regular tags and stuff, sort of like how he pre-makes all the item attributes
 # Maybe we should pre-populate all the default items, like swords and stuff, so you can base stuff of them?
 
-# Make the default texture path point to some default texture we provide? For the datapack?
+# Make the default texture path point to some default texture we provide? For the datapack? Rather than the default mc one
 
 # For things that are edible, add some lore? Same with equipable? "Can be used as a Glider", etc?
-
-# Lodestone tracker component data is broken, spins randomly (Because we're not in the nether?)
 
 # § -> &a - Kinda
 

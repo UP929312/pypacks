@@ -25,22 +25,19 @@ class FacePaths:
     bottom: str | None
     left: str | None
     right: str | None
+    horizontally_rotatable: bool = False
+    vertically_rotatable: bool = False
 
     def __post_init__(self) -> None:
         # TODO: Replace this with other options, horizontally_rotatable, vertically_rotatable?
         # We have 3 options, axial (NESW+Up+Down), cardinal (NESW), and on_axis (north-south, east-west, up-down)
         assert self.front is not None
-        if all([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]):
-            self.direction_type = "symmetric"
-            return
-        if self.top is None and self.bottom is None and all([x is not None for x in [self.back, self.left, self.right]]):
-            self.direction_type = "cardinal"
-            return
-        if [x is not None for x in [self.back, self.top, self.bottom, self.left, self.right]]:
-            self.direction_type = "axial"
-            return
-        raise ValueError("Invalid FacePaths object, must have one of:" +
-                         "Front | (Front, Back, Left, Right) | (Front, Back, Top, Bottom, Left, Right)")  # fmt: skip
+        if (
+            any([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]) and not  # If it's not a symmetric block
+            all([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]])  # If it's just a symmetric block
+        ):  # TODO: Probably redo that ^
+            raise ValueError("Invalid FacePaths object, must have one of:" +
+                            "Front | (Front, Back, Left, Right) | (Front, Back, Top, Bottom, Left, Right)")  # fmt: skip
 
     def create_resource_pack_files(self, block: "CustomBlock", datapack: "Datapack") -> None:
         # Requires the following file structure:
@@ -54,7 +51,7 @@ class FacePaths:
         # │       └── textures/
         # │           └── item/
         # │               ├── <custom_block>_<top&bottom&front&back&left&right.png
-        if self.direction_type == "symmetric":
+        if not (self.horizontally_rotatable and self.vertically_rotatable):
             return
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
@@ -109,7 +106,6 @@ class CustomBlock:
     def __post_init__(self) -> None:
         if isinstance(self.block_texture, str):
             self.block_texture = FacePaths(self.block_texture, None, None, None, None, None)
-        assert self.block_texture.direction_type in ["symmetric", "axial"]
 
     def set_or_create_loot_table(self) -> None:
         """Takes a CustomItem, item type, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
@@ -171,6 +167,7 @@ class CustomBlock:
         ], ["custom_blocks"])
 
     def generate_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
+        assert isinstance(self.block_texture, FacePaths)
         # These are in reverse order (pretty much), so we can reference them in the next function.
         # ============================================================================================================
         # Has to be secondary so we have @s set correctly.
@@ -194,13 +191,13 @@ class CustomBlock:
                 f"execute if score rotation_group player_yaw matches {i} " + 
                 f"run execute at @s run rotate @s {(i+1)*90} 0"
                 for i in [1, 2, 3, 4]
-            ] if self.block_texture.direction_type in ["cardinal", "axial"] else []),  # type: ignore[union-attr]
+            ] if self.block_texture.horizontally_rotatable else []),
 
             # This does the same, but for pitch, which is in the -90 -> 90 range (-90 = looking up, 90 = looking down).
             *([
                 f"execute if score rotation_group player_pitch matches {i} run execute at @s run rotate @s ~ {angle}"
                 for i, angle in zip([1, 2, 3], [90, 0, -90])
-            ] if self.block_texture.direction_type == "axial" else []),  # type: ignore[union-attr]
+            ] if self.block_texture.vertically_rotatable else []),  # type: ignore[union-attr]
 
             ],
             ["custom_blocks", "execute_on_item_display"],

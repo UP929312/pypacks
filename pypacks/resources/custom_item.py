@@ -48,6 +48,11 @@ class CustomItem:
             self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
 
         self.use_right_click_cooldown = getattr(getattr(self.additional_item_data, "cooldown", None), "seconds", None)
+        
+        if self.additional_item_data is not None:
+            for value in self.additional_item_data.__dict__.values():
+                if hasattr(value, "allowed_items"):
+                    assert self.base_item.removeprefix("minecraft:") in value.allowed_items, f"{value.__class__.__name__} can only be used with {' and '.join(value.allowed_items)}, not {self.base_item}"
 
     def __str__(self) -> "str":
         return self.base_item  # This is used so we can cast CustomItem | str to string and always get a minecraft item
@@ -134,6 +139,6 @@ class CustomItem:
             if self.additional_item_data else None
         )
         # TODO: Figure out a way to not have to do this?
-        if self.base_item in ["minecraft:written_book", "written_book"] and additional_item_data_string is not None:
+        if self.base_item.removeprefix("minecraft:") in ["writable_book", "written_book"] and additional_item_data_string is not None:
             additional_item_data_string = additional_item_data_string.replace("\\\\", "\\").replace("\\n", "\\\\n")
         return f"give @p {self.base_item}[{components}{', ' if components and additional_item_data_string else ''}{additional_item_data_string if additional_item_data_string else ''}]"

@@ -52,6 +52,8 @@ class BannerPattern:
                      "flower", "mojang", "globe", "piglin", "flow", "guster"]  # The pattern type.
     color: Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]  # The color for this pattern.
 
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["banner", "shield"])
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "pattern": self.pattern,
@@ -170,6 +172,8 @@ class Firework:
     explosions: list[FireworkExplosion]  # List of the explosion effects caused by this firework rocket.
     flight_duration: int = 1  # The flight duration of this firework rocket, i.e. the number of gunpowders used to craft it.
 
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["firework_rocket"])
+
     def to_dict(self) -> dict[str, Any]:
         assert len(self.explosions) <= 256, "Firework can only have a maximum of 256 explosions"
         assert -128 <= self.flight_duration <= 127, "Flight duration must be an integer between -128 and 127"
@@ -239,7 +243,7 @@ class LodestoneTracker:
     dimension: Literal["overworld", "nether", "end"] = "overworld"
     tracked: bool = True
 
-    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:compass"])
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["compass"])
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -266,6 +270,8 @@ class MapDecoration:
     x: int
     z: int
     rotation: int = 0
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["filled_map", "map"])
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -350,7 +356,7 @@ class Instrument:
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
     instrument_range: int = 256  #  A non-negative float for the range of the sound (normal horns are 256).
 
-    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:goat_horn"])
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["goat_horn"])
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
@@ -372,13 +378,13 @@ class Instrument:
 @dataclass
 class WritableBookContent:
     # https://minecraft.wiki/w/Data_component_format#writable_book_content
-    pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
+    pages: list[str] = field(default_factory=lambda: ["Hello World"])  # Should be a list of pages as str
+    # pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
 
-    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:writable_book"])
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["writable_book"])
 
     def to_dict(self) -> dict[str, Any]:
         return {"pages": [str(x) for x in self.pages]}
-
 
 
 @dataclass
@@ -388,7 +394,7 @@ class WrittenBookContent:
     author: str = "PyPacks"
     pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
 
-    # allowed_items: list[str] = field(init=False, repr=False, default_factory=lambda: ["minecraft:written_book"])
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["written_book"])
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -437,11 +443,11 @@ class CustomItemData:
     hide_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
     hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
-    repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only
-    map_color: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#map_color  <-- Maps only
+    repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
+    map_color: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#map_color
 
     enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
-    loaded_projectiles: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
+    loaded_projectiles: list[Literal["arrow", "tipped_arrow", "spectral_arrow", "firework_rocket"] | str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
     player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     custom_head_texture: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
@@ -459,10 +465,10 @@ class CustomItemData:
     lodestone_tracker: "LodestoneTracker | None" = field(default=None, kw_only=True)
     map_decorations: "list[MapDecoration] | None" = field(default=None, kw_only=True)
     tool: "Tool | None" = field(default=None, kw_only=True)
-    instrument: "Instrument | None" = field(default=None, kw_only=True)  # <-- Goat horn only
+    instrument: "Instrument | None" = field(default=None, kw_only=True)
     use_remainder: "UseRemainder | None" = field(default=None, kw_only=True)
-    written_book_content: "WrittenBookContent | None" = field(default=None, kw_only=True)  # <-- Written book only
-    writable_book_content: "WritableBookContent | None" = field(default=None, kw_only=True)  # <-- Book and Quill only
+    written_book_content: "WrittenBookContent | None" = field(default=None, kw_only=True)
+    writable_book_content: "WritableBookContent | None" = field(default=None, kw_only=True)
 
     def __post_init__(self) -> None:
         assert self.durability is None or self.durability > 0, "durability must be a positive integer"

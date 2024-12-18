@@ -97,7 +97,6 @@ class Datapack:
             assert len([x for x in self.custom_items if x.ref_book_config.category.name == category.name]) <= 18, \
                    f"Category {category.name} has too many items (> 18)!"
         # ==================================================================================
-
         self.mcfunctions.append(MCFunction("load", [
             f"function {self.namespace}:raycast/load",  # Something might use this but we can't be sure, so always load it
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
