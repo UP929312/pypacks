@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from .datapack import Datapack
 
 from .utils import IMAGES_PATH
-from .image_generation.ref_book_icon_gen import add_centered_overlay
+from .image_manipulation.ref_book_icon_gen import add_centered_overlay
 
 
 BASE_IMAGES: dict[str, Path] = {x: Path(IMAGES_PATH, "reference_book_icons", f"{x}.png") for x in (

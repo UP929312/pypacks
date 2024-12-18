@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.resources.custom_tag import CustomTag
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -14,7 +13,7 @@ if TYPE_CHECKING:
 # {
 #     "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
 #     "failed_function": f"{datapack.namespace}:raycast/failed",
-#     "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+#     "ray_transitive_blocks": "#minecraft:replaceable",
 #     "if_or_unless": "unless",
 # }
 # Which runs the default raycast/hit_block, the default raycast/failed, a list of blocks which can be passed though
@@ -26,7 +25,7 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
     arguments = {
         "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
         "failed_function": f"{datapack.namespace}:raycast/failed",
-        "ray_transitive_blocks": f"#{datapack.namespace}:ray_transitive_blocks",
+        "ray_transitive_blocks": "#minecraft:replaceable",
         "if_or_unless": "unless",
     }
     formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
@@ -107,33 +106,3 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         ["raycast"],
     )
     return failed, load_ray, hit_block_default, hit_block_set_score, ray, populate_start_ray, start_ray
-
-raycast_transitive_blocks = [
-    "minecraft:air",
-    "minecraft:water",
-    "minecraft:lava",
-    "minecraft:short_grass",
-    "minecraft:fern",
-    "minecraft:dead_bush",
-    "minecraft:seagrass",
-    "minecraft:tall_seagrass",
-    "minecraft:fire",
-    "minecraft:soul_fire",
-    "minecraft:snow",
-    "minecraft:vine",
-    "minecraft:glow_lichen",
-    "minecraft:resin_clump",
-    "minecraft:light",
-    "minecraft:tall_grass",
-    "minecraft:large_fern",
-    "minecraft:structure_void",
-    "minecraft:void_air",
-    "minecraft:cave_air",
-    "minecraft:bubble_column",
-    "minecraft:warped_roots",
-    "minecraft:nether_sprouts",
-    "minecraft:crimson_roots",
-    "minecraft:hanging_roots",
-]
-
-ray_transitive_blocks_tag = CustomTag("ray_transitive_blocks", ["block"], raycast_transitive_blocks)

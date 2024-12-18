@@ -4,7 +4,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from pypacks.utils import get_png_height
+from pypacks.image_manipulation.png_utils import get_png_height
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack

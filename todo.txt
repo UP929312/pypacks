@@ -6,6 +6,8 @@ List:
 
 # Writablebook doesn't accept json??? Kinda broken
 
+With the ray casting, what if they have a higher `block_interaction_range`?
+
 When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
 
 # Dynamic border generation, would need to scale, somehow, to any size from 20x20->300x300
@@ -25,8 +27,6 @@ They should appear in the reference book under the item page though...
 # Make datapack just take "custom content" and filter using isinstance?
 
 # Combine all the map stuff into one field... Including id, decorations and map colour
-
-Make a wall of all the items, with an item frame of each item, and a command block and button, would be really cool.
 
 # Analytics, python version, what custom content they added, etc - would be super useful with knowing where to focus development.
 

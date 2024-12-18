@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
+from pypacks.image_manipulation.ref_book_icon_gen import add_centered_overlay
 from pypacks.utils import PYPACKS_ROOT
 
 

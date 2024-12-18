@@ -9,8 +9,8 @@ if TYPE_CHECKING:
 @dataclass
 class CustomTag:
     internal_name: str
-    sub_directories: list[str]
     values: list[str]
+    sub_directories: list[str]
     replace: bool = False
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="tags")

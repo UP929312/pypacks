@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from pypacks.image_generation.ref_book_icon_gen import add_centered_overlay
+from pypacks.image_manipulation.ref_book_icon_gen import add_centered_overlay
 from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.resources.item_components import Consumable, Food, CustomItemData
 from pypacks.resources.mcfunction import MCFunction
@@ -114,7 +114,7 @@ class CustomItem:
                 f"execute as @a[scores={{{self.internal_name}_cooldown=0}}] run scoreboard players set @s {self.internal_name}_cooldown {self.use_right_click_cooldown*20}",
             ])
         else:
-            revoke_and_call_mcfunction.commands.append(self.on_right_click)  # type: ignore[abc]
+            revoke_and_call_mcfunction.commands.append(self.on_right_click)  # type: ignore[arg-type]
 
         return revoke_and_call_mcfunction
 

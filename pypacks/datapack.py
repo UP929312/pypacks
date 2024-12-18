@@ -6,7 +6,8 @@ from pypacks.generate import generate_base_pack, generate_resource_pack, generat
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.reference_book_config import RefBookCategory
-from pypacks.raycasting import generate_default_raycasting_functions, ray_transitive_blocks_tag
+from pypacks.raycasting import generate_default_raycasting_functions
+from pypacks.create_wall import create_wall
 
 
 if TYPE_CHECKING:
@@ -64,6 +65,7 @@ class Datapack:
         self.generate_pack()
 
     def add_internal_functions(self) -> None:
+        self.mcfunctions.append(create_wall(self.custom_items, self))
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
@@ -83,7 +85,6 @@ class Datapack:
             self.mcfunctions.extend(generate_default_raycasting_functions(self))
             self.mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
             self.mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
-            self.custom_tags.append(ray_transitive_blocks_tag)
         # ==================================================================================
         # Adding all the paintings' and jukebox's items to the list
         for painting in self.custom_paintings:

@@ -6,7 +6,7 @@ from typing import TypeAlias, Any, TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
-from pypacks.image_generation.recipe_image_data import generate_recipe_image
+from pypacks.image_manipulation.recipe_image_data import generate_recipe_image
 from pypacks.resources.custom_item import CustomItem
 
 StringOrCustomItem: TypeAlias = str | CustomItem
