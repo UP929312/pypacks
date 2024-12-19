@@ -1,10 +1,21 @@
 List:
-- Custom blocks - rewrite/rework/refactor
 - Custom blocks - Slab experiments
 - Custom blocks, no drops in creative
 - Custom blocks, silk touch
 
-# Writablebook doesn't accept json??? Kinda broken
+# Problems with slabs
+- Z fighting
+- Placing upper/double slabs is a problem...
+
+For slabs and stairs and such, maybe just have "children" of the block, then we can store it in the block, the ref book can reference that
+and also it can be created more easily, then the add_slab code will be adding it to the children
+
+Add a "generic" model, including maybe blockstates, model, item, textures? So if you want to add a custom 3d model you can?
+
+Placing slabs through other slabs causes issues, hopefully it's rare though? Since the raycast doesn't check if it's already
+In a custom slab.
+
+A lot of examples, maybe one per item? In a new examples folder.
 
 With the ray casting, what if they have a higher `block_interaction_range`?
 
@@ -17,16 +28,13 @@ This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom 
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 # Custom crafter and floor crafting would be nice to do...
 
-# For custom blocks, only drop their drop if they're not in creative
+# For custom blocks, only drop their drop if they're not in creative (maybe cheat and just find the closest player?)
 # Silk touch for custom blocks
 
-# For custom slabs and stairs, rework entirely how the base block is generated, then we can just treat it like nothing special.
 They should appear in the reference book under the item page though...
 
 # Change datapack init to take custom_content: list[a, b, c]
 # Make datapack just take "custom content" and filter using isinstance?
-
-# Combine all the map stuff into one field... Including id, decorations and map colour
 
 # Analytics, python version, what custom content they added, etc - would be super useful with knowing where to focus development.
 

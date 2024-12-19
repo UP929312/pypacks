@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 
 def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
+    DEBUG_RAYCASTING = True
     arguments = {
         "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
         "failed_function": f"{datapack.namespace}:raycast/failed",
@@ -70,7 +71,7 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         "scoreboard players add #distance raycast 1",
         "",
         "# Added: Particle for debugging",
-        "# particle minecraft:cloud ~ ~ ~",
+        f"{'' if DEBUG_RAYCASTING else '# '}particle minecraft:cloud ~ ~ ~",
         "",
         "# If the raycast failed, run the failed function",
         "$execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function $(failed_function)",

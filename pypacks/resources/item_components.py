@@ -278,6 +278,21 @@ class MapDecoration:
             "rotation": self.rotation,
         }
 
+@dataclass
+class MapData:
+    map_id: int | None = None
+    map_color: int | None = None
+    map_decorations: list[MapDecoration] | None = None
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["filled_map", "map"])
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "map_id": self.map_id if self.map_id is not None else None,
+            "map_color": self.map_color if self.map_color is not None else None,
+            "map_decorations": {hash(x): x.to_dict() for x in self.map_decorations} if self.map_decorations is not None else None,
+        }
+
 
 # ==========================================================================================
 
@@ -375,19 +390,18 @@ class Instrument:
 @dataclass
 class WritableBookContent:
     # https://minecraft.wiki/w/Data_component_format#writable_book_content
-    pages: list[str] = field(default_factory=lambda: ["Hello World"])  # Should be a list of pages as str
-    # pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
+    pages: list[str] = field(default_factory=lambda: ["Hello World"])  # Should be a list of pages as str (doesn't support JSON)
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["writable_book"])
 
     def to_dict(self) -> dict[str, Any]:
-        return {"pages": [str(x) for x in self.pages]}
+        return {"pages": self.pages}
 
 
 @dataclass
 class WrittenBookContent:
     # https://minecraft.wiki/w/Data_component_format#written_book_content
-    title: str
+    title: str = "Written Book"
     author: str = "PyPacks"
     pages: list[list[dict[str, str | bool]]] = field(default_factory=lambda: [[{"text": "Hello"}, {"text": "World"}]])  # Should be a list of pages, where a page is a list of objects, e.g. {text: "Hello, world!"}
 
@@ -441,17 +455,17 @@ class CustomItemData:
     hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
-    map_color: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#map_color
 
     enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
     loaded_projectiles: list[Literal["arrow", "tipped_arrow", "spectral_arrow", "firework_rocket"] | str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
     player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     custom_head_texture: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    note_block_sound: "str | CustomSound | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#note_block_sound  <-- Player heads only
     ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
 
     attribute_modifiers: list[AttributeModifier] | None = field(default=None, kw_only=True)
     banner_patterns: list[BannerPattern] | None = field(default=None, kw_only=True)
-    cooldown: "Cooldown | None" = field(default=None, kw_only=True)
+    cooldown: "Cooldown | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#use_cooldown
     consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
     entity_data: "EntityData | None" = field(default=None, kw_only=True)
     equippable_slots: "Equippable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#equippable
@@ -460,7 +474,7 @@ class CustomItemData:
     food: "Food | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#food
     jukebox_playable: "JukeboxPlayable | None" = field(default=None, kw_only=True)
     lodestone_tracker: "LodestoneTracker | None" = field(default=None, kw_only=True)
-    map_decorations: "list[MapDecoration] | None" = field(default=None, kw_only=True)
+    map_data: "MapData | None" = field(default=None, kw_only=True)
     tool: "Tool | None" = field(default=None, kw_only=True)
     instrument: "Instrument | None" = field(default=None, kw_only=True)
     use_remainder: "UseRemainder | None" = field(default=None, kw_only=True)
@@ -473,12 +487,14 @@ class CustomItemData:
         assert (self.lost_durability is None or self.durability is None) or self.lost_durability <= self.durability, "lost_durability must be less than or equal to durability"
         assert self.repair_cost is None or self.repair_cost >= 0, "repair_cost must be a non-negative integer"
         assert not (self.player_head_username and self.custom_head_texture), "Cannot have both player_head_username and custom_head_texture"
+        assert self.cooldown is None or self.cooldown.seconds > 0, "cooldown seconds must be positive, to remove the cooldown, set it to None (or don't pass it in.)"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_sound import CustomSound
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
         return {
-            "max_damage":                 self.durability if self.durability is not None else None,
-            "damage":                     self.lost_durability if self.lost_durability is not None else None,
+            "max_damage":                 self.durability,
+            "damage":                     self.lost_durability,
             "enchantment_glint_override": True if self.enchantment_glint_override else None,
             "glider":                     {} if self.glider else None,
             "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
@@ -486,13 +502,13 @@ class CustomItemData:
             "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
-            "repair_cost":                self.repair_cost if self.repair_cost is not None else None,
-            "map_color":                  self.map_color if self.map_color is not None else None,
+            "repair_cost":                self.repair_cost,
 
-            "enchantments":               self.enchantments if self.enchantments is not None else None,
+            "enchantments":               self.enchantments,
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
             "profile":                    self.player_head_username if self.player_head_username else profile,
-            "ominous_bottle_amplifier":   self.ominous_bottle_amplifier if self.ominous_bottle_amplifier is not None else None,
+            "note_block_sound":           self.note_block_sound.get_reference(datapack) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
+            "ominous_bottle_amplifier":   self.ominous_bottle_amplifier,
 
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns is not None else None,
@@ -504,7 +520,9 @@ class CustomItemData:
             "food":                       self.food.to_dict() if self.food is not None else None,
             "jukebox_playable":           self.jukebox_playable.to_dict(datapack) if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
-            "map_decorations":            {hash(x): x.to_dict() for x in self.map_decorations} if self.map_decorations is not None else None,
+            "map_color":                  self.map_data.to_dict()["map_color"] if self.map_data is not None else None,
+            "map_id":                     self.map_data.to_dict()["map_id"] if self.map_data is not None else None,
+            "map_decorations":            self.map_data.to_dict()["map_decorations"] if self.map_data is not None else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
             "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
@@ -522,21 +540,20 @@ class CustomItemData:
 # bundle_contents Mehh
 # can_break Mehhh
 # can_place_on Meh
-# consumable More work for effects and sound.
+# consumable More work for effects and sound. ---
 # container YES (for chests) =======================================
 # container_loot MEH
 # damage_resistant Hmmm  Maybe to make it resistant to lava like netherite? =======================================
 # damage_resistant={types:"#minecraft:is_fire"}
-
 # debug_stick_state no.
 # death_protection HMMMM (totem of undying)
 # dyed_color - leather armor only? MEH
 # enchantable # NOT YET (custom enchants maybe?)
 # equippable REDO, more stuff
 # intangible_projectile MEH
-# map_id
-# note_block_sound
-# potion_contents
+# lock
+# pot_decorations
+# potion_contents --------------------------------
 # recipes  - for knowledge book
 # stored_enchantments MEH - For enchanted books?
 # suspicious_stew_effects MEH

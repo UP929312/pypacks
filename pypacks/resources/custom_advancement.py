@@ -44,10 +44,10 @@ class CustomAdvancement:
     # https://minecraft.wiki/w/Advancement_definition
     internal_name: str
     criteria: list[Criteria]
-    rewarded_loot: str | None = None  # The resource location of a loot table.
-    rewarded_recipes: str | None = None  # The resource location of a recipe.
-    rewarded_experience: int | None = None  # To give an amount of experience. Defaults to 0.
-    rewarded_function: str | None = None  # To run a function. Function tags are not allowed.
+    rewarded_loot: str | None = field(repr=False, default=None)  # The resource location of a loot table.
+    rewarded_recipes: str | None = field(repr=False, default=None)  # The resource location of a recipe.
+    rewarded_experience: int | None = field(repr=False, default=None)  # To give an amount of experience. Defaults to 0.
+    rewarded_function: str | None = field(default=None)  # To run a function. Function tags are not allowed.
     hidden: bool = False
 
     title: str = "Unknown"
