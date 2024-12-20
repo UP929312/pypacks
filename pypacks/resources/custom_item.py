@@ -1,13 +1,10 @@
-import json
-import os
-import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from pypacks.image_manipulation.ref_book_icon_gen import add_centered_overlay
 from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.resources.item_components import Consumable, Food, CustomItemData
+from pypacks.resources.custom_model import ItemModel
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
 
@@ -18,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class CustomItem:
-    base_item: str  # What item to base it on
+    base_item: str  # What item to base it on  # TODO: Consider swapping the order with internal name to match the rest of the library.
     internal_name: str  # Internal name of the item
     custom_name: str | None = None  # Display name of the item
     lore: list[str] = field(repr=False, default_factory=list)  # Lore of the item
@@ -45,54 +42,32 @@ class CustomItem:
 
         path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
         with open(path, mode="rb") as file:
-            self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
+            self.image_bytes = file.read()
 
         self.use_right_click_cooldown = getattr(getattr(self.additional_item_data, "cooldown", None), "seconds", None)
-        
+
         if self.additional_item_data is not None:
             for value in self.additional_item_data.__dict__.values():
                 if hasattr(value, "allowed_items"):
-                    assert self.base_item.removeprefix("minecraft:") in value.allowed_items, f"{value.__class__.__name__} can only be used with {' and '.join(value.allowed_items)}, not {self.base_item}"
+                    assert self.base_item.removeprefix("minecraft:") in value.allowed_items, (
+                        f"{value.__class__.__name__} can only be used with {' and '.join(value.allowed_items)}, not {self.base_item}"
+                    )
 
     def __str__(self) -> "str":
         return self.base_item  # This is used so we can cast CustomItem | str to string and always get a minecraft item
 
     def add_right_click_functionality(self) -> None:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""
-        consumable = Consumable(consume_seconds=1_000_000, animation="none", sound=None, has_consume_particles=False)
-        food = Food(nutrition=0, saturation=0, can_always_eat=True)
-        tag = {f"custom_right_click_for_{self.internal_name}": True}
-        if self.additional_item_data:
-            self.additional_item_data.consumable = consumable
-            self.additional_item_data.food = food
-        else:
-            self.additional_item_data = CustomItemData(consumable=consumable, food=food)
-        self.custom_data |= tag
+        if self.additional_item_data is None:
+            self.additional_item_data = CustomItemData()
+        self.additional_item_data.consumable = Consumable(consume_seconds=1_000_000, animation="none", sound=None, has_consume_particles=False)
+        self.additional_item_data.food = Food(nutrition=0, saturation=0, can_always_eat=True)
+        self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
-        # The resource pack requires 3 things:
-        # 1. The model definition/config (in items/<internal_name>.json)
-        # 2. The model components, including textures, parent, etc. (in models/item/<internal_name>.json)
-        # 3. The texture itself (in textures/item/<internal_name>.png)
-        if self.texture_path is not None:
-            if not self.is_block:  # Create the item texture, but not if it's a block (that gets done by the custom block code)
-                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
-                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
-                os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
-
-                layers = {"layer0": f"{datapack.namespace}:item/{self.internal_name}"}
-                with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
-                    json.dump({"parent": "minecraft:item/generated", "textures": layers}, file, indent=4)
-
-                with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-                    json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
-
-                shutil.copyfile(self.texture_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png")
-
-        # Create the icons for the custom items
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font"/f"{self.internal_name}_icon.png", "wb") as file:
-            file.write(self.icon_image_bytes)
+        # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
+        if self.texture_path is not None and not self.is_block:
+            return ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(datapack)
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         # Create the give command for use in books

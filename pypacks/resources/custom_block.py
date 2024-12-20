@@ -1,10 +1,12 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
-from pypacks.resources.custom_block_models import FacePaths, AsymmetricCubeModel, SymmetricCubeModel
-from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
+from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.constants import Slabs
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -14,7 +16,7 @@ if TYPE_CHECKING:
 @dataclass
 class CustomBlock:
     """Adds a custom block, for the texture, pass in a single 16x16 texture path, or a FacePaths object, which allows multiple paths to be
-    passed in (e.g. rotatable logs). Setting drops to "self" will make the block drop itself when broken, 
+    passed in (e.g. rotatable logs). Setting drops to "self" will make the block drop itself when broken,
     and setting it to None will make it drop nothing."""
     internal_name: str
     name: str
@@ -31,7 +33,7 @@ class CustomBlock:
             self.block_texture = FacePaths(self.block_texture, None, None, None, None, None)
 
         if self.block_texture.block_type == "symmetric_cube":
-            self.model_object = SymmetricCubeModel(self.internal_name, self.block_texture.front)
+            self.model_object: SymmetricCubeModel | AsymmetricCubeModel = SymmetricCubeModel(self.internal_name, self.block_texture.front)
         elif self.block_texture.block_type == "asymmetric_cube":
             self.model_object = AsymmetricCubeModel(self.internal_name, self.block_texture)
 
@@ -67,7 +69,7 @@ class CustomBlock:
                     "condition": "minecraft:match_tool",
                     "predicate": {
                         "predicates": {
-                            "minecraft:custom_data": "{%s:'%s'}" % ("pypacks_custom_item", self.internal_name),  # TODO: {{}}?
+                            "minecraft:custom_data": f"{{pypacks_custom_item: '{self.internal_name}'}}"
                         }
                     }
                 }
@@ -105,7 +107,7 @@ class CustomBlock:
             f"tag @s add {datapack.namespace}.custom_block.{self.internal_name}",
 
             # Make it _slightly_ bigger than the block, so it hides the original (only a tiny bit bigger), to stop z-fighting too.
-            "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",
+            "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",  # TODO: This isn't right for slabs I think?
             "data modify entity @s brightness set value {block: 15, sky: 15}",
 
             # For item displays, container.0 is just the item it is displaying.
@@ -116,7 +118,7 @@ class CustomBlock:
             # Player horizontal rotation (yaw) is -180 -> 180, with -180/180 (they're the same) being directly north
             # North = 135 -> 180 & -180 -> -135  |  East = -135 -> -45  |  South = -45 -> 45  |  West = 45 -> 135
             *([
-                f"execute if score rotation_group player_yaw matches {i} " + 
+                f"execute if score rotation_group player_yaw matches {i} " +
                 f"run execute at @s run rotate @s {(i+1)*90} 0"
                 for i in [1, 2, 3, 4]
             ] if self.block_texture.horizontally_rotatable else []),
@@ -142,7 +144,7 @@ class CustomBlock:
             "ray_transitive_blocks": f"{self.base_block}",
             "if_or_unless": "if",
         }
-        formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
+        formatted_arguments = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
         populate_start_ray = MCFunction(f"populate_start_ray_{self.internal_name}", [
                 f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
             ],
@@ -177,6 +179,33 @@ class CustomBlock:
             *[f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block.{custom_block.internal_name}] at @s if block ~ ~ ~ minecraft:air run function {datapack.namespace}:custom_blocks/on_destroy/on_destroy_no_silk_touch_{custom_block.internal_name}"
               for custom_block in datapack.custom_blocks],
         ], ["custom_blocks"])
+
+    def create_slab(self, slab_block: Slabs) -> "CustomBlock":
+        """Adds a slab version of the block."""
+        assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
+        # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",
+        #                          lore=self.block_item.lore, custom_data={"pypacks_custom_item": f"{self.internal_name}_slab"}
+        #                          )
+        # =========================
+        # TODO: Just reconstruct a new item/block here?...
+        new_slab_block: "CustomBlock" = deepcopy(self)
+        new_slab_block.internal_name = f"{self.internal_name}_slab"
+        new_slab_block.base_block = "minecraft:"+slab_block
+        # new_slab_block.drops = "self"
+        # =========================
+        slab_item: "CustomItem" = deepcopy(self.block_item)  # type: ignore
+        slab_item.base_item = "minecraft:"+slab_block
+        slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)  # type: ignore
+        slab_item.internal_name = f"{self.internal_name}_slab"
+        slab_item.custom_name = f"{self.name} Slab"
+        slab_item.custom_data["pypacks_custom_item"] = f"{self.internal_name}_slab"
+        slab_item.is_block = True
+        # =========================
+        new_slab_block.drops = slab_item
+        new_slab_block.set_or_create_loot_table()
+
+        new_slab_block.block_item = slab_item
+        return new_slab_block
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         self.model_object.create_resource_pack_files(datapack)

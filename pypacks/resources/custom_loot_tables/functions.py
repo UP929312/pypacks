@@ -31,8 +31,8 @@ class ApplyBonusFunction:
     enchantment: str  # ID of an enchantment on the tool provided by loot context used for level calculation.
     formula: str | Literal["binomial_with_bonus_count", "uniform_bonus_count", "ore_drops"]  # A resource location. Can be binomial_with_bonus_count for a binomial distribution (with n=level + extra, p=probability), uniform_bonus_count for uniform distribution (from 0 to level * bonusMultiplier), or ore_drops for a special function used for ore drops in the vanilla game (Count *= (max(1; randomInt(0(inclusive) .. (Level + 2)(exclusive))))).
     extra: int | None  # For formula 'binomial_with_bonus_count', the extra value.
-    probability: int | None  #  For formula 'binomial_with_bonus_count', the probability.
-    bonus_multiplier: int | None  #  For formula 'uniform_bonus_count', the bonus multiplier.
+    probability: int | None  # For formula 'binomial_with_bonus_count', the probability.
+    bonus_multiplier: int | None  # For formula 'uniform_bonus_count', the bonus multiplier.
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -48,7 +48,7 @@ class ApplyBonusFunction:
 @dataclass
 class CopyComponentsFunction:
     """Copies components from a specified source onto an item."""
-    source: str  #  Source type to pull from. Specifies an entity or block entity from loot context. Only allowed value is block_entity
+    source: str  # Source type to pull from. Specifies an entity or block entity from loot context. Only allowed value is block_entity
     include: list[str] | None = None  # Optional. A list of components to include. If omitted, all components are copied.
     exclude: list[str] | None = None  # Optional. A list of components to exclude.
 
@@ -445,7 +445,6 @@ class SetFireworksFunction:
     """Sets the item tags for fireworks items."""
     explosions: list["FireworkExplosion"]  # Optional. Specifies firework explosions.
     flight_duration: int | None  # Optional, allowed values are 0 to 255. Determines flight duration measured in number of gunpowder. If omitted, the flight duration of the item is left untouched (or set to 0 if the component did not exist before).
-
 
     def to_dict(self) -> dict[str, Any]:
         return {

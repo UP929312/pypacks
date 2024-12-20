@@ -30,6 +30,7 @@ class Test:
                 commands.append(command)
         return f"# {self.name}\n"+"\n".join(commands) + "\n"
 
+
 furnace_test = Test("Furnace Test", [  # type: ignore
     Air(), Hopper(["minecraft:porkchop"]), Air(),
     Air(), Furnace(),                      Air(),  # fmt: skip

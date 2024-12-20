@@ -19,7 +19,7 @@ class Air:
 class Hopper:
     def __init__(self, items: list[str] | dict[str, int] | None = None) -> None:
         self.items = items
-    
+
     def to_setblock_command(self, x: int, y: int, z: int) -> str:
         return f"setblock ~{x} ~{y} ~{z} minecraft:hopper[]"+items_formatter(self.items, "count")
 
@@ -35,7 +35,7 @@ class ExpectedHopper(Hopper):
     def __init__(self, expected_item: str) -> None:
         super().__init__([])
         self.expected_item = expected_item
-    
+
     def to_setblock_command(self, x: int, y: int, z: int) -> str:
         return f"setblock ~{x} ~{y} ~{z} minecraft:hopper[]"
 
@@ -43,7 +43,7 @@ class ExpectedHopper(Hopper):
 class AutoCrafter:
     def __init__(self, slots_disabled: list[int] | None = None) -> None:
         self.slots_disabled = slots_disabled or []
-    
+
     def to_setblock_command(self, x: int, y: int, z: int) -> str:
         disabled_slots_string = ("{disabled_slots:" + f"[I; {', '.join([str(x) for x in self.slots_disabled])}]" + "}") if self.slots_disabled else ""
         return f"setblock ~{x} ~{y} ~{z} minecraft:crafter[]{disabled_slots_string}"

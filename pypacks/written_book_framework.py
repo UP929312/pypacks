@@ -62,7 +62,7 @@ class OnHoverShowItem:
     custom_item: "CustomItem"
     datapack_namespace: str
 
-    def get_json_data(self) -> dict[str, Any]:\
+    def get_json_data(self) -> dict[str, Any]:
         return {"hoverEvent": {"action": "show_item", "contents": {"id": self.custom_item.base_item, "components": self.custom_item.to_dict(self.datapack_namespace)}}}
 
 
@@ -96,7 +96,7 @@ class FilledRow:
         if len(icons) < self.row_length and self.empty_icon_unicode_char is not None:
             icons += [Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char, include_formatting=False)]*(self.row_length-len(self.elements))
         initial_padding = {
-            "text": (self.indent_unicode_char*ICON_ROW_INDENT) , "color": "white",
+            "text": (self.indent_unicode_char*ICON_ROW_INDENT), "color": "white",
             "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"
         } if self.indent_unicode_char else {}
         return [initial_padding, *[x.get_json_data() for x in icons]]

@@ -1,5 +1,6 @@
 import io
 
+
 def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None = None, enforce_square: bool = True,
                        enforce_factor_of_two: bool = True) -> tuple[int, int]:
     """Returns (width, height) of the image"""
@@ -27,4 +28,3 @@ def get_png_height(file_path: str | None = None, image_bytes: bytes | None = Non
                    enforce_square: bool = False, enforce_factor_of_two: bool = False) -> int:
     """Returns the height of the image"""
     return get_png_dimensions(file_path=file_path, image_bytes=image_bytes, enforce_square=enforce_square, enforce_factor_of_two=enforce_factor_of_two)[1]
-

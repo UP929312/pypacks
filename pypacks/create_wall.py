@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from .datapack import Datapack
     from .resources.custom_item import CustomItem
 
+
 def create_wall(custom_items: list["CustomItem"], datapack: "Datapack") -> MCFunction:
     mapping = {i: divmod(i, 4) for i in range(len(custom_items))}
 

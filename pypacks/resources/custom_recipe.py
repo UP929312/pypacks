@@ -300,6 +300,7 @@ class StonecutterRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(datapack.namespace)  # type: ignore[index]
         return data
 
+
 # This is a type hint for a recipe, it can be any of the recipe types
 Recipe: TypeAlias = (
     ShapelessCraftingRecipe | ShapedCraftingRecipe | CraftingTransmuteRecipe | FurnaceRecipe | BlastFurnaceRecipe |

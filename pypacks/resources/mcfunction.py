@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
+
 @dataclass
 class MCFunction:
     """Creates a minecraft function file"""
@@ -23,7 +24,7 @@ class MCFunction:
     def create_datapack_files(self, datapack: "Datapack") -> None:
         # Can't use / here because of *self.sub_directories
         path = Path(datapack.datapack_output_path, "data", datapack.namespace, self.__class__.datapack_subdirectory_name,
-                            *self.sub_directories, f"{self.internal_name}.mcfunction")
+                    *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
             file.write("\n".join(self.commands))
 

@@ -10,6 +10,7 @@ from pypacks.resources.item_components import CustomItemData, JukeboxPlayable
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
+
 @dataclass
 class CustomJukeboxSong:
     """Create a CustomSound first, then set it's internal_name & audio_path to be the same as the sound's internal_name + ogg_path"""
@@ -17,7 +18,7 @@ class CustomJukeboxSong:
     description: str
     ogg_path: str
     comparator_output: int
-    length_in_seconds: float #  | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
+    length_in_seconds: float  # | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="jukebox_song")
 

@@ -8,18 +8,14 @@ from pypacks.book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES
 from pypacks.resources.custom_font import CustomFont, FontImage
 from pypacks.resources.custom_item import CustomItem
+from .utils import IMAGES_PATH
+from .image_manipulation.ref_book_icon_gen import add_centered_overlay
 
 if TYPE_CHECKING:
     from .datapack import Datapack
 
-from .utils import IMAGES_PATH
-from .image_manipulation.ref_book_icon_gen import add_centered_overlay
 
-
-BASE_IMAGES: dict[str, Path] = {x: Path(IMAGES_PATH, "reference_book_icons", f"{x}.png") for x in (
-    "empty_1_x_1", "blank_icon",
-)}
-EXTRA_ICON_BASE_PATH = Path(IMAGES_PATH)/"reference_book_icons"/"extra_icon_base_2.png"
+EXTRA_ICON_BASE_PATH = Path(IMAGES_PATH)/"reference_book_icons"/"extra_icon_base.png"
 
 
 def generate_resource_pack(datapack: "Datapack") -> None:
@@ -40,26 +36,24 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
     # ================================================================================================
 
+
 def generate_font_pack(datapack: "Datapack") -> "CustomFont":
     # TODO: Could this move to the reference book generator?
     # https://www.youtube.com/watch?v=i4l2Ym_0VZg   <- Just cool
     # Create the providers file
     all_elements = [
-        *[   # BASE IMAGES, Spaces, Empty icon, logo
-            FontImage(name=image_name, image_bytes=Path(image_path).read_bytes())
-            for image_name, image_path in BASE_IMAGES.items()
-        ],
-        # Logo (scaled, better resolution)
+        FontImage("empty_1_x_1", Path(IMAGES_PATH, "reference_book_icons", "empty_1_x_1.png").read_bytes()),
+        FontImage("blank_icon", Path(IMAGES_PATH, "reference_book_icons", "blank_icon.png").read_bytes()),
         FontImage("logo_256_x_256", Path(IMAGES_PATH, "reference_book_icons", "logo_256_x_256.png").read_bytes(), height=100, y_offset=16),
-        FontImage("satchel_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         FontImage("information_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
                                                            base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=18, y_offset=14),
+        FontImage("satchel_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         *[  # Category icons
             FontImage(f"{category.internal_name}_category_icon", image_bytes=category.icon_image_bytes)
             for category in datapack.reference_book_categories
         ],
         *[  # Custom items
-            FontImage(f"{item.internal_name}_icon", image_bytes=item.icon_image_bytes)
+            FontImage(f"{item.internal_name}_icon", image_bytes=add_centered_overlay(item.image_bytes))
             for item in datapack.custom_items
         ],
         *[  # Custom recipes
@@ -75,6 +69,7 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
         ],
     ]
     return CustomFont("all_fonts", all_elements)
+
 
 def generate_base_pack(datapack: "Datapack") -> None:
     os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace, exist_ok=True)

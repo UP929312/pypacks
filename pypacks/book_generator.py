@@ -31,7 +31,6 @@ class ItemPage:
             StonecutterRecipe: self.datapack.font_mapping["stonecutter_icon"],
             BlastFurnaceRecipe: self.datapack.font_mapping["furnace_icon"],
             SmokerRecipe: self.datapack.font_mapping["furnace_icon"],
-            StonecutterRecipe: self.datapack.font_mapping["stonecutter_icon"],
             CampfireRecipe: self.datapack.font_mapping["campfire_icon"],
             SmithingTransformRecipe: self.datapack.font_mapping["smithing_table_icon"],
             SmithingTrimRecipe: self.datapack.font_mapping["smithing_table_icon"],
@@ -120,7 +119,7 @@ class ReferenceBook:
         # COVER_PAGE = 1
         CATEGORIES_PAGE = 2
         CATEGORY_ITEMS_PAGE = 3  # 3+   One for each category
-        ITEM_PAGE  = CATEGORY_ITEMS_PAGE+len(datapack.reference_book_categories)  # After we have all the categories, start adding the individual items
+        ITEM_PAGE = CATEGORY_ITEMS_PAGE+len(datapack.reference_book_categories)  # After we have all the categories, start adding the individual items
         # BLANK_PAGE = CATEGORY_ITEMS_PAGE*len(datapack.reference_book_categories)+len(datapack.custom_items)+1
 
         # Cover (1)

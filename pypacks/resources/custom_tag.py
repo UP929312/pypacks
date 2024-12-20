@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
+
 @dataclass
 class CustomTag:
     internal_name: str

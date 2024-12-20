@@ -202,8 +202,9 @@ class CustomLootTable:
             {
                 "type": self.loot_table_type,
                 "pools": [pool.to_dict(datapack) for pool in self.pools],
-            } | ({
-                "functions": [function.to_dict() for function in self.functions]
+            } | (
+                {
+                    "functions": [function.to_dict() for function in self.functions]
                 } if self.functions else {}
             )
         )

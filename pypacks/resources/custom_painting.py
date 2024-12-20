@@ -12,6 +12,7 @@ from pypacks.resources.item_components import CustomItemData, EntityData
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
 
+
 @dataclass
 class CustomPainting:
     internal_name: str

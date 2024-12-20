@@ -24,6 +24,7 @@ TriggerType = Literal["minecraft:allay_drop_item_on_block", "minecraft:any_block
                       "minecraft:thrown_item_picked_up_by_entity", "minecraft:thrown_item_picked_up_by_player", "minecraft:tick", "minecraft:used_ender_eye",
                       "minecraft:used_totem", "minecraft:using_item", "minecraft:villager_trade"]
 
+
 @dataclass
 class Criteria:
     """A requirement for an advancement."""

@@ -182,7 +182,6 @@ class Firework:
 # ==========================================================================================
 
 
-
 @dataclass
 class Food:
     nutrition: int
@@ -261,6 +260,7 @@ MapDecorationType = Literal[
     "red_x", "desert_village", "plains_village", "savanna_village", "snowy_village", "taiga_village", "jungle_pyramid", "swamp_hut",
 ]
 
+
 @dataclass(frozen=True)
 class MapDecoration:
     type: MapDecorationType
@@ -277,6 +277,7 @@ class MapDecoration:
             "z": self.z,
             "rotation": self.rotation,
         }
+
 
 @dataclass
 class MapData:
@@ -366,7 +367,7 @@ class Instrument:
                                             "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
     description: str | None = None  # A string for the description of the sound.
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
-    instrument_range: int = 256  #  A non-negative float for the range of the sound (normal horns are 256).
+    instrument_range: int = 256  # A non-negative float for the range of the sound (normal horns are 256).
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["goat_horn"])
 
@@ -382,9 +383,7 @@ class Instrument:
         }
 
 
-
 # ==========================================================================================
-
 
 
 @dataclass

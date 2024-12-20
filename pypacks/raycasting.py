@@ -29,9 +29,9 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         "ray_transitive_blocks": "#minecraft:replaceable",
         "if_or_unless": "unless",
     }
-    formatted_arguments = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
+    formatted_arguments = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
     arguments_replacements = {key: f"$({key})" for key in arguments}
-    formatted_arguments_replacements = "{" +", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments_replacements.items()]) + "}"
+    formatted_arguments_replacements = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments_replacements.items()]) + "}"
 
     failed = MCFunction("failed", [
         "# Commands to run when the raycast has failed to detect a block",
