@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
-from pypacks.utils import recusively_remove_nones_from_dict, extract_item_components
+from pypacks.utils import recusively_remove_nones_from_data, extract_item_components
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction
 from pypacks.resources.custom_loot_tables.number_provider import BinomialNumberProvider, UniformNumberProvider
 
@@ -80,6 +80,7 @@ class SingleItemRangeEntry(Entry):
     max_count: int = 1
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
         combined_components = extract_item_components(self.item, datapack)
         return {
             "type": "minecraft:item",
@@ -98,6 +99,7 @@ class BinomialDistributionEntry(Entry):
     p: float
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
         combined_components = extract_item_components(self.item, datapack)
         return {
             "type": "minecraft:item",
@@ -115,6 +117,7 @@ class UniformDistributionEntry(Entry):
     max_count: int = 1
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
         combined_components = extract_item_components(self.item, datapack)
         return {
             "type": "minecraft:item",
@@ -198,14 +201,14 @@ class CustomLootTable:
         return f"{datapack.namespace}:{self.internal_name}"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        return recusively_remove_nones_from_dict(
+        return recusively_remove_nones_from_data(
             {
                 "type": self.loot_table_type,
                 "pools": [pool.to_dict(datapack) for pool in self.pools],
             } | (
                 {
                     "functions": [function.to_dict() for function in self.functions]
-                } if self.functions else {}
+                } if self.functions else {}  # TODO: We already recursively remove none, why not just set functions to None if there's 0?
             )
         )
 

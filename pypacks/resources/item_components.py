@@ -71,34 +71,33 @@ class Consumable:
 
     consume_seconds: float = 1.6  # How long it takes to consume the item in seconds
     animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] = "none"  # The animation to play when consuming the item
-    sound: str | None = None  # The sound to play when consuming the item
+    consuming_sound: "str | CustomSound | None" = "entity.generic.eat"  # The sound to play when consuming the item
     has_consume_particles: bool = True  # Whether to show particles when consuming the item
 
-    # on_consume_effects: list["PotionEffect"] | None = None  # a list of status effects to apply when consuming the item
-    # on_consume_remove_effects: list["str | PotionEffect"] | Literal["all"] | None = None  # a list of status effects to remove when consuming the item
-    # on_consume_teleport_diameter: int | None = None  # the diameter of the teleportation area when consuming the item
-    # TODO: Consume sounds and effects
+    on_consume_effects: list["PotionEffect"] = field(default_factory=list)  # A list of status effects to apply when consuming the item
+    on_consume_remove_effects: list["str | PotionEffect"] | Literal["all"] = field(default_factory=list)  # A list of status effects to remove when consuming the item
+    on_consume_teleport_diameter: float | int = 0  # The diameter of the teleportation area when consuming the item (chorus fruit is 16.0)
 
-    # If type is apply_effects:
-    #   effects: A list of effect instances applied once consumed.
-    #     id: The ID of the effect.
-    #     probability: The chance for the above effects to be applied once consumed. Must be a positive float between 0.0 and 1.0. Defaults to 1.0.
-    # If type is remove_effects:
-    #     effects: A set of effects removed once consumed, as either a single ID or list of IDs.
-    # If type is clear_all_effects: Clears all effects of the consumer.
-    # If type is teleport_randomly:
-    #     diameter: The diameter that the consumer is teleported within. Defaults to 16.0.
-
-    def to_dict(self) -> dict[str, Any]:
-        assert self.sound is None, "sound is not yet supported"
-        # assert self.on_consume_effects is None, "on_consume_effects is not yet supported"
-        return {
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_sound import CustomSound
+        base_dict = {
             "consume_seconds": self.consume_seconds,
             "animation": self.animation,
-            "sound": self.sound,  # "entity.generic.eat"
+            "sound": {"sound_id": self.consuming_sound.get_reference(datapack) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound},
             "has_consume_particles": False if not self.has_consume_particles else None,  # Defaults to True
-            # "on_consume_effects": self.on_consume_effects,
         }
+        if not self.on_consume_effects and not self.on_consume_remove_effects and self.on_consume_teleport_diameter == 0:
+            return base_dict
+        base_dict |= ({"on_consume_effects": []})
+        if self.on_consume_effects == "all":
+            base_dict["on_consume_effects"].append({"type": "clear_all_effects"})
+        if self.on_consume_effects and self.on_consume_effects != "all":
+            base_dict["on_consume_effects"].append({"type": "apply_effects", "effects": [effect.to_dict() for effect in self.on_consume_effects]})
+        if self.on_consume_remove_effects:
+            base_dict["on_consume_effects"].append({"type": "remove_effects", "effects": [effect.effect_name if isinstance(effect, PotionEffect) else effect for effect in self.on_consume_remove_effects]})
+        if self.on_consume_teleport_diameter != 0:
+            base_dict["on_consume_effects"].append({"type": "teleport_randomly", "diameter": self.on_consume_teleport_diameter})
+        return base_dict
 
 
 # ==========================================================================================
@@ -184,14 +183,14 @@ class Firework:
 
 @dataclass
 class Food:
-    nutrition: int
-    saturation: int
+    nutrition: int = 0
+    saturation: int = 0
     can_always_eat: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "nutrition": self.nutrition,
-            "saturation": self.saturation,
+            "nutrition": self.nutrition,  # Defaults to 0 (cannot be None)
+            "saturation": self.saturation,  # Defaults to 0 (cannot be None)
             "can_always_eat": True if self.can_always_eat else None,  # Defaults to False
         }
 
@@ -312,7 +311,7 @@ class PotionEffect:
 
     effect_name: PotionEffectType  # The ID of the effect, e.g. "jump_boost"
     amplifier: int = 0  # The amplifier of the effect, with level I having value 0. Optional, defaults to 0.
-    duration: int | Literal["infinity"] = 1  # The duration of the effect in ticks. Value -1 is treated as infinity. Values 0 or less than -2 are treated as 1. Optional, defaults to 1 tick.
+    duration_in_ticks: int | Literal["infinity"] = 1  # The duration of the effect in ticks. Value -1 is treated as infinity. Values 0 or less than -2 are treated as 1. Optional, defaults to 1 tick.
     ambient: bool = False  # Whether or not this is an effect provided by a beacon and therefore should be less intrusive on the screen. Optional, defaults to false.
     show_particles: bool = True  # Whether or not this effect produces particles. Optional, defaults to true.
     show_icon: bool = True  # Whether or not an icon should be shown for this effect. Optional, defaults to true.
@@ -321,7 +320,7 @@ class PotionEffect:
         return {
             "id": self.effect_name,
             "amplifier": self.amplifier if self.amplifier != 0 else None,  # Defaults to 0
-            "duration": -1 if self.duration == "infinity" else self.duration,
+            "duration": -1 if self.duration_in_ticks == "infinity" else self.duration_in_ticks,
             "ambient": True if self.ambient else None,  # Defaults to False
             "show_particles": False if not self.show_particles else None,  # Defaults to True
             "show_icon": False if not self.show_icon else None,  # Defaults to True
@@ -378,7 +377,7 @@ class Instrument:
         return {
             "description": self.description,
             "range": self.instrument_range,
-            "sound_event": {"sound_id": f"{datapack.namespace}:{self.sound_id.internal_name}" if isinstance(self.sound_id, CustomSound) else self.sound_id},
+            "sound_event": {"sound_id": self.sound_id.get_reference(datapack) if isinstance(self.sound_id, CustomSound) else self.sound_id},
             "use_duration": self.use_duration,
         }
 
@@ -511,7 +510,7 @@ class CustomItemData:
 
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns is not None else None,
-            "consumable":                 self.consumable.to_dict() if self.consumable is not None else None,
+            "consumable":                 self.consumable.to_dict(datapack) if self.consumable is not None else None,
             "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,

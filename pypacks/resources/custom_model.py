@@ -206,9 +206,9 @@ class SlabModel:
     # def add_variants(self, datapack: "Datapack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
         # Fences are too much work (maybe?)
-        # Walls aren't wood, but also like fences
-        # Doors and trapdoors need to flip and that's probably annoying to do.
-        # Pressure plates are buttons also need to react.
+        # Walls aren't wood, but are also like fences
+        # Doors and trapdoors need to flip and that's annoying to do
+        # Pressure plates are basically buttons that also need to react
         # Fencegates are doors, so they're out.
         # Boat/boat chest??? Should be able to re-skin an entity?
         # Signs and hanging signs are editable, so probably not them (for now)

@@ -3,6 +3,9 @@ List:
 - Custom blocks, no drops in creative
 - Custom blocks, silk touch
 
+
+RENAME ADDITIONAL ITEM DATA TO JUST item_components
+
 # Problems with slabs
 - Z fighting
 - Placing upper/double slabs is a problem...

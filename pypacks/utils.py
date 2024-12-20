@@ -19,18 +19,20 @@ def extract_item_components(item: "str | CustomItem", datapack: "Datapack") -> d
     from pypacks.resources.custom_item import CustomItem
     regular_data = item.to_dict(datapack.namespace) if isinstance(item, CustomItem) else {}
     components = item.additional_item_data.to_dict(datapack) if isinstance(item, CustomItem) and item.additional_item_data is not None else {}
-    combined = recusively_remove_nones_from_dict(regular_data | components)
+    combined = recusively_remove_nones_from_data(regular_data | components)
     return combined
 
 
-def recusively_remove_nones_from_dict(obj: dict[str, Any]) -> dict[str, Any]:
-    if not isinstance(obj, dict):
-        return obj
-    return {key: (recusively_remove_nones_from_dict(val) if isinstance(val, dict) else val) for key, val in obj.items() if val is not None}
+def recusively_remove_nones_from_data(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [recusively_remove_nones_from_data(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {key: recusively_remove_nones_from_data(value) for key, value in obj.items() if value is not None}
+    return obj
 
 
 def _to_snbt(obj: dict[str, Any]) -> str:
-    return json.dumps(recusively_remove_nones_from_dict(obj)).replace("\"'", "'").replace("'\"", "'")
+    return json.dumps(recusively_remove_nones_from_data(obj)).replace("\"'", "'").replace("'\"", "'")
 
 
 def to_component_string(obj: dict[str, Any]) -> str:

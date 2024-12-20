@@ -6,7 +6,7 @@ from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.resources.item_components import Consumable, Food, CustomItemData
 from pypacks.resources.custom_model import ItemModel
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_dict
+from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -60,7 +60,7 @@ class CustomItem:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""
         if self.additional_item_data is None:
             self.additional_item_data = CustomItemData()
-        self.additional_item_data.consumable = Consumable(consume_seconds=1_000_000, animation="none", sound=None, has_consume_particles=False)
+        self.additional_item_data.consumable = Consumable(consume_seconds=1_000_000, animation="none", consuming_sound=None, has_consume_particles=False)
         self.additional_item_data.food = Food(nutrition=0, saturation=0, can_always_eat=True)
         self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
 
@@ -93,7 +93,7 @@ class CustomItem:
         return revoke_and_call_mcfunction
 
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
-        return recusively_remove_nones_from_dict({
+        return recusively_remove_nones_from_data({
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
@@ -109,7 +109,7 @@ class CustomItem:
             for key, value in self.to_dict(datapack.namespace).items()
         ])
         additional_item_data_string = (
-            to_component_string(self.additional_item_data.to_dict(datapack))  # Also strips None
+            to_component_string(self.additional_item_data.to_dict(datapack))  # Also strips None through `recusively_remove_nones_from_data`
             if self.additional_item_data else None
         )
         # TODO: Figure out a way to not have to do this?

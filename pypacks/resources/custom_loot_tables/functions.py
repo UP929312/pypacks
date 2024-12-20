@@ -572,7 +572,7 @@ class SetStewEffectFunction:
             "effects": [
                 {
                     "type": effect.effect_name,
-                    "duration": effect.duration,
+                    "duration": effect.duration_in_ticks,
                 }
                 for effect in self.effects
             ]

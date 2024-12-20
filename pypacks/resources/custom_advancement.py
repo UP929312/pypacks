@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Any, TYPE_CHECKING
 
-from pypacks.utils import recusively_remove_nones_from_dict
+from pypacks.utils import recusively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -64,7 +64,7 @@ class CustomAdvancement:
     datapack_subdirectory_name: str = field(init=False, repr=False, default="advancement")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        return recusively_remove_nones_from_dict({
+        return recusively_remove_nones_from_data({
             "parent": self.parent,
             "display": {
                 "icon": {"id": self.icon_item},
