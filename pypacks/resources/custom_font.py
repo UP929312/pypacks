@@ -40,6 +40,7 @@ class CustomFont:
 
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
+        # TODO: Do we need to split here?
         return {element.name.split("\\")[-1].removesuffix('.png'): f"\\uE{i:03}" for i, element in enumerate(self.font_elements)}
 
     def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:

@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
 from .scripts.texture_mapping import ITEM_TO_SPECIAL_TEXTURE_MAPPING
+from pypacks.resources.constants import COLOUR_CODE_MAPPINGS
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -12,40 +13,14 @@ if TYPE_CHECKING:
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"
 
-colour_code_mappings = {
-    "&0": "black",
-    "&1": "dark_blue",
-    "&2": "dark_green",
-    "&3": "dark_aqua",
-    "&4": "dark_red",
-    "&5": "dark_purple",
-    "&6": "gold",
-    "&7": "gray",
-    "&8": "dark_gray",
-    "&9": "blue",
-    "&a": "green",
-    "&b": "aqua",
-    "&c": "red",
-    "&d": "light_purple",
-    "&e": "yellow",
-    "&f": "white",
-    # "&l": "bold",
-    # "&m": "strikethrough",
-    # "&n": "underline",
-    # "&o": "italic",
-    # "&r": "reset",
-    # obfuscated?
-}
 
-
-def extract_item_type_and_components(item: "str | CustomItem", datapack: "Datapack") -> tuple[str, dict[str, Any]]:
-    """Returns the item (type) and components fixed"""
+def extract_item_components(item: "str | CustomItem", datapack: "Datapack") -> dict[str, Any]:
+    """Returns the item's components (fixed)"""
     from pypacks.resources.custom_item import CustomItem
     regular_data = item.to_dict(datapack.namespace) if isinstance(item, CustomItem) else {}
     components = item.additional_item_data.to_dict(datapack) if isinstance(item, CustomItem) and item.additional_item_data is not None else {}
     combined = recusively_remove_nones_from_dict(regular_data | components)
-    item_type = item.base_item if isinstance(item, CustomItem) else item  # TODO: Convert to str(item)?
-    return item_type, combined
+    return combined
 
 
 def recusively_remove_nones_from_dict(obj: dict[str, Any]) -> dict[str, Any]:
@@ -72,9 +47,9 @@ def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False) -> st
     # Split on colour codes, but keep the original colour codes
     split_text = [x for x in text.split("&") if x]
     # Split on the first character of each colour code
-    colour_code_and_text = [(x[0], x[1:]) if f"&{x[0]}" in colour_code_mappings else ("&f", x) for x in split_text]
+    colour_code_and_text = [(x[0], x[1:]) if f"&{x[0]}" in COLOUR_CODE_MAPPINGS else ("&f", x) for x in split_text]
     # Convert the colour codes to JSON format
-    json_data = [{"text": x[1], "color": colour_code_mappings.get("&" + x[0], "white")} for x in colour_code_and_text]
+    json_data = [{"text": x[1], "color": COLOUR_CODE_MAPPINGS.get("&" + x[0], "white")} for x in colour_code_and_text]
     # To auto untalicise, add {"italics": False} to each dictionary
     italics_removed = [x | ({"italic": False} if auto_unitalicise else {}) for x in json_data]
     return json.dumps(italics_removed)
@@ -83,7 +58,7 @@ def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False) -> st
 def remove_colour_codes(text: str) -> str:
     """Removes Minecraft colour codes from a string"""
     string = text[:]
-    for code in colour_code_mappings:
+    for code in COLOUR_CODE_MAPPINGS:
         string = string.replace(code, "")
     return string
 
@@ -106,10 +81,6 @@ def resolve_default_item_image(base_item: str) -> Path:
 
 def chunk_list(lst: list[Any], size: int) -> list[list[Any]]:
     return [lst[i:i + size] for i in range(0, len(lst), size)]
-
-
-def pascal_to_snake(name: str) -> str:
-    return ''.join(['_' + i.lower() if i.isupper() else i for i in name]).lstrip('_')
 
 
 # def get_ogg_duration(audio_bytes: bytes) -> float:

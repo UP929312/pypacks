@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from pypacks.image_manipulation.ref_book_icon_gen import add_centered_overlay
 from pypacks.utils import PYPACKS_ROOT
 
 
@@ -10,11 +9,6 @@ class RefBookCategory:
     internal_name: str
     name: str
     image_path: str | Path
-    icon_image_bytes: bytes = None  # type: ignore  # DON'T SET THIS MANUALLY
-
-    def __post_init__(self) -> None:
-        with open(self.image_path, "rb") as file:
-            self.icon_image_bytes = add_centered_overlay(image_bytes=file.read())
 
     @staticmethod
     def get_unique_categories(categories: list["RefBookCategory"]) -> list["RefBookCategory"]:
@@ -31,7 +25,7 @@ CUSTOM_BLOCKS_REF_BOOK_CATEGORY = RefBookCategory("custom_blocks", "Custom Block
 
 @dataclass
 class RefBookConfig:
-    category: RefBookCategory = MISC_REF_BOOK_CATEGORY
+    category: "RefBookCategory" = MISC_REF_BOOK_CATEGORY
     description: str = "No description provided for this item"
     hidden: bool = field(kw_only=True, default=False)
     wiki_link: str | None = field(kw_only=True, default=None)

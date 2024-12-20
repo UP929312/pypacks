@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pypacks.book_generator import ReferenceBook
+from pypacks.reference_book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES
 from pypacks.resources.custom_font import CustomFont, FontImage
 from pypacks.resources.custom_item import CustomItem
@@ -49,7 +49,7 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
                                                            base_image_path=EXTRA_ICON_BASE_PATH, resize_to_16x16=False), height=18, y_offset=14),
         FontImage("satchel_icon", add_centered_overlay(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         *[  # Category icons
-            FontImage(f"{category.internal_name}_category_icon", image_bytes=category.icon_image_bytes)
+            FontImage(f"{category.internal_name}_category_icon", image_bytes=add_centered_overlay(Path(category.image_path).read_bytes()))
             for category in datapack.reference_book_categories
         ],
         *[  # Custom items

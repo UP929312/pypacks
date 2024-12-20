@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
-from pypacks.utils import recusively_remove_nones_from_dict, extract_item_type_and_components
+from pypacks.utils import recusively_remove_nones_from_dict, extract_item_components
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction
 from pypacks.resources.custom_loot_tables.number_provider import BinomialNumberProvider, UniformNumberProvider
 
@@ -80,10 +80,10 @@ class SingleItemRangeEntry(Entry):
     max_count: int = 1
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        item_type, combined_components = extract_item_type_and_components(self.item, datapack)
+        combined_components = extract_item_components(self.item, datapack)
         return {
             "type": "minecraft:item",
-            "name": item_type,
+            "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "functions":
                 [LootTableFunction("minecraft:set_count", {"count": {"min": self.min_count, "max": self.max_count}}).to_dict()] +
                 ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
@@ -98,10 +98,10 @@ class BinomialDistributionEntry(Entry):
     p: float
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        item_type, combined_components = extract_item_type_and_components(self.item, datapack)
+        combined_components = extract_item_components(self.item, datapack)
         return {
             "type": "minecraft:item",
-            "name": item_type,
+            "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "functions":
                 [LootTableFunction("minecraft:set_count", BinomialNumberProvider(self.n, self.p).to_dict()).to_dict()] +
                 ([LootTableFunction("minecraft:set_components", {"components": combined_components})] if combined_components else []),
@@ -115,10 +115,10 @@ class UniformDistributionEntry(Entry):
     max_count: int = 1
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        item_type, combined_components = extract_item_type_and_components(self.item, datapack)
+        combined_components = extract_item_components(self.item, datapack)
         return {
             "type": "minecraft:item",
-            "name": item_type,
+            "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "functions":
                 [LootTableFunction("minecraft:set_count", UniformNumberProvider(self.min_count, self.max_count).to_dict()).to_dict()] +
                 ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
