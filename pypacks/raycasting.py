@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
-    DEBUG_RAYCASTING = True
+    DEBUG_RAYCASTING = False
     arguments = {
         "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
         "failed_function": f"{datapack.namespace}:raycast/failed",

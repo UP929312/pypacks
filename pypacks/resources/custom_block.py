@@ -6,10 +6,10 @@ from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
 from pypacks.resources.mcfunction import MCFunction
-from pypacks.resources.constants import Slabs
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
+    from pypacks.resources.constants import Slabs
     from pypacks.resources.custom_item import CustomItem
 
 
@@ -180,7 +180,8 @@ class CustomBlock:
               for custom_block in datapack.custom_blocks],
         ], ["custom_blocks"])
 
-    def create_slab(self, slab_block: Slabs) -> "CustomBlock":
+    def create_slab(self, slab_block: "Slabs") -> "CustomBlock":
+        raise NotImplementedError
         """Adds a slab version of the block."""
         assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
         # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",

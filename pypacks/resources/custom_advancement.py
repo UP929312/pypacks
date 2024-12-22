@@ -78,10 +78,7 @@ class CustomAdvancement:
             "criteria": {
                 criteriom.name: criteriom.to_dict() for criteriom in self.criteria
             },
-            "requirements": [
-                [x.name for x in self.criteria],  # TODO: Back to the below way?
-            ],
-            # "requirements": [[x.name] for x in self.criteria],  # This means we AND all requirements
+            "requirements": [[x.name] for x in self.criteria],
             "rewards": {
                 "experience": self.rewarded_experience,
                 "recipes": self.rewarded_recipes,

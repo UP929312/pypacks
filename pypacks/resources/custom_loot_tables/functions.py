@@ -15,14 +15,9 @@ if TYPE_CHECKING:
 # https://minecraft.wiki/w/Item_modifier
 
 
-@dataclass
 class LootTableFunction:
-    function_name: str
-    function_parameters: dict[str, Any] = field(default_factory=dict)
-
     def to_dict(self) -> dict[str, Any]:
-        # raise NotImplemented  # TODO: Rewrite the ones in loot tables to use these, and not this generic, make it raise NotImplemented
-        return {"function": self.function_name, **self.function_parameters}
+        raise NotImplementedError("Use the specific functions instead of this generic one.")
 
 
 @dataclass
@@ -377,13 +372,13 @@ class SetContentsFunction:
 @dataclass
 class SetCountFunction:
     """Sets the stack size."""
-    count: "ConstantNumberProvider | BinomialNumberProvider | ScoreboardNumberProvider | StorageNumberProvider | UniformNumberProvider"  # Specifies the stack size to set.
+    number_provider: "ConstantNumberProvider | BinomialNumberProvider | ScoreboardNumberProvider | StorageNumberProvider | UniformNumberProvider"  # Specifies the stack size to set.
     add: bool = False  # If true, change is relative to current count. Defaults to false.
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "function": "minecraft:set_count",
-            "count": self.count.to_dict(),
+            "count": self.number_provider.to_dict(),
             "add": self.add,
         }
 

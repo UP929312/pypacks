@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
 
-from pypacks.resources.item_components import CustomItemData, WrittenBookContent
+from pypacks.resources.item_components import Components, WrittenBookContent
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
@@ -250,6 +250,6 @@ class FormattedWrittenBook:
     def generate_give_command(self, datapack: "Datapack") -> str:
         from pypacks.resources.custom_item import CustomItem
 
-        custom_item_data = CustomItemData(written_book_content=WrittenBookContent(self.title, self.author, [x.get_json_data() for x in self.pages]))
-        custom_item = CustomItem("minecraft:written_book", internal_name="formatted_written_book", additional_item_data=custom_item_data)
+        custom_item_data = Components(written_book_content=WrittenBookContent(self.title, self.author, [x.get_json_data() for x in self.pages]))
+        custom_item = CustomItem("minecraft:written_book", internal_name="formatted_written_book", components=custom_item_data)
         return custom_item.generate_give_command(datapack)

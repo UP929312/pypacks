@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from pypacks.resources.custom_item import CustomItem
 from pypacks.reference_book_config import PAINTING_REF_BOOK_CONFIG
-from pypacks.resources.item_components import CustomItemData, EntityData
+from pypacks.resources.item_components import Components, EntityData
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -59,7 +59,7 @@ class CustomPainting:
             "minecraft:painting",
             self.internal_name,
             self.title or self.internal_name,
-            additional_item_data=CustomItemData(entity_data=EntityData({"id": "minecraft:painting", "variant": f"{datapack.namespace}:{self.internal_name}"})),
+            components=Components(entity_data=EntityData({"id": "minecraft:painting", "variant": f"{datapack.namespace}:{self.internal_name}"})),
             ref_book_config=PAINTING_REF_BOOK_CONFIG
         )
 

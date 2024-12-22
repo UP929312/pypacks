@@ -1,10 +1,9 @@
 List:
-- Custom blocks - Slab experiments
+- Custom blocks - Slab experiments (80% done)
 - Custom blocks, no drops in creative
 - Custom blocks, silk touch
 
-
-RENAME ADDITIONAL ITEM DATA TO JUST item_components
+Consider changing components to be a list of components, rather than a big ol' class.
 
 # Problems with slabs
 - Z fighting

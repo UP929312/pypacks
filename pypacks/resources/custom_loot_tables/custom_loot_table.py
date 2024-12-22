@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
 from pypacks.utils import recusively_remove_nones_from_data, extract_item_components
-from pypacks.resources.custom_loot_tables.functions import LootTableFunction
+from pypacks.resources.custom_loot_tables.functions import LootTableFunction, SetCountFunction, SetComponentsFunction
 from pypacks.resources.custom_loot_tables.number_provider import BinomialNumberProvider, UniformNumberProvider
 
 if TYPE_CHECKING:
@@ -80,15 +80,7 @@ class SingleItemRangeEntry(Entry):
     max_count: int = 1
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        from pypacks.resources.custom_item import CustomItem
-        combined_components = extract_item_components(self.item, datapack)
-        return {
-            "type": "minecraft:item",
-            "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
-            "functions":
-                [LootTableFunction("minecraft:set_count", {"count": {"min": self.min_count, "max": self.max_count}}).to_dict()] +
-                ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
-        }
+        return UniformDistributionEntry(self.item, self.min_count, self.max_count).to_dict(datapack)
 
 
 @dataclass
@@ -105,8 +97,8 @@ class BinomialDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "functions":
-                [LootTableFunction("minecraft:set_count", BinomialNumberProvider(self.n, self.p).to_dict()).to_dict()] +
-                ([LootTableFunction("minecraft:set_components", {"components": combined_components})] if combined_components else []),
+                [SetCountFunction(number_provider=BinomialNumberProvider(self.n, self.p)).to_dict()] +
+                ([SetComponentsFunction(components=combined_components).to_dict()] if combined_components else []),
         }
 
 
@@ -123,8 +115,8 @@ class UniformDistributionEntry(Entry):
             "type": "minecraft:item",
             "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "functions":
-                [LootTableFunction("minecraft:set_count", UniformNumberProvider(self.min_count, self.max_count).to_dict()).to_dict()] +
-                ([LootTableFunction("minecraft:set_components", {"components": combined_components}).to_dict()] if combined_components else []),
+                [SetCountFunction(number_provider=UniformNumberProvider(self.min_count, self.max_count)).to_dict()] +
+                ([SetComponentsFunction(components=combined_components).to_dict()] if combined_components else []),
         }
 
 
@@ -205,11 +197,8 @@ class CustomLootTable:
             {
                 "type": self.loot_table_type,
                 "pools": [pool.to_dict(datapack) for pool in self.pools],
-            } | (
-                {
-                    "functions": [function.to_dict() for function in self.functions]
-                } if self.functions else {}  # TODO: We already recursively remove none, why not just set functions to None if there's 0?
-            )
+                "functions": [function.to_dict() for function in self.functions] if self.functions else None
+            }
         )
 
     def create_datapack_files(self, datapack: "Datapack") -> None:

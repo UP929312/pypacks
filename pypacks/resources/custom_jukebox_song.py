@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.item_components import CustomItemData, JukeboxPlayable
+from pypacks.resources.item_components import Components, JukeboxPlayable
 
 # from pypacks.utils import get_ogg_duration
 if TYPE_CHECKING:
@@ -45,7 +45,7 @@ class CustomJukeboxSong:
             "minecraft:music_disc_cat",
             self.internal_name,
             self.internal_name.replace("_", " ").title(),
-            additional_item_data=CustomItemData(jukebox_playable=JukeboxPlayable(self))
+            components=Components(jukebox_playable=JukeboxPlayable(self))
         )
 
     def generate_give_command(self, datapack: "Datapack") -> str:

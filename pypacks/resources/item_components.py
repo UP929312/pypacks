@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 
 if TYPE_CHECKING:
@@ -36,9 +36,20 @@ class AttributeModifier:
             "id": f"attribute_modifier.{self.attribute_type}",
             "slot": self.slot,
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "AttributeModifier":
+        return cls(
+            attribute_type=data["type"],
+            slot=data.get("slot", "any"),
+            amount=data.get("amount", 1),
+            operation=data.get("operation", "add_value"),
+        )
 
 
 # ==========================================================================================
+
+ColorType = Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
 
 
 @dataclass
@@ -51,7 +62,7 @@ class BannerPattern:
                      "square_bottom_right", "square_top_left", "square_top_right", "triangle_bottom", "triangle_top", "triangles_bottom",
                      "triangles_top", "circle", "rhombus", "border", "curly_border", "bricks", "gradient", "gradient_up", "creeper", "skull",
                      "flower", "mojang", "globe", "piglin", "flow", "guster"]  # The pattern type.
-    color: Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]  # The color for this pattern.
+    color: ColorType  # The color for this pattern.
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["banner", "shield"])
 
@@ -60,6 +71,48 @@ class BannerPattern:
             "pattern": self.pattern,
             "color": self.color,
         }
+
+
+# ==========================================================================================
+
+@dataclass
+class Bee:
+    # https://minecraft.wiki/w/Data_component_format#bees
+    entity_data: dict[str, Any] = field(default_factory=lambda: {"id": "bee", "CustomName" :'"CustomBee"'})  # The NBT data of the entity in the hive.
+    min_ticks_in_hive: int = 60  # The minimum amount of time in ticks for this entity to stay in the hive.
+    ticks_in_hive: int = 0  #  The amount of ticks the entity has stayed in the hive.
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["bee_nest", "bee_hive"])
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "entity_data": self.entity_data,
+            "min_ticks_in_hive": self.min_ticks_in_hive,
+            "ticks_in_hive": self.ticks_in_hive,
+        }
+
+
+# ==========================================================================================
+
+
+@dataclass
+class BundleContents:
+    """A dict of item to count to fill the bundle with, e.g. {"minecraft:stone": 64}"""
+    # https://minecraft.wiki/w/Data_component_format#bundle_contents
+    items: dict["str | CustomItem", int] = field(default_factory=dict)
+
+    def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:
+        from pypacks.resources.custom_item import CustomItem
+        from pypacks.utils import extract_item_components
+        return [
+            ({
+                "id": item.base_item if isinstance(item, CustomItem) else item,
+                "count": count,
+            } | {
+                "components": extract_item_components(item, datapack) if isinstance(item, CustomItem) else {},
+            })
+            for item, count in self.items.items()
+        ]
 
 
 # ==========================================================================================
@@ -83,7 +136,7 @@ class Consumable:
         base_dict = {
             "consume_seconds": self.consume_seconds,
             "animation": self.animation,
-            "sound": {"sound_id": self.consuming_sound.get_reference(datapack) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound},
+            "sound": {"sound_id": self.consuming_sound.get_reference(datapack) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound} if self.consuming_sound is not None else None,
             "has_consume_particles": False if not self.has_consume_particles else None,  # Defaults to True
         }
         if not self.on_consume_effects and not self.on_consume_remove_effects and self.on_consume_teleport_diameter == 0:
@@ -331,12 +384,17 @@ class PotionEffect:
 
 @dataclass
 class ToolRule:
-    blocks: str | list[str]  # The blocks to match with. Can be a block ID or a block tag with a #, or a list of block IDs.
+    # https://minecraft.wiki/w/Data_component_format#tool
+    blocks: str | list[str] | Literal["#mineable/axe", "#mineable/pickaxe", "#mineable/shovel", "#mineable/hoe"]  # The blocks to match with. Can be a block ID or a block tag with a #, or a list of block IDs.
     speed: float = 1.0  # If the blocks match, overrides the default mining speed. Optional.
     correct_for_drops: bool = True  # If the blocks match, overrides whether or not this tool is considered correct to mine at its most efficient speed, and to drop items if the block's loot table requires it. Optional.
 
     def to_dict(self) -> dict[str, Any]:
-        return {"blocks": self.blocks, "speed": self.speed, "correct_for_drops": self.correct_for_drops}
+        return {
+            "blocks": self.blocks,
+            "speed": self.speed if self.speed != 1 else None,  # Note: Changed but untested
+            "correct_for_drops": self.correct_for_drops,
+        }
 
 
 @dataclass
@@ -344,13 +402,14 @@ class Tool:
     # https://minecraft.wiki/w/Data_component_format#tool
     default_mining_speed: float = 1.0  # The default mining speed of this tool, used if no rules override it. Defaults to 1.0.
     damage_per_block: int = 1  # The amount of durability to remove each time a block is broken with this tool. Must be a non-negative integer.
-    rules: list[ToolRule] | None = None  # A list of rules for the blocks that this tool has a special behavior with.
+    rules: list[ToolRule] = field(default_factory=list)  # A list of rules for the blocks that this tool has a special behavior with.
 
     def to_dict(self) -> dict[str, Any]:
+        assert self.damage_per_block >= 0, "damage_per_block must be a non-negative integer"
         return {
             "default_mining_speed": self.default_mining_speed,
             "damage_per_block": self.damage_per_block,
-            "rules": [rule.to_dict() for rule in self.rules] if self.rules is not None else None,
+            "rules": [rule.to_dict() for rule in self.rules] if self.rules else None,
         }
 
 
@@ -440,9 +499,14 @@ EnchantmentType = Literal[
 
 # ==========================================================================================
 
+# Todo: Let custom item use a list of these as well
+# ComponentType: TypeAlias = AttributeModifier, BannerPattern, Bee, BundleContents, Consumable | Food | EntityData | Equippable | Firework | FireworkExplosion | JukeboxPlayable | LodestoneTracker | MapData | Tool | Instrument | UseRemainder | WrittenBookContent | WritableBookContent
+
+# ==========================================================================================
+
 
 @dataclass
-class CustomItemData:
+class Components:
     durability: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#max_damage  <-- Tools only
     lost_durability: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage  <-- Tools only
     enchantment_glint_override: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
@@ -451,18 +515,21 @@ class CustomItemData:
     destroyed_in_lava: bool = field(default=True, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
     hide_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
     hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
-    repaired_by: list[str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
+    repaired_by: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
 
     enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
-    loaded_projectiles: list[Literal["arrow", "tipped_arrow", "spectral_arrow", "firework_rocket"] | str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
-    player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     custom_head_texture: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    loaded_projectiles: list[Literal["arrow", "tipped_arrow", "spectral_arrow", "firework_rocket"] | str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
     note_block_sound: "str | CustomSound | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#note_block_sound  <-- Player heads only
     ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
+    player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    shield_base_color: "ColorType | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#base_color  <-- Shields only
 
-    attribute_modifiers: list[AttributeModifier] | None = field(default=None, kw_only=True)
-    banner_patterns: list[BannerPattern] | None = field(default=None, kw_only=True)
+    attribute_modifiers: list[AttributeModifier] = field(default_factory=list, kw_only=True)
+    bees: list[Bee] = field(default_factory=list, kw_only=True)
+    banner_patterns: list[BannerPattern] = field(default_factory=list, kw_only=True)
+    bundle_contents: "BundleContents | None" = field(default=None, kw_only=True)
     cooldown: "Cooldown | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#use_cooldown
     consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
     entity_data: "EntityData | None" = field(default=None, kw_only=True)
@@ -499,17 +566,20 @@ class CustomItemData:
             "damage_resistant":           {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me, well, replace is_fire for lava
             "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
-            "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by is not None else None,
+            "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by else None,
             "repair_cost":                self.repair_cost,
 
             "enchantments":               self.enchantments,
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
-            "profile":                    self.player_head_username if self.player_head_username else profile,
             "note_block_sound":           self.note_block_sound.get_reference(datapack) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier,
+            "profile":                    self.player_head_username if self.player_head_username else profile,
+            "base_color":                 self.shield_base_color,
 
-            "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers is not None else None,
+            "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns is not None else None,
+            "bees":                       [bee.to_dict() for bee in self.bees] if self.bees is not None else None,
+            "bundle_contents":            self.bundle_contents.to_dict(datapack) if self.bundle_contents is not None else None,
             "consumable":                 self.consumable.to_dict(datapack) if self.consumable is not None else None,
             "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
@@ -529,16 +599,11 @@ class CustomItemData:
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
-
-# base_color - for shields MEH
-# bees - for beehives/nests MEH
 # block_entity_data MEH
 # block_state MEH
 # bucket_entity_data MEH
-# bundle_contents Mehh
 # can_break Mehhh
 # can_place_on Meh
-# consumable More work for effects and sound. ---
 # container YES (for chests) =======================================
 # container_loot MEH
 # damage_resistant Hmmm  Maybe to make it resistant to lava like netherite? =======================================

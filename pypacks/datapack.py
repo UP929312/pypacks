@@ -36,7 +36,7 @@ class Datapack:
     datapack_output_path: str = ""
     resource_pack_path: str = ""
 
-    # TODO:
+    # TODO: on_tick_function and on_load_function
     # on_tick_command: str | None = None
     # on_load_command: str | None = None
 

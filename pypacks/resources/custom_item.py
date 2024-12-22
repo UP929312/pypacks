@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
-from pypacks.resources.item_components import Consumable, Food, CustomItemData
+from pypacks.resources.item_components import Consumable, Food, Components
 from pypacks.resources.custom_model import ItemModel
 from pypacks.resources.mcfunction import MCFunction
 from pypacks.utils import to_component_string, colour_codes_to_json_format, resolve_default_item_image, recusively_remove_nones_from_data
@@ -24,15 +24,15 @@ class CustomItem:
     texture_path: str | None = field(repr=False, default=None)
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: str | None = None  # Function to call when the item is right clicked
-    additional_item_data: "CustomItemData | None" = field(repr=False, default=None)
+    components: "Components | None" = field(repr=False, default=None)
     ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)
 
     is_block: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: None = field(init=False, repr=False, default=None)
 
     def __post_init__(self) -> None:
-        if self.on_right_click and self.additional_item_data is not None and (
-            self.additional_item_data.consumable is not None or self.additional_item_data.food is not None
+        if self.on_right_click and self.components is not None and (
+            self.components.consumable is not None or self.components.food is not None
         ):
             raise ValueError("You can't have both on_right_click and consumable/food!")
         self.custom_data |= {"pypacks_custom_item": self.internal_name}
@@ -44,10 +44,10 @@ class CustomItem:
         with open(path, mode="rb") as file:
             self.image_bytes = file.read()
 
-        self.use_right_click_cooldown = getattr(getattr(self.additional_item_data, "cooldown", None), "seconds", None)
+        self.use_right_click_cooldown = getattr(getattr(self.components, "cooldown", None), "seconds", None)
 
-        if self.additional_item_data is not None:
-            for value in self.additional_item_data.__dict__.values():
+        if self.components is not None:
+            for value in self.components.__dict__.values():
                 if hasattr(value, "allowed_items"):
                     assert self.base_item.removeprefix("minecraft:") in value.allowed_items, (
                         f"{value.__class__.__name__} can only be used with {' and '.join(value.allowed_items)}, not {self.base_item}"
@@ -56,12 +56,15 @@ class CustomItem:
     def __str__(self) -> "str":
         return self.base_item  # This is used so we can cast CustomItem | str to string and always get a minecraft item
 
+    def __hash__(self) -> int:
+        return hash(self.internal_name)
+
     def add_right_click_functionality(self) -> None:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""
-        if self.additional_item_data is None:
-            self.additional_item_data = CustomItemData()
-        self.additional_item_data.consumable = Consumable(consume_seconds=1_000_000, animation="none", consuming_sound=None, has_consume_particles=False)
-        self.additional_item_data.food = Food(nutrition=0, saturation=0, can_always_eat=True)
+        if self.components is None:
+            self.components = Components()
+        self.components.consumable = Consumable(consume_seconds=1_000_000, animation="none", consuming_sound=None, has_consume_particles=False)
+        self.components.food = Food(nutrition=0, saturation=0, can_always_eat=True)
         self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
@@ -100,7 +103,7 @@ class CustomItem:
             "rarity": self.rarity,
             "item_model": f"{datapack_namespace}:{self.internal_name}" if self.texture_path else None,
             "custom_data": self.custom_data,
-            # "additional_item_data": self.additional_item_data.to_dict() if self.additional_item_data else None,
+            # "components": self.components.to_dict() if self.components else None,
         })
 
     def generate_give_command(self, datapack: "Datapack") -> str:
@@ -108,11 +111,11 @@ class CustomItem:
             to_component_string({key: value})
             for key, value in self.to_dict(datapack.namespace).items()
         ])
-        additional_item_data_string = (
-            to_component_string(self.additional_item_data.to_dict(datapack))  # Also strips None through `recusively_remove_nones_from_data`
-            if self.additional_item_data else None
+        components_string = (
+            to_component_string(self.components.to_dict(datapack))  # Also strips None through `recusively_remove_nones_from_data`
+            if self.components else None
         )
         # TODO: Figure out a way to not have to do this?
-        if self.base_item.removeprefix("minecraft:") in ["writable_book", "written_book"] and additional_item_data_string is not None:
-            additional_item_data_string = additional_item_data_string.replace("\\\\", "\\").replace("\\n", "\\\\n")
-        return f"give @p {self.base_item}[{components}{', ' if components and additional_item_data_string else ''}{additional_item_data_string if additional_item_data_string else ''}]"
+        if self.base_item.removeprefix("minecraft:") in ["writable_book", "written_book"] and components_string is not None:
+            components_string = components_string.replace("\\\\", "\\").replace("\\n", "\\\\n")
+        return f"give @p {self.base_item}[{components}{', ' if components and components_string else ''}{components_string if components_string else ''}]"
