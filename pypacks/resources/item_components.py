@@ -105,17 +105,37 @@ class BundleContents:
         from pypacks.resources.custom_item import CustomItem
         from pypacks.utils import extract_item_components
         return [
-            ({
+            {
                 "id": item.base_item if isinstance(item, CustomItem) else item,
                 "count": count,
-            } | {
-                "components": extract_item_components(item, datapack) if isinstance(item, CustomItem) else {},
-            })
+            } | ({
+                "components": extract_item_components(item, datapack),
+            } if isinstance(item, CustomItem) and item.components.to_dict(datapack) else {})
             for item, count in self.items.items()
         ]
 
 
 # ==========================================================================================
+
+@dataclass
+class _Effect:
+    """Used internally to format effects for Consumables and DeathProtection"""
+    apply_affects: list["PotionEffect"] = field(default_factory=list)
+    remove_affects: list["str | PotionEffect"] | Literal["all"] = field(default_factory=list)
+    teleport_diameter: float | int = 0
+    base_dict_name: str = "on_consume_effects"
+
+    def to_dict(self) -> dict[str, Any]:
+        base_dict = ({self.base_dict_name: []})
+        if self.apply_affects:
+            base_dict[self.base_dict_name].append({"type": "apply_effects", "effects": [effect.to_dict() for effect in self.apply_affects]})
+        if self.remove_affects and self.remove_affects != "all":
+            base_dict[self.base_dict_name].append({"type": "remove_effects", "effects": [effect.effect_name if isinstance(effect, PotionEffect) else effect for effect in self.remove_affects]})
+        if self.remove_affects == "all":
+            base_dict[self.base_dict_name].append({"type": "clear_all_effects"})
+        if self.teleport_diameter != 0:
+            base_dict[self.base_dict_name].append({"type": "teleport_randomly", "diameter": float(self.teleport_diameter)})
+        return base_dict
 
 
 @dataclass
@@ -141,16 +161,52 @@ class Consumable:
         }
         if not self.on_consume_effects and not self.on_consume_remove_effects and self.on_consume_teleport_diameter == 0:
             return base_dict
-        base_dict |= ({"on_consume_effects": []})
-        if self.on_consume_effects == "all":
-            base_dict["on_consume_effects"].append({"type": "clear_all_effects"})
-        if self.on_consume_effects and self.on_consume_effects != "all":
-            base_dict["on_consume_effects"].append({"type": "apply_effects", "effects": [effect.to_dict() for effect in self.on_consume_effects]})
-        if self.on_consume_remove_effects:
-            base_dict["on_consume_effects"].append({"type": "remove_effects", "effects": [effect.effect_name if isinstance(effect, PotionEffect) else effect for effect in self.on_consume_remove_effects]})
-        if self.on_consume_teleport_diameter != 0:
-            base_dict["on_consume_effects"].append({"type": "teleport_randomly", "diameter": self.on_consume_teleport_diameter})
-        return base_dict
+        effect_dict = _Effect(self.on_consume_effects, self.on_consume_remove_effects, self.on_consume_teleport_diameter).to_dict()
+        return base_dict | effect_dict
+
+
+# ==========================================================================================
+
+CONTAINER_BLOCKS = ["barrel", "chest", "shulker_box", "trapped_chest", "furnace", "blast_furnace", "smoker", "dispenser", "dropper", "enchanting_table", "brewing_stand", "beacon", "anvil", "hopper", "grindstone", "cartography_table", "loom", "stonecutter", "smithing_table", "crafter"]
+
+
+@dataclass
+class ContainerContents:
+    # https://minecraft.wiki/w/Data_component_format#container
+    items: dict["str | CustomItem", int] = field(default_factory=dict)  # The items in the container
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: CONTAINER_BLOCKS)
+
+    def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:
+        from pypacks.resources.custom_item import CustomItem
+        from pypacks.utils import extract_item_components
+        return [
+            {
+                "slot": i,
+                "item": {
+                    "id": item.base_item if isinstance(item, CustomItem) else item,
+                    "count": count,
+                } | ({
+                    "components": extract_item_components(item, datapack),
+                } if isinstance(item, CustomItem) and item.components.to_dict(datapack) else {}),
+            }
+            for i, (item, count) in enumerate(self.items.items())
+        ]
+
+
+# ==========================================================================================
+
+
+@dataclass
+class DeathProtection:
+    # https://minecraft.wiki/w/Data_component_format#death_protection
+    apply_affects: list["PotionEffect"] = field(default_factory=list)  # A list of status effects to apply when the entity dies
+    remove_effects: list["str | PotionEffect"] | Literal["all"] = field(default_factory=list)  # A list of status effects to remove when the entity dies
+    teleport_diameter: float | int = 0  # The diameter of the teleportation area when the entities dies (chorus fruit is 16.0)
+
+    def to_dict(self) -> dict[str, Any]:
+        return _Effect(self.apply_affects, self.remove_effects, self.teleport_diameter, base_dict_name="death_effects").to_dict()
+
 
 
 # ==========================================================================================
@@ -169,17 +225,23 @@ class EntityData:
 
 @dataclass
 class Equippable:
-    slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"]
-    equip_sound: str | None = None  # Sound event to play when the item is equipped
-    model: str | None = None
-    dispensable: bool = True  # whether the item can be equipped by using a Dispenser
+    slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"] = "mainhand"  # The slot to put the item on
+    equip_sound: "str | CustomSound" = "item.armor.equip_generic"  # Sound event to play when the item is equipped
+    dispensable: bool = True  #  Whether the item can be dispensed by using a dispenser. Defaults to True.
+    swappable: bool = True  # Whether the item can be equipped into the relevant slot by right-clicking.
+    damage_on_hurt: bool = True  # Whether this item is damaged when the wearing entity is damaged. Defaults to True.
+    entities_which_can_wear: str | list[str] | Literal["all"] = "all"  # The entities which can wear this item. Entity ID/Tag, or list of Entity IDs to limit.
+    camera_overlay: str | None = None  #  The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "slot": self.slot,
             "equip_sound": self.equip_sound,
-            "model": self.model,
-            "dispensable": True if self.dispensable else None,  # Defaults to False
+            "dispensable": False if not self.dispensable else None,  # Defaults to True
+            "swappable": False if not self.swappable else None,  # Defaults to True
+            "damage_on_hurt": False if not self.damage_on_hurt else None,  # Defaults to True
+            "entities_which_can_wear": self.entities_which_can_wear if self.entities_which_can_wear != "all" else None,  # Defaults to "all"
+            "camera_overlay": self.camera_overlay,
         }
 
 
@@ -262,6 +324,34 @@ class UseRemainder:
             "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "count": self.count,
         } | ({"components": self.item.to_dict(datapack.namespace)} if isinstance(self.item, CustomItem) else {})
+
+
+# ==========================================================================================
+
+
+@dataclass
+class Instrument:
+    """Used for the goat horn, can take a default minecraft sound or a custom sound"""
+    # https://minecraft.wiki/w/Data_component_format#instrument
+    # https://minecraft.wiki/w/Sounds.json#Sound_events
+    sound_id: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
+                                            "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
+    description: str | None = None  # A string for the description of the sound.
+    use_duration: int = 5  # A non-negative integer for how long the use duration is.
+    instrument_range: int = 256  # A non-negative float for the range of the sound (normal horns are 256).
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["goat_horn"])
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_sound import CustomSound
+        assert 0 < self.use_duration <= 60, "use_duration must be a non-negative integer"
+        assert 0 < self.instrument_range, "range must be a non-negative integer"
+        return {
+            "description": self.description,
+            "range": self.instrument_range,
+            "sound_event": {"sound_id": self.sound_id.get_reference(datapack) if isinstance(self.sound_id, CustomSound) else self.sound_id},
+            "use_duration": self.use_duration,
+        }
 
 
 # ==========================================================================================
@@ -382,6 +472,25 @@ class PotionEffect:
 
 # ==========================================================================================
 
+
+@dataclass
+class PotionContents:
+    # https://minecraft.wiki/w/Data_component_format#potion_contents
+    custom_color: int  # The overriding color of this potion texture, and/or the particles of the area effect cloud created.
+    effects: list[PotionEffect] = field(default_factory=list)  # A list of the additional effects that this item should apply.
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["potion", "splash_potion", "lingering_potion", "tipped_arrow"])
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "custom_color": self.custom_color,
+            "custom_effects": [effect.to_dict() for effect in self.effects],
+        }
+
+
+# ==========================================================================================
+
+
 @dataclass
 class ToolRule:
     # https://minecraft.wiki/w/Data_component_format#tool
@@ -410,34 +519,6 @@ class Tool:
             "default_mining_speed": self.default_mining_speed,
             "damage_per_block": self.damage_per_block,
             "rules": [rule.to_dict() for rule in self.rules] if self.rules else None,
-        }
-
-
-# ==========================================================================================
-
-
-@dataclass
-class Instrument:
-    """Used for the goat horn, can take a default minecraft sound or a custom sound"""
-    # https://minecraft.wiki/w/Data_component_format#instrument
-    # https://minecraft.wiki/w/Sounds.json#Sound_events
-    sound_id: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
-                                            "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
-    description: str | None = None  # A string for the description of the sound.
-    use_duration: int = 5  # A non-negative integer for how long the use duration is.
-    instrument_range: int = 256  # A non-negative float for the range of the sound (normal horns are 256).
-
-    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["goat_horn"])
-
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        from pypacks.resources.custom_sound import CustomSound
-        assert 0 < self.use_duration <= 60, "use_duration must be a non-negative integer"
-        assert 0 < self.instrument_range, "range must be a non-negative integer"
-        return {
-            "description": self.description,
-            "range": self.instrument_range,
-            "sound_event": {"sound_id": self.sound_id.get_reference(datapack) if isinstance(self.sound_id, CustomSound) else self.sound_id},
-            "use_duration": self.use_duration,
         }
 
 
@@ -474,6 +555,7 @@ class WrittenBookContent:
 
 # ==========================================================================================
 
+
 @dataclass
 class Cooldown:
     seconds: float = 5.0
@@ -485,8 +567,14 @@ class Cooldown:
             "cooldown_group": self.cooldown_group,
         }
 
+
 # ==========================================================================================
 
+PotDecorationsType = Literal["brick", "angler_pottery_sherd", "archer_pottery_sherd", "arms_up_pottery_sherd", "blade_pottery_sherd", "brewer_pottery_sherd",
+                             "burn_pottery_sherd", "danger_pottery_sherd", "explorer_pottery_sherd", "flow_pottery_sherd", "friend_pottery_sherd",
+                             "guster_pottery_sherd", "heart_pottery_sherd", "heartbreak_pottery_sherd", "howl_pottery_sherd", "miner_pottery_sherd",
+                             "mourner_pottery_sherd", "plenty_pottery_sherd", "prize_pottery_sherd", "scrape_pottery_sherd", "sheaf_pottery_sherd",
+                             "shelter_pottery_sherd", "skull_pottery_sherd", "snort_pottery_sherd"]
 
 EnchantmentType = Literal[
     "aqua_affinity", "bane_of_arthropods", "binding_curse", "blast_protection", "breach", "channeling",
@@ -497,10 +585,19 @@ EnchantmentType = Literal[
     "swift_sneak", "thorns", "unbreaking", "vanishing_curse", "wind_burst",
 ]
 
+TOOLS = [
+    "wooden_axe", "wooden_hoe", "wooden_pickaxe", "wooden_shovel", "wooden_sword",
+    "stone_axe", "stone_hoe", "stone_pickaxe", "stone_shovel", "stone_sword",
+    "iron_axe", "iron_hoe", "iron_pickaxe", "iron_shovel", "iron_sword",
+    "golden_axe", "golden_hoe", "golden_pickaxe", "golden_shovel", "golden_sword",
+    "diamond_axe", "diamond_hoe", "diamond_pickaxe", "diamond_shovel", "diamond_sword",
+    "netherite_axe", "netherite_hoe", "netherite_pickaxe", "netherite_shovel", "netherite_sword",
+]
+
 # ==========================================================================================
 
 # Todo: Let custom item use a list of these as well
-# ComponentType: TypeAlias = AttributeModifier, BannerPattern, Bee, BundleContents, Consumable | Food | EntityData | Equippable | Firework | FireworkExplosion | JukeboxPlayable | LodestoneTracker | MapData | Tool | Instrument | UseRemainder | WrittenBookContent | WritableBookContent
+# ComponentType: TypeAlias = AttributeModifier | BannerPattern | Bee | BundleContents | Consumable | DeathProtection | Food | EntityData | Equippable | Firework | FireworkExplosion | JukeboxPlayable | PotionContents | LodestoneTracker | MapData | Tool | Instrument | UseRemainder | WrittenBookContent | WritableBookContent
 
 # ==========================================================================================
 
@@ -512,36 +609,41 @@ class Components:
     enchantment_glint_override: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
     glider: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#glider
     unbreakable: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#unbreakable
-    destroyed_in_lava: bool = field(default=True, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
+    # destroyed_in_lava: bool = field(default=True, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
     hide_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
     hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
 
-    enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
     custom_head_texture: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
+    dye_color: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#dyed_color  <-- Leather armor only
     loaded_projectiles: list[Literal["arrow", "tipped_arrow", "spectral_arrow", "firework_rocket"] | str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
     note_block_sound: "str | CustomSound | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#note_block_sound  <-- Player heads only
     ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
     player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    pot_decorations: list["PotDecorationsType"] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#pot_decorations  <-- decorative pots only
     shield_base_color: "ColorType | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#base_color  <-- Shields only
 
     attribute_modifiers: list[AttributeModifier] = field(default_factory=list, kw_only=True)
-    bees: list[Bee] = field(default_factory=list, kw_only=True)
-    banner_patterns: list[BannerPattern] = field(default_factory=list, kw_only=True)
-    bundle_contents: "BundleContents | None" = field(default=None, kw_only=True)
+    bees: list[Bee] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bees  <-- Beehives/bee_nest only
+    banner_patterns: list[BannerPattern] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#banner_patterns  <-- Banners only
+    bundle_contents: "BundleContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bundle_contents  <-- Bundles only
     cooldown: "Cooldown | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#use_cooldown
     consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
+    container_contents: "ContainerContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container
+    death_protection: "DeathProtection | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#death_protection
     entity_data: "EntityData | None" = field(default=None, kw_only=True)
     equippable_slots: "Equippable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#equippable
     firework_explosion: "FireworkExplosion | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#firework_explosion
     firework: "Firework | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#firework
     food: "Food | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#food
+    instrument: "Instrument | None" = field(default=None, kw_only=True)
     jukebox_playable: "JukeboxPlayable | None" = field(default=None, kw_only=True)
     lodestone_tracker: "LodestoneTracker | None" = field(default=None, kw_only=True)
     map_data: "MapData | None" = field(default=None, kw_only=True)
+    potion_contents: "PotionContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#potion_contents
     tool: "Tool | None" = field(default=None, kw_only=True)
-    instrument: "Instrument | None" = field(default=None, kw_only=True)
     use_remainder: "UseRemainder | None" = field(default=None, kw_only=True)
     written_book_content: "WrittenBookContent | None" = field(default=None, kw_only=True)
     writable_book_content: "WritableBookContent | None" = field(default=None, kw_only=True)
@@ -554,6 +656,24 @@ class Components:
         assert not (self.player_head_username and self.custom_head_texture), "Cannot have both player_head_username and custom_head_texture"
         assert self.cooldown is None or self.cooldown.seconds > 0, "cooldown seconds must be positive, to remove the cooldown, set it to None (or don't pass it in.)"
 
+    # def internally_validate_component_items(self, item: "CustomItem") -> None:
+    #     if self.durability or self.lost_durability or self.repair_cost:
+    #         assert item.base_item in TOOLS, "Durability, lost_durability, and repair_cost can only be used on tools!"
+    #     if self.loaded_projectiles:
+    #         assert item.base_item == "crossbow", "Loaded projectiles can only be used on crossbows!"
+    #     if self.note_block_sound:
+    #         assert item.base_item == "player_head", "Note block sound can only be used on player heads!"
+    #     if self.pot_decorations:
+    #         assert item.base_item == "decorated_pot", "Pot decorations can only be used on decorated_pots!"
+    #     if self.shield_base_color:
+    #         assert item.base_item == "shield", "Shield base color can only be used on shields!"
+    #     if self.banner_patterns:
+    #         assert item.base_item == "banner", "Banner patterns can only be used on banners!"
+    #     if self.bees:
+    #         assert item.base_item in ["bee_nest", "beehive"], "Bees can only be used on bee nests and beehives!"
+    #     if self.bundle_contents:
+    #         assert item.base_item == "bundle", "Bundle contents can only be used on bundles!"
+
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
@@ -563,24 +683,27 @@ class Components:
             "enchantment_glint_override": True if self.enchantment_glint_override else None,
             "glider":                     {} if self.glider else None,
             "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
-            "damage_resistant":           {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,  # TODO: Test me, well, replace is_fire for lava
+            # "damage_resistant":          {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,
             "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by else None,
             "repair_cost":                self.repair_cost,
 
-            "enchantments":               self.enchantments,
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
+            "dyed_color":                 self.dye_color,
+            "enchantments":               self.enchantments,
             "note_block_sound":           self.note_block_sound.get_reference(datapack) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier,
             "profile":                    self.player_head_username if self.player_head_username else profile,
             "base_color":                 self.shield_base_color,
 
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers else None,
-            "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns is not None else None,
-            "bees":                       [bee.to_dict() for bee in self.bees] if self.bees is not None else None,
+            "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns else None,
+            "bees":                       [bee.to_dict() for bee in self.bees] if self.bees else None,
             "bundle_contents":            self.bundle_contents.to_dict(datapack) if self.bundle_contents is not None else None,
             "consumable":                 self.consumable.to_dict(datapack) if self.consumable is not None else None,
+            "container":                  self.container_contents.to_dict(datapack) if self.container_contents is not None else None,
+            "death_protection":           self.death_protection.to_dict() if self.death_protection is not None else None,
             "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
             "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
@@ -591,6 +714,8 @@ class Components:
             "map_color":                  self.map_data.to_dict()["map_color"] if self.map_data is not None else None,
             "map_id":                     self.map_data.to_dict()["map_id"] if self.map_data is not None else None,
             "map_decorations":            self.map_data.to_dict()["map_decorations"] if self.map_data is not None else None,
+            "potion_contents":            self.potion_contents.to_dict() if self.potion_contents is not None else None,
+            "pot_decorations":            self.pot_decorations if self.pot_decorations else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
             "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
@@ -604,19 +729,12 @@ class Components:
 # bucket_entity_data MEH
 # can_break Mehhh
 # can_place_on Meh
-# container YES (for chests) =======================================
 # container_loot MEH
-# damage_resistant Hmmm  Maybe to make it resistant to lava like netherite? =======================================
-# damage_resistant={types:"#minecraft:is_fire"}
-# debug_stick_state no.
-# death_protection HMMMM (totem of undying)
-# dyed_color - leather armor only? MEH
+# damage_resistant Hmmm  Maybe to make it resistant to lava like netherite? ========= damage_resistant={types:"#minecraft:is_fire"}
+# debug_stick_state
 # enchantable # NOT YET (custom enchants maybe?)
-# equippable REDO, more stuff
 # intangible_projectile MEH
 # lock
-# pot_decorations
-# potion_contents --------------------------------
 # recipes  - for knowledge book
 # stored_enchantments MEH - For enchanted books?
 # suspicious_stew_effects MEH

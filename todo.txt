@@ -3,7 +3,15 @@ List:
 - Custom blocks, no drops in creative
 - Custom blocks, silk touch
 
+on_right_click should also take a MCFunction object, and get it's reference...
+
 Consider changing components to be a list of components, rather than a big ol' class.
+
+Filled barrel, decorated pot don't have icons
+
+Use requests to get the data in scripts/default_json
+
+Dyed helmet icon is horror...
 
 # Problems with slabs
 - Z fighting

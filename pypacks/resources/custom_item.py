@@ -24,7 +24,7 @@ class CustomItem:
     texture_path: str | None = field(repr=False, default=None)
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: str | None = None  # Function to call when the item is right clicked
-    components: "Components | None" = field(repr=False, default=None)
+    components: "Components" = field(repr=False, default_factory=lambda: Components())
     ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)
 
     is_block: bool = field(init=False, repr=False, default=False)
@@ -107,15 +107,14 @@ class CustomItem:
         })
 
     def generate_give_command(self, datapack: "Datapack") -> str:
-        components = ", ".join([
+        base_components = ", ".join([
             to_component_string({key: value})
             for key, value in self.to_dict(datapack.namespace).items()
         ])
         components_string = (
             to_component_string(self.components.to_dict(datapack))  # Also strips None through `recusively_remove_nones_from_data`
-            if self.components else None
         )
         # TODO: Figure out a way to not have to do this?
-        if self.base_item.removeprefix("minecraft:") in ["writable_book", "written_book"] and components_string is not None:
+        if self.base_item.removeprefix("minecraft:") in ["writable_book", "written_book"] and components_string:
             components_string = components_string.replace("\\\\", "\\").replace("\\n", "\\\\n")
-        return f"give @p {self.base_item}[{components}{', ' if components and components_string else ''}{components_string if components_string else ''}]"
+        return f"give @p {self.base_item}[{base_components}{', ' if base_components and components_string else ''}{components_string if components_string else ''}]"

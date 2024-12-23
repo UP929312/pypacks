@@ -18,9 +18,8 @@ def extract_item_components(item: "str | CustomItem", datapack: "Datapack") -> d
     """Returns the item's components (fixed)"""
     from pypacks.resources.custom_item import CustomItem
     regular_data = item.to_dict(datapack.namespace) if isinstance(item, CustomItem) else {}
-    components = item.components.to_dict(datapack) if isinstance(item, CustomItem) and item.components is not None else {}
-    combined = recusively_remove_nones_from_data(regular_data | components)
-    return combined
+    components = item.components.to_dict(datapack) if isinstance(item, CustomItem) else {}
+    return recusively_remove_nones_from_data(regular_data | components)
 
 
 def recusively_remove_nones_from_data(obj: Any) -> Any:
