@@ -7,7 +7,48 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
 
+    from pypacks.scripts.loot_tables import LootTables
+    from pypacks.scripts.advancements import AdvancementsType
+    from pypacks.scripts.damage_tags import DamageTagsType
+
+
+# ==========================================================================================
+
+
+# ArmorTrimItemType = Literal[
+#     "bolt_armor_trim_smithing_template", "coast_armor_trim_smithing_template", "dune_armor_trim_smithing_template", "eye_armor_trim_smithing_template", 
+#     "flow_armor_trim_smithing_template", "host_armor_trim_smithing_template", "netherite_upgrade_armor_trim_smithing_template", "raiser_armor_trim_smithing_template", 
+#     "rib_armor_trim_smithing_template", "sentry_armor_trim_smithing_template", "shaper_armor_trim_smithing_template", "silence_armor_trim_smithing_template", 
+#     "snout_armor_trim_smithing_template", "spire_armor_trim_smithing_template", "tide_armor_trim_smithing_template", "vex_armor_trim_smithing_template",
+#     "ward_armor_trim_smithing_template", "wayfinder_armor_trim_smithing_template", "wild_armor_trim_smithing_template",
+# ]
+ArmorTrimType = Literal[
+    "bolt", "coast", "dune", "eye", "flow", "host", "netherite_upgrade", "raiser", "rib", "sentry",
+    "shaper", "silence", "snout", "spire", "tide", "vex", "ward", "wayfinder", "wild",
+]
+ArmorTrimMaterialType = Literal[
+    "amethyst_shard", "copper_ingot", "diamond", "emerald", "gold_ingot", "iron_ingot",
+    "lapis_lazuli", "nether_quartz", "netherite_ingot", "redstone", "resin_bricks",
+]
+
+
+@dataclass
+class ArmorTrim:
+    pattern: ArmorTrimType  # The ID of the trim pattern.
+    material: ArmorTrimMaterialType  # The ID of the trim material, which applies a color to the trim.
+    show_in_tooltip: bool = True  # Show or hide the trim on this item's tooltip. Defaults to true.
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "pattern": self.pattern,
+            "material": self.material,
+            "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
+        }
+
+
+Trim = ArmorTrim  # Alias for ArmorTrim
 
 # ==========================================================================================
 
@@ -50,6 +91,7 @@ class AttributeModifier:
 # ==========================================================================================
 
 ColorType = Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
+COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
 
 
 @dataclass
@@ -89,6 +131,59 @@ class Bee:
             "entity_data": self.entity_data,
             "min_ticks_in_hive": self.min_ticks_in_hive,
             "ticks_in_hive": self.ticks_in_hive,
+        }
+
+
+# ==========================================================================================
+
+
+@dataclass
+class TropicalFishData:
+    size: Literal["small", "large"] = "large"
+    pattern: Literal[0, 1, 2, 3, 4, 5] = 0
+    body_color: ColorType | int = "light_blue"
+    pattern_color: ColorType | int = "red"
+
+    def __int__(self) -> int:
+        body_color_index = COLORS.index(self.body_color) if isinstance(self.body_color, str) else self.body_color
+        pattern_color_index = COLORS.index(self.pattern_color) if isinstance(self.pattern_color, str) else self.pattern_color
+        size_int = 0 if self.size == "small" else 1
+        # rint(f"Shape {size_int}, Pattern {self.pattern}, Base Color {body_color_index}, Pattern Color {pattern_color_index}")
+        return (
+            pattern_color_index * (2 ** 24) +
+            body_color_index    * (2 ** 16) +
+            self.pattern        * (2 ** 8) +
+            size_int            * (2 ** 0)
+        )  # fmt: skip
+
+
+@dataclass 
+class BucketEntityData:
+    no_ai: bool = False  # Turns into NoAI entity tag for all bucketable entities.
+    silent: bool = False  # Turns into Silent entity tag for all bucketable entities.
+    no_gravity: bool = False  # Turns into NoGravity entity tag for all bucketable entities.
+    glowing: bool = False  #  Turns into Glowing entity tag for all bucketable entities.
+    invulnerable: bool = False  # Turns into Invulnerable entity tag for all bucketable entities.
+    health: float | None = None  # Turns into Health entity tag for all bucketable entities.
+    age: int | None = None  # Turns into Age entity tag for axolotls and tadpoles.
+    variant: int | None = None  # Turns into Variant entity tag for axolotls.
+    hunting_cooldown: int | None = None  # Turns into the expiry time of the memory module has_hunting_cooldown for axolotls.
+    bucket_variant_tag: "TropicalFishData | int | None" = None  # Turns into Variant entity tag for tropical fish.
+    size: Literal["small", "medium", "large"] | None = None  #  Turns into type entity tag for salmon.
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "NoAI": True if self.no_ai else None,
+            "Silent": True if self.silent else None,
+            "NoGravity": True if self.no_gravity else None,
+            "Glowing": True if self.glowing else None,
+            "Invulnerable": True if self.invulnerable else None,
+            "Health": self.health if self.health is not None else None,
+            "Age": self.age if self.age is not None else None,
+            "Variant": self.variant if self.variant is not None else None,
+            "HuntingCooldown": self.hunting_cooldown if self.hunting_cooldown is not None else None,
+            "BucketVariantTag": int(self.bucket_variant_tag) if self.bucket_variant_tag is not None else None,
+            "type": self.size if self.size is not None else None,
         }
 
 
@@ -192,6 +287,21 @@ class ContainerContents:
             }
             for i, (item, count) in enumerate(self.items.items())
         ]
+
+
+# ==========================================================================================
+
+
+@dataclass
+class Cooldown:
+    seconds: float = 5.0
+    cooldown_group: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "seconds": self.seconds,
+            "cooldown_group": self.cooldown_group,
+        }
 
 
 # ==========================================================================================
@@ -556,25 +666,13 @@ class WrittenBookContent:
 # ==========================================================================================
 
 
-@dataclass
-class Cooldown:
-    seconds: float = 5.0
-    cooldown_group: str | None = None
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "seconds": self.seconds,
-            "cooldown_group": self.cooldown_group,
-        }
-
-
-# ==========================================================================================
-
-PotDecorationsType = Literal["brick", "angler_pottery_sherd", "archer_pottery_sherd", "arms_up_pottery_sherd", "blade_pottery_sherd", "brewer_pottery_sherd",
-                             "burn_pottery_sherd", "danger_pottery_sherd", "explorer_pottery_sherd", "flow_pottery_sherd", "friend_pottery_sherd",
-                             "guster_pottery_sherd", "heart_pottery_sherd", "heartbreak_pottery_sherd", "howl_pottery_sherd", "miner_pottery_sherd",
-                             "mourner_pottery_sherd", "plenty_pottery_sherd", "prize_pottery_sherd", "scrape_pottery_sherd", "sheaf_pottery_sherd",
-                             "shelter_pottery_sherd", "skull_pottery_sherd", "snort_pottery_sherd"]
+PotDecorationsType = Literal[
+    "brick", "angler_pottery_sherd", "archer_pottery_sherd", "arms_up_pottery_sherd", "blade_pottery_sherd", "brewer_pottery_sherd",
+    "burn_pottery_sherd", "danger_pottery_sherd", "explorer_pottery_sherd", "flow_pottery_sherd", "friend_pottery_sherd",
+    "guster_pottery_sherd", "heart_pottery_sherd", "heartbreak_pottery_sherd", "howl_pottery_sherd", "miner_pottery_sherd",
+    "mourner_pottery_sherd", "plenty_pottery_sherd", "prize_pottery_sherd", "scrape_pottery_sherd", "sheaf_pottery_sherd",
+    "shelter_pottery_sherd", "skull_pottery_sherd", "snort_pottery_sherd",
+]
 
 EnchantmentType = Literal[
     "aqua_affinity", "bane_of_arthropods", "binding_curse", "blast_protection", "breach", "channeling",
@@ -597,7 +695,7 @@ TOOLS = [
 # ==========================================================================================
 
 # Todo: Let custom item use a list of these as well
-# ComponentType: TypeAlias = AttributeModifier | BannerPattern | Bee | BundleContents | Consumable | DeathProtection | Food | EntityData | Equippable | Firework | FireworkExplosion | JukeboxPlayable | PotionContents | LodestoneTracker | MapData | Tool | Instrument | UseRemainder | WrittenBookContent | WritableBookContent
+# ComponentType: TypeAlias = ArmorTrim, AttributeModifier | BannerPattern | Bee | BundleContents | Consumable | DeathProtection | Food | EntityData | Equippable | Firework | FireworkExplosion | JukeboxPlayable | PotionContents | LodestoneTracker | MapData | Tool | Instrument | UseRemainder | WrittenBookContent | WritableBookContent
 
 # ==========================================================================================
 
@@ -615,19 +713,31 @@ class Components:
     repaired_by: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
 
-    custom_head_texture: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
-    enchantments: dict[EnchantmentType, int] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
+    block_entity_data: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_entity_data  <-- Block entities only
+    block_state: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_state  <-- Blocks only
+    container_loot_table: "LootTables | CustomLootTable | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container_loot  <-- Containers only
+    custom_head_texture: str | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
+    damage_resistant_to: "DamageTagsType | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant  <-- Tools only
+    enchantments: dict[EnchantmentType, int] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments
+    book_enchantments: dict[EnchantmentType, int] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#stored_enchantments
+    debug_stick_state: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#debug_stick_state  <-- Debug sticks only
     dye_color: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#dyed_color  <-- Leather armor only
+    intangible_projectile: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#intangible_projectile  <-- Arrows only
+    knowledge_book_recipes: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#recipes  <-- Knowledge books only
     loaded_projectiles: list[Literal["arrow", "tipped_arrow", "spectral_arrow", "firework_rocket"] | str] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#charged_projectiles  <-- Crossbows only, and only arrows
     note_block_sound: "str | CustomSound | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#note_block_sound  <-- Player heads only
     ominous_bottle_amplifier: Literal[0, 1, 2, 3, 4] | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#ominous_bottle_amplifier  <-- Ominous bottles only
     player_head_username: "str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     pot_decorations: list["PotDecorationsType"] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#pot_decorations  <-- decorative pots only
     shield_base_color: "ColorType | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#base_color  <-- Shields only
+    suspicious_stew_effects: dict[PotionEffectType, int] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#suspicious_stew_effects  <-- Suspicious stew only
+    tooltip_style: str | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#tooltip_style
 
+    armor_trim: "ArmorTrim | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#trim  <-- Armor only
     attribute_modifiers: list[AttributeModifier] = field(default_factory=list, kw_only=True)
     bees: list[Bee] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bees  <-- Beehives/bee_nest only
     banner_patterns: list[BannerPattern] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#banner_patterns  <-- Banners only
+    bucket_entity_data: "BucketEntityData | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bucket_entity_data  <-- Bucket of tropical fish only
     bundle_contents: "BundleContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bundle_contents  <-- Bundles only
     cooldown: "Cooldown | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#use_cooldown
     consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
@@ -673,10 +783,15 @@ class Components:
     #         assert item.base_item in ["bee_nest", "beehive"], "Bees can only be used on bee nests and beehives!"
     #     if self.bundle_contents:
     #         assert item.base_item == "bundle", "Bundle contents can only be used on bundles!"
+    #     if self.damage_resistant and self.destroyed_in_lava:
+    #         
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
+        from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
+        # if self.damage_resistant_to and self.destroyed_in_lava:
+        #     raise ValueError("Cannot have both damage_resistant_to and destroyed_in_lava set to True")
         return {
             "max_damage":                 self.durability,
             "damage":                     self.lost_durability,
@@ -689,18 +804,30 @@ class Components:
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by else None,
             "repair_cost":                self.repair_cost,
 
+            "base_color":                 self.shield_base_color,
+            "block_entity_data":          self.block_entity_data if self.block_entity_data else None,
+            "block_state":                self.block_state if self.block_state else None,
+            "container_loot":             ({"loot_table": (self.container_loot_table.get_reference(datapack) if isinstance(self.container_loot_table, CustomLootTable)
+                                            else self.container_loot_table)}
+                                            if self.container_loot_table is not None else None),  # fmt: skip
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
+            "damage_resistant":           {"types": self.damage_resistant_to} if self.damage_resistant_to is not None else None,
+            "debug_stick_state":          self.debug_stick_state if self.debug_stick_state else None,
             "dyed_color":                 self.dye_color,
-            "enchantments":               self.enchantments,
+            "enchantments":               self.enchantments if self.enchantments else None,
+            "intangible_projectile":      {} if self.intangible_projectile else None,
             "note_block_sound":           self.note_block_sound.get_reference(datapack) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier,
             "profile":                    self.player_head_username if self.player_head_username else profile,
-            "base_color":                 self.shield_base_color,
+            "recipes":                   self.knowledge_book_recipes if self.knowledge_book_recipes else None,
+            "suspicious_stew_effects":    [{"id": key, "duration": value} for key, value in self.suspicious_stew_effects.items()] if self.suspicious_stew_effects else None,
 
+            "trim":                       self.armor_trim.to_dict() if self.armor_trim is not None else None,
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns else None,
             "bees":                       [bee.to_dict() for bee in self.bees] if self.bees else None,
             "bundle_contents":            self.bundle_contents.to_dict(datapack) if self.bundle_contents is not None else None,
+            "bucket_entity_data":         self.bucket_entity_data.to_dict() if self.bucket_entity_data is not None else None,
             "consumable":                 self.consumable.to_dict(datapack) if self.consumable is not None else None,
             "container":                  self.container_contents.to_dict(datapack) if self.container_contents is not None else None,
             "death_protection":           self.death_protection.to_dict() if self.death_protection is not None else None,
@@ -716,7 +843,9 @@ class Components:
             "map_decorations":            self.map_data.to_dict()["map_decorations"] if self.map_data is not None else None,
             "potion_contents":            self.potion_contents.to_dict() if self.potion_contents is not None else None,
             "pot_decorations":            self.pot_decorations if self.pot_decorations else None,
+            "stored_enchantments":        self.book_enchantments if self.book_enchantments else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
+            "tooltip_style":              self.tooltip_style,
             "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "use_remainder":              self.use_remainder.to_dict(datapack) if self.use_remainder is not None else None,
@@ -724,19 +853,7 @@ class Components:
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
-# block_entity_data MEH
-# block_state MEH
-# bucket_entity_data MEH
 # can_break Mehhh
 # can_place_on Meh
-# container_loot MEH
-# damage_resistant Hmmm  Maybe to make it resistant to lava like netherite? ========= damage_resistant={types:"#minecraft:is_fire"}
-# debug_stick_state
 # enchantable # NOT YET (custom enchants maybe?)
-# intangible_projectile MEH
-# lock
-# recipes  - for knowledge book
-# stored_enchantments MEH - For enchanted books?
-# suspicious_stew_effects MEH
-# tooltip_style maybe?
-# trim MEH
+# lock  # https://minecraft.wiki/w/Data_component_format#lock

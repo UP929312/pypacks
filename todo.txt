@@ -5,6 +5,12 @@ List:
 
 on_right_click should also take a MCFunction object, and get it's reference...
 
+Restrict BucketEntityData to tropical fish buckets only
+
+Mob spawner needs an icon
+
+Type hint base item, just put it mob_spawner but it's just spawner... caused issues
+
 Consider changing components to be a list of components, rather than a big ol' class.
 
 Filled barrel, decorated pot don't have icons
@@ -81,7 +87,7 @@ Loot table progress
 
 # Naturally occuring ore veins! Would be maybe tricky...
 
-# Merge on_load with an inputted one... Using /function
+# Merge on_load with an inputted one... JUST CHANGE THE LOAD.JSON'S VALUES TO HAVE BOTH, YOU CAN HAVE TWO!
 
 # Hud overlay would be cool! Something about the pack?
 

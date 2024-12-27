@@ -2,10 +2,12 @@
 import os
 import re
 
+VERSION = "1.21.4"
+folder = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\versions\\{VERSION}\\{VERSION}\\assets\\minecraft\\models\\item"
+
 RE_PATTERN = r"\"layer0\": \"(minecraft:)?(item|block)\/.*\""
 mapping = {}
 
-folder = "assets/minecraft/models/item"
 for item_model_file in os.listdir(folder):
     with open(f"{folder}/{item_model_file}") as file:
         data = file.read()

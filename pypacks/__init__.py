@@ -3,7 +3,7 @@ from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
 from pypacks.resources.custom_model import FacePaths
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.item_components import AttributeModifier, Bee, BundleContents, Components, Cooldown, Consumable, ContainerContents, DeathProtection, EntityData, Equippable, FireworkExplosion, Firework, Food, Instrument, JukeboxPlayable, LodestoneTracker, MapData, MapDecoration, PotionEffect, PotionContents, ToolRule, Tool, UseRemainder, WrittenBookContent
+from pypacks.resources.item_components import AttributeModifier, ArmorTrim, Bee, BundleContents, BucketEntityData, Components, Cooldown, Consumable, ContainerContents, DeathProtection, EntityData, Equippable, FireworkExplosion, Firework, Food, Instrument, JukeboxPlayable, LodestoneTracker, MapData, MapDecoration, PotionEffect, PotionContents, ToolRule, Tool, TropicalFishData, UseRemainder, WrittenBookContent
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_loot_tables import *
 from pypacks.resources.custom_painting import CustomPainting
