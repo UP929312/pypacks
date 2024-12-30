@@ -251,5 +251,5 @@ class FormattedWrittenBook:
         from pypacks.resources.custom_item import CustomItem
 
         custom_item_data = Components(written_book_content=WrittenBookContent(self.title, self.author, [x.get_json_data() for x in self.pages]))
-        custom_item = CustomItem("minecraft:written_book", internal_name="formatted_written_book", components=custom_item_data)
+        custom_item = CustomItem("formatted_written_book", "minecraft:written_book", components=custom_item_data)
         return custom_item.generate_give_command(datapack)

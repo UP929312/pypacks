@@ -38,13 +38,13 @@ def to_component_string(obj: dict[str, Any]) -> str:
     return ", ".join([f"{key}={_to_snbt(val)}" for key, val in obj.items() if val is not None])
 
 
-def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False) -> str:
+def colour_codes_to_json_format(text: str, auto_unitalicise: bool=False, make_white: bool=True) -> str:
     """Converts a string like '&6Hello &cworld' to a JSON string like '[{"text":"Hello ","color":"gold"},{"text":"world","color":"red"}]'
     DOES NOT WORK FOR FORMATTING (YET)"""
     if not text:
         return '[]'
     if "&" not in text:
-        return json.dumps([{"text": text, "color": "white", "italic": False}])
+        return json.dumps([{"text": text, "color": "white", "italic": False} if make_white else {"text": text, "italic": False}])
     # Split on colour codes, but keep the original colour codes
     split_text = [x for x in text.split("&") if x]
     # Split on the first character of each colour code

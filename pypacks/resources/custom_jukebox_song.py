@@ -42,8 +42,8 @@ class CustomJukeboxSong:
 
     def generate_custom_item(self, datapack: "Datapack") -> "CustomItem":
         return CustomItem(
-            "minecraft:music_disc_cat",
             self.internal_name,
+            "minecraft:music_disc_cat",
             self.internal_name.replace("_", " ").title(),
             components=Components(jukebox_playable=JukeboxPlayable(self))
         )

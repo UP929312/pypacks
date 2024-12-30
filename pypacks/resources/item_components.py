@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
 
     from pypacks.scripts.loot_tables import LootTables
-    from pypacks.scripts.advancements import AdvancementsType
     from pypacks.scripts.damage_tags import DamageTagsType
 
 
@@ -170,6 +169,10 @@ class BucketEntityData:
     hunting_cooldown: int | None = None  # Turns into the expiry time of the memory module has_hunting_cooldown for axolotls.
     bucket_variant_tag: "TropicalFishData | int | None" = None  # Turns into Variant entity tag for tropical fish.
     size: Literal["small", "medium", "large"] | None = None  #  Turns into type entity tag for salmon.
+
+    allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: [
+        "tropical_fish_bucket", "cod_bucket", "salmon_bucket"
+    ])
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -424,22 +427,6 @@ class Food:
 
 
 @dataclass
-class UseRemainder:
-    item: "str | CustomItem"
-    count: int = 1
-
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        from pypacks.resources.custom_item import CustomItem
-        return {
-            "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
-            "count": self.count,
-        } | ({"components": self.item.to_dict(datapack.namespace)} if isinstance(self.item, CustomItem) else {})
-
-
-# ==========================================================================================
-
-
-@dataclass
 class Instrument:
     """Used for the goat horn, can take a default minecraft sound or a custom sound"""
     # https://minecraft.wiki/w/Data_component_format#instrument
@@ -636,6 +623,22 @@ class Tool:
 
 
 @dataclass
+class UseRemainder:
+    item: "str | CustomItem"
+    count: int = 1
+
+    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
+        return {
+            "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
+            "count": self.count,
+        } | ({"components": self.item.to_dict(datapack.namespace)} if isinstance(self.item, CustomItem) else {})
+
+
+# ==========================================================================================
+
+
+@dataclass
 class WritableBookContent:
     # https://minecraft.wiki/w/Data_component_format#writable_book_content
     pages: list[str] = field(default_factory=lambda: ["Hello World"])  # Should be a list of pages as str (doesn't support JSON)
@@ -694,8 +697,13 @@ TOOLS = [
 
 # ==========================================================================================
 
-# Todo: Let custom item use a list of these as well
-# ComponentType: TypeAlias = ArmorTrim, AttributeModifier | BannerPattern | Bee | BundleContents | Consumable | DeathProtection | Food | EntityData | Equippable | Firework | FireworkExplosion | JukeboxPlayable | PotionContents | LodestoneTracker | MapData | Tool | Instrument | UseRemainder | WrittenBookContent | WritableBookContent
+ComponentType: TypeAlias = (
+    ArmorTrim | AttributeModifier | BannerPattern | Bee | BucketEntityData | BundleContents | 
+    Consumable | ContainerContents | Cooldown |
+    DeathProtection | EntityData | Equippable | Firework | FireworkExplosion | Food |
+    Instrument | JukeboxPlayable | LodestoneTracker | MapData | PotionContents | Tool | UseRemainder |
+    WritableBookContent | WrittenBookContent
+)
 
 # ==========================================================================================
 
@@ -744,7 +752,7 @@ class Components:
     container_contents: "ContainerContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container
     death_protection: "DeathProtection | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#death_protection
     entity_data: "EntityData | None" = field(default=None, kw_only=True)
-    equippable_slots: "Equippable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#equippable
+    equippable: "Equippable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#equippable
     firework_explosion: "FireworkExplosion | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#firework_explosion
     firework: "Firework | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#firework
     food: "Food | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#food
@@ -765,6 +773,16 @@ class Components:
         assert self.repair_cost is None or self.repair_cost >= 0, "repair_cost must be a non-negative integer"
         assert not (self.player_head_username and self.custom_head_texture), "Cannot have both player_head_username and custom_head_texture"
         assert self.cooldown is None or self.cooldown.seconds > 0, "cooldown seconds must be positive, to remove the cooldown, set it to None (or don't pass it in.)"
+        # assert not (self.damage_resistant_to and self.destroyed_in_lava), "Cannot have both damage_resistant_to and destroyed_in_lava set to True"
+
+    @classmethod
+    def from_list(cls, components: list[ComponentType]) -> "Components":
+        # Convert all the keys from PascalCase to snake_case
+        dictionary = {
+            ''.join(['_'+c.lower() if c.isupper() else c for c in component.__class__.__name__]).lstrip('_'): component
+            for component in components
+        }
+        return cls(**dictionary)  # type: ignore
 
     # def internally_validate_component_items(self, item: "CustomItem") -> None:
     #     if self.durability or self.lost_durability or self.repair_cost:
@@ -784,14 +802,11 @@ class Components:
     #     if self.bundle_contents:
     #         assert item.base_item == "bundle", "Bundle contents can only be used on bundles!"
     #     if self.damage_resistant and self.destroyed_in_lava:
-    #         
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
         from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
-        # if self.damage_resistant_to and self.destroyed_in_lava:
-        #     raise ValueError("Cannot have both damage_resistant_to and destroyed_in_lava set to True")
         return {
             "max_damage":                 self.durability,
             "damage":                     self.lost_durability,
@@ -832,7 +847,7 @@ class Components:
             "container":                  self.container_contents.to_dict(datapack) if self.container_contents is not None else None,
             "death_protection":           self.death_protection.to_dict() if self.death_protection is not None else None,
             "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
-            "equippable":                 self.equippable_slots.to_dict() if self.equippable_slots is not None else None,
+            "equippable":                 self.equippable.to_dict() if self.equippable is not None else None,
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
             "fireworks":                  self.firework.to_dict() if self.firework is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,

@@ -56,8 +56,8 @@ class CustomPainting:
 
     def generate_custom_item(self, datapack: "Datapack") -> "CustomItem":
         return CustomItem(
-            "minecraft:painting",
             self.internal_name,
+            "minecraft:painting",
             self.title or self.internal_name,
             components=Components(entity_data=EntityData({"id": "minecraft:painting", "variant": f"{datapack.namespace}:{self.internal_name}"})),
             ref_book_config=PAINTING_REF_BOOK_CONFIG

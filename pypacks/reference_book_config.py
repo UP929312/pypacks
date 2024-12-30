@@ -28,10 +28,10 @@ class RefBookConfig:
     category: "RefBookCategory" = MISC_REF_BOOK_CATEGORY
     description: str = "No description provided for this item"
     hidden: bool = field(kw_only=True, default=False)
-    wiki_link: str | None = field(kw_only=True, default=None)
+    # wiki_link: str | None = field(kw_only=True, default=None)
 
-    def __post_init__(self) -> None:
-        assert self.wiki_link is None
+    # def __post_init__(self) -> None:
+    #     assert self.wiki_link is None
 
 
 MISC_REF_BOOK_CONFIG = RefBookConfig(category=MISC_REF_BOOK_CATEGORY, description="No description provided for this item")

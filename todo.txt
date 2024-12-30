@@ -3,21 +3,12 @@ List:
 - Custom blocks, no drops in creative
 - Custom blocks, silk touch
 
-on_right_click should also take a MCFunction object, and get it's reference...
-
-Restrict BucketEntityData to tropical fish buckets only
-
-Mob spawner needs an icon
-
-Type hint base item, just put it mob_spawner but it's just spawner... caused issues
-
 Consider changing components to be a list of components, rather than a big ol' class.
 
-Filled barrel, decorated pot don't have icons
+Filled barrel, decorated pot, Mob spawner --- don't have icons
+Dyed armor icon is horror...
 
 Use requests to get the data in scripts/default_json
-
-Dyed helmet icon is horror...
 
 # Problems with slabs
 - Z fighting

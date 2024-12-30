@@ -69,7 +69,7 @@ class CustomBlock:
                     "condition": "minecraft:match_tool",
                     "predicate": {
                         "predicates": {
-                            "minecraft:custom_data": f"{{pypacks_custom_item: '{self.internal_name}'}}"
+                            "minecraft:custom_data": f"{{custom_right_click_for_{self.internal_name}: {True}}}"
                         }
                     }
                 }
@@ -185,8 +185,7 @@ class CustomBlock:
         """Adds a slab version of the block."""
         assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
         # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",
-        #                          lore=self.block_item.lore, custom_data={"pypacks_custom_item": f"{self.internal_name}_slab"}
-        #                          )
+        #                          lore=self.block_item.lore)
         # =========================
         # TODO: Just reconstruct a new item/block here?...
         new_slab_block: "CustomBlock" = deepcopy(self)
@@ -199,7 +198,6 @@ class CustomBlock:
         slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)  # type: ignore
         slab_item.internal_name = f"{self.internal_name}_slab"
         slab_item.custom_name = f"{self.name} Slab"
-        slab_item.custom_data["pypacks_custom_item"] = f"{self.internal_name}_slab"
         slab_item.is_block = True
         # =========================
         new_slab_block.drops = slab_item

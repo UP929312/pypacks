@@ -32,8 +32,8 @@ for item, data in DEFAULT_OBJECT_JSON.items():
     if not is_normal_item(data):
         print(item, data)
         a = CustomItem(
-            base_item=item,
             internal_name=item.removeprefix("minecraft:"),
+            base_item=item,  # type: ignore[abc]
             # custom_name=data.get("minecraft:item_name", {}),
             lore=data.get("minecraft:lore", []),
             max_stack_size=data.get("minecraft:max_stack_size", 64),
