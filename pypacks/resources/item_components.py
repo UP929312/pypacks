@@ -836,6 +836,7 @@ class Components:
             "profile":                    self.player_head_username if self.player_head_username else profile,
             "recipes":                   self.knowledge_book_recipes if self.knowledge_book_recipes else None,
             "suspicious_stew_effects":    [{"id": key, "duration": value} for key, value in self.suspicious_stew_effects.items()] if self.suspicious_stew_effects else None,
+            "tooltip_style":              self.tooltip_style,
 
             "trim":                       self.armor_trim.to_dict() if self.armor_trim is not None else None,
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers else None,
@@ -860,7 +861,6 @@ class Components:
             "pot_decorations":            self.pot_decorations if self.pot_decorations else None,
             "stored_enchantments":        self.book_enchantments if self.book_enchantments else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
-            "tooltip_style":              self.tooltip_style,
             "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "use_remainder":              self.use_remainder.to_dict(datapack) if self.use_remainder is not None else None,

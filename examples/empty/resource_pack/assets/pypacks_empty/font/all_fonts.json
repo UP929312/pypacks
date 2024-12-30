@@ -1,0 +1,139 @@
+{
+    "providers": [
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/empty_1_x_1.png",
+            "height": 1,
+            "ascent": 0,
+            "chars": [
+                "\uE000"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/blank_icon.png",
+            "height": 20,
+            "ascent": 10,
+            "chars": [
+                "\uE001"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/logo_256_x_256.png",
+            "height": 100,
+            "ascent": 16,
+            "chars": [
+                "\uE002"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/information_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE003"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/satchel_icon.png",
+            "height": 20,
+            "ascent": 10,
+            "chars": [
+                "\uE004"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/crafting_table_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE006"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/crafting_table_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE006"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/crafting_table_transmute_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE007"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/furnace_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE008"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/blast_furnace_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE009"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/campfire_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE010"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/smithing_table_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE012"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/smithing_table_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE012"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/smoker_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE013"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "pypacks_empty:font/stonecutter_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\uE014"
+            ]
+        }
+    ]
+}

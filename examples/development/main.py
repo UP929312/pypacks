@@ -6,6 +6,9 @@ from pypacks import (
 from pypacks.resources.custom_recipe import *  # type: ignore[import]
 from pypacks.resources.item_components import *  # type: ignore[import]
 
+import os
+os.chdir(os.path.dirname(__file__))
+
 # ============================================================================================================
 custom_painting = CustomPainting("logo_art", "images/logo_512_x_512.png", title="My Masterpiece", width_in_blocks=4, height_in_blocks=4)
 custom_sound = CustomSound("rick_roll", "sounds/rick_roll.ogg", 1.0, 1.0)
@@ -62,18 +65,29 @@ custom_potion = CustomItem("custom_potion", "minecraft:potion", "Custom Potion",
 decorated_pot = CustomItem("decorated_pot", "decorated_pot", "decorated Pot", components=Components(pot_decorations=["angler_pottery_sherd", "brick", "arms_up_pottery_sherd", "skull_pottery_sherd"]))
 death_protection_star = CustomItem("death_protection_star", "minecraft:nether_star", "Death Protection Star", components=Components(death_protection=DeathProtection(apply_affects=[PotionEffect("fire_resistance", 2, 20*5)])), ref_book_config=RefBookConfig(category=consumable_category))
 dyed_helmet = CustomItem("dyed_helmet", "minecraft:leather_helmet", "Dyed Helmet", components=Components(dye_color=0xFF00FF), ref_book_config=RefBookConfig(category=weapons_category))
+trimmed_leggings = CustomItem("trimmed_leggings", "minecraft:leather_leggings", "Trimmed Leggings", components=Components(armor_trim=ArmorTrim("host", "emerald")), ref_book_config=RefBookConfig(category=usable_category))
+suspicious_stew = CustomItem("suspicious_stew", "minecraft:suspicious_stew", "Suspicious Stew", components=Components(suspicious_stew_effects={"speed": 5*20}), ref_book_config=RefBookConfig(category=consumable_category))
+spider_spawner = CustomItem("spider_spawner", "minecraft:spawner", "Spider Spawner", components=Components(block_entity_data={"id":"mob_spawner","SpawnData":{"entity":{"id":"spider"}}}), ref_book_config=RefBookConfig(category=usable_category))
+upper_slab = CustomItem("upper_slab", "minecraft:stone_slab", "Upper Slab", components=Components(block_state={"type":"minecraft:stone_slab", "type":"top"}))
+fish_bucket = CustomItem("fish_bucket", "minecraft:tropical_fish_bucket", "Fish Bucket", components=Components(bucket_entity_data=BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))), ref_book_config=RefBookConfig(category=usable_category))
+loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table Chest", components=Components(container_loot_table="minecraft:chests/village/village_butcher"), ref_book_config=RefBookConfig(category=usable_category))
+
+# fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
+# test = CustomItem("minecraft:emerald", "test", "Test", components=Components.from_list([Equippable("chest")]), ref_book_config=RefBookConfig(category=weapons_category))
 
 # edible_bow = CustomItem("minecraft:bow", "edible_bow", "Yummy Bow", components=Components(consumable=Consumable(0.5, "drink"), food=Food(5, 0, True)))
+# edible_item = CustomItem("minecraft:witch_spawn_egg", "edible_witch_spawn_egg", "Edible Witch Spawn Egg", components=Components(consumable=Consumable(0.5, "drink"), food=Food(5, 0, True)))
 
 custom_items = [
     ruby, topaz, weak_axe, flying_helmet, playable_lapis, musical_horn, written_book, rick_roll_horn,
     rick_roll_horn_from_sound, lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book,
     sharpness_fish, enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
-    right_clickable_feather, right_clickable_nether_quartz, edible_item, custom_head_texture, ray_gun,
+    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun,  # edible_item
     pre_charged_crossbow, steak_to_ruby_when_eaten, custom_firework, custom_firework_hex, map_with_decoration,
     colored_map, map_with_id, banner, note_block_sound_head, eating_gives_you_speed, eating_removes_speed,
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
-    bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet,
+    bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet, trimmed_leggings,
+    suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest,
 ]
 # endregion
 # ============================================================================================================
