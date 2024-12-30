@@ -19,6 +19,7 @@ EXTRA_ICON_BASE_PATH = Path(IMAGES_PATH)/"reference_book_icons"/"extra_icon_base
 
 
 def generate_resource_pack(datapack: "Datapack") -> None:
+    os.makedirs(datapack.resource_pack_path, exist_ok=True)
     # ================================================================================================
     # pack.mcmeta
     with open(Path(datapack.resource_pack_path)/"pack.mcmeta", "w") as file:
@@ -32,8 +33,9 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         element.create_resource_pack_files(datapack)
     # ================================================================================================
     # Create the sounds.json file.
-    with open(Path(datapack.resource_pack_path, "assets", datapack.namespace, "sounds.json"), "w") as file:
-        json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
+    if datapack.custom_sounds:
+        with open(Path(datapack.resource_pack_path, "assets", datapack.namespace, "sounds.json"), "w") as file:
+            json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
     # ================================================================================================
 
 
@@ -86,18 +88,20 @@ def generate_base_pack(datapack: "Datapack") -> None:
     with open(Path(datapack.datapack_output_path)/"data"/"minecraft"/"tags"/"function"/"load.json", "w") as file:
         json.dump({"values": [f"{datapack.namespace}:load"]}, file, indent=4)
 
-    with open(Path(datapack.datapack_output_path)/"data"/"minecraft"/"tags"/"function"/"tick.json", "w") as file:
-        json.dump({"values": [f"{datapack.namespace}:tick"]}, file, indent=4)
+    if datapack.custom_blocks:
+        with open(Path(datapack.datapack_output_path)/"data"/"minecraft"/"tags"/"function"/"tick.json", "w") as file:
+            json.dump({"values": [f"{datapack.namespace}:tick"]}, file, indent=4)
     # ================================================================================================
     # Give commands
-    os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give", exist_ok=True)
+    if datapack.custom_items:
+        os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give", exist_ok=True)
 
-    with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give_all.mcfunction", "w") as file:
-        file.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in datapack.custom_items]))
-    # And give the book
-    book = ReferenceBook(datapack.custom_items)
-    with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
-        file.write(f"\n# Give the book\n{book.generate_give_command(datapack)}")
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give_all.mcfunction", "w") as file:
+            file.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in datapack.custom_items]))
+        # And give the book
+        book = ReferenceBook(datapack.custom_items)
+        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
+            file.write(f"\n# Give the book\n{book.generate_give_command(datapack)}")
     # ================================================================================================
     # Resources
     for item in (

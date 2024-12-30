@@ -99,8 +99,8 @@ class Datapack:
             assert len([x for x in self.custom_items if x.ref_book_config.category.name == category.name]) <= 18, \
                    f"Category {category.name} has too many items (> 18)!"
         # ==================================================================================
-        self.mcfunctions.append(MCFunction("load", [
-            f"function {self.namespace}:raycast/load",  # Something might use this but we can't be sure, so always load it
+        load_mcfunciton = MCFunction("load", [
+            f"function {self.namespace}:raycast/load" if (self.custom_items or self.custom_blocks) else "",
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
             "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
             "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
@@ -110,15 +110,19 @@ class Datapack:
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
             ],
             f"say Loaded into {self.name}!",
-        ]))
-        self.mcfunctions.append(MCFunction("tick", [
+        ])
+        load_mcfunciton.create_if_empty = False
+        tick_mcfunction = MCFunction("tick", [
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
             ],
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
-        ]))
-        self.mcfunctions.append(create_wall(self.custom_items, self))
+        ])
+        tick_mcfunction.create_if_empty = False
+        self.mcfunctions.extend([load_mcfunciton, tick_mcfunction])
+        if self.custom_items:
+            self.mcfunctions.append(create_wall(self.custom_items, self))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")

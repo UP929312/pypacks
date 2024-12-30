@@ -13,6 +13,7 @@ class MCFunction:
     commands: list[str]
     sub_directories: list[str] = field(default_factory=list)  # Allow this to be a str
 
+    create_if_empty: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, default="function")
 
     def __post_init__(self) -> None:
@@ -22,6 +23,8 @@ class MCFunction:
         return f"{datapack.namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
+        if (not self.commands or self.commands == [""]) and not self.create_if_empty:
+            return
         # Can't use / here because of *self.sub_directories
         path = Path(datapack.datapack_output_path, "data", datapack.namespace, self.__class__.datapack_subdirectory_name,
                     *self.sub_directories, f"{self.internal_name}.mcfunction")

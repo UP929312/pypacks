@@ -87,6 +87,7 @@ class SymmetricCubeModel:
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
             json.dump({"parent": "minecraft:block/cube_all", "textures": layers}, file, indent=4)
 
+        # Item model definition
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
             json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
 
@@ -212,3 +213,24 @@ class SlabModel:
         # Fencegates are doors, so they're out.
         # Boat/boat chest??? Should be able to re-skin an entity?
         # Signs and hanging signs are editable, so probably not them (for now)
+
+
+# @dataclass
+# class CustomItemModel:
+#     model: str = "item/iron_sword"
+
+#     def create_resource_pack_files(self, datapack: "Datapack") -> None:
+#         # https://www.discord.com/channels/154777837382008833/1323240917792063489
+#         # https://minecraft.wiki/w/Items_model_definition
+#         data = {
+#             "model": {
+#                 "type": "model",
+#                 "model": self.model,  # "item/iron_sword"
+#                 "tints": [
+#                     {
+#                         "type": "dye",
+#                         "default": -1
+#                     }
+#                 ]
+#             }
+#         }
