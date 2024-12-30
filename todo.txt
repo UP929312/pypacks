@@ -65,14 +65,6 @@ REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its set
 # Move all the internal functions and textures into an "internal" subdir, e.g. functions/internal, textures/internal, etc
 
 Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "minecraft:block/acacia_planks",
-    "side": "minecraft:block/acacia_planks",
-    "top": "minecraft:block/acacia_planks"
-  }
-}
 
 Loot table progress
 
@@ -110,9 +102,6 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # For the ref book, have a 2nd row of invisible icons so the buttons and hover work well
 
 python -m pip install -e .
-
-# Maybe load in all the regular tags and stuff, sort of like how he pre-makes all the item attributes
-# Maybe we should pre-populate all the default items, like swords and stuff, so you can base stuff of them?
 
 # Make the default texture path point to some default texture we provide? For the datapack? Rather than the default mc one
 

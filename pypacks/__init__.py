@@ -15,4 +15,6 @@ from pypacks.resources.mcfunction import MCFunction
 
 from pypacks.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 
+from pypacks.scripts.all_item_instances import DEFAULT_ITEMS
+
 from pypacks.datapack import Datapack

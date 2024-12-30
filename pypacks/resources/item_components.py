@@ -65,7 +65,7 @@ class AttributeModifier:
         "water_movement_efficiency"
     ]
     slot: Literal["any", "hand", "armor", "mainhand", "offhand", "head", "chest", "legs", "feet", "body"] = "any"
-    amount: int = 1
+    amount: float | int = 1.0
     operation: Literal["add_value", "add_multiplied_base", "add_multiplied_total"] = "add_value"
 
     def to_dict(self) -> dict[str, Any]:
@@ -80,9 +80,9 @@ class AttributeModifier:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AttributeModifier":
         return cls(
-            attribute_type=data["type"],
+            attribute_type=data["type"].removeprefix("minecraft:"),
             slot=data.get("slot", "any"),
-            amount=data.get("amount", 1),
+            amount=round(data.get("amount", 1), 3),
             operation=data.get("operation", "add_value"),
         )
 
@@ -344,7 +344,7 @@ class Equippable:
     swappable: bool = True  # Whether the item can be equipped into the relevant slot by right-clicking.
     damage_on_hurt: bool = True  # Whether this item is damaged when the wearing entity is damaged. Defaults to True.
     entities_which_can_wear: str | list[str] | Literal["all"] = "all"  # The entities which can wear this item. Entity ID/Tag, or list of Entity IDs to limit.
-    camera_overlay: str | None = None  #  The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
+    camera_overlay: str | None = field(repr=False, default=None)  #  The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -354,8 +354,21 @@ class Equippable:
             "swappable": False if not self.swappable else None,  # Defaults to True
             "damage_on_hurt": False if not self.damage_on_hurt else None,  # Defaults to True
             "entities_which_can_wear": self.entities_which_can_wear if self.entities_which_can_wear != "all" else None,  # Defaults to "all"
+        } | ({
             "camera_overlay": self.camera_overlay,
-        }
+        } if self.camera_overlay else {})
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Equippable":
+        return cls(
+            slot=data.get("slot", "mainhand"),
+            equip_sound=data.get("equip_sound", "item.armor.equip_generic"),
+            dispensable=data.get("dispensable", True),
+            swappable=data.get("swappable", True),
+            damage_on_hurt=data.get("damage_on_hurt", True),
+            entities_which_can_wear=data.get("entities_which_can_wear", []),
+            camera_overlay=data.get("camera_overlay"),
+        )
 
 
 # ==========================================================================================
@@ -618,6 +631,14 @@ class Tool:
             "rules": [rule.to_dict() for rule in self.rules] if self.rules else None,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Tool":
+        return cls(
+            default_mining_speed=data.get("default_mining_speed", 1.0),
+            damage_per_block=data.get("damage_per_block", 1),
+            rules=[ToolRule(**rule) for rule in data.get("rules", [])],
+        )
+
 
 # ==========================================================================================
 
@@ -715,7 +736,8 @@ class Components:
     enchantment_glint_override: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
     glider: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#glider
     unbreakable: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#unbreakable
-    # destroyed_in_lava: bool = field(default=True, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
+    enchantable_at_level: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantable
+    # survives_in_lava: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
     hide_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
     hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
@@ -814,6 +836,7 @@ class Components:
             "glider":                     {} if self.glider else None,
             "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
             # "damage_resistant":          {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,
+            "enchantable":                {"value": self.enchantable_at_level} if self.enchantable_at_level is not None else None,
             "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by else None,
@@ -870,5 +893,4 @@ class Components:
 
 # can_break Mehhh
 # can_place_on Meh
-# enchantable # NOT YET (custom enchants maybe?)
 # lock  # https://minecraft.wiki/w/Data_component_format#lock
