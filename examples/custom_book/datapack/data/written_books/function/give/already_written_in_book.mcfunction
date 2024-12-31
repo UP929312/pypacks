@@ -1,1 +1,0 @@
-give @p minecraft:written_book[custom_name="[{\"text\": \"Written Book\", \"italic\": false}]", written_book_content={"title": "t", "author": "a", "pages": ["[{\"text\": \"abc\\n\"}, {\"text\": \"def\\ue000\"}]"]}]
