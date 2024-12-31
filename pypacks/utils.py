@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
-from .scripts.texture_mapping import ITEM_TO_SPECIAL_TEXTURE_MAPPING
 from pypacks.resources.constants import COLOUR_CODE_MAPPINGS
 
 if TYPE_CHECKING:
@@ -64,27 +63,7 @@ def remove_colour_codes(text: str) -> str:
     return string
 
 
-def resolve_default_item_image(base_item: str) -> Path:
-    BANNERS = ["white_banner", "orange_banner", "magenta_banner", "light_blue_banner", "yellow_banner", "lime_banner", "pink_banner", "gray_banner", "light_gray_banner", "cyan_banner", "purple_banner", "blue_banner", "brown_banner", "green_banner", "red_banner", "black_banner"]
-    no_minecraft = base_item.removeprefix('minecraft:')
-    path = Path(PYPACKS_ROOT)/"assets"/"minecraft"/"item"/f"{no_minecraft}.png"
-    if no_minecraft in ITEM_TO_SPECIAL_TEXTURE_MAPPING:
-        path = Path(PYPACKS_ROOT)/"assets"/"minecraft"/"item"/f"{ITEM_TO_SPECIAL_TEXTURE_MAPPING[no_minecraft]}.png"
-    if no_minecraft in ["player_head", "zombie_head", "creeper_head", "skeleton_skull", "wither_skeleton_skull", "dragon_head"]:
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"player_head.png"
-    elif no_minecraft in BANNERS:
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"banner.png"
-    elif no_minecraft == "shield":
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"shield.png"
-    elif no_minecraft == "bee_hive":
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"bee_hive.png"
-    elif no_minecraft == "bee_nest":
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"bee_nest.png"
-    elif no_minecraft.endswith("spawn_egg"):
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"spawn_egg.png"
-    if not path.exists():
-        path = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"unknown.png"
-    return path
+
 
 
 def chunk_list(lst: list[Any], size: int) -> list[list[Any]]:

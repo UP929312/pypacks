@@ -3,7 +3,8 @@ from PIL import Image
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pypacks.utils import IMAGES_PATH, resolve_default_item_image
+from pypacks.utils import IMAGES_PATH
+from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
 
 if TYPE_CHECKING:
     from PIL.Image import Image as ImageType
@@ -59,9 +60,10 @@ def place_ingredients_on_image(
     # BASE
     base_image = Image.open(Path(IMAGES_PATH)/"recipe_bases"/f"{recipe.recipe_block_name}.png").convert("RGBA")
     # INGREDIENTS
+    # TODO: This codie is injecting "air" (or "") and is therefore resolving to a default inage...
     for i, ingredient in enumerate(ingredients):
         with Image.open(resolve_default_item_image(ingredient) if not isinstance(ingredient, CustomItem) else ingredient.texture_path) as ingredient_image:  # type: ignore
-            ingredient_image = ingredient_image.convert("RGBA")
+            ingredient_image = ingredient_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
             base_image.paste(ingredient_image, coord_mapping[i], ingredient_image)
     # RESULT
     result_texture_path = (
@@ -71,7 +73,7 @@ def place_ingredients_on_image(
         )
     )
     with Image.open(result_texture_path) as result_image:  # type: ignore[arg-type]
-        result_image = result_image.convert("RGBA")
+        result_image = result_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
         base_image.paste(result_image, coord_mapping["result"], result_image)
     # RETURN
     return base_image

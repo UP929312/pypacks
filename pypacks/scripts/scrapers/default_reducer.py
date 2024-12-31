@@ -2,8 +2,8 @@ import os
 import re
 from typing import Any
 
-from pypacks.scripts.default_dictionary import DEFAULT_OBJECT_JSON
-from pypacks.resources.custom_item import CustomItem
+import requests
+
 from pypacks.resources.item_components import AttributeModifier, Components, Equippable, Tool
 
 EMPTY_PATTERN = re.compile(r"[A-Za-z_]*=(None|{}|\[]|False), ")
@@ -13,13 +13,14 @@ def is_not_normal_item(data: dict[str, Any]) -> bool:
         data.get("minecraft:attribute_modifiers", {}).get("modifiers") or
         data.get("minecraft:enchantments", {}).get("levels") or
         data.get("minecraft:damage_resistant")
-        # data.get("minecraft:enchantment_glint_override")
+        # data.get("minecraft:enchantment_glint_override")  # Glistening melons
     )
 
-def is_tool_item(data: dict[str, Any]) -> bool:
-    return bool(data.get("minecraft:enchantable"))
+# def is_tool_item(data: dict[str, Any]) -> bool:
+#     return bool(data.get("minecraft:enchantable"))
 
 
+all_item_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/misode/mcmeta/1.21.4-summary/item_components/data.min.json").json()
 
 lines = [
     "from pypacks.resources.custom_item import CustomItem",
@@ -27,7 +28,7 @@ lines = [
     ""
 ]
 items = []
-for item, data in DEFAULT_OBJECT_JSON.items():
+for item, data in all_item_data.items():
     if is_not_normal_item(data):
         # print(item, data)
         attribute_modifiers = [AttributeModifier.from_dict(modifier) for modifier in data.get("minecraft:attribute_modifiers", {}).get("modifiers")]

@@ -5,10 +5,11 @@ List:
 
 Consider changing components to be a list of components, rather than a big ol' class.
 
-Filled barrel, decorated pot, Mob spawner --- don't have icons
-Dyed armor icon is horror...
+For image resolution, use https://github.com/edayot/renders/blob/1.21.4-renders-special/resourcepack/assets/minecraft/textures/render/items/pale_moss_block.png
+It has pretty much everything
 
-Use requests to get the data in scripts/default_json
+# ========================================
+# Custom blocks:
 
 # Problems with slabs
 - Z fighting
@@ -17,28 +18,37 @@ Use requests to get the data in scripts/default_json
 For slabs and stairs and such, maybe just have "children" of the block, then we can store it in the block, the ref book can reference that
 and also it can be created more easily, then the add_slab code will be adding it to the children
 
-Add a "generic" model, including maybe blockstates, model, item, textures? So if you want to add a custom 3d model you can?
-
 Placing slabs through other slabs causes issues, hopefully it's rare though? Since the raycast doesn't check if it's already
 In a custom slab.
-
-A lot of examples, maybe one per item? In a new examples folder.
-
-With the ray casting, what if they have a higher `block_interaction_range`?
+They should appear in the reference book under the item page though...
 
 When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
 
-# Dynamic border generation, would need to scale, somehow, to any size from 20x20->300x300
+# For custom blocks, only drop their drop if they're not in creative (maybe cheat and just find the closest player?)
+# Silk touch for custom blocks
+
+# In the future, for custom inventories/block entities, do
+setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
+# execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
+
+Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
+
+interaction entity for detecting right click on blocks! If we ever add custom invs | Problem is they can't break the block anymore...
+
+# ========================================
+# Custom crafting:
 
 # With crafting recipes, be able to put CustomItems in, currently just supports strings.
 This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
 # Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
 # Custom crafter and floor crafting would be nice to do...
+# ========================================
 
-# For custom blocks, only drop their drop if they're not in creative (maybe cheat and just find the closest player?)
-# Silk touch for custom blocks
+Add a "generic" model, including maybe blockstates, model, item, textures? So if you want to add a custom 3d model you can?
 
-They should appear in the reference book under the item page though...
+A lot of examples, maybe one per item? In a new examples folder.
+
+With the ray casting, what if they have a higher `block_interaction_range`?
 
 # Change datapack init to take custom_content: list[a, b, c]
 # Make datapack just take "custom content" and filter using isinstance?
@@ -47,9 +57,6 @@ They should appear in the reference book under the item page though...
 
 # What happens if they have more than 18 songs or paintings?
 
-# In the future, for custom inventories/block entities, do
-setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
-# execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
 
 # Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
 # Probably won't do because the give command, but what if we had a loot table setup for all blocks,
@@ -64,8 +71,6 @@ REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its set
 
 # Move all the internal functions and textures into an "internal" subdir, e.g. functions/internal, textures/internal, etc
 
-Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
-
 Loot table progress
 
 # Naturally occuring ore veins! Would be maybe tricky...
@@ -76,7 +81,6 @@ Loot table progress
 
 # Descriptors for integers & type validation? Probably just use Pydantic... Maybe just asserts?
 
-interaction entity for detecting right click on blocks! If we ever add custom invs | Problem is they can't break the block anymore...
 
 # Advancements (One for loading the datapack for the first time)
 For an "install" stuff, just give them an achievement and don't revoke!
@@ -94,7 +98,7 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # Debug book with all the sounds? Could be fun, and helpful, sounds, fonts, paintings, etc.
 "Play sound" button in the book, with a list of all the sounds, and a play button next to them.
 
-# Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with silk touch, etc.
+# Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with infinity, etc.
 
 # ▙ is fun for stairs, ▄▄ for slab
 # ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾ 
