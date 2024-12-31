@@ -52,7 +52,7 @@ class ItemPage:
                 right_indentation=3,
                 on_hover=OnHoverShowTextRaw([
                     {"text": self.datapack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], "font": f"{self.datapack.namespace}:all_fonts"},
-                    {"text": "\n"*5, "font": "minecraft:default"},
+                    {"text": "\n"*6, "font": "minecraft:default"},
                 ]),
             )
             for recipe in recipes if type(recipe) in recipe_to_font_icon

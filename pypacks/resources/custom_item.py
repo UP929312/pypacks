@@ -114,8 +114,4 @@ class CustomItem:
         components_string = (
             to_component_string(self.components.to_dict(datapack))  # Also strips None through `recusively_remove_nones_from_data`
         )
-        if self.base_item.removeprefix("minecraft:") in ["writable_book", "written_book"] and components_string:
-            # TODO: Figure out a way to not have to do this? Something is generating a bunch of \\...
-            # What's weird is both need to be escaped, i.e. have two backslashes, why does \u -> \\u and \n -> \\\\n?
-            components_string = components_string.replace("\\\\\\u", "\\u").replace("\\\\\\n", "\\\\n")
         return f"give @p {self.base_item}[{base_components}{', ' if base_components and components_string else ''}{components_string if components_string else ''}]"

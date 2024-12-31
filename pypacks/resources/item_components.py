@@ -1,3 +1,4 @@
+import json  # For written books
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
@@ -680,18 +681,11 @@ class WrittenBookContent:
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["written_book"])
 
     def to_dict(self) -> dict[str, Any]:
-        # TODO: On going investigation to sort this...
-        # with open(f"a{self.title}.txt", "w") as f:
-        #     # f.write(str(self.pages))
-        #     import json
-        #     json.dump(self.pages, f)
-        # import json
-        # print([json.dumps(x) for x in self.pages])
-        return {  # .encode('unicode_escape').decode('ascii')
+        return {
             "title": self.title,
             "author": self.author,
-            # "pages": [json.dumps(x) for x in self.pages],  # Converts the structure from list of lists to list of strings
-            "pages": [str(x) for x in self.pages],  # Converts the structure from list of lists to list of strings
+            "pages": [json.dumps(x, ensure_ascii=False).replace("\\\\", "\\") for x in self.pages],  
+            # "pages": [str(x) for x in self.pages],  # Converts the structure from list of lists to list of strings
         }
 
 
