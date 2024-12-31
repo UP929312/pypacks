@@ -17,7 +17,6 @@ ICON_ROW_INDENT = 2
 
 # \n has to be \\n
 # \uE<x><x><x> has to be \\uE<x><x><x>
-# https://github.com/Stoupy51/python_datapack/blob/main/src/python_datapack/manual/main.py
 # https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Java_Edition
 
 # =======================================================================================================================================

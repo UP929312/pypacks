@@ -2,7 +2,7 @@
     "providers": [
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/empty_1_x_1.png",
+            "file": "written_books:font/empty_1_x_1.png",
             "height": 1,
             "ascent": 0,
             "chars": [
@@ -11,7 +11,7 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/blank_icon.png",
+            "file": "written_books:font/blank_icon.png",
             "height": 20,
             "ascent": 10,
             "chars": [
@@ -20,7 +20,7 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/logo_256_x_256.png",
+            "file": "written_books:font/logo_256_x_256.png",
             "height": 100,
             "ascent": 16,
             "chars": [
@@ -29,7 +29,7 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/information_icon.png",
+            "file": "written_books:font/information_icon.png",
             "height": 18,
             "ascent": 14,
             "chars": [
@@ -38,7 +38,7 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/satchel_icon.png",
+            "file": "written_books:font/satchel_icon.png",
             "height": 20,
             "ascent": 10,
             "chars": [
@@ -47,34 +47,25 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/crafting_table_icon.png",
-            "height": 18,
-            "ascent": 14,
+            "file": "written_books:font/misc_category_icon.png",
+            "height": 20,
+            "ascent": 10,
+            "chars": [
+                "\ue005"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "written_books:font/already_written_in_book_icon.png",
+            "height": 20,
+            "ascent": 10,
             "chars": [
                 "\ue006"
             ]
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/crafting_table_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue006"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/crafting_table_transmute_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue007"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/furnace_icon.png",
+            "file": "written_books:font/crafting_table_icon.png",
             "height": 18,
             "ascent": 14,
             "chars": [
@@ -83,7 +74,16 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/blast_furnace_icon.png",
+            "file": "written_books:font/crafting_table_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\ue008"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "written_books:font/crafting_table_transmute_icon.png",
             "height": 18,
             "ascent": 14,
             "chars": [
@@ -92,7 +92,7 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/campfire_icon.png",
+            "file": "written_books:font/furnace_icon.png",
             "height": 18,
             "ascent": 14,
             "chars": [
@@ -101,7 +101,16 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/smithing_table_icon.png",
+            "file": "written_books:font/blast_furnace_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\ue00b"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "written_books:font/campfire_icon.png",
             "height": 18,
             "ascent": 14,
             "chars": [
@@ -110,29 +119,38 @@
         },
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/smithing_table_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00c"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/smoker_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00d"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/stonecutter_icon.png",
+            "file": "written_books:font/smithing_table_icon.png",
             "height": 18,
             "ascent": 14,
             "chars": [
                 "\ue00e"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "written_books:font/smithing_table_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\ue00e"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "written_books:font/smoker_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\ue00f"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "written_books:font/stonecutter_icon.png",
+            "height": 18,
+            "ascent": 14,
+            "chars": [
+                "\ue010"
             ]
         }
     ]

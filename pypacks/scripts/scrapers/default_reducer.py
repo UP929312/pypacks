@@ -30,7 +30,7 @@ lines = [
 items = []
 for item, data in all_item_data.items():
     if is_not_normal_item(data):
-        # print(item, data)
+        # rint(item, data)
         attribute_modifiers = [AttributeModifier.from_dict(modifier) for modifier in data.get("minecraft:attribute_modifiers", {}).get("modifiers")]
         tool = Tool.from_dict(data["minecraft:tool"]) if data.get("minecraft:tool") else None
         equippable = Equippable.from_dict(data["minecraft:equippable"]) if data.get("minecraft:equippable") else None

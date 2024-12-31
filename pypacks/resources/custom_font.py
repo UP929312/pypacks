@@ -40,6 +40,7 @@ class CustomFont:
 
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
+        # {element.name: f"{chr(0xE000+i)}" for i, element in enumerate(self.font_elements)}
         return {element.name: f"\\uE{i:03}" for i, element in enumerate(self.font_elements)}
 
     def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:

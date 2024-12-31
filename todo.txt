@@ -1,48 +1,7 @@
-List:
-- Custom blocks - Slab experiments (80% done)
-- Custom blocks, no drops in creative
-- Custom blocks, silk touch
-
 Consider changing components to be a list of components, rather than a big ol' class.
 
 For image resolution, use https://github.com/edayot/renders/blob/1.21.4-renders-special/resourcepack/assets/minecraft/textures/render/items/pale_moss_block.png
 It has pretty much everything
-
-# ========================================
-# Custom blocks:
-
-# Problems with slabs
-- Z fighting
-- Placing upper/double slabs is a problem...
-
-For slabs and stairs and such, maybe just have "children" of the block, then we can store it in the block, the ref book can reference that
-and also it can be created more easily, then the add_slab code will be adding it to the children
-
-Placing slabs through other slabs causes issues, hopefully it's rare though? Since the raycast doesn't check if it's already
-In a custom slab.
-They should appear in the reference book under the item page though...
-
-When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
-
-# For custom blocks, only drop their drop if they're not in creative (maybe cheat and just find the closest player?)
-# Silk touch for custom blocks
-
-# In the future, for custom inventories/block entities, do
-setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
-# execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
-
-Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
-
-interaction entity for detecting right click on blocks! If we ever add custom invs | Problem is they can't break the block anymore...
-
-# ========================================
-# Custom crafting:
-
-# With crafting recipes, be able to put CustomItems in, currently just supports strings.
-This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
-# Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
-# Custom crafter and floor crafting would be nice to do...
-# ========================================
 
 Add a "generic" model, including maybe blockstates, model, item, textures? So if you want to add a custom 3d model you can?
 
@@ -56,7 +15,6 @@ With the ray casting, what if they have a higher `block_interaction_range`?
 # Analytics, python version, what custom content they added, etc - would be super useful with knowing where to focus development.
 
 # What happens if they have more than 18 songs or paintings?
-
 
 # Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
 # Probably won't do because the give command, but what if we had a loot table setup for all blocks,
@@ -117,6 +75,47 @@ Added minecraft:extended_view boolean property
 Returns true if player has requested extended details by holding shift key down (maybe only if they're not in the inventory?)
 Note: not a keybind, can't be rebound
 Only works when item is displayed in UI  - Better text on shift!
+
+# ========================================
+# Custom blocks:
+
+List:
+- Custom blocks - Slab experiments (80% done)
+- Custom blocks, no drops in creative
+- Custom blocks, silk touch
+
+# Problems with slabs
+- Z fighting
+- Placing upper/double slabs is a problem...
+
+For slabs and stairs and such, maybe just have "children" of the block, then we can store it in the block, the ref book can reference that
+and also it can be created more easily, then the add_slab code will be adding it to the children
+
+Placing slabs through other slabs causes issues, hopefully it's rare though? Since the raycast doesn't check if it's already
+In a custom slab.
+They should appear in the reference book under the item page though...
+
+When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
+
+# For custom blocks, only drop their drop if they're not in creative (maybe cheat and just find the closest player?)
+# Silk touch for custom blocks
+
+# In the future, for custom inventories/block entities, do
+setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
+# execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
+
+Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
+
+interaction entity for detecting right click on blocks! If we ever add custom invs | Problem is they can't break the block anymore...
+
+# ========================================
+# Custom crafting:
+
+# With crafting recipes, be able to put CustomItems in, currently just supports strings.
+This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
+# Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
+# Custom crafter and floor crafting would be nice to do...
+# ========================================
 
 # https://www.reddit.com/r/mcresourcepack/comments/wpcg0a/hi_i_want_to_learn_what_does_the_ascent_and_chars/
 

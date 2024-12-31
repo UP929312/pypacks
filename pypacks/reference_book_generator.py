@@ -108,8 +108,9 @@ class ReferenceBook:
     items: list["CustomItem"]
 
     def generate_cover_page(self, datapack: "Datapack") -> "ElementPage":
+        title_starting_char_code = "➤".encode('unicode_escape').decode('ascii')
         return ElementPage([
-            Text(f"{datapack.name} Reference Book\n\n\n", underline=True, text_color="black"),
+            Text(f"{title_starting_char_code} {datapack.name} Reference Book\n\n\n", underline=True, text_color="black"),
             Text(datapack.font_mapping['empty_1_x_1']*LOGO_HORIZONTAL_SPACER, font=f"{datapack.namespace}:all_fonts", text_color="white"),  # SPACER
             Text(datapack.font_mapping["logo_256_x_256"], font=f"{datapack.namespace}:all_fonts", text_color="white")
         ])
@@ -144,7 +145,7 @@ class ReferenceBook:
         )
 
         category_items_pages: list[GridPage] = []
-        # Item list page(s) (3+)
+        # Item list page(s) (3+ )
         for category in datapack.reference_book_categories:
             # This shows lists of items per category, the button takes you to the individual item page, which comes after all
             # The cover & category pages, so it's index is CATEGORIES_PAGE + item_index
