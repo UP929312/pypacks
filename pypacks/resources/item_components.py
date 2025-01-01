@@ -18,9 +18,9 @@ if TYPE_CHECKING:
 
 
 # ArmorTrimItemType = Literal[
-#     "bolt_armor_trim_smithing_template", "coast_armor_trim_smithing_template", "dune_armor_trim_smithing_template", "eye_armor_trim_smithing_template", 
-#     "flow_armor_trim_smithing_template", "host_armor_trim_smithing_template", "netherite_upgrade_armor_trim_smithing_template", "raiser_armor_trim_smithing_template", 
-#     "rib_armor_trim_smithing_template", "sentry_armor_trim_smithing_template", "shaper_armor_trim_smithing_template", "silence_armor_trim_smithing_template", 
+#     "bolt_armor_trim_smithing_template", "coast_armor_trim_smithing_template", "dune_armor_trim_smithing_template", "eye_armor_trim_smithing_template",
+#     "flow_armor_trim_smithing_template", "host_armor_trim_smithing_template", "netherite_upgrade_armor_trim_smithing_template", "raiser_armor_trim_smithing_template",
+#     "rib_armor_trim_smithing_template", "sentry_armor_trim_smithing_template", "shaper_armor_trim_smithing_template", "silence_armor_trim_smithing_template",
 #     "snout_armor_trim_smithing_template", "spire_armor_trim_smithing_template", "tide_armor_trim_smithing_template", "vex_armor_trim_smithing_template",
 #     "ward_armor_trim_smithing_template", "wayfinder_armor_trim_smithing_template", "wild_armor_trim_smithing_template",
 # ]
@@ -77,7 +77,7 @@ class AttributeModifier:
             "id": f"attribute_modifier.{self.attribute_type}",
             "slot": self.slot,
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AttributeModifier":
         return cls(
@@ -120,12 +120,12 @@ class BannerPattern:
 @dataclass
 class Bee:
     # https://minecraft.wiki/w/Data_component_format#bees
-    entity_data: dict[str, Any] = field(default_factory=lambda: {"id": "bee", "CustomName" :'"CustomBee"'})  # The NBT data of the entity in the hive.
+    entity_data: dict[str, Any] = field(default_factory=lambda: {"id": "bee", "CustomName": '"CustomBee"'})  # The NBT data of the entity in the hive.
     min_ticks_in_hive: int = 60  # The minimum amount of time in ticks for this entity to stay in the hive.
-    ticks_in_hive: int = 0  #  The amount of ticks the entity has stayed in the hive.
+    ticks_in_hive: int = 0  # The amount of ticks the entity has stayed in the hive.
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["bee_nest", "bee_hive"])
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "entity_data": self.entity_data,
@@ -157,19 +157,19 @@ class TropicalFishData:
         )  # fmt: skip
 
 
-@dataclass 
+@dataclass
 class BucketEntityData:
     no_ai: bool = False  # Turns into NoAI entity tag for all bucketable entities.
     silent: bool = False  # Turns into Silent entity tag for all bucketable entities.
     no_gravity: bool = False  # Turns into NoGravity entity tag for all bucketable entities.
-    glowing: bool = False  #  Turns into Glowing entity tag for all bucketable entities.
+    glowing: bool = False  # Turns into Glowing entity tag for all bucketable entities.
     invulnerable: bool = False  # Turns into Invulnerable entity tag for all bucketable entities.
     health: float | None = None  # Turns into Health entity tag for all bucketable entities.
     age: int | None = None  # Turns into Age entity tag for axolotls and tadpoles.
     variant: int | None = None  # Turns into Variant entity tag for axolotls.
     hunting_cooldown: int | None = None  # Turns into the expiry time of the memory module has_hunting_cooldown for axolotls.
     bucket_variant_tag: "TropicalFishData | int | None" = None  # Turns into Variant entity tag for tropical fish.
-    size: Literal["small", "medium", "large"] | None = None  #  Turns into type entity tag for salmon.
+    size: Literal["small", "medium", "large"] | None = None  # Turns into type entity tag for salmon.
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: [
         "tropical_fish_bucket", "cod_bucket", "salmon_bucket"
@@ -225,7 +225,7 @@ class _Effect:
     base_dict_name: str = "on_consume_effects"
 
     def to_dict(self) -> dict[str, Any]:
-        base_dict = ({self.base_dict_name: []})
+        base_dict: dict[str, list[Any]] = ({self.base_dict_name: []})
         if self.apply_affects:
             base_dict[self.base_dict_name].append({"type": "apply_effects", "effects": [effect.to_dict() for effect in self.apply_affects]})
         if self.remove_affects and self.remove_affects != "all":
@@ -322,7 +322,6 @@ class DeathProtection:
         return _Effect(self.apply_affects, self.remove_effects, self.teleport_diameter, base_dict_name="death_effects").to_dict()
 
 
-
 # ==========================================================================================
 
 
@@ -334,6 +333,7 @@ class EntityData:
     def to_dict(self) -> dict[str, Any]:
         return self.data
 
+
 # ==========================================================================================
 
 
@@ -341,11 +341,11 @@ class EntityData:
 class Equippable:
     slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"] = "mainhand"  # The slot to put the item on
     equip_sound: "str | CustomSound" = "item.armor.equip_generic"  # Sound event to play when the item is equipped
-    dispensable: bool = True  #  Whether the item can be dispensed by using a dispenser. Defaults to True.
+    dispensable: bool = True  # Whether the item can be dispensed by using a dispenser. Defaults to True.
     swappable: bool = True  # Whether the item can be equipped into the relevant slot by right-clicking.
     damage_on_hurt: bool = True  # Whether this item is damaged when the wearing entity is damaged. Defaults to True.
     entities_which_can_wear: str | list[str] | Literal["all"] = "all"  # The entities which can wear this item. Entity ID/Tag, or list of Entity IDs to limit.
-    camera_overlay: str | None = field(repr=False, default=None)  #  The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
+    camera_overlay: str | None = field(repr=False, default=None)  # The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -684,7 +684,7 @@ class WrittenBookContent:
         return {
             "title": self.title,
             "author": self.author,
-            "pages": [json.dumps(x, ensure_ascii=False).replace("\\\\", "\\") for x in self.pages],  
+            "pages": [json.dumps(x, ensure_ascii=False).replace("\\\\", "\\") for x in self.pages],
             # "pages": [str(x) for x in self.pages],  # Converts the structure from list of lists to list of strings
         }
 
@@ -721,7 +721,7 @@ TOOLS = [
 # ==========================================================================================
 
 ComponentType: TypeAlias = (
-    ArmorTrim | AttributeModifier | BannerPattern | Bee | BucketEntityData | BundleContents | 
+    ArmorTrim | AttributeModifier | BannerPattern | Bee | BucketEntityData | BundleContents |
     Consumable | ContainerContents | Cooldown |
     DeathProtection | EntityData | Equippable | Firework | FireworkExplosion | Food |
     Instrument | JukeboxPlayable | LodestoneTracker | MapData | PotionContents | Tool | UseRemainder |

@@ -10,6 +10,7 @@ ICON_BASE = Path(IMAGES_PATH)/"reference_book_icons"/"icon_base.png"
 SCALE_UP = 1.42
 SCALE_DOWN = 0.5
 
+
 def add_border(image_bytes: bytes, base_image_path: str | Path | None = None) -> bytes:
     # We need to make the item 70% of the total, meaning making the entire image 1.42x bigger
     image = Image.open(io.BytesIO(image_bytes)).convert("RGBA")

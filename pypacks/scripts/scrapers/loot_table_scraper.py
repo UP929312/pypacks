@@ -8,9 +8,9 @@ output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\
 loot_tables = []
 
 for root, _, files in os.walk(input_path):
-    for file in files:
-        if file.endswith(".json"):
-            relative_path = os.path.relpath(os.path.join(root, file), input_path)
+    for file_name in files:
+        if file_name.endswith(".json"):
+            relative_path = os.path.relpath(os.path.join(root, file_name), input_path)
             loot_tables.append(relative_path.replace("\\", "/").removesuffix(".json"))
 
 BASE = """from typing import Literal
@@ -18,4 +18,4 @@ BASE = """from typing import Literal
 LootTables = Literal"""
 
 with open(output_path, "w") as file:
-    file.write(BASE+json.dumps(loot_tables, indent=4))
+    file.write(BASE+json.dumps(loot_tables, indent=4)+"\n")

@@ -1,4 +1,4 @@
-from pypacks import Datapack  # type: ignore[attr-defined]
+from pypacks import Datapack
 from pypacks.resources.custom_recipe import FurnaceRecipe
 # ============================================================================================================
 # Custom recipes

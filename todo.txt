@@ -1,5 +1,8 @@
 Consider changing components to be a list of components, rather than a big ol' class.
 
+Custom enchants:
+https://www.reddit.com/r/MinecraftCommands/comments/1hr0r9z/datapack_custom_enchants_cant_be_obtained_by/
+
 For image resolution, use https://github.com/edayot/renders/blob/1.21.4-renders-special/resourcepack/assets/minecraft/textures/render/items/pale_moss_block.png
 It has pretty much everything
 
@@ -38,7 +41,6 @@ Loot table progress
 # Hud overlay would be cool! Something about the pack?
 
 # Descriptors for integers & type validation? Probably just use Pydantic... Maybe just asserts?
-
 
 # Advancements (One for loading the datapack for the first time)
 For an "install" stuff, just give them an achievement and don't revoke!

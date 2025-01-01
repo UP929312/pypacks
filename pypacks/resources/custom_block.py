@@ -193,9 +193,9 @@ class CustomBlock:
         new_slab_block.base_block = "minecraft:"+slab_block
         # new_slab_block.drops = "self"
         # =========================
-        slab_item: "CustomItem" = deepcopy(self.block_item)  # type: ignore
+        slab_item: "CustomItem" = deepcopy(self.block_item)
         slab_item.base_item = "minecraft:"+slab_block
-        slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)  # type: ignore
+        slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)
         slab_item.internal_name = f"{self.internal_name}_slab"
         slab_item.custom_name = f"{self.name} Slab"
         slab_item.is_block = True

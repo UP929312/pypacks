@@ -18,7 +18,7 @@ def extract_item_components(item: "str | CustomItem", datapack: "Datapack") -> d
     from pypacks.resources.custom_item import CustomItem
     regular_data = item.to_dict(datapack.namespace) if isinstance(item, CustomItem) else {}
     components = item.components.to_dict(datapack) if isinstance(item, CustomItem) else {}
-    return recusively_remove_nones_from_data(regular_data | components)
+    return recusively_remove_nones_from_data(regular_data | components)  # type: ignore[no-any-return]
 
 
 def recusively_remove_nones_from_data(obj: Any) -> Any:
@@ -37,7 +37,7 @@ def to_component_string(obj: dict[str, Any]) -> str:
     return ", ".join([f"{key}={_to_snbt(val)}" for key, val in obj.items() if val is not None])
 
 
-def colour_codes_to_json_format(text: str, auto_unitalicise: bool=False, make_white: bool=True) -> str:
+def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False, make_white: bool = True) -> str:
     """Converts a string like '&6Hello &cworld' to a JSON string like '[{"text":"Hello ","color":"gold"},{"text":"world","color":"red"}]'
     DOES NOT WORK FOR FORMATTING (YET)"""
     if not text:
@@ -61,9 +61,6 @@ def remove_colour_codes(text: str) -> str:
     for code in COLOUR_CODE_MAPPINGS:
         string = string.replace(code, "")
     return string
-
-
-
 
 
 def chunk_list(lst: list[Any], size: int) -> list[list[Any]]:

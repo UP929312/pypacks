@@ -193,7 +193,7 @@ class CustomLootTable:
         return f"{datapack.namespace}:{self.internal_name}"
 
     def to_dict(self, datapack: "Datapack") -> dict[str, str]:
-        return recusively_remove_nones_from_data(
+        return recusively_remove_nones_from_data(  # type: ignore[no-any-return]
             {
                 "type": self.loot_table_type,
                 "pools": [pool.to_dict(datapack) for pool in self.pools],

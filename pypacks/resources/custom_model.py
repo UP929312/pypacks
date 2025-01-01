@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
+    from pypacks.resources.tints import DyeTint
 
 # TODO: Support non cubes? Player heads? Custom models?
 
@@ -215,25 +216,27 @@ class SlabModel:
         # Signs and hanging signs are editable, so probably not them (for now)
 
 
-# @dataclass
-# class CustomItemModel:
-#     model: str = "item/iron_sword"
+@dataclass
+class CustomItemModel:
+    # TODO: Currently unused and purely used for testing
+    internal_name: str = "my_custom_sword"
+    model: str = "item/iron_sword"
+    tint: "DyeTint | None" = None
 
-#     def create_resource_pack_files(self, datapack: "Datapack") -> None:
-#         # https://www.discord.com/channels/154777837382008833/1323240917792063489
-#         # https://minecraft.wiki/w/Items_model_definition
-#         data = {
-#             "model": {
-#                 "type": "model",
-#                 "model": self.model,  # "item/iron_sword"
-#                 "tints": [
-#                     {
-#                         "type": "dye",
-#                         "default": -1
-#                     }
-#                 ]
-#             }
-#         }
+    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+        # https://www.discord.com/channels/154777837382008833/1323240917792063489
+        # https://minecraft.wiki/w/Items_model_definition
+        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
 
-# ====================================================================================================================
-# Glints
+        # Item model definition
+        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+            json.dump({
+                "model": {
+                    "type": "model",
+                    "model": self.model,
+                } | ({
+                    "tints": [
+                        self.tint.to_dict(),
+                    ]
+                } if self.tint else {}),
+            }, file, indent=4)

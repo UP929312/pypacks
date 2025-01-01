@@ -7,13 +7,13 @@ output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\
 
 advancements = []
 
-for _, _, files in os.walk(input_path):
-    for file in files:
-        advancements.append(file.removesuffix(".json"))
+for *_, files in os.walk(input_path):
+    for file_name in files:
+        advancements.append(file_name.removesuffix(".json"))
 
 BASE = """from typing import Literal
 
 AdvancementsType = Literal"""
 
 with open(output_path, "w") as file:
-    file.write(BASE+json.dumps(sorted(advancements), indent=4))
+    file.write(BASE+json.dumps(sorted(advancements), indent=4)+"\n")

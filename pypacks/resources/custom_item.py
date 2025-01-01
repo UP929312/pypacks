@@ -96,7 +96,7 @@ class CustomItem:
         return revoke_and_call_mcfunction
 
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
-        return recusively_remove_nones_from_data({
+        return recusively_remove_nones_from_data({  # type: ignore[no-any-return]
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,

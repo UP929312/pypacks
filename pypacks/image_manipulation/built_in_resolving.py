@@ -17,7 +17,7 @@ SPAWN_EGGS = [
     "zombie_horse_spawn_egg", "zombie_villager_spawn_egg", "zombified_piglin_spawn_egg",
 ]
 # Base ======
-image_mapping = {}
+image_mapping: dict[str, Path] = {}
 # Banners ======
 image_mapping |= {banner: Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"banner.png" for banner in BANNERS}
 # Heads ======
@@ -31,10 +31,14 @@ image_mapping |= {
     "chest": Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"chest.png",
 }
 
+
 def resolve_default_item_image(base_item: str) -> Path:
     if base_item.removeprefix('minecraft:') in image_mapping:
         return image_mapping[base_item.removeprefix('minecraft:')]
+    # https://github.com/edayot/renders/tree/1.21.4-renders/resourcepack/assets/minecraft/textures/render/items
+    # Most of these come from that link ^
     path = Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_cache"/"items"/f"{base_item.removeprefix('minecraft:')}.png"
     if path.exists():
         return path
+    print("Unknown item: |"+base_item+"|")
     return Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"unknown.png"

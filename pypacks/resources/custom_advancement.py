@@ -64,7 +64,7 @@ class CustomAdvancement:
     datapack_subdirectory_name: str = field(init=False, repr=False, default="advancement")
 
     def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        return recusively_remove_nones_from_data({
+        return recusively_remove_nones_from_data({  # type: ignore[no-any-return]
             "parent": self.parent,
             "display": {
                 "icon": {"id": self.icon_item},

@@ -60,11 +60,12 @@ def place_ingredients_on_image(
     # BASE
     base_image = Image.open(Path(IMAGES_PATH)/"recipe_bases"/f"{recipe.recipe_block_name}.png").convert("RGBA")
     # INGREDIENTS
-    # TODO: This codie is injecting "air" (or "") and is therefore resolving to a default inage...
+    # TODO: This code is injecting "air" (or "") and is therefore resolving to a default inage...
     for i, ingredient in enumerate(ingredients):
-        with Image.open(resolve_default_item_image(ingredient) if not isinstance(ingredient, CustomItem) else ingredient.texture_path) as ingredient_image:  # type: ignore
-            ingredient_image = ingredient_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
-            base_image.paste(ingredient_image, coord_mapping[i], ingredient_image)
+        if ingredient != " ":  # For shaped recipes, the " " is a placeholder for air, just ignore it
+            with Image.open(resolve_default_item_image(ingredient) if not isinstance(ingredient, CustomItem) else ingredient.texture_path) as ingredient_image:  # type: ignore
+                ingredient_image = ingredient_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
+                base_image.paste(ingredient_image, coord_mapping[i], ingredient_image)
     # RESULT
     result_texture_path = (
         resolve_default_item_image(result) if not isinstance(result, CustomItem) else (

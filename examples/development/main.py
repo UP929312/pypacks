@@ -1,10 +1,11 @@
 from pypacks import (
     Datapack, CustomItem, Components, CustomPainting, CustomSound, CustomJukeboxSong, CustomBlock,
-    CustomLootTable, SimpleRangePool, SingleItemPool, SimpleRangeLootTable, RefBookCategory,
+    CustomLootTable, RefBookCategory,
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
 )
-from pypacks.resources.custom_recipe import *  # type: ignore[import]
-from pypacks.resources.item_components import *  # type: ignore[import]
+from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
+from pypacks.resources.custom_recipe import *
+from pypacks.resources.item_components import *
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -67,8 +68,8 @@ death_protection_star = CustomItem("death_protection_star", "minecraft:nether_st
 dyed_helmet = CustomItem("dyed_helmet", "minecraft:leather_helmet", "Dyed Helmet", components=Components(dye_color=0xFF00FF), ref_book_config=RefBookConfig(category=weapons_category))
 trimmed_leggings = CustomItem("trimmed_leggings", "minecraft:leather_leggings", "Trimmed Leggings", components=Components(armor_trim=ArmorTrim("host", "emerald")), ref_book_config=RefBookConfig(category=usable_category))
 suspicious_stew = CustomItem("suspicious_stew", "minecraft:suspicious_stew", "Suspicious Stew", components=Components(suspicious_stew_effects={"speed": 5*20}), ref_book_config=RefBookConfig(category=consumable_category))
-spider_spawner = CustomItem("spider_spawner", "minecraft:spawner", "Spider Spawner", components=Components(block_entity_data={"id":"mob_spawner","SpawnData":{"entity":{"id":"spider"}}}), ref_book_config=RefBookConfig(category=usable_category))
-upper_slab = CustomItem("upper_slab", "minecraft:stone_slab", "Upper Slab", components=Components(block_state={"type":"minecraft:stone_slab", "type":"top"}))
+spider_spawner = CustomItem("spider_spawner", "minecraft:spawner", "Spider Spawner", components=Components(block_entity_data={"id": "mob_spawner", "SpawnData": {"entity": {"id": "spider"}}}), ref_book_config=RefBookConfig(category=usable_category))
+upper_slab = CustomItem("upper_slab", "minecraft:stone_slab", "Upper Slab", components=Components(block_state={"type": "top"}))
 fish_bucket = CustomItem("fish_bucket", "minecraft:tropical_fish_bucket", "Fish Bucket", components=Components(bucket_entity_data=BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))), ref_book_config=RefBookConfig(category=usable_category))
 loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table Chest", components=Components(container_loot_table="minecraft:chests/village/village_butcher"), ref_book_config=RefBookConfig(category=usable_category))
 
@@ -106,8 +107,8 @@ ruby_stonecutter_recipe = StonecutterRecipe("ruby_stonecutter_recipe", "minecraf
 ruby_campfire_recipe = CampfireRecipe("ruby_campfire_recipe", "redstone", ruby, 100, 20)
 ruby_smithing_tranform_recipe = SmithingTransformRecipe("ruby_transform_recipe", "gold_ingot", "iron_ingot", "redstone", ruby)
 
-recipes = [cobble_recipe, door_recipe, iron_helmet_recipe, burnable_diamond_recipe, smokable_redstone_recipe, lapis_campfire_recipe, ruby_recipe,
-           ruby_furnace_recipe, moss_to_pale_recipe, ruby_stonecutter_recipe, ruby_campfire_recipe, ruby_smithing_tranform_recipe]
+recipes: list[Recipe] = [cobble_recipe, door_recipe, iron_helmet_recipe, burnable_diamond_recipe, smokable_redstone_recipe, lapis_campfire_recipe, ruby_recipe,
+                         ruby_furnace_recipe, moss_to_pale_recipe, ruby_stonecutter_recipe, ruby_campfire_recipe, ruby_smithing_tranform_recipe]
 # endregion
 # ============================================================================================================
 # region: Custom Blocks
@@ -123,8 +124,8 @@ faces = {"front": "side_side", "back": "side_side", "top": "top_side", "bottom":
 chocolate_block = CustomBlock.from_item(chocolate_block_item, block_texture=FacePaths(**{key: f"images/chocolate_block/{value}.png" for key, value in faces.items()}, horizontally_rotatable=True, vertically_rotatable=False))
 
 debug_block_item = CustomItem("debug_block", "sponge", "Debug Block", texture_path="images/debug_block/front.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
-faces = ["front", "back", "top", "bottom", "left", "right"]
-debug_block = CustomBlock.from_item(debug_block_item, block_texture=FacePaths(**{item: f"images/debug_block/{item}.png" for item in faces}, horizontally_rotatable=True, vertically_rotatable=True))
+faces_strings = ["front", "back", "top", "bottom", "left", "right"]
+debug_block = CustomBlock.from_item(debug_block_item, block_texture=FacePaths(**{item: f"images/debug_block/{item}.png" for item in faces_strings}, horizontally_rotatable=True, vertically_rotatable=True))
 
 custom_blocks = [ruby_ore_block, topaz_ore_block, chocolate_block, debug_block, ]  # ruby_ore_slab
 # endregion

@@ -8,6 +8,7 @@ from pypacks.resources.item_components import AttributeModifier, Components, Equ
 
 EMPTY_PATTERN = re.compile(r"[A-Za-z_]*=(None|{}|\[]|False), ")
 
+
 def is_not_normal_item(data: dict[str, Any]) -> bool:
     return bool(
         data.get("minecraft:attribute_modifiers", {}).get("modifiers") or
@@ -36,7 +37,7 @@ for item, data in all_item_data.items():
         equippable = Equippable.from_dict(data["minecraft:equippable"]) if data.get("minecraft:equippable") else None
         damage_resistance = data["minecraft:damage_resistant"]["types"] if data.get("minecraft:damage_resistant") else None
         enchantable = data["minecraft:enchantable"]["value"] if data.get("minecraft:enchantable", {}).get("value") else None
-        repaired_by: list[str] | None = [data["minecraft:repairable"]["items"]] if data.get("minecraft:repairable") else []
+        repaired_by: list[str] = [data["minecraft:repairable"]["items"]] if data.get("minecraft:repairable") else []
         components = Components(
             attribute_modifiers=attribute_modifiers, tool=tool, equippable=equippable, damage_resistant_to=damage_resistance,
             repaired_by=repaired_by, enchantable_at_level=enchantable,
@@ -48,7 +49,7 @@ for item, data in all_item_data.items():
         rarity_arg = f"rarity=\"{data.get('minecraft:rarity')}\", " if (data.get("minecraft:rarity") != "common") else ""
         # ====
         line = (
-            f"""{item.upper()} = CustomItem(internal_name="minecraft:{item.removeprefix("minecraft:")}", base_item="{item}", """+
+            f"""{item.upper()} = CustomItem(internal_name="minecraft:{item.removeprefix("minecraft:")}", base_item="{item}", """ +
             f"{components_arg}{max_stack_arg}{rarity_arg})"""
         ).replace(", )", ")")
         items.append(item.upper())
