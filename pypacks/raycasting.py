@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.custom_mcfunction import MCFunction
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack

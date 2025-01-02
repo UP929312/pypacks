@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
-from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.custom_mcfunction import MCFunction
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack

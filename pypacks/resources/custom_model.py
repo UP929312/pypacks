@@ -5,9 +5,11 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from pypacks.resources.item_model_definition import ModelItemModel
+
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
-    from pypacks.resources.tints import DyeTint
+    from pypacks.resources.item_model_definition import ItemModelType
 
 # TODO: Support non cubes? Player heads? Custom models?
 
@@ -22,8 +24,18 @@ class ItemModel:
         # 1. The model definition/config (in items/<internal_name>.json)
         # 2. The model components, including textures, parent, etc. (in models/item/<internal_name>.json)
         # 3. The texture itself (in textures/item/<internal_name>.png)
+        # ├── assets/
+        # │   └── <datapack namespace>/
+        # │       ├── models/
+        # │       │   └── item/
+        # │       │       └── <internal_name>.json  # Defines the item's appearance in-game
+        # │       ├── items/
+        # │       │   └── <internal_name>.json      # Defines the item's behavior or properties
+        # │       └── textures/
+        # │           └── item/
+        # │               └── <internal_name>.png   # The texture for the item
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+        # os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
 
@@ -31,8 +43,7 @@ class ItemModel:
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
             json.dump({"parent": "minecraft:item/generated", "textures": layers}, file, indent=4)
 
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-            json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
+        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{datapack.namespace}:item/{self.internal_name}").create_resource_pack_files(datapack)
 
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png", "wb") as file:
             file.write(self.texture_bytes)
@@ -81,7 +92,7 @@ class SymmetricCubeModel:
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+        # os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
 
         layers = {"all": f"{datapack.namespace}:item/{self.internal_name}"}
@@ -89,8 +100,9 @@ class SymmetricCubeModel:
             json.dump({"parent": "minecraft:block/cube_all", "textures": layers}, file, indent=4)
 
         # Item model definition
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-            json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
+        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{datapack.namespace}:item/{self.internal_name}").create_resource_pack_files(datapack)
+        # with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+        #     json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
 
         shutil.copyfile(self.texture_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png")
 
@@ -114,11 +126,11 @@ class AsymmetricCubeModel:
         # │       │   └── <custom_block>.json
         # │       └── textures/
         # │           └── item/
-        # │               └── <custom_block>_<top&bottom&front&back&left&right.png
+        # │               └── <custom_block>_<top&bottom&front&back&left&right>.png
 
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+        # os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
 
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates"/f"{self.internal_name}.json", "w") as file:
@@ -147,8 +159,9 @@ class AsymmetricCubeModel:
                 }
             }, file, indent=4)
 
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-            json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
+        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{datapack.namespace}:item/{self.internal_name}").create_resource_pack_files(datapack)
+        # with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+        #     json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}"}}, file, indent=4)
 
         for face in ["top", "bottom", "front", "back", "left", "right"]:
             if getattr(self.face_paths, face) is not None:
@@ -202,8 +215,9 @@ class SlabModel:
                     }
                 }, file, indent=4)
 
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}_slab.json", "w") as file:
-            json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}_slab"}}, file, indent=4)
+        CustomItemModelDefinition(internal_name=f"{self.internal_name}_slab", model=f"{datapack.namespace}:item/{self.internal_name}_slab").create_resource_pack_files(datapack)
+        # with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}_slab.json", "w") as file:
+        #     json.dump({"model": {"type": "minecraft:model", "model": f"{datapack.namespace}:item/{self.internal_name}_slab"}}, file, indent=4)
 
     # def add_variants(self, datapack: "Datapack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
@@ -217,11 +231,14 @@ class SlabModel:
 
 
 @dataclass
-class CustomItemModel:
-    # TODO: Currently unused and purely used for testing
-    internal_name: str = "my_custom_sword"
-    model: str = "item/iron_sword"
-    tint: "DyeTint | None" = None
+class CustomItemModelDefinition:
+    internal_name: str
+    model: "ItemModelType | str" = "item/iron_sword"  # or <namespace>:<model_name>
+    hand_animation_on_swap: bool = True
+
+    def __post_init__(self) -> None:
+        if isinstance(self.model, str):
+            self.model = ModelItemModel(self.model)
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         # https://www.discord.com/channels/154777837382008833/1323240917792063489
@@ -229,14 +246,7 @@ class CustomItemModel:
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
 
         # Item model definition
+        assert isinstance(self.model, ModelItemModel)
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-            json.dump({
-                "model": {
-                    "type": "model",
-                    "model": self.model,
-                } | ({
-                    "tints": [
-                        self.tint.to_dict(),
-                    ]
-                } if self.tint else {}),
-            }, file, indent=4)
+            # print("New", self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {}))
+            json.dump(self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {}), file, indent=4)

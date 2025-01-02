@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.resources.item_components import Consumable, Food, Components
 from pypacks.resources.custom_model import ItemModel
-from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
 from pypacks.utils import to_component_string, colour_codes_to_json_format, recusively_remove_nones_from_data
 

@@ -4,10 +4,14 @@ from pypacks import (
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
 )
 from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
+from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.resources.custom_recipe import *
 from pypacks.resources.item_components import *
+from pypacks import ConstantTint
 
 import os
+
+from pypacks.resources.item_model_definition import ModelItemModel
 os.chdir(os.path.dirname(__file__))
 
 # ============================================================================================================
@@ -135,6 +139,9 @@ emerald_loot_table = CustomLootTable("emerald_loot_table", [SimpleRangePool("eme
 glider_helmet_loot_table = CustomLootTable("glider_helmet_loot_table", [SingleItemPool(flying_helmet)])
 loot_tables = [emerald_loot_table, glider_helmet_loot_table]
 
+blue_sword = CustomItemModelDefinition("blue_sword", ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 0.0, 1.0))]))
+custom_item_model_definitions = [blue_sword]
+
 datapack = Datapack(
     "PyPacks Testing", "A cool datapack", "pypacks_testing", "pack_icon.png", world_name="PyPacksWorld",
     custom_recipes=recipes,
@@ -144,5 +151,6 @@ datapack = Datapack(
     custom_jukebox_songs=[custom_jukebox_song],
     custom_blocks=custom_blocks,
     custom_loot_tables=loot_tables,
+    custom_item_model_definitions=custom_item_model_definitions,
     # custom_advancements=[eating_advancement],
 )

@@ -1,5 +1,10 @@
 Consider changing components to be a list of components, rather than a big ol' class.
 
+Convert Datapack_location_path to a path object, so we don't have to do it everywhere
+
+Go all out on a testing framework.
+Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
+
 Custom enchants:
 https://www.reddit.com/r/MinecraftCommands/comments/1hr0r9z/datapack_custom_enchants_cant_be_obtained_by/
 

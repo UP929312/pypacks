@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
-from pypacks.resources.custom_model import CustomItemModel
-from pypacks.resources.mcfunction import MCFunction
+from pypacks.resources.custom_model import CustomItemModelDefinition
+from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.reference_book_config import RefBookCategory
 from pypacks.raycasting import generate_default_raycasting_functions
 from pypacks.create_wall import create_wall
@@ -52,7 +52,7 @@ class Datapack:
     custom_sounds: list["CustomSound"] = field(default_factory=list)
     custom_tags: list["CustomTag"] = field(default_factory=list)
     mcfunctions: list["MCFunction"] = field(default_factory=list)
-    custom_models: list[CustomItemModel] = field(default_factory=list)
+    custom_item_model_definitions: list[CustomItemModelDefinition] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.datapack_output_path == "" and self.world_name:
@@ -67,7 +67,6 @@ class Datapack:
         self.generate_pack()
 
     def add_internal_functions(self) -> None:
-        self.custom_models.append(CustomItemModel())
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))

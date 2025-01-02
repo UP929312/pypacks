@@ -29,7 +29,9 @@ def generate_resource_pack(datapack: "Datapack") -> None:
         shutil.copyfile(datapack.pack_icon_path, Path(datapack.resource_pack_path)/"pack.png")
     # ================================================================================================
     # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder) & custom font (built in)
-    for element in datapack.custom_items+datapack.custom_blocks+datapack.custom_paintings+datapack.custom_sounds+datapack.custom_fonts+datapack.custom_models:
+    for element in (
+        datapack.custom_items+datapack.custom_blocks+datapack.custom_paintings+datapack.custom_sounds+datapack.custom_fonts+datapack.custom_item_model_definitions
+    ):
         element.create_resource_pack_files(datapack)
     # ================================================================================================
     # Create the sounds.json file.
