@@ -20,13 +20,14 @@ EXTRA_ICON_BASE_PATH = Path(IMAGES_PATH)/"reference_book_icons"/"extra_icon_base
 
 def generate_resource_pack(datapack: "Datapack") -> None:
     os.makedirs(datapack.resource_pack_path, exist_ok=True)
+    assert isinstance(datapack.resource_pack_path, Path)
     # ================================================================================================
     # pack.mcmeta
-    with open(Path(datapack.resource_pack_path)/"pack.mcmeta", "w") as file:
+    with open(datapack.resource_pack_path/"pack.mcmeta", "w") as file:
         json.dump({"pack": {"pack_format": datapack.resource_pack_format_version, "description": datapack.description}}, file, indent=4)
     # pack.png
     if datapack.pack_icon_path is not None:
-        shutil.copyfile(datapack.pack_icon_path, Path(datapack.resource_pack_path)/"pack.png")
+        shutil.copyfile(datapack.pack_icon_path, datapack.resource_pack_path/"pack.png")
     # ================================================================================================
     # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder) & custom font (built in)
     for element in (
@@ -36,7 +37,7 @@ def generate_resource_pack(datapack: "Datapack") -> None:
     # ================================================================================================
     # Create the sounds.json file.
     if datapack.custom_sounds:
-        with open(Path(datapack.resource_pack_path, "assets", datapack.namespace, "sounds.json"), "w") as file:
+        with open(datapack.resource_pack_path/"assets"/datapack.namespace/"sounds.json", "w") as file:
             json.dump({sound.internal_name: sound.create_sound_entry(datapack) for sound in datapack.custom_sounds}, file, indent=4)
     # ================================================================================================
 
@@ -76,33 +77,34 @@ def generate_font_pack(datapack: "Datapack") -> "CustomFont":
 
 
 def generate_base_pack(datapack: "Datapack") -> None:
-    os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace, exist_ok=True)
+    assert isinstance(datapack.datapack_output_path, Path)
+    os.makedirs(datapack.datapack_output_path/"data"/datapack.namespace, exist_ok=True)
     # ================================================================================================
     # pack.mcmeta
-    with open(Path(datapack.datapack_output_path, "pack.mcmeta"), "w") as file:
+    with open(datapack.datapack_output_path/"pack.mcmeta", "w") as file:
         json.dump({"pack": {"pack_format": datapack.data_pack_format_version, "description": datapack.description}}, file, indent=4)
     # pack.png
     if datapack.pack_icon_path is not None:
-        shutil.copyfile(datapack.pack_icon_path, Path(datapack.datapack_output_path, "pack.png"))
+        shutil.copyfile(datapack.pack_icon_path, datapack.datapack_output_path/"pack.png")
     # ================================================================================================
     # Load + Tick functions
-    os.makedirs(Path(datapack.datapack_output_path)/"data"/"minecraft"/"tags"/"function", exist_ok=True)
-    with open(Path(datapack.datapack_output_path)/"data"/"minecraft"/"tags"/"function"/"load.json", "w") as file:
+    os.makedirs(datapack.datapack_output_path/"data"/"minecraft"/"tags"/"function", exist_ok=True)
+    with open(datapack.datapack_output_path/"data"/"minecraft"/"tags"/"function"/"load.json", "w") as file:
         json.dump({"values": [f"{datapack.namespace}:load"]}, file, indent=4)
 
     if datapack.custom_blocks:
-        with open(Path(datapack.datapack_output_path)/"data"/"minecraft"/"tags"/"function"/"tick.json", "w") as file:
+        with open(datapack.datapack_output_path/"data"/"minecraft"/"tags"/"function"/"tick.json", "w") as file:
             json.dump({"values": [f"{datapack.namespace}:tick"]}, file, indent=4)
     # ================================================================================================
     # Give commands
     if datapack.custom_items:
-        os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give", exist_ok=True)
+        os.makedirs(datapack.datapack_output_path/"data"/datapack.namespace/"function"/"give", exist_ok=True)
 
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give_all.mcfunction", "w") as file:
+        with open(datapack.datapack_output_path/"data"/datapack.namespace/"function"/"give_all.mcfunction", "w") as file:
             file.write("\n".join([custom_item.generate_give_command(datapack) for custom_item in datapack.custom_items]))
         # And give the book
         book = ReferenceBook(datapack.custom_items)
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
+        with open(datapack.datapack_output_path/"data"/datapack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
             file.write(f"\n# Give the book\n{book.generate_give_command(datapack)}")
     # ================================================================================================
     # Resources
@@ -112,7 +114,7 @@ def generate_base_pack(datapack: "Datapack") -> None:
         datapack.mcfunctions+datapack.custom_tags
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
-            os.makedirs(Path(datapack.datapack_output_path)/"data"/datapack.namespace/item.datapack_subdirectory_name, exist_ok=True)
+            os.makedirs(datapack.datapack_output_path/"data"/datapack.namespace/item.datapack_subdirectory_name, exist_ok=True)
         if hasattr(item, "sub_directories"):
             os.makedirs(Path(datapack.datapack_output_path, "data", datapack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)  # type: ignore
         item.create_datapack_files(datapack)

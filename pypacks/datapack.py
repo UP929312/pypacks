@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
@@ -38,8 +39,8 @@ class Datapack:
     resource_pack_path: str = ""
 
     # TODO: on_tick_function and on_load_function
-    # on_tick_command: str | None = None
-    # on_load_command: str | None = None
+    # on_tick_command: MCFunction | None = None
+    # on_load_command: MCFunction | None = None
 
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
@@ -60,6 +61,9 @@ class Datapack:
         if self.resource_pack_path == "":
             self.resource_pack_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\resourcepacks\\{self.name}"
 
+        self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[abc]
+        self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[abc]
+
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
 
@@ -70,8 +74,7 @@ class Datapack:
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
-            if item.use_right_click_cooldown is not None:
-                self.mcfunctions.append(item.create_right_click_revoke_advancement_function(self))
+            self.mcfunctions.append(item.create_right_click_revoke_advancement_function(self))
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:

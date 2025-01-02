@@ -58,6 +58,7 @@ class CustomBlock:
         item.is_block = True
         class_ = cls(item.internal_name, item.custom_name, item.base_item, block_texture or item.texture_path, drops=drops)
         class_.block_item = item
+        class_.block_item.custom_data[f"custom_right_click_for_{class_.internal_name}"] = True
         class_.set_or_create_loot_table()
         return class_
 
@@ -69,7 +70,7 @@ class CustomBlock:
                     "condition": "minecraft:match_tool",
                     "predicate": {
                         "predicates": {
-                            "minecraft:custom_data": f"{{custom_right_click_for_{self.internal_name}: {True}}}"
+                            "minecraft:custom_data": {f"custom_right_click_for_{self.internal_name}": True},
                         }
                     }
                 }

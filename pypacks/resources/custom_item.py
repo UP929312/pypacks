@@ -34,7 +34,7 @@ class CustomItem:
     datapack_subdirectory_name: None = field(init=False, repr=False, default=None)
 
     def __post_init__(self) -> None:
-        # self.custom_data |= {"pypacks_custom_item": self.internal_name}  # No longer needed
+        # self.custom_data |= {"internal_name": self.internal_name}
 
         if self.on_right_click:
             if self.components.consumable is not None or self.components.food is not None:
