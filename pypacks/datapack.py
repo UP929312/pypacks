@@ -63,8 +63,8 @@ class Datapack:
         if self.resource_pack_path == "":
             self.resource_pack_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\resourcepacks\\{self.name}"
 
-        self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[abc]
-        self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[abc]
+        self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[assignment]
+        self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[assignment]
 
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46

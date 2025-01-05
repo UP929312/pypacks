@@ -1,11 +1,10 @@
 from typing import TYPE_CHECKING
 
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.utils import extract_item_components
+from .resources.custom_item import CustomItem
 
 if TYPE_CHECKING:
     from .datapack import Datapack
-    from .resources.custom_item import CustomItem
 
 
 def create_wall(custom_items: list["CustomItem"], datapack: "Datapack") -> MCFunction:
@@ -18,7 +17,8 @@ def create_wall(custom_items: list["CustomItem"], datapack: "Datapack") -> MCFun
 
     for i, custom_item in enumerate(custom_items):
         x, y = mapping[i]
-        components = extract_item_components(custom_item, datapack)
+        
+        components = custom_item.to_dict(datapack.namespace) if isinstance(custom_item, CustomItem) else {}
         mcfunction.commands.append(
             f"summon minecraft:item_frame ~{x} ~{y} ~1 {{Tags:[wall_item_frame], Item: {{id: \"{custom_item.base_item}\", components: {components}}}, Facing: 3}}"
         )

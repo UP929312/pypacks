@@ -73,7 +73,7 @@ def place_ingredients_on_image(
             else resolve_default_item_image(result.base_item)
         )
     )
-    with Image.open(result_texture_path) as result_image:  # type: ignore[arg-type]
+    with Image.open(result_texture_path) as result_image:
         result_image = result_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
         base_image.paste(result_image, coord_mapping["result"], result_image)
     # RETURN

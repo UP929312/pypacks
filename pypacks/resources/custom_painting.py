@@ -28,9 +28,9 @@ class CustomPainting:
         assert 1 <= self.width_in_blocks <= 16, "Width must be between 1 and 16"
         assert 1 <= self.height_in_blocks <= 16, "Height must be between 1 and 16"
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         data = {
-            "asset_id": f"{datapack.namespace}:{self.internal_name}",
+            "asset_id": f"{datapack_namespace}:{self.internal_name}",
             "width": self.width_in_blocks,
             "height": self.height_in_blocks,
         }
@@ -48,7 +48,7 @@ class CustomPainting:
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack), file, indent=4)
+            json.dump(self.to_dict(datapack.namespace), file, indent=4)
 
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"painting", exist_ok=True)

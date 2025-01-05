@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Any, TYPE_CHECKING
 
-from pypacks.utils import recusively_remove_nones_from_data
+from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -65,8 +65,8 @@ class CustomAdvancement:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="advancement")
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        return recusively_remove_nones_from_data({  # type: ignore[no-any-return]
+    def to_dict(self, datapack_nameespace: str) -> dict[str, Any]:
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "parent": self.parent,
             "display": {
                 "icon": {"id": self.icon_item},
@@ -92,7 +92,7 @@ class CustomAdvancement:
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack), file, indent=4)
+            json.dump(self.to_dict(datapack.namespace), file, indent=4)
 
     @staticmethod
     def generate_right_click_functionality(item: "CustomItem", datapack: "Datapack") -> "CustomAdvancement":

@@ -28,9 +28,9 @@ class CustomJukeboxSong:
     #             rint("Guessed song length: ", get_ogg_duration(file.read()))
     #             # self.length_in_seconds = get_ogg_duration(file.read())
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         return {
-            "sound_event": {"sound_id": f"{datapack.namespace}:{self.internal_name}"},
+            "sound_event": {"sound_id": f"{datapack_namespace}:{self.internal_name}"},
             "description": {"text": self.description, "color": "white"},
             "length_in_seconds": float(self.length_in_seconds),
             "comparator_output": self.comparator_output,
@@ -38,7 +38,7 @@ class CustomJukeboxSong:
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack), file, indent=4)
+            json.dump(self.to_dict(datapack.namespace), file, indent=4)
 
     def generate_custom_item(self, datapack: "Datapack") -> "CustomItem":
         return CustomItem(

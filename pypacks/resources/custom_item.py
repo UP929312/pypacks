@@ -8,7 +8,7 @@ from pypacks.resources.custom_model import ItemModel
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
-from pypacks.utils import to_component_string, colour_codes_to_json_format, recusively_remove_nones_from_data
+from pypacks.utils import to_component_string, colour_codes_to_json_format, recursively_remove_nones_from_data
 
 from pypacks.scripts.all_items import MinecraftItem
 
@@ -71,10 +71,10 @@ class CustomItem:
     def create_resource_pack_files(self, datapack: "Datapack") -> None:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
-            return ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(datapack)
+            ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(datapack)
         # TODO: Should this exist here? I mean, it's a sub_item creating more resources, but maybe that's fine?
         if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
-            return self.item_model.create_resource_pack_files(datapack)
+            self.item_model.create_resource_pack_files(datapack)
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         # Create the give command for use in books
@@ -103,25 +103,22 @@ class CustomItem:
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         # TODO: Clean this up
         if self.item_model:
-            item_model = self.item_model.get_reference(datapack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
+            item_model: str | None = self.item_model.get_reference(datapack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
         else:
             item_model = f"{datapack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
-        return recusively_remove_nones_from_data({  # type: ignore[no-any-return]
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
             "rarity": self.rarity,
             "item_model": item_model,
             "custom_data": self.custom_data if self.custom_data else None,
-            # "components": self.components.to_dict(),
+            **self.components.to_dict(datapack_namespace),
         })
 
     def generate_give_command(self, datapack: "Datapack") -> str:
-        base_components = ", ".join([
+        components = ", ".join([
             to_component_string({key: value})
             for key, value in self.to_dict(datapack.namespace).items()
         ])
-        components_string = (
-            to_component_string(self.components.to_dict(datapack))  # Also strips None through `recusively_remove_nones_from_data`
-        )
-        return f"give @p {self.base_item}[{base_components}{', ' if base_components and components_string else ''}{components_string if components_string else ''}]"
+        return f"give @p {self.base_item}[{components}]"

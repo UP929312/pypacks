@@ -164,7 +164,7 @@ class CustomBlock:
                 "kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
                 "kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
                 "kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
-                f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(datapack)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
+                f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(datapack.namespace)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
                 "kill @s"  # Kill the item display
             ],
             ["custom_blocks", "on_destroy"],

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Any, TYPE_CHECKING
 
-from pypacks.utils import recusively_remove_nones_from_data
+from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
@@ -43,8 +43,8 @@ class CustomEnchantment:
         assert 0 < self.weight <= 1024, "Weight must be between 1 and 1024"
         assert 0 < self.max_level <= 255, "Max level must be between 1 and 255"
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
-        return recusively_remove_nones_from_data({  # type: ignore[no-any-return]
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "description": self.description,
             "exclusive_set": self.exclusive_set,
             "supported_items": self.supported_items,
@@ -66,4 +66,4 @@ class CustomEnchantment:
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack), file, indent=4)
+            json.dump(self.to_dict(datapack.namespace), file, indent=4)

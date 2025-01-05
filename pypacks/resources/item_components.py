@@ -200,16 +200,15 @@ class BundleContents:
     # https://minecraft.wiki/w/Data_component_format#bundle_contents
     items: dict["str | CustomItem", int] = field(default_factory=dict)
 
-    def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:
+    def to_dict(self, datapack_namespace: str) -> list[dict[str, Any]]:
         from pypacks.resources.custom_item import CustomItem
-        from pypacks.utils import extract_item_components
         return [
             {
                 "id": item.base_item if isinstance(item, CustomItem) else item,
                 "count": count,
             } | ({
-                "components": extract_item_components(item, datapack),
-            } if isinstance(item, CustomItem) and item.components.to_dict(datapack) else {})
+                "components": (item.to_dict(datapack_namespace) if isinstance(item, CustomItem) else {}),
+            } if isinstance(item, CustomItem) and item.components.to_dict(datapack_namespace) else {})
             for item, count in self.items.items()
         ]
 
@@ -250,12 +249,12 @@ class Consumable:
     on_consume_remove_effects: list["str | PotionEffect"] | Literal["all"] = field(default_factory=list)  # A list of status effects to remove when consuming the item
     on_consume_teleport_diameter: float | int = 0  # The diameter of the teleportation area when consuming the item (chorus fruit is 16.0)
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
         base_dict = {
             "consume_seconds": self.consume_seconds,
             "animation": self.animation,
-            "sound": {"sound_id": self.consuming_sound.get_reference(datapack) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound} if self.consuming_sound is not None else None,
+            "sound": {"sound_id": self.consuming_sound.get_reference(datapack_namespace) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound} if self.consuming_sound is not None else None,
             "has_consume_particles": False if not self.has_consume_particles else None,  # Defaults to True
         }
         if not self.on_consume_effects and not self.on_consume_remove_effects and self.on_consume_teleport_diameter == 0:
@@ -276,9 +275,8 @@ class ContainerContents:
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: CONTAINER_BLOCKS)
 
-    def to_dict(self, datapack: "Datapack") -> list[dict[str, Any]]:
+    def to_dict(self, datapack_namespace: str) -> list[dict[str, Any]]:
         from pypacks.resources.custom_item import CustomItem
-        from pypacks.utils import extract_item_components
         return [
             {
                 "slot": i,
@@ -286,8 +284,8 @@ class ContainerContents:
                     "id": item.base_item if isinstance(item, CustomItem) else item,
                     "count": count,
                 } | ({
-                    "components": extract_item_components(item, datapack),
-                } if isinstance(item, CustomItem) and item.components.to_dict(datapack) else {}),
+                    "components": (item.to_dict(datapack_namespace) if isinstance(item, CustomItem) else {}),
+                } if isinstance(item, CustomItem) and item.components.to_dict(datapack_namespace) else {}),
             }
             for i, (item, count) in enumerate(self.items.items())
         ]
@@ -453,14 +451,14 @@ class Instrument:
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["goat_horn"])
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
         assert 0 < self.use_duration <= 60, "use_duration must be a non-negative integer"
         assert 0 < self.instrument_range, "range must be a non-negative integer"
         return {
             "description": self.description,
             "range": self.instrument_range,
-            "sound_event": {"sound_id": self.sound_id.get_reference(datapack) if isinstance(self.sound_id, CustomSound) else self.sound_id},
+            "sound_event": {"sound_id": self.sound_id.get_reference(datapack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id},
             "use_duration": self.use_duration,
         }
 
@@ -473,10 +471,10 @@ class JukeboxPlayable:
     song: "str | CustomJukeboxSong" = "pigstep"
     show_in_tooltip: bool = True
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
         return {
-            "song": f"{datapack.namespace}:{self.song.internal_name}" if isinstance(self.song, CustomJukeboxSong) else self.song,
+            "song": f"{datapack_namespace}:{self.song.internal_name}" if isinstance(self.song, CustomJukeboxSong) else self.song,
             "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
         }
 
@@ -649,12 +647,12 @@ class UseRemainder:
     item: "str | CustomItem"
     count: int = 1
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_item import CustomItem
         return {
             "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
             "count": self.count,
-        } | ({"components": self.item.to_dict(datapack.namespace)} if isinstance(self.item, CustomItem) else {})
+        } | ({"components": self.item.to_dict(datapack_namespace)} if isinstance(self.item, CustomItem) else {})
 
 
 # ==========================================================================================
@@ -827,7 +825,7 @@ class Components:
     #         assert item.base_item == "bundle", "Bundle contents can only be used on bundles!"
     #     if self.damage_resistant and self.destroyed_in_lava:
 
-    def to_dict(self, datapack: "Datapack") -> dict[str, Any]:
+    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_sound import CustomSound
         from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
@@ -847,7 +845,7 @@ class Components:
             "base_color":                 self.shield_base_color,
             "block_entity_data":          self.block_entity_data if self.block_entity_data else None,
             "block_state":                self.block_state if self.block_state else None,
-            "container_loot":             ({"loot_table": (self.container_loot_table.get_reference(datapack) if isinstance(self.container_loot_table, CustomLootTable)
+            "container_loot":             ({"loot_table": (self.container_loot_table.get_reference(datapack_namespace) if isinstance(self.container_loot_table, CustomLootTable)
                                             else self.container_loot_table)}
                                             if self.container_loot_table is not None else None),  # fmt: skip
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
@@ -856,7 +854,7 @@ class Components:
             "dyed_color":                 self.dye_color,
             "enchantments":               self.enchantments if self.enchantments else None,
             "intangible_projectile":      {} if self.intangible_projectile else None,
-            "note_block_sound":           self.note_block_sound.get_reference(datapack) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
+            "note_block_sound":           self.note_block_sound.get_reference(datapack_namespace) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier,
             "profile":                    self.player_head_username if self.player_head_username else profile,
             "recipes":                   self.knowledge_book_recipes if self.knowledge_book_recipes else None,
@@ -867,17 +865,17 @@ class Components:
             "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns else None,
             "bees":                       [bee.to_dict() for bee in self.bees] if self.bees else None,
-            "bundle_contents":            self.bundle_contents.to_dict(datapack) if self.bundle_contents is not None else None,
+            "bundle_contents":            self.bundle_contents.to_dict(datapack_namespace) if self.bundle_contents is not None else None,
             "bucket_entity_data":         self.bucket_entity_data.to_dict() if self.bucket_entity_data is not None else None,
-            "consumable":                 self.consumable.to_dict(datapack) if self.consumable is not None else None,
-            "container":                  self.container_contents.to_dict(datapack) if self.container_contents is not None else None,
+            "consumable":                 self.consumable.to_dict(datapack_namespace) if self.consumable is not None else None,
+            "container":                  self.container_contents.to_dict(datapack_namespace) if self.container_contents is not None else None,
             "death_protection":           self.death_protection.to_dict() if self.death_protection is not None else None,
             "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
             "equippable":                 self.equippable.to_dict() if self.equippable is not None else None,
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
             "fireworks":                  self.firework.to_dict() if self.firework is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,
-            "jukebox_playable":           self.jukebox_playable.to_dict(datapack) if self.jukebox_playable is not None else None,
+            "jukebox_playable":           self.jukebox_playable.to_dict(datapack_namespace) if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
             "map_color":                  self.map_data.to_dict()["map_color"] if self.map_data is not None else None,
             "map_id":                     self.map_data.to_dict()["map_id"] if self.map_data is not None else None,
@@ -886,9 +884,9 @@ class Components:
             "pot_decorations":            self.pot_decorations if self.pot_decorations else None,
             "stored_enchantments":        self.book_enchantments if self.book_enchantments else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
-            "instrument":                 self.instrument.to_dict(datapack) if self.instrument is not None else None,
+            "instrument":                 self.instrument.to_dict(datapack_namespace) if self.instrument is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
-            "use_remainder":              self.use_remainder.to_dict(datapack) if self.use_remainder is not None else None,
+            "use_remainder":              self.use_remainder.to_dict(datapack_namespace) if self.use_remainder is not None else None,
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip

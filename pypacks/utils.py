@@ -13,24 +13,16 @@ PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/p
 IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"
 
 
-def extract_item_components(item: "str | CustomItem", datapack: "Datapack") -> dict[str, Any]:
-    """Returns the item's components (fixed)"""
-    from pypacks.resources.custom_item import CustomItem
-    regular_data = item.to_dict(datapack.namespace) if isinstance(item, CustomItem) else {}
-    components = item.components.to_dict(datapack) if isinstance(item, CustomItem) else {}
-    return recusively_remove_nones_from_data(regular_data | components)  # type: ignore[no-any-return]
-
-
-def recusively_remove_nones_from_data(obj: Any) -> Any:
+def recursively_remove_nones_from_data(obj: Any) -> Any:
     if isinstance(obj, list):
-        return [recusively_remove_nones_from_data(x) for x in obj if x is not None]
+        return [recursively_remove_nones_from_data(x) for x in obj if x is not None]
     if isinstance(obj, dict):
-        return {key: recusively_remove_nones_from_data(value) for key, value in obj.items() if value is not None}
+        return {key: recursively_remove_nones_from_data(value) for key, value in obj.items() if value is not None}
     return obj
 
 
 def _to_snbt(obj: dict[str, Any]) -> str:
-    return json.dumps(recusively_remove_nones_from_data(obj)).replace("\"'", "'").replace("'\"", "'")
+    return json.dumps(recursively_remove_nones_from_data(obj)).replace("\"'", "'").replace("'\"", "'")
 
 
 def to_component_string(obj: dict[str, Any]) -> str:

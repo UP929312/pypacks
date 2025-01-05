@@ -7,7 +7,7 @@ Each test shouldn't just be 2d, it should be a 3 structure with the beacon like 
 
 If we want to allow them to pass in a custom item model, we also need to give a way to pass in the custom texture, and the {"parent": "minecraft:item/generated", "textures": layers} bit...
 
-Should custom item models have a "test_item" attribute, which gets rendered on the wall?
+For custom item models "test item", let them put a custom item so we can apply damage and bundles items?
 
 Rename Datapack to just Pack? It creates resource and datapacks...
 
