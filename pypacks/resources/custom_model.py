@@ -5,13 +5,39 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pypacks.resources.item_model_definition import ModelItemModel
+from pypacks.resources.item_model_definition import ModelItemModel, ItemModelType
+from pypacks.scripts.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.datapack import Datapack
     from pypacks.resources.item_model_definition import ItemModelType
 
 # TODO: Support non cubes? Player heads? Custom models?
+
+
+@dataclass
+class CustomItemModelDefinition:
+    internal_name: str
+    model: "ItemModelType | str" = "item/iron_sword"  # or <namespace>:<model_name>
+    hand_animation_on_swap: bool = True  # Whether the down-and-up animation should be played in first-person view when the item stack is changed. (default: true)
+    showcase_item: MinecraftItem | None = None  # This is if you want it to show up in a debug command (for testing)
+
+    def __post_init__(self) -> None:
+        if isinstance(self.model, str):
+            self.model = ModelItemModel(self.model)
+
+    def get_reference(self, datapack_namespace: str) -> str:
+        return f"{datapack_namespace}:{self.internal_name}"
+
+    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+        # https://www.discord.com/channels/154777837382008833/1323240917792063489
+        # https://minecraft.wiki/w/Items_model_definition
+        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+
+        # Item model definition
+        assert isinstance(self.model, ItemModelType)
+        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {}), file, indent=4)
 
 
 @dataclass
@@ -36,7 +62,6 @@ class ItemModel:
         # │               └── <internal_name>.png   # The texture for the item
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
         os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"font", exist_ok=True)
 
         layers = {"layer0": f"{datapack.namespace}:item/{self.internal_name}"}
         with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
@@ -220,24 +245,3 @@ class SlabModel:
         # Fencegates are doors, so they're out.
         # Boat/boat chest??? Should be able to re-skin an entity?
         # Signs and hanging signs are editable, so probably not them (for now)
-
-
-@dataclass
-class CustomItemModelDefinition:
-    internal_name: str
-    model: "ItemModelType | str" = "item/iron_sword"  # or <namespace>:<model_name>
-    hand_animation_on_swap: bool = True
-
-    def __post_init__(self) -> None:
-        if isinstance(self.model, str):
-            self.model = ModelItemModel(self.model)
-
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
-        # https://www.discord.com/channels/154777837382008833/1323240917792063489
-        # https://minecraft.wiki/w/Items_model_definition
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
-
-        # Item model definition
-        assert isinstance(self.model, ModelItemModel)
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {}), file, indent=4)

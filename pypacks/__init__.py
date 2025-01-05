@@ -3,6 +3,7 @@
 from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
+from pypacks.resources.custom_enchantment import CustomEnchantment, EnchantEffect
 from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
@@ -28,7 +29,7 @@ from pypacks.resources.item_model_definition import (
     ModelItemModel, ConstantTint, DyeTint, GrassTint, FireworkTint, PotionTint, MapColorTint, TeamTint, CustomModelDataTint,
     CompositeItemModel,
     ConditionalItemModel, UsingItemConditional, BrokenConditional, DamagedConditional, HasComponentConditional, FishingRodCastConditional, BundleHasSelectedItemConditional, SelectedConditional, CarriedConditional, ExtendedViewConditional, KeyDownConditional, ViewEntityConditional, CustomModelDataConditional,
-    SelectItemModel, SelectCase,
+    SelectItemModel, SelectCase, MainHandSelectProperty, ChargeTypeSelectProperty, TrimMaterialSelectProperty, BlockStateSelectProperty, DisplayContextSelectProperty, LocalTimeSelectProperty, ContextDimensionSelectProperty, ContextEntityTypeSelectProperty, CustomModelDataSelectProperty,
     RangeDispatchItemModel,
     EmptyItemModel,
     BundleSelectedItemModel,
@@ -46,6 +47,7 @@ __all__ = [
     "MinecraftColor",
     "CustomAdvancement", "Criteria",
     "CustomBlock",
+    "CustomEnchantment", "EnchantEffect",
     "FacePaths", "CustomItemModelDefinition",
     "CustomItem",
     "CustomJukeboxSong",
@@ -65,7 +67,7 @@ __all__ = [
     "ModelItemModel", "ConstantTint", "DyeTint", "GrassTint", "FireworkTint", "PotionTint", "MapColorTint", "TeamTint", "CustomModelDataTint",
     "CompositeItemModel",
     "ConditionalItemModel", "UsingItemConditional", "BrokenConditional", "DamagedConditional", "HasComponentConditional", "FishingRodCastConditional", "BundleHasSelectedItemConditional", "SelectedConditional", "CarriedConditional", "ExtendedViewConditional", "KeyDownConditional", "ViewEntityConditional", "CustomModelDataConditional",
-    "SelectItemModel", "SelectCase",
+    "SelectItemModel", "SelectCase", "MainHandSelectProperty", "ChargeTypeSelectProperty", "TrimMaterialSelectProperty", "BlockStateSelectProperty", "DisplayContextSelectProperty", "LocalTimeSelectProperty", "ContextDimensionSelectProperty", "ContextEntityTypeSelectProperty", "CustomModelDataSelectProperty",
     "RangeDispatchItemModel",
     "EmptyItemModel",
     "BundleSelectedItemModel",

@@ -7,6 +7,7 @@ def check_color(color: tuple[float, float, float]) -> None:
     assert 0 <= color[1] <= 1.0, "Green must be between 0 and 1"
     assert 0 <= color[2] <= 1.0, "Blue must be between 0 and 1"
 
+# TODO: Type Range dispatch, and special model types.
 
 # ================================================================================================
 # region: MODEL
@@ -157,17 +158,19 @@ class CompositeItemModel:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "type": "minecraft:composite",
-            "models": [
-                (
-                    model.to_dict() if isinstance(model, ItemModelType) else
-                    {
-                        "type": "minecraft:model",
-                        "model": model,
-                    } 
-                )
-                for model in self.models
-            ],
+            "model": {
+                "type": "minecraft:composite",
+                "models": [
+                    (
+                        model.to_dict()["model"] if isinstance(model, ItemModelType) else
+                        {
+                            "type": "minecraft:model",
+                            "model": model,
+                        } 
+                    )
+                    for model in self.models
+                ],
+            }
         }
 
 # endregion
@@ -183,16 +186,19 @@ class ConditionalItemModel:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "type": "minecraft:conditional",
-            "on_true": self.true_model.to_dict() if isinstance(self.true_model, ItemModelType) else {
-                "type": "model",
-                "model": self.true_model,
-            },
-            "on_false": self.false_model.to_dict() if isinstance(self.false_model, ItemModelType) else {
-                "type": "model",
-                "model": self.false_model,
-            },
-        } | self.property_to_satisfy.to_dict()
+            "model": {
+                "type": "minecraft:condition",
+                **self.property_to_satisfy.to_dict(),
+                "on_true": self.true_model.to_dict()["model"] if isinstance(self.true_model, ItemModelType) else ({
+                    "type": "model",
+                    "model": self.true_model,
+                }),
+                "on_false": self.false_model.to_dict()["model"] if isinstance(self.false_model, ItemModelType) else ({
+                    "type": "model",
+                    "model": self.false_model,
+                }),
+            }
+        }
 
 
 class UsingItemConditional:
@@ -292,36 +298,33 @@ ConditionalBooleanPropertyType: TypeAlias = UsingItemConditional | BrokenConditi
 # endregion
 # ================================================================================================
 # region: SELECT DISPATCH
-SelectPropertyType = Literal[
-    "minecraft:main_hand", "minecraft:charge_type", "minecraft:trim_material", "minecraft:block_state",
-    "minecraft:display_context", "minecraft:local_time", "minecraft:context_dimension",
-    "minecraft:context_entity_type", "minecraft:custom_model_data"
-]
 
 
 @dataclass
 class SelectItemModel:
     """Render an item model based on discrete property."""
     # https://minecraft.wiki/w/Items_model_definition#select
-    property_to_satisfy: "SelectPropertyType" = "minecraft:main_hand"
+    property_to_satisfy: "SelectPropertyType" = field(default_factory=lambda: MainHandSelectProperty())  # The property to satisfy.
     cases: list["SelectCase"] = field(default_factory=lambda: [
         SelectCase(when="left", model="item/diamond_sword"), SelectCase(when="right", model="item/wooden_sword")
     ])  # List of cases to match.
-    fallback_model_name: str = "item/gold_sword"  # The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
+    fallback_model: "str | ItemModelType | None" = None  # The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "type": "minecraft:select",
-            "property": self.property_to_satisfy,
-            "cases": [case.to_dict() for case in self.cases],
-        } | (
-            {
-                "fallback": {
-                    "type": "minecraft:model",
-                    "model": self.fallback_model_name,
-                }
-            } if self.fallback_model_name else {}
-        )
+            "model": {
+                "type": "minecraft:select",
+                **self.property_to_satisfy.to_dict(),
+                "cases": [case.to_dict() for case in self.cases],
+            } | (
+                {
+                    "fallback": (self.fallback_model.to_dict()["model"] if isinstance(self.fallback_model, ItemModelType) else {
+                        "type": "minecraft:model",
+                        "model": self.fallback_model,
+                    })
+                } if self.fallback_model else {}
+            )
+        } 
 
 
 @dataclass
@@ -339,10 +342,115 @@ class SelectCase:
             },
         }
 
-# class SelectBooleanProperty:
-#     TODO: Massively type hint the select properties
-#     def to_dict(self) -> dict:
-#         raise NotImplementedError
+
+class MainHandSelectProperty:
+    """Return main hand of holding player."""
+    # https://minecraft.wiki/w/Items_model_definition#main_hand
+    # Values: "left", "right"
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:main_hand"}
+
+
+class ChargeTypeSelectProperty:
+    """Return charge type stored in minecraft:charged_projectiles component."""
+    # https://minecraft.wiki/w/Items_model_definition#charge_type
+    # Values: "none", "rocket", "arrow"
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:charge_type"}
+
+
+class TrimMaterialSelectProperty:
+    """Return value of material field from minecraft:trim component, if present."""
+    # https://minecraft.wiki/w/Items_model_definition#trim_material
+    # Values: Namespaced ID trim material.
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:trim_material"}
+
+
+@dataclass
+# block_state
+class BlockStateSelectProperty:
+    """Return value for some property from minecraft:block_state component."""
+    # https://minecraft.wiki/w/Items_model_definition#block_state
+    # Values: Block state.
+    block_state_property: str
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:block_state", "block_state_property": self.block_state_property}
+
+
+class DisplayContextSelectProperty:
+    """Return context this item is rendered in."""
+    # https://minecraft.wiki/w/Items_model_definition#trim_material
+    # Values: `none`, `thirdperson_lefthand`, `thirdperson_righthand`, `firstperson_lefthand`, `firstperson_righthand`, `head`, `gui`, `ground`, `fixed`
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:display_context"}
+
+
+@dataclass
+class LocalTimeSelectProperty:
+    """Returns the current time formatted according to a given pattern. The value is updated every second.
+    For full format documentation for locale, time zone and pattern, see ICU (International Components for Unicode) documentation."""
+    # https://minecraft.wiki/w/Items_model_definition#local_time
+    # Values: Any string.
+
+    locale: str | None = "en_US"  # Value describing locale Default "" which means "root" locale (a set of defaults, including English names).
+    # Optional. Locale to use for formatting. Default: "en_US".
+    # cs_AU@numbers=thai;calendar=japanese: Czech language, Australian formatting, Thai numerals and Japanese calendar.
+    time_zone: str | None = "UTC"  # describes format to be used for time formatting.
+    # Examples: Europe/Stockholm, GMT+0:45
+    pattern: str | None = None #  Optional. Describing time. If not present, defaults to timezone set on client.
+    # yyyy-MM-dd: 4-digit year number, then 2-digit month number, then 2-digit day of month number, all zero-padded if needed, separated by -.
+    # HH:mm:ss: current time (hours, minutes, seconds), 24-hour cycle, all zero-padded to 2 digits of needed, separated by :.
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "property": "minecraft:local_time"
+        } | ({
+            "locale": self.locale,
+        } if self.locale else {}) | ({
+            "time_zone": self.time_zone,
+        } if self.time_zone else {}) | ({
+            "pattern": self.pattern,
+        } if self.pattern else {})
+
+
+class ContextDimensionSelectProperty:
+    """Return the ID of the dimension in context, if any."""
+    # https://minecraft.wiki/w/Items_model_definition#context_dimension
+    # Values: Namespaced dimension ID.
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:context_dimension"}
+
+
+class ContextEntityTypeSelectProperty:
+    """Return the holding entity type, if present."""
+    # https://minecraft.wiki/w/Items_model_definition#context_entity_type
+    # Values: Namespaced entity type ID.
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:context_entity_type"}
+
+
+@dataclass
+class CustomModelDataSelectProperty:
+    """Return value from strings list in minecraft:custom_model_data component."""
+    index: int = 0
+    # Values: Any string.
+
+    def to_dict(self) -> dict[str, str | int]:
+        return {"property": "minecraft:custom_model_data", "index": self.index}
+
+
+SelectPropertyType: TypeAlias = (
+    MainHandSelectProperty | ChargeTypeSelectProperty | TrimMaterialSelectProperty | BlockStateSelectProperty | DisplayContextSelectProperty |
+    LocalTimeSelectProperty | ContextDimensionSelectProperty | ContextEntityTypeSelectProperty | CustomModelDataSelectProperty
+)
 # endregion
 # ================================================================================================
 # region: RANGE DISPATCH
@@ -358,28 +466,30 @@ class RangeDispatchItemModel:
     # TODO: Type hint all the Range dispatches, as 
     property_to_satisfy: RangeDispatchPropertyType
     scale: float = 1.0  # Optional. Factor to multiply property value with. Default: 1.0.
-    entries: dict[int, "str | ItemModelType"] = field(default_factory=dict)  # A mapping of threshold to item model name.
+    entries: dict[int | float, "str | ItemModelType"] = field(default_factory=dict)  # A mapping of threshold to item model name.
     additional_data: dict[str, Any] = field(default_factory=dict)  # e.g. {"normalize": True} - (for damage).
-    fallback_model_name: str = ""  #  The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
+    fallback_model: "str | ItemModelType | None" = None  #  The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "type": "minecraft:range",
-            "property": self.property_to_satisfy,
-            **self.additional_data,
-            "scale": self.scale,
-            "entries": [
-                {"threshold": threshold, "model": model.to_dict() if isinstance(model, ItemModelType) else {"type": "minecraft:model", "model": model}}
-                for threshold, model in self.entries.items()
-            ],
-        } | (
-            {
-                "fallback": {
-                    "type": "minecraft:model",
-                    "model": self.fallback_model_name,
-                }
-            } if self.fallback_model_name else {}
-        )
+            "model": {
+                "type": "minecraft:range_dispatch",
+                "property": self.property_to_satisfy,
+                "scale": self.scale,
+                **self.additional_data,
+                "entries": [
+                    {"threshold": threshold, "model": model.to_dict()["model"] if isinstance(model, ItemModelType) else {"type": "minecraft:model", "model": model}}
+                    for threshold, model in self.entries.items()
+                ],
+            } | (
+                {
+                    "fallback": (self.fallback_model.to_dict()["model"] if isinstance(self.fallback_model, ItemModelType) else {
+                        "type": "minecraft:model",
+                        "model": self.fallback_model,
+                    })
+                } if self.fallback_model else {}
+            )
+        }
 # endregion
 # ================================================================================================
 # region: EMPTY
@@ -388,7 +498,7 @@ class EmptyItemModel:
     """Does not render anything."""
     # https://minecraft.wiki/w/Items_model_definition#empty
     def to_dict(self) -> dict[str, Any]:
-        return {"type": "minecraft:empty"}
+        return {"model": {"type": "minecraft:empty"}}
 
 # endregion
 # ================================================================================================
@@ -398,7 +508,7 @@ class BundleSelectedItemModel:
     """Render the selected stack in minecraft:bundle_contents component, if present, otherwise does nothing."""
     # https://minecraft.wiki/w/Items_model_definition#bundle/selected_item
     def to_dict(self) -> dict[str, Any]:
-        return {"type": "minecraft:bundle/selected_item"}
+        return {"model": {"type": "minecraft:bundle/selected_item"}}
 
 # endregion
 # ================================================================================================
@@ -421,15 +531,19 @@ class SpecialItemModel:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "type": "minecraft:special",
             "model": {
-                "type": self.model_type,
-                **self.additional_data
-            },
-            "base": self.base,
+                "type": "minecraft:special",
+                "model": {
+                    "type": self.model_type,
+                    **self.additional_data
+                },
+                "base": self.base,
+            }
         }
 
 # endregion
 # ================================================================================================
 
-ItemModelType: TypeAlias = ModelItemModel | CompositeItemModel | ConditionalItemModel | SelectItemModel | RangeDispatchItemModel | EmptyItemModel | BundleSelectedItemModel | SpecialItemModel
+ItemModelType: TypeAlias = (
+    ModelItemModel | CompositeItemModel | ConditionalItemModel | SelectItemModel | RangeDispatchItemModel | EmptyItemModel | BundleSelectedItemModel | SpecialItemModel
+)

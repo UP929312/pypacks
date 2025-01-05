@@ -3,6 +3,16 @@ Consider changing components to be a list of components, rather than a big ol' c
 Go all out on a testing framework.
 Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
 
+# TODO: type hint all the minecraft:block/iron_bars, etc
+
+If we want to allow them to pass in a custom item model, we also need to give a way to pass in the custom texture, and the {"parent": "minecraft:item/generated", "textures": layers} bit...
+
+Should custom item models have a "test_item" attribute, which gets rendered on the wall?
+
+Rename Datapack to just Pack? It creates resource and datapacks...
+
+Custom item should have a "model" attribute, which gets created when the item does (instead of just texture_path)
+
 Custom enchants:
 https://www.reddit.com/r/MinecraftCommands/comments/1hr0r9z/datapack_custom_enchants_cant_be_obtained_by/
 

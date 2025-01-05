@@ -3,6 +3,7 @@ from pypacks import (
     CustomLootTable, RefBookCategory,
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
 )
+from pypacks.resources.item_model_definition import *
 from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.resources.custom_recipe import *
@@ -138,10 +139,49 @@ emerald_loot_table = CustomLootTable("emerald_loot_table", [SimpleRangePool("eme
 # ruby_loot_table = CustomLootTable("ruby_loot_table", [SimpleRangePool(ruby, 1, 3)])
 glider_helmet_loot_table = CustomLootTable("glider_helmet_loot_table", [SingleItemPool(flying_helmet)])
 loot_tables = [emerald_loot_table, glider_helmet_loot_table]
-
-blue_sword = CustomItemModelDefinition("blue_sword", ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 0.0, 1.0))]))
-custom_item_model_definitions = [blue_sword]
-
+# ============================================================================================================
+# region: Custom Item Model Definitions
+blue_sword = CustomItemModelDefinition("blue_sword", ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 0.0, 1.0))]), showcase_item="iron_sword")
+hold_model = CustomItemModelDefinition("hold_model", ConditionalItemModel(
+        SelectedConditional(),
+        true_model=ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 1.0, 0.0))]),
+        false_model=ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((1.0, 0.0, 0.0))]),
+    ),
+    showcase_item="iron_sword"
+)
+composite_model = CustomItemModelDefinition("composite_model", CompositeItemModel(
+        models=[
+            ModelItemModel("minecraft:block/oak_pressure_plate"),
+            ModelItemModel("minecraft:item/beef"),
+        ],
+    ),
+    showcase_item="acacia_door"
+)
+empty_model = CustomItemModelDefinition("empty_model", EmptyItemModel(), showcase_item="acacia_door")
+hand_model = CustomItemModelDefinition("hand_model", SelectItemModel(property_to_satisfy=MainHandSelectProperty(), cases=[
+        SelectCase(when="left", model="item/diamond_sword"), SelectCase(when="right", model="item/wooden_sword"),
+    ]),
+    showcase_item="golden_sword",
+)
+range_dispatch = CustomItemModelDefinition("range_dispatch",
+    RangeDispatchItemModel(
+        property_to_satisfy="minecraft:damage",
+        additional_data={"normalize": True},
+        entries={
+            0.8: ModelItemModel("item/diamond_sword"),
+        },
+        fallback_model="item/wooden_sword",
+    ),
+    showcase_item="golden_sword",
+)
+bundle_model = CustomItemModelDefinition("bundle_model", BundleSelectedItemModel(), showcase_item="bundle")
+special_model = CustomItemModelDefinition("special_model", SpecialItemModel(
+    "minecraft:shulker_box", base="minecraft:block/copper_bulb", additional_data={"texture": "minecraft:shulker_green", "openness": 0.3, "orientation": "up"}),
+    showcase_item="acacia_sign",
+)
+custom_item_model_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model]
+# endregion
+# ============================================================================================================
 datapack = Datapack(
     "PyPacks Testing", "A cool datapack", "pypacks_testing", "pack_icon.png", world_name="PyPacksWorld",
     custom_recipes=recipes,

@@ -6,6 +6,7 @@ from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.resources.item_components import Consumable, Food, Components
 from pypacks.resources.custom_model import ItemModel
 from pypacks.resources.custom_mcfunction import MCFunction
+from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
 from pypacks.utils import to_component_string, colour_codes_to_json_format, recusively_remove_nones_from_data
 
@@ -25,6 +26,7 @@ class CustomItem:
     max_stack_size: int = field(repr=False, default=64)  # Max stack size of the item (1-99)
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = field(repr=False, default=None)
     texture_path: str | None = field(repr=False, default=None)
+    item_model: "str | CustomItemModelDefinition | None" = field(repr=False, default=None)
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: "str | MCFunction | None" = None  # Function to call when the item is right clicked
     components: "Components" = field(repr=False, default_factory=lambda: Components())
@@ -34,13 +36,13 @@ class CustomItem:
     datapack_subdirectory_name: None = field(init=False, repr=False, default=None)
 
     def __post_init__(self) -> None:
-        # self.custom_data |= {"internal_name": self.internal_name}
-
+        assert not (self.texture_path and self.item_model), "You can't have both a texture path and an item model!"
         if self.on_right_click:
             if self.components.consumable is not None or self.components.food is not None:
                 raise ValueError("You can't have both on_right_click and consumable/food!")
             self.add_right_click_functionality()
 
+        # TODO: Rework this, instead, just make a custom item model here instead...
         path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
         with open(path, mode="rb") as file:
             self.image_bytes = file.read()
@@ -70,6 +72,8 @@ class CustomItem:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
             return ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(datapack)
+        if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
+            return self.item_model.create_resource_pack_files(datapack)
 
     def create_datapack_files(self, datapack: "Datapack") -> None:
         # Create the give command for use in books
@@ -96,14 +100,19 @@ class CustomItem:
         return revoke_and_call_mcfunction
 
     def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+        # TODO: Clean this up
+        if self.item_model:
+            item_model = self.item_model.get_reference(datapack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
+        else:
+            item_model = f"{datapack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
         return recusively_remove_nones_from_data({  # type: ignore[no-any-return]
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
             "rarity": self.rarity,
-            "item_model": f"{datapack_namespace}:{self.internal_name}" if self.texture_path else None,
+            "item_model": item_model,
             "custom_data": self.custom_data if self.custom_data else None,
-            # "components": self.components.to_dict() if self.components else None,
+            # "components": self.components.to_dict(),
         })
 
     def generate_give_command(self, datapack: "Datapack") -> str:
