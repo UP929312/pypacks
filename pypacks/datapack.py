@@ -5,16 +5,17 @@ from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_base_pack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
+from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.reference_book_config import RefBookCategory
+from pypacks.reference_book_config import RefBookCategory, HIDDEN_REF_BOOK_CONFIG
 from pypacks.raycasting import generate_default_raycasting_functions
 from pypacks.create_wall import create_wall
 
 
 if TYPE_CHECKING:
-    from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_block import CustomBlock
+    from pypacks.resources.custom_enchantment import CustomEnchantment
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
     from pypacks.resources.custom_painting import CustomPainting
@@ -44,6 +45,7 @@ class Datapack:
 
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
+    custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
     custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
@@ -103,6 +105,17 @@ class Datapack:
             # TODO: Remove this, I want multiple pages where possible
             assert len([x for x in self.custom_items if x.ref_book_config.category.name == category.name]) <= 18, \
                    f"Category {category.name} has too many items (> 18)!"
+        # ==================================================================================
+        # ITEM MODELS
+        give_all_item_models = MCFunction("give_all_item_models", [
+            CustomItem(
+                custom_item_model_def.internal_name, custom_item_model_def.showcase_item, custom_name=custom_item_model_def.internal_name,
+                item_model=custom_item_model_def, ref_book_config=HIDDEN_REF_BOOK_CONFIG
+            ).generate_give_command(self)
+            for custom_item_model_def in self.custom_item_model_definitions
+            if custom_item_model_def.showcase_item is not None
+        ])
+        self.mcfunctions.append(give_all_item_models)
         # ==================================================================================
         load_mcfunciton = MCFunction("load", [
             f"function {self.namespace}:raycast/load" if (self.custom_items or self.custom_blocks) else "",

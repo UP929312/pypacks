@@ -72,6 +72,7 @@ class CustomItem:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
             return ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(datapack)
+        # TODO: Should this exist here? I mean, it's a sub_item creating more resources, but maybe that's fine?
         if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
             return self.item_model.create_resource_pack_files(datapack)
 
