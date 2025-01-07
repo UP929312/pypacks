@@ -37,9 +37,9 @@ from pypacks.resources.item_model_definition import (
     ItemModelType,
 )
 # =============================================================================
-from pypacks.scripts.all_item_instances import DEFAULT_ITEMS
+from pypacks.scripts.repos.all_item_instances import DEFAULT_ITEMS
 
-from pypacks.datapack import Datapack
+from pypacks.pack import Pack
 
 from pypacks.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 
@@ -76,7 +76,7 @@ __all__ = [
 
     "DEFAULT_ITEMS",
 
-    "Datapack",
+    "Pack",
 
     "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
 ]

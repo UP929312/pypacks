@@ -55,7 +55,7 @@ for item, data in all_item_data.items():
         items.append(item.upper())
         lines.append(line)
 
-output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\scripts\\all_item_instances.py"
+output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\scripts\\repos\\all_item_instances.py"
 with open(output_path, "w") as file:
     file.write("\n".join(lines)+"\n\n")
     file.write("DEFAULT_ITEMS = {\n" +

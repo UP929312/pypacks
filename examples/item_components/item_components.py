@@ -1,4 +1,4 @@
-# from pypacks import Datapack, CustomItem, Components, CustomSound, CustomJukeboxSong
+# from pypacks import Pack, CustomItem, Components, CustomSound, CustomJukeboxSong
 # from pypacks.resources.item_components import *  # type: ignore[import]
 
 # # ============================================================================================================
@@ -62,8 +62,8 @@
 # # endregion
 # # ============================================================================================================
 
-# datapack = Datapack(
-#     "Item Components", "A cool datapack", "item_components", "pack_icon.png", world_name="ItemComponents",
+# pack = Pack(
+#     "Item Components", "A cool pack", "item_components", "pack_icon.png", world_name="ItemComponents",
 #     custom_items=custom_items,
 #     custom_sounds=[custom_sound],
 #     custom_jukebox_songs=[custom_jukebox_song],

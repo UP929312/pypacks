@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from pypacks.resources.custom_mcfunction import MCFunction
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
 
 
 # This is a simple raycasting system that can be used to detect blocks in a line of sight.
@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 # and if the we should check if the ray_transitive_blocks is present or absent.
 # An example of this is:
 # {
-#     "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
-#     "failed_function": f"{datapack.namespace}:raycast/failed",
+#     "hit_block_function": f"{pack_namespace}:raycast/hit_block",
+#     "failed_function": f"{pack_namespace}:raycast/failed",
 #     "ray_transitive_blocks": "#minecraft:replaceable",
 #     "if_or_unless": "unless",
 # }
@@ -21,11 +21,11 @@ if TYPE_CHECKING:
 # If we set it to "if", we will stop the ray "if" we hit a block.
 
 
-def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunction, ...]:
+def generate_default_raycasting_functions(pack_namespace: str) -> tuple[MCFunction, ...]:
     DEBUG_RAYCASTING = False
     arguments = {
-        "hit_block_function": f"{datapack.namespace}:raycast/hit_block",
-        "failed_function": f"{datapack.namespace}:raycast/failed",
+        "hit_block_function": f"{pack_namespace}:raycast/hit_block",
+        "failed_function": f"{pack_namespace}:raycast/failed",
         "ray_transitive_blocks": "#minecraft:replaceable",
         "if_or_unless": "unless",
     }
@@ -64,8 +64,7 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
 
     ray = MCFunction("ray", [
         "# Run a function if a block was detected",
-        # f"$execute unless block ~ ~ ~ $(ray_transitive_blocks) run function {hit_block_set_score.get_reference(datapack)} {{\"hit_block_function\": \"$(hit_block_function)\"}}",
-        f"$execute $(if_or_unless) block ~ ~ ~ $(ray_transitive_blocks) run function {hit_block_set_score.get_reference(datapack)} {{\"hit_block_function\": \"$(hit_block_function)\"}}",
+        f"$execute $(if_or_unless) block ~ ~ ~ $(ray_transitive_blocks) run function {hit_block_set_score.get_reference(pack_namespace)} {{\"hit_block_function\": \"$(hit_block_function)\"}}",
         "",
         "# Add one distance to the ray",
         "scoreboard players add #distance raycast 1",
@@ -77,14 +76,14 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         "$execute if score #hit raycast matches 0 if score #distance raycast matches 551.. run function $(failed_function)",
         "",
         "# Advance forward and run the ray again if no block was found",
-        f"$execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {datapack.namespace}:raycast/ray {formatted_arguments_replacements}",
+        f"$execute if score #hit raycast matches 0 if score #distance raycast matches ..550 positioned ^ ^ ^0.01 run function {pack_namespace}:raycast/ray {formatted_arguments_replacements}",
         ],
         ["raycast"],
     )
 
     # This exists so we don't have to have everything in start_ray duplicated, as an interface, almost.
     populate_start_ray = MCFunction("populate_start_ray", [
-        f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
+        f"function {pack_namespace}:raycast/start_ray {formatted_arguments}",
         ],
         ["raycast"],
     )
@@ -99,7 +98,7 @@ def generate_default_raycasting_functions(datapack: "Datapack") -> tuple[MCFunct
         "playsound minecraft:ui.button.click block @s ~ ~ ~",
         "",
         "# Activating the raycast. This function will call itself until it is done (at height of player - 1.62 blocks high)",
-        f"$execute positioned ~ ~1.62 ~ run function {datapack.namespace}:raycast/ray {formatted_arguments_replacements}",
+        f"$execute positioned ~ ~1.62 ~ run function {pack_namespace}:raycast/ray {formatted_arguments_replacements}",
         "",
         "# Raycasting finished, removing tag from the raycaster.",
         "tag @s remove is_raycasting",

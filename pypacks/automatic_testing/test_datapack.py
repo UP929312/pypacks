@@ -1,4 +1,4 @@
-from pypacks import Datapack
+from pypacks import Pack
 from pypacks.resources.custom_recipe import FurnaceRecipe
 # ============================================================================================================
 # Custom recipes
@@ -9,7 +9,7 @@ world_name = "PyPacksWorld"
 datapack_name = "PyPacks Tests"
 namespace = "pypacks_tests"
 
-datapack = Datapack(
+pack = Pack(
     datapack_name, "The testing framework datapack", namespace, world_name=world_name,
     custom_recipes=recipes,  # type: ignore[arg-type]
 )

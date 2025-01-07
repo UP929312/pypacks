@@ -1,5 +1,5 @@
 from pypacks import (
-    Datapack, CustomItem, Components, CustomPainting, CustomSound, CustomJukeboxSong, CustomBlock,
+    Pack, CustomItem, Components, CustomPainting, CustomSound, CustomJukeboxSong, CustomBlock, CustomEnchantment,
     CustomLootTable, RefBookCategory,
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
 )
@@ -182,7 +182,54 @@ special_model = CustomItemModelDefinition("special_model", SpecialItemModel(
 custom_item_model_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model]
 # endregion
 # ============================================================================================================
-datapack = Datapack(
+# region: Custom Enchants
+# custom_enchantment = CustomEnchantment(
+#     "beam", "Beam", "minecraft:quick_charge", "minecraft:crossbow", weight=10, max_level=1, min_cost_base=1, per_level_increase_min=10,
+#     max_cost_base=50, per_level_increase_max=0, anvil_cost=0, slots=["mainhand"], effects=[],  # WORK TO BE DONE!
+# )
+custom_enchantments = []  # custom_enchantment
+# {
+#   "description": "Beam",
+#   "exclusive_set": "minecraft:quick_charge",
+#   "supported_items": "minecraft:crossbow",
+#   "weight": 10,
+#   "max_level": 1,
+#   "min_cost": {
+#     "base": 1,
+#     "per_level_above_first": 10
+#   },
+#   "max_cost": {
+#     "base": 50,
+#     "per_level_above_first": 0
+#   },
+#   "anvil_cost": 0,
+#   "slots": [
+#     "mainhand"
+#   ],
+#   "effects": {
+#     "minecraft:post_attack": [
+#       {
+#         "effect": {
+#           "type": "minecraft:run_function",
+#           "function": "test:beam"
+#         },
+#         "enchanted": "attacker",
+#         "affected": "victim"
+#       }
+#     ],
+#     "minecraft:projectile_spawned": [
+#       {
+#         "effect": {
+#           "type": "minecraft:run_function",
+#           "function": "test:beamarrow"
+#         }
+#       }
+#     ]
+#   }
+# }
+# endregion
+# ============================================================================================================
+datapack = Pack(
     "PyPacks Testing", "A cool datapack", "pypacks_testing", "pack_icon.png", world_name="PyPacksWorld",
     custom_recipes=recipes,
     custom_items=custom_items,
@@ -192,5 +239,6 @@ datapack = Datapack(
     custom_blocks=custom_blocks,
     custom_loot_tables=loot_tables,
     custom_item_model_definitions=custom_item_model_definitions,
+    custom_enchantments=custom_enchantments,
     # custom_advancements=[eating_advancement],
 )

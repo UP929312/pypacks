@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TypeAlias, Any, TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
 
 from pypacks.image_manipulation.recipe_image_data import generate_recipe_image
 from pypacks.resources.custom_item import CustomItem
@@ -24,7 +24,7 @@ class GenericRecipe:
     def __post_init__(self) -> None:
         self.recipe_image_bytes = generate_recipe_image(self)  # type: ignore
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     def format_item_or_string(self, item_or_string: "str | CustomItem") -> str:
@@ -32,9 +32,9 @@ class GenericRecipe:
             return item_or_string.base_item
         return item_or_string
 
-    def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack.namespace), file, indent=4)
+    def create_datapack_files(self, pack: "Pack") -> None:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass
@@ -54,7 +54,7 @@ class ShapelessCraftingRecipe(GenericRecipe):
 
         self.recipe_image_bytes = generate_recipe_image(self)
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:crafting_shapeless",
             "category": self.recipe_category,
@@ -65,7 +65,7 @@ class ShapelessCraftingRecipe(GenericRecipe):
             }
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, call-overload]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload]
         return data
 
 
@@ -88,7 +88,7 @@ class ShapedCraftingRecipe(GenericRecipe):
         row_3 = self.rows[2] if len(self.rows) == 3 else None
         self.removed_nones_rows = [x for x in [row_1, row_2, row_3] if x is not None]
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:crafting_shaped",
             "category": self.recipe_category,
@@ -101,7 +101,7 @@ class ShapedCraftingRecipe(GenericRecipe):
             "show_notification": True,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, call-overload, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload, assignment]
         return data
 
 
@@ -115,7 +115,7 @@ class CraftingTransmuteRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {
             "type": "minecraft:crafting_shapeless",
             "category": self.recipe_category,
@@ -136,7 +136,7 @@ class FurnaceRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="furnace")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:smelting",
             "category": self.recipe_category,
@@ -148,7 +148,7 @@ class FurnaceRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
         return data
 
 
@@ -163,7 +163,7 @@ class BlastFurnaceRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="blast_furnace")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:blasting",
             "category": self.recipe_category,
@@ -175,7 +175,7 @@ class BlastFurnaceRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
         return data
 
 
@@ -190,7 +190,7 @@ class CampfireRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="campfire")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:campfire_cooking",
             "category": self.recipe_category,
@@ -202,7 +202,7 @@ class CampfireRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
         return data
 
 
@@ -217,7 +217,7 @@ class SmithingTransformRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:smithing_transform",
             "category": self.recipe_category,
@@ -227,7 +227,7 @@ class SmithingTransformRecipe(GenericRecipe):
             "result": {"id": self.format_item_or_string(self.result)},
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
         return data
 
 
@@ -240,7 +240,7 @@ class SmithingTrimRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:smithing_trim",
             "template": {"item": self.template_item},
@@ -260,7 +260,7 @@ class SmokerRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="smoker")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:smoking",
             "category": self.recipe_category,
@@ -272,7 +272,7 @@ class SmokerRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
         return data
 
 
@@ -286,7 +286,7 @@ class StonecutterRecipe(GenericRecipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="stonecutter")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:stonecutting",
             "category": self.recipe_category,
@@ -297,7 +297,7 @@ class StonecutterRecipe(GenericRecipe):
             }
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(datapack_namespace)  # type: ignore[index]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index]
         return data
 
 

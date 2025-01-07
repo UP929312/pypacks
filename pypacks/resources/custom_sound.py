@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
 
 
 @dataclass
@@ -23,18 +23,18 @@ class CustomSound:
         assert 0 <= self.volume <= 1, "Volume must be between 0 and 1"
         assert 0.5 <= self.pitch <= 2, "Pitch must be between 0.5 and 2"
 
-    def get_reference(self, datapack_namespace: str) -> str:
-        return f"{datapack_namespace}:{self.internal_name}"
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"sounds", exist_ok=True)
-        shutil.copyfile(self.ogg_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"sounds"/f"{self.internal_name}.ogg")
+    def create_resource_pack_files(self, pack: "Pack") -> None:
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"sounds", exist_ok=True)
+        shutil.copyfile(self.ogg_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"sounds"/f"{self.internal_name}.ogg")
 
-    def create_sound_entry(self, datapack: "Datapack") -> dict[str, list[dict[str, Any]] | str]:
+    def create_sound_entry(self, pack_namespace: str) -> dict[str, list[dict[str, Any]] | str]:
         return {
             "sounds": [
                 {
-                    "name": f"{datapack.namespace}:{self.internal_name}",
+                    "name": f"{pack_namespace}:{self.internal_name}",
                     "volume": self.volume,
                     "pitch": self.pitch,
                     "stream": self.stream,

@@ -5,7 +5,7 @@ from pypacks.resources.item_components import Components, WrittenBookContent
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
 
 ICONS_PER_ROW = 5
@@ -33,7 +33,6 @@ class OnClickChangePage:
 @dataclass
 class OnClickRunCommand:
     command: str
-    datapack: "Datapack"
 
     def get_json_data(self) -> dict[str, Any]:
         return {"clickEvent": {"action": "run_command", "value": self.command}}
@@ -59,10 +58,10 @@ class OnHoverShowTextRaw:
 @dataclass
 class OnHoverShowItem:
     custom_item: "CustomItem"
-    datapack_namespace: str
+    pack_namespace: str
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"hoverEvent": {"action": "show_item", "contents": {"id": self.custom_item.base_item, "components": self.custom_item.to_dict(self.datapack_namespace)}}}
+        return {"hoverEvent": {"action": "show_item", "contents": {"id": self.custom_item.base_item, "components": self.custom_item.to_dict(self.pack_namespace)}}}
 
 
 # =======================================================================================================================================
@@ -246,9 +245,9 @@ class FormattedWrittenBook:
     title: str
     author: str
 
-    def generate_give_command(self, datapack: "Datapack") -> str:
+    def generate_give_command(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_item import CustomItem
 
         custom_item_data = Components(written_book_content=WrittenBookContent(self.title, self.author, [x.get_json_data() for x in self.pages]))
         custom_item = CustomItem("formatted_written_book", "minecraft:written_book", components=custom_item_data)
-        return custom_item.generate_give_command(datapack)
+        return custom_item.generate_give_command(pack_namespace)

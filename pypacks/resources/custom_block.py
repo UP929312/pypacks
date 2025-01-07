@@ -8,7 +8,7 @@ from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTab
 from pypacks.resources.custom_mcfunction import MCFunction
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.resources.constants import Slabs
     from pypacks.resources.custom_item import CustomItem
 
@@ -62,7 +62,7 @@ class CustomBlock:
         class_.set_or_create_loot_table()
         return class_
 
-    def create_advancement(self, datapack: "Datapack") -> "CustomAdvancement":
+    def create_advancement(self, pack_namespace: str) -> "CustomAdvancement":
         """Required to detect when the custom block is placed."""
         condition = {
             "location": [
@@ -77,7 +77,7 @@ class CustomBlock:
             ]
         }
         criteria = Criteria(f"placed_{self.internal_name}", "minecraft:placed_block", conditions=condition)
-        rewarded_function = f"{datapack.namespace}:custom_blocks/revoke_and_run/revoke_and_run_{self.internal_name}"
+        rewarded_function = f"{pack_namespace}:custom_blocks/revoke_and_run/revoke_and_run_{self.internal_name}"
         advancement = CustomAdvancement(f"placed_{self.internal_name}", criteria=[criteria], rewarded_function=rewarded_function, hidden=True)
         return advancement
 
@@ -97,22 +97,22 @@ class CustomBlock:
             "execute if score rotation player_pitch matches 45..90 run scoreboard players set rotation_group player_pitch 3",  # Down
         ], ["custom_blocks"])
 
-    def generate_functions(self, datapack: "Datapack") -> tuple["MCFunction", ...]:
+    def generate_functions(self, pack_namespace: str) -> tuple["MCFunction", ...]:
         assert isinstance(self.block_texture, FacePaths)
         # These are in reverse order (pretty much), so we can reference them in the next function.
         # ============================================================================================================
         # Has to be secondary so we have @s set correctly.
         execute_as_item_display = MCFunction(f"execute_on_item_display_{self.internal_name}", [
             # Give two tags:
-            f"tag @s add {datapack.namespace}.custom_block",
-            f"tag @s add {datapack.namespace}.custom_block.{self.internal_name}",
+            f"tag @s add {pack_namespace}.custom_block",
+            f"tag @s add {pack_namespace}.custom_block.{self.internal_name}",
 
             # Make it _slightly_ bigger than the block, so it hides the original (only a tiny bit bigger), to stop z-fighting too.
             "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",  # TODO: This isn't right for slabs I think?
             "data modify entity @s brightness set value {block: 15, sky: 15}",
 
             # For item displays, container.0 is just the item it is displaying.
-            f"item replace entity @s container.0 with minecraft:sponge[minecraft:item_model='{datapack.namespace}:{self.internal_name}']",
+            f"item replace entity @s container.0 with minecraft:sponge[minecraft:item_model='{pack_namespace}:{self.internal_name}']",
 
             # ============================================================================================================
             # ROTATION:
@@ -134,28 +134,28 @@ class CustomBlock:
         )
         # Spawn the item display, then call the setup on it directly.
         spawn_item_display = MCFunction(f"setup_item_display_{self.internal_name}", [
-            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {execute_as_item_display.get_reference(datapack)}",
+            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {execute_as_item_display.get_reference(pack_namespace)}",
             ],
             ["custom_blocks", "setup_item_display"],
         )
         # ============================================================================================================
         arguments = {
-            "hit_block_function": f"{spawn_item_display.get_reference(datapack)}",
-            "failed_function": f"{datapack.namespace}:raycast/failed",
+            "hit_block_function": f"{spawn_item_display.get_reference(pack_namespace)}",
+            "failed_function": f"{pack_namespace}:raycast/failed",
             "ray_transitive_blocks": f"{self.base_block}",
             "if_or_unless": "if",
         }
         formatted_arguments = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
         populate_start_ray = MCFunction(f"populate_start_ray_{self.internal_name}", [
-                f"function {datapack.namespace}:raycast/start_ray {formatted_arguments}",
+                f"function {pack_namespace}:raycast/start_ray {formatted_arguments}",
             ],
             ["custom_blocks", "populate_start_ray"],
         )
         # ============================================================================================================
         revoke_and_run_mcfunction = MCFunction(f"revoke_and_run_{self.internal_name}", [
-                f"advancement revoke @s only {datapack.namespace}:placed_{self.internal_name}",
-                f"function {self.generate_detect_rotation_function().get_reference(datapack)}",
-                f"function {populate_start_ray.get_reference(datapack)}",
+                f"advancement revoke @s only {pack_namespace}:placed_{self.internal_name}",
+                f"function {self.generate_detect_rotation_function().get_reference(pack_namespace)}",
+                f"function {populate_start_ray.get_reference(pack_namespace)}",
             ],
             ["custom_blocks", "revoke_and_run"],
         )
@@ -164,7 +164,7 @@ class CustomBlock:
                 "kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
                 "kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
                 "kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
-                f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(datapack.namespace)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
+                f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(pack_namespace)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
                 "kill @s"  # Kill the item display
             ],
             ["custom_blocks", "on_destroy"],
@@ -173,12 +173,12 @@ class CustomBlock:
         return execute_as_item_display, spawn_item_display, populate_start_ray, revoke_and_run_mcfunction, on_destroy_no_silk_touch_function
 
     @staticmethod
-    def on_tick_function(datapack: "Datapack") -> "MCFunction":
-        """Runs every tick, but once per datapack, not per block."""
+    def on_tick_function(pack: "Pack") -> "MCFunction":
+        """Runs every tick, but once per pack, not per block."""
         return MCFunction("all_blocks_tick", [
             # Kill all xp orbs and items, spawn the loot, then kill the item display itself.
-            *[f"execute as @e[type=item_display, tag={datapack.namespace}.custom_block.{custom_block.internal_name}] at @s if block ~ ~ ~ minecraft:air run function {datapack.namespace}:custom_blocks/on_destroy/on_destroy_no_silk_touch_{custom_block.internal_name}"
-              for custom_block in datapack.custom_blocks],
+            *[f"execute as @e[type=item_display, tag={pack.namespace}.custom_block.{custom_block.internal_name}] at @s if block ~ ~ ~ minecraft:air run function {pack.namespace}:custom_blocks/on_destroy/on_destroy_no_silk_touch_{custom_block.internal_name}"
+              for custom_block in pack.custom_blocks],
         ], ["custom_blocks"])
 
     def create_slab(self, slab_block: "Slabs") -> "CustomBlock":
@@ -207,5 +207,5 @@ class CustomBlock:
         new_slab_block.block_item = slab_item
         return new_slab_block
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
-        self.model_object.create_resource_pack_files(datapack)
+    def create_resource_pack_files(self, pack: "Pack") -> None:
+        self.model_object.create_resource_pack_files(pack)

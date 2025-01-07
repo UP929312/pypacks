@@ -10,10 +10,10 @@ from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
 from pypacks.utils import to_component_string, colour_codes_to_json_format, recursively_remove_nones_from_data
 
-from pypacks.scripts.all_items import MinecraftItem
+from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.reference_book_config import RefBookConfig
 
 
@@ -68,26 +68,26 @@ class CustomItem:
         self.components.food = Food(nutrition=0, saturation=0, can_always_eat=True)
         self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+    def create_resource_pack_files(self, pack: "Pack") -> None:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
-            ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(datapack)
+            ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(pack)
         # TODO: Should this exist here? I mean, it's a sub_item creating more resources, but maybe that's fine?
         if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
-            self.item_model.create_resource_pack_files(datapack)
+            self.item_model.create_resource_pack_files(pack)
 
-    def create_datapack_files(self, datapack: "Datapack") -> None:
+    def create_datapack_files(self, pack: "Pack") -> None:
         # Create the give command for use in books
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w") as file:
-            file.write(self.generate_give_command(datapack))
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w") as file:
+            file.write(self.generate_give_command(pack.namespace))
 
-    def create_right_click_revoke_advancement_function(self, datapack: "Datapack") -> MCFunction:
+    def create_right_click_revoke_advancement_function(self, pack_namespace: str) -> MCFunction:
         revoke_and_call_mcfunction = MCFunction(
             self.internal_name, [
-                f"advancement revoke @s only {datapack.namespace}:custom_right_click_for_{self.internal_name}",
+                f"advancement revoke @s only {pack_namespace}:custom_right_click_for_{self.internal_name}",
             ], ["right_click"]
         )
-        run_code = f"function {self.on_right_click.get_reference(datapack)}" if isinstance(self.on_right_click, MCFunction) else self.on_right_click
+        run_code = f"function {self.on_right_click.get_reference(pack_namespace)}" if isinstance(self.on_right_click, MCFunction) else self.on_right_click
         if self.use_right_click_cooldown is not None:
             action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
             revoke_and_call_mcfunction.commands.extend([
@@ -100,12 +100,12 @@ class CustomItem:
 
         return revoke_and_call_mcfunction
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         # TODO: Clean this up
         if self.item_model:
-            item_model: str | None = self.item_model.get_reference(datapack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
+            item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
         else:
-            item_model = f"{datapack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
+            item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
@@ -113,12 +113,12 @@ class CustomItem:
             "rarity": self.rarity,
             "item_model": item_model,
             "custom_data": self.custom_data if self.custom_data else None,
-            **self.components.to_dict(datapack_namespace),
+            **self.components.to_dict(pack_namespace),
         })
 
-    def generate_give_command(self, datapack: "Datapack") -> str:
+    def generate_give_command(self, pack_namespace: str) -> str:
         components = ", ".join([
             to_component_string({key: value})
-            for key, value in self.to_dict(datapack.namespace).items()
+            for key, value in self.to_dict(pack_namespace).items()
         ])
         return f"give @p {self.base_item}[{components}]"

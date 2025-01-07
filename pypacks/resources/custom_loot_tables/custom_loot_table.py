@@ -8,7 +8,7 @@ from pypacks.resources.custom_loot_tables.functions import LootTableFunction, Se
 from pypacks.resources.custom_loot_tables.number_provider import BinomialNumberProvider, UniformNumberProvider
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
 
 LootContextTypes = Literal["empty", "chest", "fishing", "entity", "equipment", "archaeology", "vault",
@@ -68,7 +68,7 @@ class Entry:
     # weight: int = 1
     # quality: int = 0
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {}
 
 
@@ -79,8 +79,8 @@ class SingleItemRangeEntry(Entry):
     min_count: int = 1
     max_count: int = 1
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
-        return UniformDistributionEntry(self.item, self.min_count, self.max_count).to_dict(datapack_namespace)
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return UniformDistributionEntry(self.item, self.min_count, self.max_count).to_dict(pack_namespace)
 
 
 @dataclass
@@ -90,9 +90,9 @@ class BinomialDistributionEntry(Entry):
     n: int
     p: float
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_item import CustomItem
-        components = self.item.to_dict(datapack_namespace) if isinstance(self.item, CustomItem) else {}
+        components = self.item.to_dict(pack_namespace) if isinstance(self.item, CustomItem) else {}
         return {
             "type": "minecraft:item",
             "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
@@ -108,9 +108,9 @@ class UniformDistributionEntry(Entry):
     min_count: int = 1
     max_count: int = 1
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_item import CustomItem
-        components = self.item.to_dict(datapack_namespace) if isinstance(self.item, CustomItem) else {}
+        components = self.item.to_dict(pack_namespace) if isinstance(self.item, CustomItem) else {}
         return {
             "type": "minecraft:item",
             "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
@@ -136,10 +136,10 @@ class Pool:
     bonus_rolls: int | None = None
     entries: list[Entry] = field(default_factory=list)
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "rolls": self.rolls,
-            "entries": [entry.to_dict(datapack_namespace) for entry in self.entries]
+            "entries": [entry.to_dict(pack_namespace) for entry in self.entries]
         }
         # if self.bonus_rolls:
         #     data["bonus_rolls"] = self.bonus_rolls
@@ -156,10 +156,10 @@ class SimpleRangePool:
     min_count: int
     max_count: int
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "rolls": 1,
-            "entries": [SingleItemRangeEntry(self.item, self.min_count, self.max_count).to_dict(datapack_namespace)]
+            "entries": [SingleItemRangeEntry(self.item, self.min_count, self.max_count).to_dict(pack_namespace)]
         }
 
 
@@ -167,8 +167,8 @@ class SimpleRangePool:
 class SingleItemPool:
     item: "str | CustomItem"
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, Any]:
-        return SimpleRangePool(self.item, min_count=1, max_count=1).to_dict(datapack_namespace)
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return SimpleRangePool(self.item, min_count=1, max_count=1).to_dict(pack_namespace)
 
 
 LootTablePool: TypeAlias = "Pool | SingleItemPool | SimpleRangePool"
@@ -189,24 +189,24 @@ class CustomLootTable:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="loot_table")
 
-    def get_reference(self, datapack_namespace: str) -> str:
-        return f"{datapack_namespace}:{self.internal_name}"
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return recursively_remove_nones_from_data(  # type: ignore[no-any-return]
             {
                 "type": self.loot_table_type,
-                "pools": [pool.to_dict(datapack_namespace) for pool in self.pools],
+                "pools": [pool.to_dict(pack_namespace) for pool in self.pools],
                 "functions": [function.to_dict() for function in self.functions] if self.functions else None
             }
         )
 
-    def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack.namespace), file, indent=4)
+    def create_datapack_files(self, pack: "Pack") -> None:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
-    def generate_give_command(self, datapack: "Datapack") -> str:
-        return f"loot give @p loot {datapack.namespace}:{self.internal_name}"
+    def generate_give_command(self, pack: "Pack") -> str:
+        return f"loot give @p loot {pack.namespace}:{self.internal_name}"
 
 
 class SingleItemLootTable(CustomLootTable):

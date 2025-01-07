@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Datapack:
-    """Given a nice name for the datapack, a description, a namespace (usually a version of the datapack without spaces or punctuation, all lowercase),
+class Pack:
+    """Given a nice name for the datapack and resouce pack, a description, a namespace (usually a version of the datapack without spaces or punctuation, all lowercase),
     A path to a pack icon (optional), a world name (if you're not passing in a datapack output path, so it'll automatically be put in that world)
     A datapack output path (where the datapack will be saved, optional), a resource pack path (where the resource pack will be saved),
     And a list of custom elements."""
@@ -75,8 +75,8 @@ class Datapack:
     def add_internal_functions(self) -> None:
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
-            self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self))
-            self.mcfunctions.append(item.create_right_click_revoke_advancement_function(self))
+            self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self.namespace))
+            self.mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
@@ -84,11 +84,11 @@ class Datapack:
                 self.custom_items.append(block.block_item)  # The custom item
             if block.loot_table is not None:
                 self.custom_loot_tables.append(block.loot_table)  # When breaking the block
-            self.custom_advancements.append(block.create_advancement(self))  # Advancement for placing the block
-            self.mcfunctions.extend(block.generate_functions(self))  # Raycasting functions
+            self.custom_advancements.append(block.create_advancement(self.namespace))  # Advancement for placing the block
+            self.mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
 
         if self.custom_blocks:
-            self.mcfunctions.extend(generate_default_raycasting_functions(self))
+            self.mcfunctions.extend(generate_default_raycasting_functions(self.namespace))
             self.mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
             self.mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
         # ==================================================================================
@@ -111,7 +111,7 @@ class Datapack:
             CustomItem(
                 custom_item_model_def.internal_name, custom_item_model_def.showcase_item, custom_name=custom_item_model_def.internal_name,
                 item_model=custom_item_model_def, ref_book_config=HIDDEN_REF_BOOK_CONFIG
-            ).generate_give_command(self)
+            ).generate_give_command(self.namespace)
             for custom_item_model_def in self.custom_item_model_definitions
             if custom_item_model_def.showcase_item is not None
         ])
@@ -140,7 +140,7 @@ class Datapack:
         tick_mcfunction.create_if_empty = False
         self.mcfunctions.extend([load_mcfunciton, tick_mcfunction])
         if self.custom_items:
-            self.mcfunctions.append(create_wall(self.custom_items, self))
+            self.mcfunctions.append(create_wall(self.custom_items, self.namespace))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")

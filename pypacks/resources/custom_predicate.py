@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
 
 # https://minecraft.wiki/w/Predicate#JSON_format
 PredicateConditionType = Literal["all_of", "any_of", "block_state_property", "damage_source_properties", "enchantment_active_check",
@@ -23,16 +23,17 @@ class Predicate:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="predicate")
 
-    def to_dict(self, datapack_namespace: str) -> dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         return {
             "condition": self.condition,
             **(self.extra_data or {})
         }
 
-    def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack.namespace), file, indent=4)
+    def create_datapack_files(self, pack: "Pack") -> None:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(), file, indent=4)
 
+# TODO: Type this:
 # The root element of the predicate.
 #  condition: The resource location of the condition type to check.
 # Other parts of the predicate, specified below.

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
 
 
 @dataclass
@@ -19,14 +19,14 @@ class MCFunction:
     def __post_init__(self) -> None:
         assert len("".join(self.commands)) <= 2_000_000, "MCFunction files must be less than 2 million characters!"
 
-    def get_reference(self, datapack: "Datapack") -> str:
-        return f"{datapack.namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
 
-    def create_datapack_files(self, datapack: "Datapack") -> None:
+    def create_datapack_files(self, pack: "Pack") -> None:
         if (not self.commands or self.commands == [""]) and not self.create_if_empty:
             return
         # Can't use / here because of *self.sub_directories
-        path = Path(datapack.datapack_output_path, "data", datapack.namespace, self.__class__.datapack_subdirectory_name,
+        path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name,
                     *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
             file.write("\n".join(self.commands))

@@ -6,7 +6,7 @@ from typing import Literal, Any, TYPE_CHECKING
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
 
 TriggerType = Literal[
@@ -65,7 +65,7 @@ class CustomAdvancement:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="advancement")
 
-    def to_dict(self, datapack_nameespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "parent": self.parent,
             "display": {
@@ -90,12 +90,12 @@ class CustomAdvancement:
             "sends_telemetry_event": True if self.send_telemetry_event else None,
         })
 
-    def create_datapack_files(self, datapack: "Datapack") -> None:
-        with open(Path(datapack.datapack_output_path)/"data"/datapack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(datapack.namespace), file, indent=4)
+    def create_datapack_files(self, pack: "Pack") -> None:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @staticmethod
-    def generate_right_click_functionality(item: "CustomItem", datapack: "Datapack") -> "CustomAdvancement":
+    def generate_right_click_functionality(item: "CustomItem", pack_namespace: str) -> "CustomAdvancement":
         criteria = Criteria(f"eating_{item.internal_name}", "minecraft:using_item", {
             "item": {
                 "predicates": {  # We use predicates instead of components because components require exact match, predicates require minimum match
@@ -105,6 +105,6 @@ class CustomAdvancement:
         })
         eating_advancement = CustomAdvancement(
             f"custom_right_click_for_{item.internal_name}", [criteria],
-            hidden=True, rewarded_function=f"{datapack.namespace}:right_click/{item.internal_name}"
+            hidden=True, rewarded_function=f"{pack_namespace}:right_click/{item.internal_name}"
         )
         return eating_advancement

@@ -6,10 +6,10 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pypacks.resources.item_model_definition import ModelItemModel, ItemModelType
-from pypacks.scripts.all_items import MinecraftItem
+from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.resources.item_model_definition import ItemModelType
 
 # TODO: Support non cubes? Player heads? Custom models?
@@ -26,17 +26,17 @@ class CustomItemModelDefinition:
         if isinstance(self.model, str):
             self.model = ModelItemModel(self.model)
 
-    def get_reference(self, datapack_namespace: str) -> str:
-        return f"{datapack_namespace}:{self.internal_name}"
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+    def create_resource_pack_files(self, pack: "Pack") -> None:
         # https://www.discord.com/channels/154777837382008833/1323240917792063489
         # https://minecraft.wiki/w/Items_model_definition
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items", exist_ok=True)
 
         # Item model definition
         assert isinstance(self.model, ItemModelType)
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
             json.dump(self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {}), file, indent=4)
 
 
@@ -45,13 +45,13 @@ class ItemModel:
     internal_name: str
     texture_bytes: bytes
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+    def create_resource_pack_files(self, pack: "Pack") -> None:
         # The resource pack requires 3 things:
         # 1. The model definition/config (in items/<internal_name>.json)
         # 2. The model components, including textures, parent, etc. (in models/item/<internal_name>.json)
         # 3. The texture itself (in textures/item/<internal_name>.png)
         # ├── assets/
-        # │   └── <datapack namespace>/
+        # │   └── <pack namespace>/
         # │       ├── models/
         # │       │   └── item/
         # │       │       └── <internal_name>.json  # Defines the item's appearance in-game
@@ -60,16 +60,16 @@ class ItemModel:
         # │       └── textures/
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
 
-        layers = {"layer0": f"{datapack.namespace}:item/{self.internal_name}"}
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
+        layers = {"layer0": f"{pack.namespace}:item/{self.internal_name}"}
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
             json.dump({"parent": "minecraft:item/generated", "textures": layers}, file, indent=4)
 
-        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{datapack.namespace}:item/{self.internal_name}").create_resource_pack_files(datapack)
+        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png", "wb") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item"/f"{self.internal_name}.png", "wb") as file:
             file.write(self.texture_bytes)
 
 
@@ -103,10 +103,10 @@ class SymmetricCubeModel:
     internal_name: str
     texture_path: str
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+    def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
         # ├── assets/
-        # │   └── <datapack namespace>/
+        # │   └── <pack namespace>/
         # │       ├── models/
         # │       │   └── item/
         # │       │       └── <internal_name>.json  # Defines the item's appearance in-game
@@ -115,18 +115,18 @@ class SymmetricCubeModel:
         # │       └── textures/
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
 
-        layers = {"all": f"{datapack.namespace}:item/{self.internal_name}"}
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
+        layers = {"all": f"{pack.namespace}:item/{self.internal_name}"}
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
             json.dump({"parent": "minecraft:block/cube_all", "textures": layers}, file, indent=4)
 
         # Item model definition
-        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{datapack.namespace}:item/{self.internal_name}").create_resource_pack_files(datapack)
+        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
         # Texture
-        shutil.copyfile(self.texture_path, Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}.png")
+        shutil.copyfile(self.texture_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item"/f"{self.internal_name}.png")
 
 
 @dataclass
@@ -135,10 +135,10 @@ class AsymmetricCubeModel:
     internal_name: str
     face_paths: "FacePaths"
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+    def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
         # ├── assets/
-        # │   └── <datapack namespace>/
+        # │   └── <pack namespace>/
         # │       ├── blockstates/
         # │       │   └── <custom_block>.json
         # │       ├── models/
@@ -150,18 +150,18 @@ class AsymmetricCubeModel:
         # │           └── item/
         # │               └── <custom_block>_<top&bottom&front&back&left&right>.png
 
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
 
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}.json", "w") as file:
             json.dump({
                 "variants": {
-                    "": {"model": f"{datapack.namespace}:block/{self.internal_name}"},
+                    "": {"model": f"{pack.namespace}:block/{self.internal_name}"},
                 }
             }, file, indent=4)
 
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
             axial_mapping = {
                 "up": "top",
                 "down": "bottom",
@@ -173,18 +173,18 @@ class AsymmetricCubeModel:
             json.dump({
                 "parent": "block/cube",
                 "textures": {
-                    direction: f"{datapack.namespace}:item/{self.internal_name}_{face}"
+                    direction: f"{pack.namespace}:item/{self.internal_name}_{face}"
                     for direction, face in axial_mapping.items()
                 } | {
-                    "particle": f"{datapack.namespace}:item/{self.internal_name}_front"  # This just stops errors in the logs
+                    "particle": f"{pack.namespace}:item/{self.internal_name}_front"  # This just stops errors in the logs
                 }
             }, file, indent=4)
 
-        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{datapack.namespace}:item/{self.internal_name}").create_resource_pack_files(datapack)
+        CustomItemModelDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
         for face in ["top", "bottom", "front", "back", "left", "right"]:
             if getattr(self.face_paths, face) is not None:
-                path = Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"textures"/"item"/f"{self.internal_name}_{face}.png"
+                path = Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item"/f"{self.internal_name}_{face}.png"
                 with open(path, "wb") as file:
                     file.write(Path(getattr(self.face_paths, face)).read_bytes())
 
@@ -194,7 +194,7 @@ class SlabModel:
     internal_name: str
     texture_path: str
 
-    def create_resource_pack_files(self, datapack: "Datapack") -> None:
+    def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
         # ├── assets/
         # │   └── <namespace>/
@@ -212,31 +212,31 @@ class SlabModel:
         # │               ├── <slab_name>_top.png
         # │               ├── <slab_name>_bottom.png
         # │               └── <slab_name>_side.png
-        with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"blockstates"/f"{self.internal_name}_slab.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}_slab.json", "w") as file:
             json.dump({
                 # Create the blockstates file, pointing to the 3 different models
                 "variants": {
-                    "type=bottom": {"model": f"{datapack.namespace}:item/{self.internal_name}_slab"},
-                    "type=top":    {"model": f"{datapack.namespace}:item/{self.internal_name}_slab_top"},
-                    "type=double": {"model": f"{datapack.namespace}:item/{self.internal_name}"},
+                    "type=bottom": {"model": f"{pack.namespace}:item/{self.internal_name}_slab"},
+                    "type=top":    {"model": f"{pack.namespace}:item/{self.internal_name}_slab_top"},
+                    "type=double": {"model": f"{pack.namespace}:item/{self.internal_name}"},
                 }
             }, file, indent=4)
 
         for suffix in ["slab", "slab_top"]:
-            with open(Path(datapack.resource_pack_path)/"assets"/datapack.namespace/"models"/"item"/f"{self.internal_name}_{suffix}.json", "w") as file:
+            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}_{suffix}.json", "w") as file:
                 json.dump({
                     "parent": "minecraft:block/slab",
                     "textures": {
-                        "bottom": f"{datapack.namespace}:item/{self.internal_name}",
-                        "side": f"{datapack.namespace}:item/{self.internal_name}",
-                        "top": f"{datapack.namespace}:item/{self.internal_name}",
+                        "bottom": f"{pack.namespace}:item/{self.internal_name}",
+                        "side": f"{pack.namespace}:item/{self.internal_name}",
+                        "top": f"{pack.namespace}:item/{self.internal_name}",
                     }
                 }, file, indent=4)
 
-        CustomItemModelDefinition(internal_name=f"{self.internal_name}_slab", model=f"{datapack.namespace}:item/{self.internal_name}_slab").create_resource_pack_files(datapack)
+        CustomItemModelDefinition(internal_name=f"{self.internal_name}_slab", model=f"{pack.namespace}:item/{self.internal_name}_slab").create_resource_pack_files(pack)
 
 
-    # def add_variants(self, datapack: "Datapack", stairs: bool = False, slabs: bool = False,) -> None:
+    # def add_variants(self, pack: "Pack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
         # Fences are too much work (maybe?)
         # Walls aren't wood, but are also like fences

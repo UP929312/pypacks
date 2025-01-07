@@ -1,4 +1,4 @@
-from pypacks import Datapack, CustomItem, Components
+from pypacks import Pack, CustomItem, Components
 from pypacks.resources.item_components import WrittenBookContent
 from pypacks.reference_book_generator import ReferenceBook
 # from pypacks.written_book_framework import FormattedWrittenBook
@@ -18,7 +18,7 @@ written_book = CustomItem("already_written_in_book", "minecraft:written_book", "
 # c = to_component_string(b)
 # print(c)
 
-dummy_datapack = Datapack("a", "b", "c")
+dummy_datapack = Pack("a", "b", "c")
 
 ref_book = ReferenceBook([])
 pages = [x.get_json_data() for x in ref_book.generate_pages(dummy_datapack)]
@@ -27,7 +27,7 @@ written_book_contents = WrittenBookContent("t", "a", pages)
 print(written_book_contents.to_dict())
 custom_item_data = Components(written_book_content=written_book_contents)
 custom_item = CustomItem("already_written_in_book", "minecraft:written_book", "Written Book", components=custom_item_data)
-print(custom_item.generate_give_command(dummy_datapack))
+print(custom_item.generate_give_command(dummy_datapack.namespace))
 
 # import os
 # os.chdir(os.path.dirname(__file__))

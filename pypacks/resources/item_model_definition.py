@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Literal, Any, TypeAlias
+from typing import Literal, Any, TypeAlias, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pypacks.scripts.repos.models import MinecraftModels
 
 
 def check_color(color: tuple[float, float, float]) -> None:
@@ -15,7 +18,7 @@ def check_color(color: tuple[float, float, float]) -> None:
 @dataclass
 class ModelItemModel:
     """Render a plain model from the models directory."""
-    item_model_name: str  # Specifies the path to the model file of the item, in form of a Namespaced ID.
+    item_model_name: "str | MinecraftModels"  # Specifies the path to the model file of the item, in form of a Namespaced ID.
     tints: list[
         "ConstantTint | DyeTint | GrassTint | FireworkTint | PotionTint | MapColorTint | TeamTint | CustomModelDataTint"
     ] = field(default_factory=list)  # Optional. List of tint components to apply to the model.

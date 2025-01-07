@@ -6,7 +6,7 @@ from typing import Any, TYPE_CHECKING
 from pypacks.resources.constants import COLOUR_CODE_MAPPINGS
 
 if TYPE_CHECKING:
-    from pypacks.datapack import Datapack
+    from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
