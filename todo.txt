@@ -7,6 +7,8 @@ Have generic "Raycast" object, which the player can use...
 
 Translations (grrr)
 
+For any_of enchantment, maybe just take a list as an alternative, and if it's passed in, re-construct the object to use the AnyOfValueEffect?
+
 If we want to allow them to pass in a custom item model, we also need to give a way to pass in the custom texture, and the {"parent": "minecraft:item/generated", "textures": layers} bit...
 
 For custom item models "test item", let them put a custom item so we can apply damage and bundles items?

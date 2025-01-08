@@ -116,7 +116,7 @@ def generate_base_pack(pack: "Pack") -> None:
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(pack.datapack_output_path/"data"/pack.namespace/item.datapack_subdirectory_name, exist_ok=True)
         if hasattr(item, "sub_directories"):
-            os.makedirs(Path(pack.datapack_output_path, "data", pack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)  # type: ignore[abc]
+            os.makedirs(Path(pack.datapack_output_path, "data", pack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)  # pyright: ignore
         item.create_datapack_files(pack)
 
     # Testing command

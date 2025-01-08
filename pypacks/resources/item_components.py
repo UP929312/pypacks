@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 
 if TYPE_CHECKING:
-    from pypacks.pack import Pack
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem

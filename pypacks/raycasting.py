@@ -1,10 +1,4 @@
-from typing import TYPE_CHECKING
-
 from pypacks.resources.custom_mcfunction import MCFunction
-
-if TYPE_CHECKING:
-    from pypacks.pack import Pack
-
 
 # This is a simple raycasting system that can be used to detect blocks in a line of sight.
 # It takes 4 inputs, the hit block function, the failed function, the ray transitive blocks,

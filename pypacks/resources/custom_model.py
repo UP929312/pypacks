@@ -3,7 +3,7 @@ import json
 import shutil
 from pathlib import Path
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.item_model_definition import ModelItemModel, ItemModelType
 from pypacks.scripts.repos.all_items import MinecraftItem
@@ -29,24 +29,27 @@ class CustomItemModelDefinition:
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
 
+    def to_dict(self) -> dict[str, Any]:
+        assert isinstance(self.model, ItemModelType)
+        return self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {})
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # https://www.discord.com/channels/154777837382008833/1323240917792063489
         # https://minecraft.wiki/w/Items_model_definition
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items", exist_ok=True)
 
         # Item model definition
-        assert isinstance(self.model, ItemModelType)
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {}), file, indent=4)
+            json.dump(self.to_dict(), file, indent=4)
 
 
 @dataclass
-class ItemModel:
+class CustomTexture:
     internal_name: str
     texture_bytes: bytes
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        # The resource pack requires 3 things:
+        # The resource pack requires 3 things for a custom texture:
         # 1. The model definition/config (in items/<internal_name>.json)
         # 2. The model components, including textures, parent, etc. (in models/item/<internal_name>.json)
         # 3. The texture itself (in textures/item/<internal_name>.png)

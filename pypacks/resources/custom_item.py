@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.resources.item_components import Consumable, Food, Components
-from pypacks.resources.custom_model import ItemModel
+from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
@@ -71,7 +71,7 @@ class CustomItem:
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
-            ItemModel(self.internal_name, self.image_bytes).create_resource_pack_files(pack)
+            CustomTexture(self.internal_name, self.image_bytes).create_resource_pack_files(pack)
         # TODO: Should this exist here? I mean, it's a sub_item creating more resources, but maybe that's fine?
         if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
             self.item_model.create_resource_pack_files(pack)
