@@ -2,11 +2,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pypacks.written_book_framework import (
-    ElementPage, GridPage, Icon, OnClickChangePage, OnHoverShowText, RowManager, Text, FormattedWrittenBook, RightAlignedIcon,
+    ElementPage, GridPage, GridPageManager, Icon, OnClickChangePage, OnHoverShowText, RowManager, Text, FormattedWrittenBook, RightAlignedIcon,
     OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw,
+    ICONS_PER_ROW, ROWS_PER_PAGE,
 )
 from pypacks.utils import remove_colour_codes
-from pypacks.resources.custom_recipe import *
+from pypacks.resources.custom_recipe import *  # noqa: F403
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -102,75 +103,91 @@ class ReferenceBook:
             Text(pack.font_mapping["logo_256_x_256"], font=f"{pack.namespace}:all_fonts", text_color="white")
         ])
 
+    def _generate_category_to_page_number(self, pack: "Pack") -> dict[str, int]:
+        category_to_page_number = {}
+        current_page_number = 0
+        for category in pack.reference_book_categories:
+            category_to_page_number[category.name] = current_page_number
+            current_page_number += (
+                len([x for x in pack.custom_items if x.ref_book_config.category.name == category.name and not x.ref_book_config.hidden]) // (ICONS_PER_ROW*ROWS_PER_PAGE) + 1
+            )
+        return category_to_page_number
+
     def generate_pages(self, pack: "Pack") -> list["ElementPage | GridPage"]:
         # Page order is as follows:
-        # COVER_PAGE = 1
-        CATEGORIES_PAGE = 2
-        CATEGORY_ITEMS_PAGE = 3  # 3+   One for each category
-        ITEM_PAGE = CATEGORY_ITEMS_PAGE+len(pack.reference_book_categories)  # After we have all the categories, start adding the individual items
-        # BLANK_PAGE = CATEGORY_ITEMS_PAGE*len(pacl.reference_book_categories)+len(pack.custom_items)+1
-
+        COVER_PAGE = 1
+        # ==============================================================================================================================
+        CATEGORIES_STARTING_PAGE = COVER_PAGE + 1
+        CATEGORIES_FINISHING_PAGE = CATEGORIES_STARTING_PAGE + len(pack.reference_book_categories) // (ICONS_PER_ROW*ROWS_PER_PAGE)
+        # ==============================================================================================================================
+        CATEGORY_ITEMS_STARTING_PAGE = CATEGORIES_FINISHING_PAGE + 1  # One for each category
+        CATEGORY_ITEMS_FINISHING_PAGE = CATEGORY_ITEMS_STARTING_PAGE + max(self._generate_category_to_page_number(pack).values())
+        # ==============================================================================================================================
+        ITEM_PAGE_START = CATEGORY_ITEMS_FINISHING_PAGE + 1  # After we have all the categories, start adding the individual items
+        # ==============================================================================================================================
+        # BLANK_PAGE = ITEM_PAGE_START*len(pack.custom_items) + 1  # Just a blank page at the end
+        # ==============================================================================================================================
         # Cover (1)
-        cover_page = self.generate_cover_page(pack)
-
+        cover_page = self.generate_cover_page(pack)  # Has to be pack
+        # ==============================================================================================================================
         # Categories (2)
-        category_page: GridPage = GridPage(
-            Text("Categories", underline=True, text_color="black"),
-            pack.font_mapping["blank_icon"],
-            pack.font_mapping["empty_1_x_1"],
-            pack.namespace,
-            [
-                Icon(pack.font_mapping[f"{category.internal_name}_category_icon"],
-                     pack.namespace,
-                     indent_unicode_char=pack.font_mapping["empty_1_x_1"],
-                     on_hover=OnHoverShowText(f"Go to the `{category.name}` category"),
-                     on_click=OnClickChangePage(CATEGORY_ITEMS_PAGE+i)
+        category_pages: list[GridPage] = GridPageManager(
+            title="Categories",
+            icons=[
+                Icon(
+                    pack.font_mapping[f"{category.internal_name}_category_icon"],
+                    pack.namespace,
+                    indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+                    on_hover=OnHoverShowText(f"Go to the `{category.name}` category"),
+                    on_click=OnClickChangePage(CATEGORY_ITEMS_STARTING_PAGE+i)
                 )
                 for i, category in enumerate(pack.reference_book_categories)
             ],
-            back_button_unicode_char=pack.font_mapping["satchel_icon"],
-        )
+            empty_icon_unicode_char=pack.font_mapping["blank_icon"],
+            indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+            font_namespace=pack.namespace,
+        ).pages
 
-        category_items_pages: list[GridPage] = []
-        # Item list page(s) (3+ )
-        for category in pack.reference_book_categories:
-            # This shows lists of items per category, the button takes you to the individual item page, which comes after all
-            # The cover & category pages, so it's index is CATEGORIES_PAGE + item_index
-            icon_list_page = GridPage(
-                Text(f"{category.name.title()} items", underline=True, text_color="black"),
-                empty_icon_unicode_char=pack.font_mapping["blank_icon"],
-                indent_unicode_char=pack.font_mapping["empty_1_x_1"],
-                font_namespace=pack.namespace,
+        # ==============================================================================================================================
+        # Item list pages
+        category_items_page_managers: list[GridPageManager] = [
+            GridPageManager(
+                title=f"{category.name.title()} items",
                 icons=[
                     Icon(
                         pack.font_mapping[f"{item.internal_name}_icon"],
                         pack.namespace,
                         indent_unicode_char=pack.font_mapping["empty_1_x_1"],
                         on_hover=OnHoverShowText(remove_colour_codes(item.custom_name or item.base_item)),
-                        on_click=OnClickChangePage(ITEM_PAGE+item_index),
+                        on_click=OnClickChangePage(ITEM_PAGE_START+item_index),
                     )
                     for item_index, item in enumerate(pack.custom_items)
                     if item.ref_book_config.category.name == category.name and not item.ref_book_config.hidden
                 ],
-                back_button_page=CATEGORIES_PAGE,
-                back_button_unicode_char=pack.font_mapping["satchel_icon"],
+                empty_icon_unicode_char=pack.font_mapping["blank_icon"],
+                indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+                font_namespace=pack.namespace,
+                # back_button_unicode_char=pack.font_mapping["satchel_icon"],
+                # back_button_page=CATEGORIES_STARTING_PAGE,
             )
-            category_items_pages.append(icon_list_page)
+            for category in pack.reference_book_categories
+        ]
+        # Flatten to a 1d list of pages
+        category_items_pages = [x for y in category_items_page_managers for x in y.pages]
 
-        # Item page(s) (x+)
+        # ==============================================================================================================================
+        # Item pages
         item_pages: list[ElementPage] = []
         for item in pack.custom_items:
-            category_page_index = CATEGORY_ITEMS_PAGE+[x.name for x in pack.reference_book_categories].index(item.ref_book_config.category.name)
-
+            category_page_index = CATEGORY_ITEMS_STARTING_PAGE + self._generate_category_to_page_number(pack)[item.ref_book_config.category.name]
             item_page = ItemPage(item, pack, category_page_index)
             item_pages.append(item_page)  # type: ignore
 
+        # ==============================================================================================================================
         # Blank page:
         blank_page = ElementPage([Text("This page is intentionally left blank")])
-
-        all_pages: list[ElementPage | GridPage] = [cover_page, category_page, *category_items_pages, *item_pages, blank_page]
-
-        return all_pages
+        # ==============================================================================================================================
+        return [cover_page, *category_pages, *category_items_pages, *item_pages, blank_page]
 
     def generate_give_command(self, pack: "Pack") -> str:
         return FormattedWrittenBook(

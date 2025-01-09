@@ -5,7 +5,6 @@ from pypacks.resources.item_components import Components, WrittenBookContent
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
-    from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
 
 ICONS_PER_ROW = 5
@@ -102,6 +101,7 @@ class FilledRow:
 
 @dataclass
 class RowManager:
+    """Takes any amount of icons and returns a list of `Row`s"""
     icons: list["Icon"]
     row_length: int = ICONS_PER_ROW
     indent_unicode_char: str = field(repr=False, default="")
@@ -134,6 +134,9 @@ class RowManager:
         #     self.rows[-1].elements[-1] = Icon(self.back_button_unicode_char, self.font_namespace, self.indent_unicode_char, on_click=OnClickChangePage(0), on_hover=OnHoverShowText("Go back"))
 
 
+# =======================================================================================================================================
+
+
 @dataclass
 class GridPage:
     title: "Text"
@@ -143,29 +146,26 @@ class GridPage:
     icons: list["Icon"]
     icons_per_row: int = ICONS_PER_ROW
     rows_per_page: int = ROWS_PER_PAGE
-    back_button_unicode_char: str | None = field(repr=False, default=None)
-    back_button_page: int | None = field(repr=False, default=None)
+    # back_button_unicode_char: str | None = field(repr=False, default=None)
+    # back_button_page: int | None = field(repr=False, default=None)
 
     def __post_init__(self) -> None:
-        assert len(self.icons) < (
-            (self.icons_per_row*self.rows_per_page)-1 if self.back_button_page is not None else (self.icons_per_row*self.rows_per_page)
-        ), "Too many icons for the grid"
+        self.back_button_page = None  # TEMP
+        limit = (self.icons_per_row*self.rows_per_page)-1 if self.back_button_page is not None else (self.icons_per_row*self.rows_per_page)
+        assert len(self.icons) <= limit, f"Too many icons for the grid, received {len(self.icons)} but can only have {limit} icons"
         row_manager = RowManager(
             self.icons, self.icons_per_row, self.indent_unicode_char, self.font_namespace, self.empty_icon_unicode_char, trailing_new_lines=NEWLINES_BETWEEN_GRID_ROWS,
         )
-        self.elements = row_manager.rows
         # if self.back_button_page is not None and self.back_button_unicode_char is not None:
         #     self.elements[-1].back_button = Icon(self.back_button_unicode_char, self.font_namespace, self.indent_unicode_char,
         #                                          on_click=OnClickChangePage(self.back_button_page),
         #                                          on_hover=OnHoverShowText("Go back"))
+        self.elements = row_manager.rows
 
     def get_json_data(self) -> list[dict[str, Any]]:
-        # Make it one layer flatter
-        # For each row, add some new lines after it
         title = Row([self.title, Text("\n\n")])
         elements = [x.get_json_data() for x in [title]+self.elements]
-        # For each row, extract the elements and flatten
-        return elements  # type: ignore
+        return elements  # type: ignore[abc]
 
 
 @dataclass
@@ -174,6 +174,38 @@ class ElementPage:
 
     def get_json_data(self) -> list[dict[str, Any]]:
         return [x.get_json_data() for x in self.elements]
+
+
+@dataclass
+class GridPageManager:
+    icons: list["Icon"]
+    title: str
+    empty_icon_unicode_char: str | None
+    indent_unicode_char: str
+    font_namespace: str
+    icons: list["Icon"]
+    icons_per_row: int = ICONS_PER_ROW
+    rows_per_page: int = ROWS_PER_PAGE
+    # UNUSED:
+    back_button_unicode_char: str | None = None
+    back_button_page: int | None = None
+
+    def __post_init__(self) -> None:
+        icons_per_page = self.icons_per_row*self.rows_per_page
+        self.pages = [
+            GridPage(
+                Text(self.title + (f", page {i}" if len(self.icons)//icons_per_page != 0 else ""), underline=True, text_color="black"),
+                self.empty_icon_unicode_char,
+                self.indent_unicode_char,
+                self.font_namespace,
+                icons=page_icons,  # Here's the magic
+                icons_per_row=self.icons_per_row,
+                rows_per_page=self.rows_per_page,
+                # back_button_unicode_char=self.back_button_unicode_char,
+                # back_button_page=self.back_button_page
+            )
+            for i, page_icons in enumerate(chunk_list(self.icons, self.icons_per_row*self.rows_per_page), 1)
+        ]
 
 
 # =======================================================================================================================================

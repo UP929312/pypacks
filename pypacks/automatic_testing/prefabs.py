@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pypacks.automatic_testing.testing_framework import Test
 from pypacks.resources.custom_item import CustomItem
 
-from pypacks.automatic_testing.testing_blocks import *
+from pypacks.automatic_testing.testing_blocks import *  # noqa: F403
 
 
 @dataclass

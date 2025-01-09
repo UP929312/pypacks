@@ -1,13 +1,9 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 from pypacks.resources.constants import COLOUR_CODE_MAPPINGS
-
-if TYPE_CHECKING:
-    from pypacks.pack import Pack
-    from pypacks.resources.custom_item import CustomItem
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"

@@ -1,9 +1,12 @@
 Consider changing components to be a list of components, rather than a big ol' class.
 
+mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 --exclude=script.py && ruff check && pylint .
+
 Go all out on a testing framework.
 Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
+# Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)
 
-Have generic "Raycast" object, which the player can use...
+Have generic "Raycast" object, which the player can use... Which also stops on entities if you want it to?
 
 Translations (grrr)
 
@@ -29,8 +32,6 @@ With the ray casting, what if they have a higher `block_interaction_range`?
 # Make datapack just take "custom content" and filter using isinstance?
 
 # Analytics, python version, what custom content they added, etc - would be super useful with knowing where to focus development.
-
-# What happens if they have more than 18 songs or paintings?
 
 # Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
 # Probably won't do because the give command, but what if we had a loot table setup for all blocks,
@@ -64,8 +65,6 @@ For an "install" stuff, just give them an achievement and don't revoke!
 
 # INFO: Paintings require a world reset
 
-# Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)
-
 # JUKEBOX SONGS - Auto Length is messed up... Hmmmm
 
 # Debug book with all the sounds? Could be fun, and helpful, sounds, fonts, paintings, etc.
@@ -85,11 +84,6 @@ python -m pip install -e .
 # For things that are edible, add some lore? Same with equipable? "Can be used as a Glider", etc?
 
 # § -> &a - Kinda
-
-Added minecraft:extended_view boolean property
-Returns true if player has requested extended details by holding shift key down (maybe only if they're not in the inventory?)
-Note: not a keybind, can't be rebound
-Only works when item is displayed in UI  - Better text on shift!
 
 # ========================================
 # Custom blocks:

@@ -150,9 +150,9 @@ class TropicalFishData:
         # rint(f"Shape {size_int}, Pattern {self.pattern}, Base Color {body_color_index}, Pattern Color {pattern_color_index}")
         return (
             pattern_color_index * (2 ** 24) +
-            body_color_index    * (2 ** 16) +
-            self.pattern        * (2 ** 8) +
-            size_int            * (2 ** 0)
+            body_color_index    * (2 ** 16) +  # noqa: E221
+            self.pattern        * (2 ** 8) +  # noqa: E221
+            size_int            * (2 ** 0)  # noqa: E221
         )  # fmt: skip
 
 
@@ -845,8 +845,8 @@ class Components:
             "block_entity_data":          self.block_entity_data if self.block_entity_data else None,
             "block_state":                self.block_state if self.block_state else None,
             "container_loot":             ({"loot_table": (self.container_loot_table.get_reference(pack_namespace) if isinstance(self.container_loot_table, CustomLootTable)
-                                            else self.container_loot_table)}
-                                            if self.container_loot_table is not None else None),  # fmt: skip
+                                           else self.container_loot_table)}
+                                           if self.container_loot_table is not None else None),  # fmt: skip
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
             "damage_resistant":           {"types": self.damage_resistant_to} if self.damage_resistant_to is not None else None,
             "debug_stick_state":          self.debug_stick_state if self.debug_stick_state else None,

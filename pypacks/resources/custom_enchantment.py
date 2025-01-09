@@ -27,7 +27,7 @@ class CustomEnchantment:
     per_level_increase_max: int = field(repr=False, default=1)  # 0-100 | The amount of levels added to the maximum for each level above level I.
     anvil_cost: int = field(repr=False, default=1)  # 0-100 |  The base cost when applying this enchantment to another item using an anvil. Halved when adding using a book, multiplied by the level of the enchantment.
     slots: list[Literal["any", "hand", "mainhand", "offhand", "armor", "feet", "legs", "chest", "head", "body"]] = field(default_factory=lambda: ["any"])  # List of equipment slots that this enchantment works in.
-    effects: list["EnchantEffect"] = field(repr=False, default_factory=list)  #  Effect components - Controls the effect of the enchantment.
+    effects: list["EnchantEffect"] = field(repr=False, default_factory=list)  # Effect components - Controls the effect of the enchantment.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="enchantment")
 
@@ -76,10 +76,11 @@ EntityEffectComponentIdType = Literal[
     "minecraft:hit_block", "minecraft:tick", "minecraft:projectile_spawned", "minecraft:post_attack",
 ]
 
+
 @dataclass
 class EnchantEffect:
     component_id: "ValueEffectComponentIdType"
-    value_effect: "ValueEffect"  #  Determines how to modify the value.
+    value_effect: "ValueEffect"  # Determines how to modify the value.
     requirements: "Predicate | None" = None  # Determines when the effect is active. Cannot be of type `minecraft:reference` - all predicates must be in-lined
     enchanted: Literal["attacker", "victim"] = "victim"  # Which entity has to have the enchantment
 

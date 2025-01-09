@@ -12,22 +12,22 @@ written_book = CustomItem("already_written_in_book", "minecraft:written_book", "
 # from pypacks.utils import to_component_string, _to_snbt
 
 # a = WrittenBookContent("t", "a", [[{"text": "abc\n"}, {"text": "def\uE000, \uE0001"}]])
-# print(a)
+# rint(a)
 # b = a.to_dict()
-# print(b)
+# rint(b)
 # c = to_component_string(b)
-# print(c)
+# rint(c)
 
 dummy_datapack = Pack("a", "b", "c")
 
 ref_book = ReferenceBook([])
 pages = [x.get_json_data() for x in ref_book.generate_pages(dummy_datapack)]
-# print(pages)
+# rint(pages)
 written_book_contents = WrittenBookContent("t", "a", pages)
-print(written_book_contents.to_dict())
+# rint(written_book_contents.to_dict())
 custom_item_data = Components(written_book_content=written_book_contents)
 custom_item = CustomItem("already_written_in_book", "minecraft:written_book", "Written Book", components=custom_item_data)
-print(custom_item.generate_give_command(dummy_datapack.namespace))
+# rint(custom_item.generate_give_command(dummy_datapack.namespace))
 
 # import os
 # os.chdir(os.path.dirname(__file__))

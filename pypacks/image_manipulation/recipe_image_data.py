@@ -9,7 +9,7 @@ from pypacks.image_manipulation.built_in_resolving import resolve_default_item_i
 if TYPE_CHECKING:
     from PIL.Image import Image as ImageType
     from pypacks.resources.custom_item import CustomItem
-    from pypacks.resources.custom_recipe import *
+    from pypacks.resources.custom_recipe import *  # noqa: F403
 
 CoordMappingType = dict[int | str, tuple[int, int]]
 

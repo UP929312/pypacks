@@ -1,5 +1,5 @@
 # =============================================================================
-# Resources 
+# Resources
 from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
@@ -9,7 +9,7 @@ from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_loot_tables import CustomLootTable
-from pypacks.resources.custom_loot_tables import *
+from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 
 from pypacks.resources.custom_painting import CustomPainting
 from pypacks.resources.custom_predicate import Predicate

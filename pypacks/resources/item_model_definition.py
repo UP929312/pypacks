@@ -15,6 +15,7 @@ def check_color(color: tuple[float, float, float]) -> None:
 # ================================================================================================
 # region: MODEL
 
+
 @dataclass
 class ModelItemModel:
     """Render a plain model from the models directory."""
@@ -33,6 +34,7 @@ class ModelItemModel:
                 "tints": [tint.to_dict() for tint in self.tints],
             } if self.tints else {}),
         }
+
 
 @dataclass
 class ConstantTint:
@@ -153,11 +155,12 @@ TintsType: TypeAlias = ConstantTint | DyeTint | GrassTint | FireworkTint | Potio
 # ================================================================================================
 # region: COMPOSITE
 
+
 @dataclass
 class CompositeItemModel:
     """Render multiple sub-models in the same space."""
     # https://minecraft.wiki/w/Items_model_definition#composite
-    models: list["str | ItemModelType"]  #  List of Item model objects to render.
+    models: list["str | ItemModelType"]  # List of Item model objects to render.
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -169,16 +172,18 @@ class CompositeItemModel:
                         {
                             "type": "minecraft:model",
                             "model": model,
-                        } 
+                        }
                     )
                     for model in self.models
                 ],
             }
         }
 
+
 # endregion
 # ================================================================================================
 # region: CONDITIONAL
+
 
 @dataclass
 class ConditionalItemModel:
@@ -263,6 +268,7 @@ class ExtendedViewConditional:
     def to_dict(self) -> dict[str, str]:
         return {"property": "minecraft:extended_view"}
 
+
 @dataclass
 class KeyDownConditional:
     """Return true if key is pressed."""
@@ -291,7 +297,7 @@ class ViewEntityConditional:
 @dataclass
 class CustomModelDataConditional:
     """Return value from flags list in minecraft:custom_model_data component."""
-    index: int = 0  #  Optional. Index for field in flags. Default: 0.
+    index: int = 0  # Optional. Index for field in flags. Default: 0.
 
     def to_dict(self) -> dict[str, str | int]:
         return {"property": "minecraft:custom_model_data", "index": self.index}
@@ -327,7 +333,7 @@ class SelectItemModel:
                     })
                 } if self.fallback_model else {}
             )
-        } 
+        }
 
 
 @dataclass
@@ -406,7 +412,7 @@ class LocalTimeSelectProperty:
     # cs_AU@numbers=thai;calendar=japanese: Czech language, Australian formatting, Thai numerals and Japanese calendar.
     time_zone: str | None = "UTC"  # describes format to be used for time formatting.
     # Examples: Europe/Stockholm, GMT+0:45
-    pattern: str | None = None #  Optional. Describing time. If not present, defaults to timezone set on client.
+    pattern: str | None = None  # Optional. Describing time. If not present, defaults to timezone set on client.
     # yyyy-MM-dd: 4-digit year number, then 2-digit month number, then 2-digit day of month number, all zero-padded if needed, separated by -.
     # HH:mm:ss: current time (hours, minutes, seconds), 24-hour cycle, all zero-padded to 2 digits of needed, separated by :.
 
@@ -462,16 +468,17 @@ RangeDispatchPropertyType = Literal[
     "minecraft:use_duration", "minecraft:use_cycle", "minecraft:custom_model_data"
 ]
 
+
 @dataclass
 class RangeDispatchItemModel:
     """Render an item model based on numeric property. Will select last entry with threshold less or equal to property value."""
     # https://minecraft.wiki/w/Items_model_definition#range_dispatch
-    # TODO: Type hint all the Range dispatches, as 
+    # TODO: Type hint all the Range dispatches, as well as the special model types.
     property_to_satisfy: RangeDispatchPropertyType
     scale: float = 1.0  # Optional. Factor to multiply property value with. Default: 1.0.
     entries: dict[int | float, "str | ItemModelType"] = field(default_factory=dict)  # A mapping of threshold to item model name.
     additional_data: dict[str, Any] = field(default_factory=dict)  # e.g. {"normalize": True} - (for damage).
-    fallback_model: "str | ItemModelType | None" = None  #  The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
+    fallback_model: "str | ItemModelType | None" = None  # The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -493,9 +500,12 @@ class RangeDispatchItemModel:
                 } if self.fallback_model else {}
             )
         }
+
+
 # endregion
 # ================================================================================================
 # region: EMPTY
+
 
 class EmptyItemModel:
     """Does not render anything."""
@@ -503,9 +513,11 @@ class EmptyItemModel:
     def to_dict(self) -> dict[str, Any]:
         return {"model": {"type": "minecraft:empty"}}
 
+
 # endregion
 # ================================================================================================
 # region: BUNDLE SELECTED ITEM
+
 
 class BundleSelectedItemModel:
     """Render the selected stack in minecraft:bundle_contents component, if present, otherwise does nothing."""
@@ -513,10 +525,10 @@ class BundleSelectedItemModel:
     def to_dict(self) -> dict[str, Any]:
         return {"model": {"type": "minecraft:bundle/selected_item"}}
 
+
 # endregion
 # ================================================================================================
 # region: SPECIAL
-
 SpecialItemModelType = Literal[
     "minecraft:bed", "minecraft:banner", "minecraft:conduit", "minecraft:chest", "minecraft:decorated_pot", "minecraft:head",
     "minecraft:shulker_box", "minecraft:shield", "minecraft:standing_sign", "minecraft:hanging_sign", "minecraft:trident"
@@ -529,7 +541,7 @@ class SpecialItemModel:
     # https://minecraft.wiki/w/Items_model_definition#special_model_types
     # TODO: Type this too.
     model_type: SpecialItemModelType
-    base: str  #  Namespaced ID of model in models directory, to providing transformations, particle texture and GUI light.
+    base: str  # Namespaced ID of model in models directory, to providing transformations, particle texture and GUI light.
     additional_data: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -543,6 +555,7 @@ class SpecialItemModel:
                 "base": self.base,
             }
         }
+
 
 # endregion
 # ================================================================================================

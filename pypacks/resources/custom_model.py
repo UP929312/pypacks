@@ -10,7 +10,6 @@ from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.resources.item_model_definition import ItemModelType
 
 # TODO: Support non cubes? Player heads? Custom models?
 
@@ -41,6 +40,15 @@ class CustomItemModelDefinition:
         # Item model definition
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(), file, indent=4)
+
+    def generate_give_command(self, pack_namespace: str) -> str:
+        from pypacks.resources.custom_item import CustomItem
+        from pypacks.reference_book_config import HIDDEN_REF_BOOK_CONFIG
+        assert self.showcase_item is not None
+        return CustomItem(
+            self.internal_name, self.showcase_item, custom_name=self.internal_name,
+            item_model=self, ref_book_config=HIDDEN_REF_BOOK_CONFIG
+        ).generate_give_command(pack_namespace)
 
 
 @dataclass
@@ -237,7 +245,6 @@ class SlabModel:
                 }, file, indent=4)
 
         CustomItemModelDefinition(internal_name=f"{self.internal_name}_slab", model=f"{pack.namespace}:item/{self.internal_name}_slab").create_resource_pack_files(pack)
-
 
     # def add_variants(self, pack: "Pack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block

@@ -1,13 +1,13 @@
-from pypacks import (
+from pypacks import (  # noqa: F401
     Pack, CustomItem, Components, CustomPainting, CustomSound, CustomJukeboxSong, CustomBlock, CustomEnchantment,
     CustomLootTable, RefBookCategory,
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
 )
-from pypacks.resources.item_model_definition import *
 from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
 from pypacks.resources.custom_model import CustomItemModelDefinition
-from pypacks.resources.custom_recipe import *
-from pypacks.resources.item_components import *
+from pypacks.resources.custom_recipe import *  # noqa: F403
+from pypacks.resources.item_components import *  # noqa: F403
+from pypacks.resources.item_model_definition import *  # noqa: F403
 from pypacks import ConstantTint
 
 import os
@@ -70,13 +70,13 @@ filled_barrel = CustomItem("filled_barrel", "minecraft:barrel", "Filled Barrel",
 custom_potion = CustomItem("custom_potion", "minecraft:potion", "Custom Potion", components=Components(potion_contents=PotionContents(custom_color=0xFF0000, effects=[PotionEffect("speed", 1, 20*10)])), ref_book_config=RefBookConfig(category=consumable_category))
 decorated_pot = CustomItem("decorated_pot", "decorated_pot", "decorated Pot", components=Components(pot_decorations=["angler_pottery_sherd", "brick", "arms_up_pottery_sherd", "skull_pottery_sherd"]))
 death_protection_star = CustomItem("death_protection_star", "minecraft:nether_star", "Death Protection Star", components=Components(death_protection=DeathProtection(apply_affects=[PotionEffect("fire_resistance", 2, 20*5)])), ref_book_config=RefBookConfig(category=consumable_category))
-dyed_helmet = CustomItem("dyed_helmet", "minecraft:leather_helmet", "Dyed Helmet", components=Components(dye_color=0xFF00FF), ref_book_config=RefBookConfig(category=weapons_category))
+dyed_helmet = CustomItem("dyed_helmet", "minecraft:leather_helmet", "Dyed Helmet", components=Components(dye_color=0xFF00FF))
 trimmed_leggings = CustomItem("trimmed_leggings", "minecraft:leather_leggings", "Trimmed Leggings", components=Components(armor_trim=ArmorTrim("host", "emerald")), ref_book_config=RefBookConfig(category=usable_category))
 suspicious_stew = CustomItem("suspicious_stew", "minecraft:suspicious_stew", "Suspicious Stew", components=Components(suspicious_stew_effects={"speed": 5*20}), ref_book_config=RefBookConfig(category=consumable_category))
-spider_spawner = CustomItem("spider_spawner", "minecraft:spawner", "Spider Spawner", components=Components(block_entity_data={"id": "mob_spawner", "SpawnData": {"entity": {"id": "spider"}}}), ref_book_config=RefBookConfig(category=usable_category))
+spider_spawner = CustomItem("spider_spawner", "minecraft:spawner", "Spider Spawner", components=Components(block_entity_data={"id": "mob_spawner", "SpawnData": {"entity": {"id": "spider"}}}))
 upper_slab = CustomItem("upper_slab", "minecraft:stone_slab", "Upper Slab", components=Components(block_state={"type": "top"}))
 fish_bucket = CustomItem("fish_bucket", "minecraft:tropical_fish_bucket", "Fish Bucket", components=Components(bucket_entity_data=BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))), ref_book_config=RefBookConfig(category=usable_category))
-loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table Chest", components=Components(container_loot_table="minecraft:chests/village/village_butcher"), ref_book_config=RefBookConfig(category=usable_category))
+loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table Chest", components=Components(container_loot_table="minecraft:chests/village/village_butcher"))
 
 # fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
 # test = CustomItem("minecraft:emerald", "test", "Test", components=Components.from_list([Equippable("chest")]), ref_book_config=RefBookConfig(category=weapons_category))
@@ -163,7 +163,8 @@ hand_model = CustomItemModelDefinition("hand_model", SelectItemModel(property_to
     ]),
     showcase_item="golden_sword",
 )
-range_dispatch = CustomItemModelDefinition("range_dispatch",
+range_dispatch = CustomItemModelDefinition(
+    "range_dispatch",
     RangeDispatchItemModel(
         property_to_satisfy="minecraft:damage",
         additional_data={"normalize": True},

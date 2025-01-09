@@ -12,7 +12,7 @@ def create_wall(custom_items: list["CustomItem"], pack_namespace: str) -> MCFunc
 
     for i, custom_item in enumerate(custom_items):
         x, y = mapping[i]
-        
+
         components = custom_item.to_dict(pack_namespace) if isinstance(custom_item, CustomItem) else {}
         mcfunction.commands.append(
             f"summon minecraft:item_frame ~{x} ~{y} ~1 {{Tags:[wall_item_frame], Item: {{id: \"{custom_item.base_item}\", components: {components}}}, Facing: 3}}"

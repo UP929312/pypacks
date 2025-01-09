@@ -51,7 +51,7 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
         FontImage("blank_icon", Path(IMAGES_PATH, "reference_book_icons", "blank_icon.png").read_bytes()),
         FontImage("logo_256_x_256", Path(IMAGES_PATH, "reference_book_icons", "logo_256_x_256.png").read_bytes(), height=100, y_offset=16),
         FontImage("information_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
-                                                           base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
+                                                 base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
         FontImage("satchel_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         *[  # Category icons
             FontImage(f"{category.internal_name}_category_icon", image_bytes=add_border(Path(category.image_path).read_bytes()), height=20, y_offset=10)
@@ -68,7 +68,7 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
         *[  # Custom recipe icons
             FontImage(f"{recipe.recipe_block_name}_icon",
                       image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
-                                                       base_image_path=EXTRA_ICON_BASE_PATH),
+                                             base_image_path=EXTRA_ICON_BASE_PATH),
                       height=18, y_offset=14)
             for recipe in ALL_RECIPES
         ],
@@ -109,8 +109,8 @@ def generate_base_pack(pack: "Pack") -> None:
     # ================================================================================================
     # Resources
     for item in (
-        pack.custom_items+pack.custom_recipes+pack.custom_jukebox_songs+pack.custom_predicates+
-        pack.custom_paintings+pack.custom_advancements+pack.custom_loot_tables+
+        pack.custom_items+pack.custom_recipes+pack.custom_jukebox_songs+pack.custom_predicates+  # noqa: E225
+        pack.custom_paintings+pack.custom_advancements+pack.custom_loot_tables+  # noqa: E225
         pack.mcfunctions+pack.custom_tags+pack.custom_enchantments
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory

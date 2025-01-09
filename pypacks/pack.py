@@ -8,7 +8,7 @@ from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.reference_book_config import RefBookCategory, HIDDEN_REF_BOOK_CONFIG
+from pypacks.reference_book_config import RefBookCategory
 from pypacks.raycasting import generate_default_raycasting_functions
 from pypacks.create_wall import create_wall
 
@@ -98,22 +98,13 @@ class Pack:
         for song in self.custom_jukebox_songs:
             self.custom_items.append(song.generate_custom_item(self))
         # ==================================================================================
-        # REFERENCE BOOK CATEGORIES
+        # Get all the reference book categories
         self.reference_book_categories = RefBookCategory.get_unique_categories([x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden])
-        # Make sure none of the categories are too filled
-        for category in self.reference_book_categories:
-            # TODO: Remove this, I want multiple pages where possible
-            assert len([x for x in self.custom_items if x.ref_book_config.category.name == category.name]) <= 18, \
-                   f"Category {category.name} has too many items (> 18)!"
         # ==================================================================================
-        # ITEM MODELS
+        # Item models (well, the items)
         give_all_item_models = MCFunction("give_all_item_models", [
-            CustomItem(
-                custom_item_model_def.internal_name, custom_item_model_def.showcase_item, custom_name=custom_item_model_def.internal_name,
-                item_model=custom_item_model_def, ref_book_config=HIDDEN_REF_BOOK_CONFIG
-            ).generate_give_command(self.namespace)
-            for custom_item_model_def in self.custom_item_model_definitions
-            if custom_item_model_def.showcase_item is not None
+            custom_item_model_def.generate_give_command(self.namespace)
+            for custom_item_model_def in [x for x in self.custom_item_model_definitions if x.showcase_item is not None]
         ])
         self.mcfunctions.append(give_all_item_models)
         # ==================================================================================
