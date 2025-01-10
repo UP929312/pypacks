@@ -3,7 +3,13 @@
 from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
-from pypacks.resources.custom_enchantment import CustomEnchantment, EnchantEffect
+from pypacks.resources.custom_enchantment import (
+    CustomEnchantment,
+    EnchantValueEffect, SetValueEffect, AddValueEffect, MultiplyValueEffect, RemoveBinomialValueEffect, AllOfValueEffect,
+    EnchantmentEntityEffect, AllOfEntityEffect, ApplyMobEffectEntityEffect,  DamageEntityEntityEffect, ChangeItemDamageEntityEffect, ExplodeEntityEffect, IgniteEntityEffect,
+    PlaySoundEntityEffect, ReplaceBlockEntityEffect, ReplaceDiskEntityEffect, RunFunctionEntityEffect, SetBlockPropertiesEntityEffect, SpawnParticlesEntityEffect, SummonEntityEntityEffect
+
+)
 from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
@@ -47,7 +53,10 @@ __all__ = [
     "MinecraftColor",
     "CustomAdvancement", "Criteria",
     "CustomBlock",
-    "CustomEnchantment", "EnchantEffect",
+    "CustomEnchantment",
+    "EnchantValueEffect", "SetValueEffect", "AddValueEffect", "MultiplyValueEffect", "RemoveBinomialValueEffect", "AllOfValueEffect",
+    "EnchantmentEntityEffect", "AllOfEntityEffect", "ApplyMobEffectEntityEffect", "DamageEntityEntityEffect", "ChangeItemDamageEntityEffect", "ExplodeEntityEffect", "IgniteEntityEffect",
+    "PlaySoundEntityEffect", "ReplaceBlockEntityEffect", "ReplaceDiskEntityEffect", "RunFunctionEntityEffect", "SetBlockPropertiesEntityEffect", "SpawnParticlesEntityEffect", "SummonEntityEntityEffect",
     "FacePaths", "CustomItemModelDefinition",
     "CustomItem",
     "CustomJukeboxSong",

@@ -111,7 +111,7 @@ def generate_base_pack(pack: "Pack") -> None:
     for item in (
         pack.custom_items+pack.custom_recipes+pack.custom_jukebox_songs+pack.custom_predicates+  # noqa: E225
         pack.custom_paintings+pack.custom_advancements+pack.custom_loot_tables+  # noqa: E225
-        pack.mcfunctions+pack.custom_tags+pack.custom_enchantments
+        pack.custom_mcfunctions+pack.custom_tags+pack.custom_enchantments
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(pack.datapack_output_path/"data"/pack.namespace/item.datapack_subdirectory_name, exist_ok=True)

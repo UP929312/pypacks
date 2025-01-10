@@ -54,7 +54,7 @@ class Pack:
     custom_recipes: list["Recipe"] = field(default_factory=list)
     custom_sounds: list["CustomSound"] = field(default_factory=list)
     custom_tags: list["CustomTag"] = field(default_factory=list)
-    mcfunctions: list["MCFunction"] = field(default_factory=list)
+    custom_mcfunctions: list["MCFunction"] = field(default_factory=list)
     custom_item_model_definitions: list[CustomItemModelDefinition] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -76,7 +76,7 @@ class Pack:
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self.namespace))
-            self.mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
+            self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
@@ -85,18 +85,20 @@ class Pack:
             if block.loot_table is not None:
                 self.custom_loot_tables.append(block.loot_table)  # When breaking the block
             self.custom_advancements.append(block.create_advancement(self.namespace))  # Advancement for placing the block
-            self.mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
+            self.custom_mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
 
         if self.custom_blocks:
-            self.mcfunctions.extend(generate_default_raycasting_functions(self.namespace))
-            self.mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
-            self.mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
+            self.custom_mcfunctions.extend(generate_default_raycasting_functions(self.namespace))
+            self.custom_mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
+            self.custom_mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
         # ==================================================================================
         # Adding all the paintings' and jukebox's items to the list
         for painting in self.custom_paintings:
             self.custom_items.append(painting.generate_custom_item(self))
         for song in self.custom_jukebox_songs:
             self.custom_items.append(song.generate_custom_item(self))
+        for enchantment in self.custom_enchantments:
+            self.custom_items.append(enchantment.generate_custom_item(self.namespace))
         # ==================================================================================
         # Get all the reference book categories
         self.reference_book_categories = RefBookCategory.get_unique_categories([x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden])
@@ -106,7 +108,7 @@ class Pack:
             custom_item_model_def.generate_give_command(self.namespace)
             for custom_item_model_def in [x for x in self.custom_item_model_definitions if x.showcase_item is not None]
         ])
-        self.mcfunctions.append(give_all_item_models)
+        self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
         load_mcfunciton = MCFunction("load", [
             f"function {self.namespace}:raycast/load" if (self.custom_items or self.custom_blocks) else "",
@@ -129,9 +131,9 @@ class Pack:
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ])
         tick_mcfunction.create_if_empty = False
-        self.mcfunctions.extend([load_mcfunciton, tick_mcfunction])
+        self.custom_mcfunctions.extend([load_mcfunciton, tick_mcfunction])
         if self.custom_items:
-            self.mcfunctions.append(create_wall(self.custom_items, self.namespace))
+            self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")

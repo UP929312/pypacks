@@ -3,7 +3,10 @@ from pypacks import (  # noqa: F401
     CustomLootTable, RefBookCategory,
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
 )
+from pypacks.resources import custom_mcfunction
 from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
+from pypacks.resources.custom_enchantment import RunFunctionEntityEffect, EnchantmentEntityEffect
+from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.resources.custom_recipe import *  # noqa: F403
 from pypacks.resources.item_components import *  # noqa: F403
@@ -184,50 +187,15 @@ custom_item_model_definitions = [blue_sword, hold_model, empty_model, composite_
 # endregion
 # ============================================================================================================
 # region: Custom Enchants
-# custom_enchantment = CustomEnchantment(
-#     "beam", "Beam", "minecraft:quick_charge", "minecraft:crossbow", weight=10, max_level=1, min_cost_base=1, per_level_increase_min=10,
-#     max_cost_base=50, per_level_increase_max=0, anvil_cost=0, slots=["mainhand"], effects=[],  # WORK TO BE DONE!
-# )
-custom_enchantments = []  # custom_enchantment
-# {
-#   "description": "Beam",
-#   "exclusive_set": "minecraft:quick_charge",
-#   "supported_items": "minecraft:crossbow",
-#   "weight": 10,
-#   "max_level": 1,
-#   "min_cost": {
-#     "base": 1,
-#     "per_level_above_first": 10
-#   },
-#   "max_cost": {
-#     "base": 50,
-#     "per_level_above_first": 0
-#   },
-#   "anvil_cost": 0,
-#   "slots": [
-#     "mainhand"
-#   ],
-#   "effects": {
-#     "minecraft:post_attack": [
-#       {
-#         "effect": {
-#           "type": "minecraft:run_function",
-#           "function": "test:beam"
-#         },
-#         "enchanted": "attacker",
-#         "affected": "victim"
-#       }
-#     ],
-#     "minecraft:projectile_spawned": [
-#       {
-#         "effect": {
-#           "type": "minecraft:run_function",
-#           "function": "test:beamarrow"
-#         }
-#       }
-#     ]
-#   }
-# }
+give_arrow_function = MCFunction("give_arrow", commands=["give @a minecraft:arrow 1"])
+custom_enchantment = CustomEnchantment(
+    "give_item", "Give Item", "minecraft:quick_charge", "minecraft:crossbow", weight=10, max_level=1, min_cost_base=1, per_level_increase_min=10,
+    max_cost_base=50, per_level_increase_max=0, anvil_cost=0, slots=["mainhand"], effects=[
+        EnchantmentEntityEffect("minecraft:post_attack", RunFunctionEntityEffect(give_arrow_function.get_reference("pypacks_testing")),
+                                enchanted="attacker", affected="attacker"),
+    ],
+)
+custom_enchantments = [custom_enchantment]
 # endregion
 # ============================================================================================================
 datapack = Pack(
@@ -241,5 +209,6 @@ datapack = Pack(
     custom_loot_tables=loot_tables,
     custom_item_model_definitions=custom_item_model_definitions,
     custom_enchantments=custom_enchantments,
+    custom_mcfunctions=[give_arrow_function],
     # custom_advancements=[eating_advancement],
 )

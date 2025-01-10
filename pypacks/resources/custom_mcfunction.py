@@ -20,7 +20,7 @@ class MCFunction:
         assert len("".join(self.commands)) <= 2_000_000, "MCFunction files must be less than 2 million characters!"
 
     def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{'/'.join(self.sub_directories)}/{self.internal_name}"
+        return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"
 
     def create_datapack_files(self, pack: "Pack") -> None:
         if (not self.commands or self.commands == [""]) and not self.create_if_empty:

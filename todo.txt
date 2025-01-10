@@ -2,11 +2,19 @@ Consider changing components to be a list of components, rather than a big ol' c
 
 mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 --exclude=script.py && ruff check && pylint .
 
+The items in the reference book aren't sorted by their category, reee!
+
 Go all out on a testing framework.
 Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
 # Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)
 
 Have generic "Raycast" object, which the player can use... Which also stops on entities if you want it to?
+
+For custom enchantments, also have the book included as a custom item
+
+# Custom enchant idea: Reverse thorns? When you hit, you take damage
+
+ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type
 
 Translations (grrr)
 
