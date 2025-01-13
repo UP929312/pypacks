@@ -2,8 +2,8 @@ from pypacks import (  # noqa: F401
     Pack, CustomItem, Components, CustomPainting, CustomSound, CustomJukeboxSong, CustomBlock, CustomEnchantment,
     CustomLootTable, RefBookCategory,
     FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
+    CustomDimension, CustomDimensionType
 )
-from pypacks.resources import custom_mcfunction
 from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
 from pypacks.resources.custom_enchantment import RunFunctionEntityEffect, EnchantmentEntityEffect
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -198,6 +198,17 @@ custom_enchantment = CustomEnchantment(
 custom_enchantments = [custom_enchantment]
 # endregion
 # ============================================================================================================
+# region: Custom Dimensions
+
+my_dimension = CustomDimension(
+    "my_dimension", CustomDimensionType(
+        "my_dimension_type", height=1024, logical_height=1024, minimum_y=0, coordinate_scale=1, ambient_light=0,  # Goes from 0-1024
+    ),
+    biome="minecraft:the_end", noise_settings="minecraft:amplified",  # Amplified overworld, but set in the nether
+)
+
+# endregion
+# ============================================================================================================
 datapack = Pack(
     "PyPacks Testing", "A cool datapack", "pypacks_testing", "pack_icon.png", world_name="PyPacksWorld",
     custom_recipes=recipes,
@@ -210,5 +221,6 @@ datapack = Pack(
     custom_item_model_definitions=custom_item_model_definitions,
     custom_enchantments=custom_enchantments,
     custom_mcfunctions=[give_arrow_function],
+    custom_dimensions=[my_dimension],
     # custom_advancements=[eating_advancement],
 )

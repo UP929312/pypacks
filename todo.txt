@@ -4,6 +4,8 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 The items in the reference book aren't sorted by their category, reee!
 
+Custom Dimensions!
+
 Go all out on a testing framework.
 Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
 # Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)

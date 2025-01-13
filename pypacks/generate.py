@@ -76,13 +76,13 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
     return CustomFont("all_fonts", all_elements)
 
 
-def generate_base_pack(pack: "Pack") -> None:
+def generate_datapack(pack: "Pack") -> None:
     assert isinstance(pack.datapack_output_path, Path)
     os.makedirs(pack.datapack_output_path/"data"/pack.namespace, exist_ok=True)
     # ================================================================================================
     # pack.mcmeta
     with open(pack.datapack_output_path/"pack.mcmeta", "w") as file:
-        json.dump({"pack": {"pack_format": pack.data_pack_format_version, "description": pack.description}}, file, indent=4)
+        json.dump({"id": pack.namespace, "pack": {"pack_format": pack.data_pack_format_version, "description": pack.description}}, file, indent=4)
     # pack.png
     if pack.pack_icon_path is not None:
         shutil.copyfile(pack.pack_icon_path, pack.datapack_output_path/"pack.png")
@@ -109,9 +109,10 @@ def generate_base_pack(pack: "Pack") -> None:
     # ================================================================================================
     # Resources
     for item in (
-        pack.custom_items+pack.custom_recipes+pack.custom_jukebox_songs+pack.custom_predicates+  # noqa: E225
-        pack.custom_paintings+pack.custom_advancements+pack.custom_loot_tables+  # noqa: E225
-        pack.custom_mcfunctions+pack.custom_tags+pack.custom_enchantments
+        pack.custom_items + pack.custom_recipes + pack.custom_jukebox_songs + pack.custom_predicates +
+        pack.custom_paintings + pack.custom_advancements + pack.custom_loot_tables +
+        pack.custom_mcfunctions + pack.custom_tags + pack.custom_enchantments +
+        pack.custom_dimensions
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(pack.datapack_output_path/"data"/pack.namespace/item.datapack_subdirectory_name, exist_ok=True)
