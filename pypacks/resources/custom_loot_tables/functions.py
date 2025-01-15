@@ -6,7 +6,7 @@ from pypacks.resources.item_components import PotionEffect
 
 if TYPE_CHECKING:
     from pypacks.resources.custom_loot_tables.custom_loot_table import Entry
-    from pypacks.resources.custom_loot_tables.number_provider import (
+    from pypacks.providers.number_provider import (
         ConstantNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, UniformNumberProvider,
     )
     from pypacks.resources.item_components import AttributeModifier, FireworkExplosion, MapDecorationType, BannerPattern

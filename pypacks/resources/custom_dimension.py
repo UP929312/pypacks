@@ -4,12 +4,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from pypacks.providers.int_provider import IntProvider, UniformIntProvider
+
 if TYPE_CHECKING:
     from pypacks.pack import Pack
 
 
 @dataclass
 class CustomDimension:
+    # https://minecraft.wiki/w/Dimension_definition
     internal_name: str
     dimension_type: "CustomDimensionType | Literal['overworld', 'the_nether', 'the_end', 'overworld_caves']"
     biome: str = "minecraft:the_end"  # The biome of the dimension.
@@ -45,6 +48,7 @@ class CustomDimension:
 @dataclass
 class CustomDimensionType:
     """Defines properties of a dimension such as world height build limits, the ambient light, and more."""
+    # https://minecraft.wiki/w/Dimension_type
     internal_name: str
     height: int = 384  # The total height in which blocks can exist within this dimension. Must be between 16 and 4064 and be a multiple of 16. The maximum building height = min_y + height - 1, which cannot be greater than 2031.
     logical_height: int = 384  # The maximum height to which chorus fruits and nether portals can bring players within this dimension. This excludes portals that were already built above the limit as they still connect normally. Cannot be greater than `height`.
@@ -52,7 +56,7 @@ class CustomDimensionType:
     coordinate_scale: float = 1.0  # The multiplier applied to coordinates when leaving the dimension. Value between 0.00001 and 30000000.0 (both inclusive)。
     ambient_light: float = 0.0  # How much light the dimension has. When set to 0, it completely follows the light level; when set to 1, there is no ambient lighting. 
 
-    monster_spawn_light_level: Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] = 7  #  Maximum light required when the monster spawns. The formula of this light is: max(sky light - 10, block light) during thunderstorms, and max(internal sky light, block light) during other weather.
+    monster_spawn_light_level: "Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] | IntProvider" = field(default_factory=lambda: UniformIntProvider(0, 7))  #  Maximum light required when the monster spawns. The formula of this light is: max(sky light - 10, block light) during thunderstorms, and max(internal sky light, block light) during other weather.
     monster_spawn_block_light_limit: Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] = 0  # Maximum block light required when the monster spawns.
     ultrawarm: bool = False  # Whether the dimensions behaves like the nether (water evaporates and sponges dry) or not. Also lets stalactites drip lava and causes lava to spread faster and thinner.
     natural: bool = True  #  When false, compasses spin randomly, and using a bed to set the respawn point or sleep, is disabled. When true, nether portals can spawn zombified piglins, and creaking hearts can spawn creakings.
@@ -70,7 +74,6 @@ class CustomDimensionType:
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
 
-
     def __post_init__(self) -> None:
         assert 16 <= self.height <= 4064, f"Height must be between 16 and 4064, recieved {self.height}"
         assert self.height % 16 == 0, f"Height must be a multiple of 16, recieved {self.height}"
@@ -87,7 +90,7 @@ class CustomDimensionType:
             "has_skylight": self.has_skylight,
             "has_ceiling": self.has_ceiling,
             "ambient_light": self.ambient_light,
-            "monster_spawn_light_level": self.monster_spawn_light_level,
+            "monster_spawn_light_level": self.monster_spawn_light_level.to_dict() if isinstance(self.monster_spawn_light_level, IntProvider) else self.monster_spawn_light_level,
             "monster_spawn_block_light_limit": self.monster_spawn_block_light_limit,
             "piglin_safe": self.piglin_safe,
             "bed_works": self.bed_works,
@@ -195,6 +198,7 @@ class MoodSound:
 
 # @dataclass
 # class CustomBiome:
+#     # https://minecraft.wiki/w/Biome_definition
 #     has_precipitation: bool = True  # Determines whether or not the biome has precipitation (rain and snow)
 #     temperature: float = 0.8  #  Controls gameplay features like grass and foliage color, and a height adjusted temperature (which controls whether raining or snowing if `has_precipitation` is true, and generation details of some features).
 #     temperature_modifier: Literal["none", "frozen"] = "none"

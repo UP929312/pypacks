@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
 from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction, SetCountFunction, SetComponentsFunction
-from pypacks.resources.custom_loot_tables.number_provider import BinomialNumberProvider, UniformNumberProvider
+from pypacks.providers.number_provider import BinomialNumberProvider, UniformNumberProvider
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack

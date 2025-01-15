@@ -2,9 +2,13 @@ Consider changing components to be a list of components, rather than a big ol' c
 
 mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 --exclude=script.py && ruff check && pylint .
 
-The items in the reference book aren't sorted by their category, reee!
+Custom Dimensions! (more work)
 
-Custom Dimensions!
+Continue work on custom enchantments
+
+Dropper crafting
+
+Following smithed convention?
 
 Go all out on a testing framework.
 Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
@@ -25,9 +29,6 @@ For any_of enchantment, maybe just take a list as an alternative, and if it's pa
 If we want to allow them to pass in a custom item model, we also need to give a way to pass in the custom texture, and the {"parent": "minecraft:item/generated", "textures": layers} bit...
 
 For custom item models "test item", let them put a custom item so we can apply damage and bundles items?
-
-Custom enchants:
-https://www.reddit.com/r/MinecraftCommands/comments/1hr0r9z/datapack_custom_enchants_cant_be_obtained_by/
 
 For image resolution, use https://github.com/edayot/renders/blob/1.21.4-renders-special/resourcepack/assets/minecraft/textures/render/items/pale_moss_block.png
 It has pretty much everything

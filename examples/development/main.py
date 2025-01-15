@@ -199,7 +199,6 @@ custom_enchantments = [custom_enchantment]
 # endregion
 # ============================================================================================================
 # region: Custom Dimensions
-
 my_dimension = CustomDimension(
     "my_dimension", CustomDimensionType(
         "my_dimension_type", height=1024, logical_height=1024, minimum_y=0, coordinate_scale=1, ambient_light=0,  # Goes from 0-1024

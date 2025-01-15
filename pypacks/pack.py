@@ -136,6 +136,8 @@ class Pack:
         self.custom_mcfunctions.extend([load_mcfunciton, tick_mcfunction])
         if self.custom_items:
             self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
+        # ==================================================================================
+        self.custom_items = sorted(self.custom_items, key=lambda x: self.reference_book_categories.index(x.ref_book_config.category))
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")
