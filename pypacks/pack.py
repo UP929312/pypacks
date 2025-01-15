@@ -15,6 +15,7 @@ from pypacks.create_wall import create_wall
 
 if TYPE_CHECKING:
     from pypacks.resources.custom_block import CustomBlock
+    from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
@@ -46,6 +47,7 @@ class Pack:
 
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
+    custom_damage_types: list["CustomDamageType"] = field(default_factory=list)
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)

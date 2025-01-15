@@ -69,11 +69,12 @@ class CustomEnchantment:
         return CustomItem(
             f"{self.internal_name}_enchanted_book", "enchanted_book",
             custom_name=f"{self.description} Enchanted Book",
-            components=Components(book_enchantments={f"{pack_namespace}:{self.internal_name}": 1})  # type: ignore[arg-type]
+            components=Components(book_enchantments={f"{pack_namespace}:{self.internal_name}": 1})  # type: ignore[dict-item]
         )
 
 # ====================================================================================================================
 # region: VALUE EFFECTS:
+
 
 ValueEffectComponentIdType = Literal[
     "minecraft:armor_effectiveness", "minecraft:damage", "minecraft:damage_protection", "minecraft:smash_damage_per_fallen_block",
@@ -406,7 +407,7 @@ class RunFunctionEntityEffect:
         return {
             "type": "minecraft:run_function",
             # TODO: Support Custom MCFunction
-            "function": self.function,  # self.function.get_reference() if isinstance(self.function, MCFunction) else 
+            "function": self.function,  # self.function.get_reference(pack_reference) if isinstance(self.function, MCFunction) else self.function,
         }
 
 

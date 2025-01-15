@@ -20,7 +20,6 @@ class CustomDimension:
         "minecraft:overworld", "minecraft:nether", "minecraft:end", "minecraft:large_biomes", "minecraft:amplified", "minecraft:floating_islands", "minecraft:caves"
     ] = "minecraft:overworld"  # The noise settings of the dimension.
 
-
     datapack_subdirectory_name: str = field(init=False, repr=False, default="dimension")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -40,9 +39,8 @@ class CustomDimension:
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
-        if isinstance(self.dimension_type, CustomDimensionType):
+        if isinstance(self.dimension_type, CustomDimensionType):  # TODO: Hmmm, do we want this?
             self.dimension_type.create_datapack_files(pack)
-
 
 
 @dataclass
@@ -52,14 +50,14 @@ class CustomDimensionType:
     internal_name: str
     height: int = 384  # The total height in which blocks can exist within this dimension. Must be between 16 and 4064 and be a multiple of 16. The maximum building height = min_y + height - 1, which cannot be greater than 2031.
     logical_height: int = 384  # The maximum height to which chorus fruits and nether portals can bring players within this dimension. This excludes portals that were already built above the limit as they still connect normally. Cannot be greater than `height`.
-    minimum_y: int = -64  #  The minimum height in which blocks can exist within this dimension. Must be between -2032 and 2031 and be a multiple of 16 (effectively making 2016 the maximum).
+    minimum_y: int = -64  # The minimum height in which blocks can exist within this dimension. Must be between -2032 and 2031 and be a multiple of 16 (effectively making 2016 the maximum).
     coordinate_scale: float = 1.0  # The multiplier applied to coordinates when leaving the dimension. Value between 0.00001 and 30000000.0 (both inclusive)。
-    ambient_light: float = 0.0  # How much light the dimension has. When set to 0, it completely follows the light level; when set to 1, there is no ambient lighting. 
+    ambient_light: float = 0.0  # How much light the dimension has. When set to 0, it completely follows the light level; when set to 1, there is no ambient lighting.
 
-    monster_spawn_light_level: "Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] | IntProvider" = field(default_factory=lambda: UniformIntProvider(0, 7))  #  Maximum light required when the monster spawns. The formula of this light is: max(sky light - 10, block light) during thunderstorms, and max(internal sky light, block light) during other weather.
+    monster_spawn_light_level: "Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] | IntProvider" = field(default_factory=lambda: UniformIntProvider(0, 7))  # Maximum light required when the monster spawns. The formula of this light is: max(sky light - 10, block light) during thunderstorms, and max(internal sky light, block light) during other weather.
     monster_spawn_block_light_limit: Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] = 0  # Maximum block light required when the monster spawns.
     ultrawarm: bool = False  # Whether the dimensions behaves like the nether (water evaporates and sponges dry) or not. Also lets stalactites drip lava and causes lava to spread faster and thinner.
-    natural: bool = True  #  When false, compasses spin randomly, and using a bed to set the respawn point or sleep, is disabled. When true, nether portals can spawn zombified piglins, and creaking hearts can spawn creakings.
+    natural: bool = True  # When false, compasses spin randomly, and using a bed to set the respawn point or sleep, is disabled. When true, nether portals can spawn zombified piglins, and creaking hearts can spawn creakings.
     has_skylight: bool = True  # Whether the dimension has skylight or not.
     has_ceiling: bool = False  # Whether the dimension has a bedrock ceiling. Note that this is only a logical ceiling. It is unrelated with whether the dimension really has a block ceiling.
     piglin_safe: bool = False  # When false, Piglins and hoglins shake and transform to zombified entities.
@@ -184,8 +182,8 @@ EndDimension = CustomDimensionType(
 class MoodSound:
     sound: str = "minecraft:ambient.cave"  # The sound event to play.
     tick_delay: int = 6000  # The mininum delay between two plays
-    block_search_extent: int = 8  #  Determines the cubic range of possible positions to find place to play the mood sound. The player is at the center of the cubic range, and the edge length is 2 * block_search_extent.
-    offset: int = 2  #  The higher the value makes the sound source further away from the player.
+    block_search_extent: int = 8  # Determines the cubic range of possible positions to find place to play the mood sound. The player is at the center of the cubic range, and the edge length is 2 * block_search_extent.
+    offset: int = 2  # The higher the value makes the sound source further away from the player.
 
     def to_dict(self) -> dict[str, Any]:
         return {

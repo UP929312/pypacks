@@ -165,7 +165,7 @@ class GridPage:
     def get_json_data(self) -> list[dict[str, Any]]:
         title = Row([self.title, Text("\n\n")])
         elements = [x.get_json_data() for x in [title]+self.elements]
-        return elements  # type: ignore[abc]
+        return elements  # type: ignore[return-value]
 
 
 @dataclass
@@ -178,7 +178,6 @@ class ElementPage:
 
 @dataclass
 class GridPageManager:
-    icons: list["Icon"]
     title: str
     empty_icon_unicode_char: str | None
     indent_unicode_char: str

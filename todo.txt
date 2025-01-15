@@ -10,6 +10,8 @@ Dropper crafting
 
 Following smithed convention?
 
+https://www.reddit.com/r/MinecraftCommands/comments/1i1plzs/recipe_click_detection/
+
 Go all out on a testing framework.
 Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
 # Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)
@@ -20,9 +22,9 @@ For custom enchantments, also have the book included as a custom item
 
 # Custom enchant idea: Reverse thorns? When you hit, you take damage
 
-ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type
+ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type   - Need translations
 
-Translations (grrr)
+Translations (grrr) https://minecraft.wiki/w/Resource_pack#Language
 
 For any_of enchantment, maybe just take a list as an alternative, and if it's passed in, re-construct the object to use the AnyOfValueEffect?
 

@@ -1,30 +1,18 @@
-from pypacks import (  # noqa: F401
-    Pack, CustomItem, Components, CustomPainting, CustomSound, CustomJukeboxSong, CustomBlock, CustomEnchantment,
-    CustomLootTable, RefBookCategory,
-    FacePaths, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY,
-    CustomDimension, CustomDimensionType
-)
-from pypacks.resources.custom_loot_tables import SimpleRangePool, SingleItemPool, SimpleRangeLootTable
-from pypacks.resources.custom_enchantment import RunFunctionEntityEffect, EnchantmentEntityEffect
-from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.resources.custom_model import CustomItemModelDefinition
-from pypacks.resources.custom_recipe import *  # noqa: F403
-from pypacks.resources.item_components import *  # noqa: F403
-from pypacks.resources.item_model_definition import *  # noqa: F403
-from pypacks import ConstantTint
+from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY  # noqa: F401
+from pypacks.resources import *  # noqa: F403
 
 import os
-
-from pypacks.resources.item_model_definition import ModelItemModel
 os.chdir(os.path.dirname(__file__))
 
 # ============================================================================================================
+# region: Custom Paintings, Sounds, Jukebox Songs and Ref Book Categories
 custom_painting = CustomPainting("logo_art", "images/logo_512_x_512.png", title="My Masterpiece", width_in_blocks=4, height_in_blocks=4)
 custom_sound = CustomSound("rick_roll", "sounds/rick_roll.ogg", 1.0, 1.0)
 custom_jukebox_song = CustomJukeboxSong(custom_sound.internal_name, "Rick Roll", custom_sound.ogg_path, 4, 5)
 weapons_category = RefBookCategory("weapons", "Weapons", "images/sword.png")
 usable_category = RefBookCategory("usable", "Usable", "images/goat_horn.png")
 consumable_category = RefBookCategory("consumable", "Consumable", "images/steak.png")
+# endregion
 # ============================================================================================================
 # region: Custom Items
 # Custom Items
@@ -138,10 +126,12 @@ debug_block = CustomBlock.from_item(debug_block_item, block_texture=FacePaths(**
 custom_blocks = [ruby_ore_block, topaz_ore_block, chocolate_block, debug_block, ]  # ruby_ore_slab
 # endregion
 # ============================================================================================================
+# region: Custom Loot Tables
 emerald_loot_table = CustomLootTable("emerald_loot_table", [SimpleRangePool("emerald", 1, 3)])
 # ruby_loot_table = CustomLootTable("ruby_loot_table", [SimpleRangePool(ruby, 1, 3)])
 glider_helmet_loot_table = CustomLootTable("glider_helmet_loot_table", [SingleItemPool(flying_helmet)])
 loot_tables = [emerald_loot_table, glider_helmet_loot_table]
+# endregion
 # ============================================================================================================
 # region: Custom Item Model Definitions
 blue_sword = CustomItemModelDefinition("blue_sword", ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 0.0, 1.0))]), showcase_item="iron_sword")
@@ -208,6 +198,12 @@ my_dimension = CustomDimension(
 
 # endregion
 # ============================================================================================================
+# region: Custom Damage Type:
+my_custom_damage_type = CustomDamageType(
+    "halucination", "magic", exhaustion=0.0, scaling="never", effects="hurt", death_message_type="default"
+)
+# endregion
+# ============================================================================================================
 datapack = Pack(
     "PyPacks Testing", "A cool datapack", "pypacks_testing", "pack_icon.png", world_name="PyPacksWorld",
     custom_recipes=recipes,
@@ -221,5 +217,6 @@ datapack = Pack(
     custom_enchantments=custom_enchantments,
     custom_mcfunctions=[give_arrow_function],
     custom_dimensions=[my_dimension],
+    custom_damage_types=[my_custom_damage_type],
     # custom_advancements=[eating_advancement],
 )

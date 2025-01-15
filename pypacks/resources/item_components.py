@@ -223,7 +223,7 @@ class _Effect:
     base_dict_name: str = "on_consume_effects"
 
     def to_dict(self) -> dict[str, Any]:
-        base_dict: dict[str, list[Any]] = ({self.base_dict_name: []})
+        base_dict: dict[str, list[Any]] = {self.base_dict_name: []}
         if self.apply_affects:
             base_dict[self.base_dict_name].append({"type": "apply_effects", "effects": [effect.to_dict() for effect in self.apply_affects]})
         if self.remove_affects and self.remove_affects != "all":

@@ -103,7 +103,7 @@ class FacePaths:
         if all((x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]):  # If it's just the front face.
             self.block_type = "symmetric_cube"
             return
-        if any([(x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]]):
+        if any((x is None) for x in [self.back, self.top, self.bottom, self.left, self.right]):
             raise ValueError("Invalid FacePaths object, must have one of: Front | (Front, Back, Top, Bottom, Left, Right)")
         self.block_type = "asymmetric_cube"
 

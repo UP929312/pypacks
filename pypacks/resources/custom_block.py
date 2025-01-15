@@ -182,8 +182,8 @@ class CustomBlock:
         ], ["custom_blocks"])
 
     def create_slab(self, slab_block: "Slabs") -> "CustomBlock":
-        raise NotImplementedError
         """Adds a slab version of the block."""
+        raise NotImplementedError
         assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
         # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",
         #                          lore=self.block_item.lore)

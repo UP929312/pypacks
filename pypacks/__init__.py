@@ -11,7 +11,8 @@ from pypacks.providers.number_provider import (
 from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
-from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType
+from pypacks.resources.custom_damage_type import CustomDamageType
+from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
 from pypacks.resources.custom_enchantment import (
     CustomEnchantment,
     EnchantValueEffect, SetValueEffect, AddValueEffect, MultiplyValueEffect, RemoveBinomialValueEffect, AllOfValueEffect,
@@ -66,7 +67,8 @@ __all__ = [
     "MinecraftColor",
     "CustomAdvancement", "Criteria",
     "CustomBlock",
-    "CustomDimension", "CustomDimensionType",
+    "CustomDamageType",
+    "CustomDimension", "CustomDimensionType", "OverworldDimension", "NetherDimension", "EndDimension",
     "CustomEnchantment",
     "EnchantValueEffect", "SetValueEffect", "AddValueEffect", "MultiplyValueEffect", "RemoveBinomialValueEffect", "AllOfValueEffect",
     "EnchantmentEntityEffect", "AllOfEntityEffect", "ApplyMobEffectEntityEffect", "DamageEntityEntityEffect", "ChangeItemDamageEntityEffect", "ExplodeEntityEffect", "IgniteEntityEffect",

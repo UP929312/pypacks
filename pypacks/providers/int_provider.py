@@ -72,7 +72,6 @@ class WeightedListIntProvider:
         }
 
 
-
 IntProvider: TypeAlias = ConstantIntProvider | UniformIntProvider | BiasedToBottomIntProvider | ClampedIntProvider | ClampedNormalIntProvider | WeightedListIntProvider
 
 # If type is constant, additional fields are as follows:
