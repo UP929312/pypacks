@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 from pypacks.generate import generate_datapack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
-from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.reference_book_config import RefBookCategory
 from pypacks.raycasting import generate_default_raycasting_functions
@@ -18,13 +16,17 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment
+    from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
+    from pypacks.resources.custom_model import CustomItemModelDefinition
     from pypacks.resources.custom_painting import CustomPainting
     from pypacks.resources.custom_predicate import Predicate
     from pypacks.resources.custom_recipe import Recipe
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_tag import CustomTag
+    from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
+    from pypacks.resources.world_gen.structure_set import CustomStructureSet
 
 
 @dataclass
@@ -60,6 +62,8 @@ class Pack:
     custom_mcfunctions: list["MCFunction"] = field(default_factory=list)
     custom_item_model_definitions: list["CustomItemModelDefinition"] = field(default_factory=list)
     custom_dimensions: list["CustomDimension"] = field(default_factory=list)
+    custom_structures: list["CustomStructure | SingleCustomStructure"] = field(default_factory=list)
+    custom_structure_sets: list["CustomStructureSet"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.datapack_output_path == "" and self.world_name:

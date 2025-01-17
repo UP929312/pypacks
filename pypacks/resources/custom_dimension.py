@@ -8,6 +8,7 @@ from pypacks.providers.int_provider import IntProvider, UniformIntProvider
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
+    from pypacks.resources.world_gen.biome import CustomBiome
 
 
 @dataclass
@@ -15,14 +16,18 @@ class CustomDimension:
     # https://minecraft.wiki/w/Dimension_definition
     internal_name: str
     dimension_type: "CustomDimensionType | Literal['overworld', 'the_nether', 'the_end', 'overworld_caves']"
-    biome: str = "minecraft:the_end"  # The biome of the dimension.
+    biome: "CustomBiome | str" = "minecraft:the_end"  # The biome of the dimension.
     noise_settings: Literal[
         "minecraft:overworld", "minecraft:nether", "minecraft:end", "minecraft:large_biomes", "minecraft:amplified", "minecraft:floating_islands", "minecraft:caves"
     ] = "minecraft:overworld"  # The noise settings of the dimension.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="dimension")
 
+    def generate_teleport_command(self, pack_namespace: str) -> str:
+        return f"/execute in {pack_namespace}:{self.internal_name} run tp @s ~ ~ ~"
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.world_gen.biome import CustomBiome
         return {
             "type": self.dimension_type.get_reference(pack_namespace) if isinstance(self.dimension_type, CustomDimensionType) else self.dimension_type,
             # TODO: More inputs here
@@ -30,15 +35,18 @@ class CustomDimension:
                 "type": "minecraft:noise",
                 "biome_source": {
                     "type": "minecraft:fixed",
-                    "biome": self.biome,
+                    "biome": self.biome.get_reference(pack_namespace) if isinstance(self.biome, CustomBiome) else self.biome,
                 },
                 "settings": self.noise_settings,
             }
         }
 
     def create_datapack_files(self, pack: "Pack") -> None:
+        from pypacks.resources.world_gen.biome import CustomBiome
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
+        if isinstance(self.biome, CustomBiome):
+            self.biome.create_datapack_files(pack)
         if isinstance(self.dimension_type, CustomDimensionType):  # TODO: Hmmm, do we want this?
             self.dimension_type.create_datapack_files(pack)
 
@@ -174,40 +182,3 @@ EndDimension = CustomDimensionType(
     infiniburn="#minecraft:infiniburn_end",
     effects="minecraft:the_end"
 )
-
-# ============================================================================================================
-
-
-@dataclass
-class MoodSound:
-    sound: str = "minecraft:ambient.cave"  # The sound event to play.
-    tick_delay: int = 6000  # The mininum delay between two plays
-    block_search_extent: int = 8  # Determines the cubic range of possible positions to find place to play the mood sound. The player is at the center of the cubic range, and the edge length is 2 * block_search_extent.
-    offset: int = 2  # The higher the value makes the sound source further away from the player.
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "sound": self.sound,
-            "tick_delay": self.tick_delay,
-            "block_search_extent": self.block_search_extent,
-            "offset": self.offset
-        }
-
-
-# @dataclass
-# class CustomBiome:
-#     # https://minecraft.wiki/w/Biome_definition
-#     has_precipitation: bool = True  # Determines whether or not the biome has precipitation (rain and snow)
-#     temperature: float = 0.8  #  Controls gameplay features like grass and foliage color, and a height adjusted temperature (which controls whether raining or snowing if `has_precipitation` is true, and generation details of some features).
-#     temperature_modifier: Literal["none", "frozen"] = "none"
-#     downfall: float = 0.4  # Controls grass and foliage color.
-#     fog_color: int = 12638463  # Decimal value converted from Hex color to use for fog.
-#     sky_color: int = 7907327  # Decimal value converted from Hex color to use for sky.
-#     water_color: int = 4159204  # Decimal value converted from Hex color to use for water blocks and cauldrons.
-#     water_fog_color: int = 329011  # Decimal value converted from Hex color to use for fog underwater.
-#     foliage_color: int | None = None  # Decimal value converted from Hex color to use for tree leaves and vines. If not present, the value depends on downfall and the temperature.
-#     grass_color: int | None = None  # Decimal value converted from Hex color to use for grass blocks, short grass, tall grass, ferns, tall ferns, and sugar cane. If not present, the value depends on downfall and temperature.
-#     grass_color_modifier: Literal["none", "dark_forest", "swamp"] | None = None
-#     mood_sound: MoodSound | None = field(default_factory=lambda: MoodSound("minecraft:ambient.cave", 6000, 8, 2))  #  Settings for mood sound.
-
-#     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/biome")

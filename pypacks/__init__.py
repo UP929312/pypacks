@@ -8,6 +8,8 @@ from pypacks.providers.number_provider import (
 )
 # =============================================================================
 # Resources
+from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
+from pypacks.resources.world_gen import CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, SpawnOverride, DisableSpawnOverrideCategory, CustomBiome, MoodSound
 from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
@@ -24,8 +26,6 @@ from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.resources.custom_loot_tables import CustomLootTable
-from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 
 from pypacks.resources.custom_painting import CustomPainting
 from pypacks.resources.custom_predicate import Predicate
@@ -64,6 +64,7 @@ __all__ = [
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",
     "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreboardNumberProvider", "StorageNumberProvider",
     # Resources
+    "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "MinecraftColor",
     "CustomAdvancement", "Criteria",
     "CustomBlock",

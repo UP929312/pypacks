@@ -175,3 +175,97 @@ INEDIBLE_ITEMS = [
 #         { "required": false, "id": "minecraft:trident" }
 
 # A lot more
+
+MobCapCategories = Literal[
+    "monster", "creature", "ambient", "axolotls", "underground_water_creature", "water_ambient", "water_creature", "misc", None
+]
+# Monster = Hostile mobs
+# Creature = Passive mobs
+# Ambient = Bats
+# Axolotls = Axolotls
+# Underground water creature = Glow squids
+# Water ambient = Dolphins and squids
+# Water creature = Fish (cod, salmon, pufferfish and tropical fish)
+# Misc = Item frames, etc (non mobs/animals)
+
+MOB_TO_CATEGORY: dict[str, MobCapCategories] = {
+    "allay": "creature",
+    "armadillo": "creature",
+    "axolotl": "axolotls",
+    "bat": "ambient",  # Only ambient
+    "bee": "creature",
+    "blaze": "monster",
+    "bogged": "monster",
+    "breeze": "monster",
+    "camel": "creature",
+    "cat": "creature",
+    "cave_spider": "monster",
+    "chicken": "creature",
+    "cod": "water_creature",
+    "cow": "creature",
+    "creaking": "monster",
+    "creeper": "monster",
+    "dolphin": "water_ambient",  # Water ambient = Squids and dolphins only
+    "donkey": "creature",
+    "drowned": "monster",
+    "elder_guardian": None,
+    "enderman": "monster",
+    "endermite": "monster",
+    "evoker": "monster",
+    "fox": "creature",
+    "frog": "creature",
+    "ghast": "monster",
+    "glow_squid": "underground_water_creature",  # Only underground water creature
+    "goat": "creature",
+    "guardian": "monster",
+    "hoglin": "monster",
+    "horse": "creature",
+    "husk": "monster",
+    "iron_golem": None,
+    "llama": "creature",
+    "magma_cube": "monster",
+    "mooshroom": "creature",
+    "mule": "creature",
+    "ocelot": "creature",
+    "panda": "creature",
+    "parrot": "creature",
+    "phantom": "monster",
+    "pig": "creature",
+    "piglin": "monster",
+    "piglin_brute": "monster",
+    "pillager": "monster",
+    "polar_bear": "creature",
+    "pufferfish": "water_creature",
+    "rabbit": "creature",
+    "ravager": "monster",
+    "salmon": "water_creature",
+    "sheep": "creature",
+    "shulker": "monster",
+    "silverfish": "monster",
+    "skeleton": "monster",
+    "skeleton_horse": "creature",
+    "slime": "monster",
+    "sniffer": "creature",
+    "snow_golem": None,
+    "spider": "monster",
+    "squid": "water_ambient",  # Water ambient = Squids and dolphins only
+    "stray": "monster",
+    "strider": "creature",
+    "tadpole": None,
+    "trader_llama": "creature",
+    "tropical_fish": "water_creature",
+    "turtle": "creature",
+    "vex": "monster",
+    "villager": None,
+    "vindicator": "monster",
+    "wandering_trader": "creature",
+    "warden": None,
+    "witch": "monster",
+    "wither_skeleton": "monster",
+    "wolf": "creature",
+    "zoglin": "monster",
+    "zombie": "monster",
+    "zombie_horse": "creature",
+    "zombie_villager": "monster",
+    "zombified_piglin": "monster",
+}

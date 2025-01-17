@@ -1,3 +1,5 @@
+from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
+from pypacks.resources.world_gen import *  # noqa: F401, F403
 from pypacks.resources.constants import *  # noqa: F401, F403
 from pypacks.resources.custom_advancement import *  # noqa: F401, F403
 from pypacks.resources.custom_block import *  # noqa: F401, F403
@@ -8,7 +10,6 @@ from pypacks.resources.custom_model import *  # noqa: F401, F403
 from pypacks.resources.custom_item import *  # noqa: F401, F403
 from pypacks.resources.custom_jukebox_song import *  # noqa: F401, F403
 from pypacks.resources.custom_mcfunction import *  # noqa: F401, F403
-from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 from pypacks.resources.custom_painting import *  # noqa: F401, F403
 from pypacks.resources.custom_predicate import *  # noqa: F401, F403
 from pypacks.resources.custom_recipe import *  # noqa: F401, F403

@@ -188,6 +188,33 @@ custom_enchantment = CustomEnchantment(
 custom_enchantments = [custom_enchantment]
 # endregion
 # ============================================================================================================
+# region: Custom MCFunctions:
+take_me_home = MCFunction("take_me_home", ["execute in overworld run tp @s 120 69 -46"])
+# endregion
+# ============================================================================================================
+# region: World Generation
+custom_structure_set = CustomStructureSet(
+    "my_structure_set",
+    {"minecraft:ancient_city": 1.0}
+)
+ocean_monument_structure = CustomStructure(
+    "my_custom_structure",
+    "#minecraft:has_structure/ocean_monument",
+    entity_spawn_overrides=[
+        SpawnOverride(entity_name="minecraft:guardian", weight=1, min_count=2, max_count=4),
+        DisableSpawnOverrideCategory("axolotls"),
+        DisableSpawnOverrideCategory("underground_water_creature"),
+    ],
+)
+custom_biome = CustomBiome("overworld_biome")
+bee_explosion_structure = SingleCustomStructure(
+    "bee_explosion_structure",
+    [custom_biome],
+    "bee_explosion_structure.nbt",
+)
+overworld_dimension = CustomDimension("overworld", "overworld", custom_biome)
+# endregion
+# ============================================================================================================
 # region: Custom Dimensions
 my_dimension = CustomDimension(
     "my_dimension", CustomDimensionType(
@@ -209,14 +236,16 @@ datapack = Pack(
     custom_recipes=recipes,
     custom_items=custom_items,
     custom_sounds=[custom_sound],
+    custom_mcfunctions=[give_arrow_function, take_me_home],
     custom_paintings=[custom_painting],
     custom_jukebox_songs=[custom_jukebox_song],
     custom_blocks=custom_blocks,
     custom_loot_tables=loot_tables,
     custom_item_model_definitions=custom_item_model_definitions,
     custom_enchantments=custom_enchantments,
-    custom_mcfunctions=[give_arrow_function],
-    custom_dimensions=[my_dimension],
+    custom_dimensions=[my_dimension, overworld_dimension],
     custom_damage_types=[my_custom_damage_type],
+    custom_structures=[bee_explosion_structure],
+    custom_structure_sets=[custom_structure_set],
     # custom_advancements=[eating_advancement],
 )
