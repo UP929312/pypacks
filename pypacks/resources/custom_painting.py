@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
 from pypacks.resources.custom_item import CustomItem
-from pypacks.reference_book_config import PAINTING_REF_BOOK_CONFIG
-from pypacks.resources.item_components import Components, EntityData
+from pypacks.additions.reference_book_config import PAINTING_REF_BOOK_CONFIG
+from pypacks.additions.item_components import Components, EntityData
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack

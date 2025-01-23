@@ -79,6 +79,15 @@ def place_ingredients_on_image(
     return base_image
 
 
+def generate_custom_crafter_recipe_image(recipe: "CustomCrafterRecipe") -> "ImageType":
+    return place_ingredients_on_image(
+        recipe,
+        [ingredient[0] if isinstance(ingredient, list) else ingredient for ingredient in recipe.ingredients],  # type: ignore[FOR-NOW]
+        recipe.result,
+        crafting_recipe_coords,
+    )
+
+
 def generate_shapeless_crafting_image(recipe: "ShapelessCraftingRecipe") -> "ImageType":
     return place_ingredients_on_image(
         recipe,
@@ -161,13 +170,14 @@ def generate_smithing_transform_recipe_image(recipe: "SmithingTransformRecipe") 
 
 def generate_recipe_image(recipe: "Recipe") -> bytes:
     from pypacks.resources.custom_recipe import (
-        ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, StonecutterRecipe,
+        CustomCrafterRecipe, ShapelessCraftingRecipe, ShapedCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, StonecutterRecipe,
         SmokerRecipe, BlastFurnaceRecipe, CampfireRecipe, SmithingTrimRecipe, SmithingTransformRecipe
     )
 
     class_to_function = {
-        ShapelessCraftingRecipe: generate_shapeless_crafting_image,
+        CustomCrafterRecipe: generate_custom_crafter_recipe_image,
         ShapedCraftingRecipe: generate_shaped_crafting_image,
+        ShapelessCraftingRecipe: generate_shapeless_crafting_image,
         CraftingTransmuteRecipe: generate_crafting_transmute_crafting_image,
 
         FurnaceRecipe: generate_furnace_recipe_image,

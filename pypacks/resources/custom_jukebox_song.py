@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.item_components import Components, JukeboxPlayable
+from pypacks.additions.item_components import Components, JukeboxPlayable
 
 # from pypacks.utils import get_ogg_duration
 if TYPE_CHECKING:

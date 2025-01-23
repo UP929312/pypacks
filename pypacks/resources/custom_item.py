@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from pypacks.reference_book_config import MISC_REF_BOOK_CONFIG
-from pypacks.resources.item_components import Consumable, Food, Components
+from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
+from pypacks.additions.item_components import Consumable, Food, Components
 from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
@@ -14,7 +14,7 @@ from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.reference_book_config import RefBookConfig
+    from pypacks.additions.reference_book_config import RefBookConfig
 
 
 @dataclass

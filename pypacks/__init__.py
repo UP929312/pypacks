@@ -1,3 +1,11 @@
+# Additions:
+from pypacks.additions.constants import MinecraftColor
+from pypacks.additions.item_components import (
+    AttributeModifier, ArmorTrim, Bee, BundleContents, BucketEntityData, Components, Cooldown, Consumable, ContainerContents, DeathProtection, EntityData,
+    Equippable, FireworkExplosion, Firework, Food, Instrument, JukeboxPlayable, LodestoneTracker, MapData, MapDecoration, PotionEffect, PotionContents,
+    ToolRule, Tool, TropicalFishData, UseRemainder, WrittenBookContent,
+)
+from pypacks.additions.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 # =============================================================================
 # Providers:
 from pypacks.providers.int_provider import (
@@ -10,7 +18,6 @@ from pypacks.providers.number_provider import (
 # Resources
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 from pypacks.resources.world_gen import CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, SpawnOverride, DisableSpawnOverrideCategory, CustomBiome, MoodSound
-from pypacks.resources.constants import MinecraftColor
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_block import CustomBlock
 from pypacks.resources.custom_damage_type import CustomDamageType
@@ -30,17 +37,12 @@ from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_painting import CustomPainting
 from pypacks.resources.custom_predicate import Predicate
 from pypacks.resources.custom_recipe import (
-    Recipe, ShapelessCraftingRecipe, ShapedCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,
+    Recipe, CustomCrafterRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,
     CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe
 )
 from pypacks.resources.custom_sound import CustomSound
 from pypacks.resources.custom_tag import CustomTag
 
-from pypacks.resources.item_components import (
-    AttributeModifier, ArmorTrim, Bee, BundleContents, BucketEntityData, Components, Cooldown, Consumable, ContainerContents, DeathProtection, EntityData,
-    Equippable, FireworkExplosion, Firework, Food, Instrument, JukeboxPlayable, LodestoneTracker, MapData, MapDecoration, PotionEffect, PotionContents,
-    ToolRule, Tool, TropicalFishData, UseRemainder, WrittenBookContent,
-)
 from pypacks.resources.item_model_definition import (
     ModelItemModel, ConstantTint, DyeTint, GrassTint, FireworkTint, PotionTint, MapColorTint, TeamTint, CustomModelDataTint,
     CompositeItemModel,
@@ -57,15 +59,18 @@ from pypacks.scripts.repos.all_item_instances import DEFAULT_ITEMS
 
 from pypacks.pack import Pack
 
-from pypacks.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
-
 __all__ = [
+    # Additions
+    "MinecraftColor",
+    "AttributeModifier", "ArmorTrim", "Bee", "BundleContents", "BucketEntityData", "Components", "Cooldown", "Consumable", "ContainerContents", "DeathProtection", "EntityData",
+    "Equippable", "FireworkExplosion", "Firework", "Food", "Instrument", "JukeboxPlayable", "LodestoneTracker", "MapData", "MapDecoration", "PotionEffect", "PotionContents",
+    "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
+    "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
     # Providers
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",
     "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreboardNumberProvider", "StorageNumberProvider",
     # Resources
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
-    "MinecraftColor",
     "CustomAdvancement", "Criteria",
     "CustomBlock",
     "CustomDamageType",
@@ -81,14 +86,10 @@ __all__ = [
     "CustomLootTable",
     "CustomPainting",
     "Predicate",
-    "Recipe", "ShapelessCraftingRecipe", "ShapedCraftingRecipe", "CraftingTransmuteRecipe", "FurnaceRecipe", "BlastFurnaceRecipe", "SmokerRecipe",
+    "Recipe", "CustomCrafterRecipe", "ShapedCraftingRecipe", "ShapelessCraftingRecipe", "CraftingTransmuteRecipe", "FurnaceRecipe", "BlastFurnaceRecipe", "SmokerRecipe",
     "CampfireRecipe", "SmithingTransformRecipe", "SmithingTrimRecipe", "StonecutterRecipe",
     "CustomSound",
     "CustomTag",
-
-    "AttributeModifier", "ArmorTrim", "Bee", "BundleContents", "BucketEntityData", "Components", "Cooldown", "Consumable", "ContainerContents", "DeathProtection", "EntityData",
-    "Equippable", "FireworkExplosion", "Firework", "Food", "Instrument", "JukeboxPlayable", "LodestoneTracker", "MapData", "MapDecoration", "PotionEffect", "PotionContents",
-    "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
 
     "ModelItemModel", "ConstantTint", "DyeTint", "GrassTint", "FireworkTint", "PotionTint", "MapColorTint", "TeamTint", "CustomModelDataTint",
     "CompositeItemModel",
@@ -105,7 +106,4 @@ __all__ = [
 
     # Pack.py
     "Pack",
-
-    # Reference Book Config
-    "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
 ]

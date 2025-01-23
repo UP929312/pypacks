@@ -1,5 +1,5 @@
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.item_components import AttributeModifier, Components, Equippable, Tool, ToolRule
+from pypacks.additions.item_components import AttributeModifier, Components, Equippable, Tool, ToolRule
 
 ANCIENT_DEBRIS = CustomItem(internal_name="minecraft:ancient_debris", base_item="ancient_debris", components=Components(damage_resistant_to='#minecraft:is_fire'))
 CHAINMAIL_BOOTS = CustomItem(internal_name="minecraft:chainmail_boots", base_item="chainmail_boots", components=Components(enchantable_at_level=12, repaired_by=['#minecraft:repairs_chain_armor'], attribute_modifiers=[AttributeModifier(attribute_type='armor', slot='feet', amount=1.0, operation='add_value'), AttributeModifier(attribute_type='armor_toughness', slot='feet', amount=0.0, operation='add_value')], equippable=Equippable(slot='feet', equip_sound='minecraft:item.armor.equip_chain', dispensable=True, swappable=True, damage_on_hurt=True, entities_which_can_wear=[])), max_stack_size=1, rarity="uncommon")

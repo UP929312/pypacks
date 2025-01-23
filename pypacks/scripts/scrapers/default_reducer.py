@@ -4,7 +4,7 @@ from typing import Any
 
 import requests
 
-from pypacks.resources.item_components import AttributeModifier, Components, Equippable, Tool
+from pypacks.additions.item_components import AttributeModifier, Components, Equippable, Tool
 
 EMPTY_PATTERN = re.compile(r"[A-Za-z_]*=(None|{}|\[]|False), ")
 
@@ -25,7 +25,7 @@ all_item_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/
 
 lines = [
     "from pypacks.resources.custom_item import CustomItem",
-    "from pypacks.resources.item_components import AttributeModifier, Components, Equippable, Tool, ToolRule",
+    "from pypacks.additions.item_components import AttributeModifier, Components, Equippable, Tool, ToolRule",
     ""
 ]
 items = []

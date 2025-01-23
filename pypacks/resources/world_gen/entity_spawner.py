@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from pypacks.resources.constants import MOB_TO_CATEGORY
+from pypacks.additions.constants import MOB_TO_CATEGORY
 
 
 @dataclass

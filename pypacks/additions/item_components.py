@@ -794,7 +794,7 @@ class Components:
         assert self.repair_cost is None or self.repair_cost >= 0, "repair_cost must be a non-negative integer"
         assert not (self.player_head_username and self.custom_head_texture), "Cannot have both player_head_username and custom_head_texture"
         assert self.cooldown is None or self.cooldown.seconds > 0, "cooldown seconds must be positive, to remove the cooldown, set it to None (or don't pass it in.)"
-        # assert not (self.damage_resistant_to and self.destroyed_in_lava), "Cannot have both damage_resistant_to and destroyed_in_lava set to True"
+        # assert not (self.damage_resistant_to and self.destroyed_in_lava), "Cannot have both damage_resistant_to and destroyed_in_lava set!"
 
     @classmethod
     def from_list(cls, components: list[ComponentType]) -> "Components":
@@ -834,7 +834,6 @@ class Components:
             "enchantment_glint_override": True if self.enchantment_glint_override else None,
             "glider":                     {} if self.glider else None,
             "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
-            # "damage_resistant":          {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,
             "enchantable":                {"value": self.enchantable_at_level} if self.enchantable_at_level is not None else None,
             "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
             "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
@@ -848,6 +847,7 @@ class Components:
                                            else self.container_loot_table)}
                                            if self.container_loot_table is not None else None),  # fmt: skip
             "charged_projectiles":        [{"id": projectile} for projectile in self.loaded_projectiles] if self.loaded_projectiles is not None else None,
+            # "damage_resistant":          {"types": "#minecraft:is_fire"} if not self.destroyed_in_lava else None,
             "damage_resistant":           {"types": self.damage_resistant_to} if self.damage_resistant_to is not None else None,
             "debug_stick_state":          self.debug_stick_state if self.debug_stick_state else None,
             "dyed_color":                 self.dye_color,

@@ -9,7 +9,7 @@ from pypacks.resources.custom_mcfunction import MCFunction
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.resources.constants import Slabs
+    from pypacks.additions.constants import Slabs
     from pypacks.resources.custom_item import CustomItem
 
 

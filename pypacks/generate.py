@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pypacks.reference_book_generator import ReferenceBook
+from pypacks.additions.reference_book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES
 from pypacks.resources.custom_font import CustomFont, FontImage
 from pypacks.resources.custom_item import CustomItem

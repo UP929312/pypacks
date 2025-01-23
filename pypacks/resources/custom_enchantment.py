@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_predicate import Predicate
-    from pypacks.resources.item_components import PotionEffectType
+    from pypacks.additions.item_components import PotionEffectType
 
 
 @dataclass
@@ -65,7 +65,7 @@ class CustomEnchantment:
 
     def generate_custom_item(self, pack_namespace: str) -> "CustomItem":
         from pypacks.resources.custom_item import CustomItem
-        from pypacks.resources.item_components import Components
+        from pypacks.additions.item_components import Components
         return CustomItem(
             f"{self.internal_name}_enchanted_book", "enchanted_book",
             custom_name=f"{self.description} Enchanted Book",

@@ -197,20 +197,20 @@ custom_structure_set = CustomStructureSet(
     "my_structure_set",
     {"minecraft:ancient_city": 1.0}
 )
-ocean_monument_structure = CustomStructure(
-    "my_custom_structure",
-    "#minecraft:has_structure/ocean_monument",
-    entity_spawn_overrides=[
-        SpawnOverride(entity_name="minecraft:guardian", weight=1, min_count=2, max_count=4),
-        DisableSpawnOverrideCategory("axolotls"),
-        DisableSpawnOverrideCategory("underground_water_creature"),
-    ],
-)
+# ocean_monument_structure = CustomStructure(
+#     "my_custom_structure",
+#     "#minecraft:has_structure/ocean_monument",
+#     entity_spawn_overrides=[
+#         SpawnOverride(entity_name="minecraft:guardian", weight=1, min_count=2, max_count=4),
+#         DisableSpawnOverrideCategory("axolotls"),
+#         DisableSpawnOverrideCategory("underground_water_creature"),
+#     ],
+# )
 custom_biome = CustomBiome("overworld_biome")
 bee_explosion_structure = SingleCustomStructure(
     "bee_explosion_structure",
     [custom_biome],
-    "bee_explosion_structure.nbt",
+    "bee_explosion.nbt",
 )
 overworld_dimension = CustomDimension("overworld", "overworld", custom_biome)
 # endregion
@@ -229,6 +229,13 @@ my_dimension = CustomDimension(
 my_custom_damage_type = CustomDamageType(
     "halucination", "magic", exhaustion=0.0, scaling="never", effects="hurt", death_message_type="default"
 )
+# endregion
+# ============================================================================================================
+# region: Custom Crafter
+custom_crafter = CustomCrafter(
+    "my_custom_crafter", ShapedCraftingRecipe("custom_test_recipe", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}, "air")
+)
+print(custom_crafter.on_tick("pypacks_testing"))
 # endregion
 # ============================================================================================================
 datapack = Pack(

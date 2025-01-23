@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING, Literal, TypedDict
 
-from pypacks.resources.item_components import PotionEffect
+from pypacks.additions.item_components import PotionEffect
 
 
 if TYPE_CHECKING:
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from pypacks.providers.number_provider import (
         ConstantNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, UniformNumberProvider,
     )
-    from pypacks.resources.item_components import AttributeModifier, FireworkExplosion, MapDecorationType, BannerPattern
+    from pypacks.additions.item_components import AttributeModifier, FireworkExplosion, MapDecorationType, BannerPattern
 
 
 # https://minecraft.wiki/w/Item_modifier

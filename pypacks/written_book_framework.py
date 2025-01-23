@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
 
-from pypacks.resources.item_components import Components, WrittenBookContent
+from pypacks.additions.item_components import Components, WrittenBookContent
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:

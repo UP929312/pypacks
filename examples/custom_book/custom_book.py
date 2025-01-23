@@ -1,6 +1,6 @@
 from pypacks import Pack, CustomItem, Components
-from pypacks.resources.item_components import WrittenBookContent
-from pypacks.reference_book_generator import ReferenceBook
+from pypacks.additions.item_components import WrittenBookContent
+from pypacks.additions.reference_book_generator import ReferenceBook
 # from pypacks.written_book_framework import FormattedWrittenBook
 
 written_book = CustomItem("already_written_in_book", "minecraft:written_book", "Written Book", components=Components(

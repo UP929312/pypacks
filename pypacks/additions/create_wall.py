@@ -1,5 +1,5 @@
 from pypacks.resources.custom_mcfunction import MCFunction
-from .resources.custom_item import CustomItem
+from pypacks.resources.custom_item import CustomItem
 
 
 def create_wall(custom_items: list["CustomItem"], pack_namespace: str) -> MCFunction:

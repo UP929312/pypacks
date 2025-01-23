@@ -43,7 +43,7 @@ class CustomItemModelDefinition:
 
     def generate_give_command(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_item import CustomItem
-        from pypacks.reference_book_config import HIDDEN_REF_BOOK_CONFIG
+        from pypacks.additions.reference_book_config import HIDDEN_REF_BOOK_CONFIG
         assert self.showcase_item is not None
         return CustomItem(
             self.internal_name, self.showcase_item, custom_name=self.internal_name,

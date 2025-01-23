@@ -1,6 +1,9 @@
+from pypacks.additions.constants import *  # noqa: F401, F403
+from pypacks.additions.item_components import *  # noqa: F401, F403
+from pypacks.additions.custom_crafter import *  # noqa: F401, F403
+
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 from pypacks.resources.world_gen import *  # noqa: F401, F403
-from pypacks.resources.constants import *  # noqa: F401, F403
 from pypacks.resources.custom_advancement import *  # noqa: F401, F403
 from pypacks.resources.custom_block import *  # noqa: F401, F403
 from pypacks.resources.custom_damage_type import *  # noqa: F401, F403
@@ -15,5 +18,4 @@ from pypacks.resources.custom_predicate import *  # noqa: F401, F403
 from pypacks.resources.custom_recipe import *  # noqa: F401, F403
 from pypacks.resources.custom_sound import *  # noqa: F401, F403
 from pypacks.resources.custom_tag import *  # noqa: F401, F403
-from pypacks.resources.item_components import *  # noqa: F401, F403
 from pypacks.resources.item_model_definition import *  # noqa: F401, F403
