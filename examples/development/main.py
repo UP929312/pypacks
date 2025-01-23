@@ -233,9 +233,9 @@ my_custom_damage_type = CustomDamageType(
 # ============================================================================================================
 # region: Custom Crafter
 custom_crafter = CustomCrafter(
-    "my_custom_crafter", ShapedCraftingRecipe("custom_test_recipe", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}, "air")
+    "my_custom_crafter", "My custom crafter", ShapedCraftingRecipe("custom_test_recipe", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}, "air")
 )
-print(custom_crafter.on_tick("pypacks_testing"))
+# custom_crafter.on_tick("pypacks_testing")
 # endregion
 # ============================================================================================================
 datapack = Pack(
@@ -255,4 +255,5 @@ datapack = Pack(
     custom_structures=[bee_explosion_structure],
     custom_structure_sets=[custom_structure_set],
     # custom_advancements=[eating_advancement],
+    custom_crafters=[custom_crafter],
 )

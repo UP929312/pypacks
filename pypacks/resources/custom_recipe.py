@@ -1,3 +1,4 @@
+import dataclasses
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -38,6 +39,55 @@ class GenericRecipe:
 
 
 @dataclass
+class CustomCrafterRecipe(GenericRecipe):
+    ingredients: list[StringOrCustomItem]
+    result: StringOrCustomItem
+
+    recipe_block_name: str = field(init=False, repr=False, default="dispenser")
+
+
+@dataclass
+class ShapedCraftingRecipe(GenericRecipe):
+    internal_name: str
+    rows: list[str]
+    keys: dict[str, list[str] | str]
+    result: StringOrCustomItem
+    amount: int = 1
+    recipe_category: RecipeCategory = "misc"
+
+    recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        assert 0 < len(self.rows) <= 3, "Rows must be a list of 1-3 strings"
+        row_1 = self.rows[0]  # Now row is a 3 length string
+        row_2 = self.rows[1] if len(self.rows) >= 2 else None
+        row_3 = self.rows[2] if len(self.rows) == 3 else None
+        self.removed_nones_rows = [x for x in [row_1, row_2, row_3] if x is not None]
+        self.enumeratable_list = [
+            *[self.keys.get(x, "minecraft:air") for x in row_1],
+            *[self.keys.get(x, "minecraft:air") for x in (list(row_2) if row_2 is not None else ["", "", ""])],
+            *[self.keys.get(x, "minecraft:air") for x in (list(row_3) if row_3 is not None else ["", "", ""])],
+        ]
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        data = {
+            "type": "minecraft:crafting_shaped",
+            "category": self.recipe_category,
+            "pattern": self.removed_nones_rows,
+            "key": self.keys,
+            "result": {
+                "id": self.format_item_or_string(self.result),
+                "count": self.amount,
+            },
+            "show_notification": True,
+        }
+        if isinstance(self.result, CustomItem):
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload, assignment]
+        return data
+
+
+@dataclass
 class ShapelessCraftingRecipe(GenericRecipe):
     internal_name: str
     ingredients: list[list[str] | str]
@@ -66,42 +116,6 @@ class ShapelessCraftingRecipe(GenericRecipe):
         }
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload]
-        return data
-
-
-@dataclass
-class ShapedCraftingRecipe(GenericRecipe):
-    internal_name: str
-    rows: list[str]
-    keys: dict[str, list[str] | str]
-    result: StringOrCustomItem
-    amount: int = 1
-    recipe_category: RecipeCategory = "misc"
-
-    recipe_block_name: str = field(init=False, repr=False, default="crafting_table")
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        assert 0 < len(self.rows) <= 3, "Rows must be a list of 1-3 strings"
-        row_1 = self.rows[0]
-        row_2 = self.rows[1] if len(self.rows) >= 2 else None
-        row_3 = self.rows[2] if len(self.rows) == 3 else None
-        self.removed_nones_rows = [x for x in [row_1, row_2, row_3] if x is not None]
-
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        data = {
-            "type": "minecraft:crafting_shaped",
-            "category": self.recipe_category,
-            "pattern": self.removed_nones_rows,
-            "key": self.keys,
-            "result": {
-                "id": self.format_item_or_string(self.result),
-                "count": self.amount,
-            },
-            "show_notification": True,
-        }
-        if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload, assignment]
         return data
 
 
@@ -303,11 +317,11 @@ class StonecutterRecipe(GenericRecipe):
 
 # This is a type hint for a recipe, it can be any of the recipe types
 Recipe: TypeAlias = (
-    ShapelessCraftingRecipe | ShapedCraftingRecipe | CraftingTransmuteRecipe | FurnaceRecipe | BlastFurnaceRecipe |
+    CustomCrafterRecipe | ShapedCraftingRecipe | ShapelessCraftingRecipe | CraftingTransmuteRecipe | FurnaceRecipe | BlastFurnaceRecipe |
     CampfireRecipe | SmithingTransformRecipe | SmithingTrimRecipe | SmokerRecipe | StonecutterRecipe
 )
 
 ALL_RECIPES: list[Recipe] = [
-    ShapelessCraftingRecipe, ShapedCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,  # type: ignore[list-item]
+    CustomCrafterRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,  # type: ignore[list-item]
     CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe,  # type: ignore[list-item]
 ]

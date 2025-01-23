@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_tag import CustomTag
     from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
     from pypacks.resources.world_gen.structure_set import CustomStructureSet
+    from pypacks.additions.custom_crafter import CustomCrafter
 
 
 @dataclass
@@ -64,6 +65,7 @@ class Pack:
     custom_dimensions: list["CustomDimension"] = field(default_factory=list)
     custom_structures: list["CustomStructure | SingleCustomStructure"] = field(default_factory=list)
     custom_structure_sets: list["CustomStructureSet"] = field(default_factory=list)
+    custom_crafters: list["CustomCrafter"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.datapack_output_path == "" and self.world_name:
@@ -85,6 +87,11 @@ class Pack:
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self.namespace))
             self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
+        # ==================================================================================
+        # Custom crafters:
+        for crafter in self.custom_crafters:
+            self.custom_mcfunctions.append(crafter.on_tick(self.namespace))
+            self.custom_items.append(crafter.generate_give_command(self.namespace))
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
@@ -135,6 +142,10 @@ class Pack:
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
+            ],
+            *[
+                f"function {custom_crafter_tick.on_tick(self.namespace).get_reference(self.namespace)}"
+                for custom_crafter_tick in self.custom_crafters  # TODO: Consider a all_crafters_tick function
             ],
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ])
