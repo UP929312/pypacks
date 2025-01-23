@@ -2,9 +2,15 @@ Consider changing components to be a list of components, rather than a big ol' c
 
 mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 --exclude=script.py && ruff check && pylint .
 
+https://misode.github.io/predicate/?share=nd8QEiV96I
+
 Custom Dimensions! (more work)
 https://www.planetminecraft.com/blog/custom-world-generation-documentation/
 https://www.planetminecraft.com/blog/custom-structure-gen-documentation/
+
+Loops, to be able to run code every <x> ticks
+
+C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\25w03a\25w03a\data\minecraft\worldgen\noise_settings
 
 /give @s minecraft:villager_spawn_egg[minecraft:villager/variant="plains"]
 
@@ -16,17 +22,13 @@ Following smithed convention?  https://docs.smithed.dev/conventions/namespacing/
 
 https://www.reddit.com/r/MinecraftCommands/comments/1i1plzs/recipe_click_detection/
 
-Go all out on a testing framework.
-Each test shouldn't just be 2d, it should be a 3 structure with the beacon like Mojang do.
-# Improve testing setup, it's a nice start though. (also, add loot table stuff, should spawn the item, then detect it in the hopper below?)
+Use the new tests mojang implemented into datapacks!
 
 Have generic "Raycast" object, which the player can use... Which also stops on entities if you want it to?
 
-For custom enchantments, also have the book included as a custom item
-
 # Custom enchant idea: Reverse thorns? When you hit, you take damage
 
-ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type   - Need translations
+ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type - Need translations
 
 Translations (grrr) https://minecraft.wiki/w/Resource_pack#Language
 

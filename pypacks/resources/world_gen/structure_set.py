@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 import json
+import os
 from pathlib import Path
 from typing import Any, Literal, TYPE_CHECKING
 
@@ -69,6 +70,7 @@ class CustomStructureSet:
 
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.world_gen.structure import CustomStructure
+        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
         for structure in self.structures:
             if isinstance(structure, CustomStructure):
                 structure.create_datapack_files(pack)
