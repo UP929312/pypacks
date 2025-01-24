@@ -46,7 +46,7 @@ class CustomStructureSet:
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.world_gen.structure import CustomStructure
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "structures": [
                 {"structure": structure.get_reference(pack_namespace) if isinstance(structure, CustomStructure) else structure, "weight": weight}
                 for structure, weight in self.structures.items()

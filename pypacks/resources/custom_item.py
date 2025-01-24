@@ -44,6 +44,8 @@ class CustomItem:
 
         # TODO: Rework this, instead, just make a custom item model here instead...
         path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
+        # from pypacks.resources.custom_model import ModelItemModel
+        # custom_item_model = CustomItemModelDefinition(self.internal_name, ModelItemModel(path), self.base_item)
         with open(path, mode="rb") as file:
             self.image_bytes = file.read()
 

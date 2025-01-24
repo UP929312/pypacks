@@ -46,7 +46,7 @@ class CustomNoiseSettings:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "sea_level": self.sea_level,
             "disable_mob_generation": self.disable_mob_generation,
             "ore_veins_enabled": self.ore_veins_enabled,

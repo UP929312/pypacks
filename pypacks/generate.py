@@ -52,6 +52,8 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
         FontImage("logo_256_x_256", Path(IMAGES_PATH, "reference_book_icons", "logo_256_x_256.png").read_bytes(), height=100, y_offset=16),
         FontImage("information_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
                                                  base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
+        FontImage("play_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "play_icon.png").read_bytes(),
+                                          base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
         FontImage("satchel_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         *[  # Category icons
             FontImage(f"{category.internal_name}_category_icon", image_bytes=add_border(Path(category.image_path).read_bytes()), height=20, y_offset=10)

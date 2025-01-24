@@ -37,7 +37,7 @@ class CustomStructure:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             **self.structure_type.to_dict(),
             "biomes": self.biomes_to_spawn_in,
             "step": self.generation_step,

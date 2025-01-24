@@ -203,10 +203,10 @@ class BundleContents:
         from pypacks.resources.custom_item import CustomItem
         return [
             {
-                "id": item.base_item if isinstance(item, CustomItem) else item,
+                "id": str(item),
                 "count": count,
             } | ({
-                "components": (item.to_dict(pack_namespace) if isinstance(item, CustomItem) else {}),
+                "components": item.to_dict(pack_namespace),
             } if isinstance(item, CustomItem) and item.components.to_dict(pack_namespace) else {})
             for item, count in self.items.items()
         ]
@@ -460,6 +460,10 @@ class Instrument:
             "sound_event": {"sound_id": self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id},
             "use_duration": self.use_duration,
         }
+    
+    def get_reference(self, pack_namespace: str) -> str:
+        from pypacks.resources.custom_sound import CustomSound
+        return self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id
 
 
 # ==========================================================================================
@@ -473,9 +477,13 @@ class JukeboxPlayable:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
         return {
-            "song": f"{pack_namespace}:{self.song.internal_name}" if isinstance(self.song, CustomJukeboxSong) else self.song,
+            "song": self.get_reference(pack_namespace),
             "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
         }
+
+    def get_reference(self, pack_namespace: str) -> str:
+        from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
+        return f"{pack_namespace}:{self.song.internal_name}" if isinstance(self.song, CustomJukeboxSong) else self.song
 
 
 # ==========================================================================================

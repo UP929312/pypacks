@@ -33,7 +33,7 @@ class CustomBiome:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "has_precipitation": self.has_precipitation,
             "temperature": self.temperature,
             "temperature_modifier": self.temperature_modifier if self.temperature_modifier != "none" else None,

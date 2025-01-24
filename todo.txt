@@ -12,6 +12,8 @@ https://www.planetminecraft.com/blog/custom-structure-gen-documentation/
 
 Loops, to be able to run code every <x> ticks
 
+- python.analysis.restartLanguageServer
+
 C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\25w03a\25w03a\data\minecraft\worldgen\noise_settings
 
 /give @s minecraft:villager_spawn_egg[minecraft:villager/variant="plains"]
@@ -56,9 +58,7 @@ With the ray casting, what if they have a higher `block_interaction_range`?
 # Probably won't do because the give command, but what if we had a loot table setup for all blocks,
 # Then we can use that for block drops or for the give command (could just call it?) Or custom blocks?
 
-# For recipe images, also add the ingredients underneath, like "sticks: x1, diamonds: x2"
-
-# Calling __str__ on an item returns it's base item? Then we can just do str(item) rather than item.base_item if isisntance(item, CustomItem) else item
+# For recipe images, also add the ingredients underneath, like "sticks: x1, diamonds: x2" As well as the block, e.g. Stonecutter.
 
 REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its setting the same info, e.g. underline=True, underline=True,
 > REMOVE IT
@@ -87,7 +87,7 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # JUKEBOX SONGS - Auto Length is messed up... Hmmmm
 
 # Debug book with all the sounds? Could be fun, and helpful, sounds, fonts, paintings, etc.
-"Play sound" button in the book, with a list of all the sounds, and a play button next to them.
+Add jukebox playable "play sound" button, have it for custom instruments.
 
 # Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with infinity, etc.
 

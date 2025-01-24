@@ -95,7 +95,7 @@ class CustomAdvancement:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @staticmethod
-    def generate_right_click_functionality(item: "CustomItem", pack_namespace: str) -> "CustomAdvancement":
+    def generate_right_click_advancement(item: "CustomItem", pack_namespace: str) -> "CustomAdvancement":
         criteria = Criteria(f"eating_{item.internal_name}", "minecraft:using_item", {
             "item": {
                 "predicates": {  # We use predicates instead of components because components require exact match, predicates require minimum match

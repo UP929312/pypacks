@@ -85,7 +85,7 @@ class Pack:
     def add_internal_functions(self) -> None:
         # ============================================================================================================
         for item in [x for x in self.custom_items if x.on_right_click]:
-            self.custom_advancements.append(CustomAdvancement.generate_right_click_functionality(item, self.namespace))
+            self.custom_advancements.append(CustomAdvancement.generate_right_click_advancement(item, self.namespace))
             self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
         # ==================================================================================
         # Custom crafters:

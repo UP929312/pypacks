@@ -31,7 +31,7 @@ class CustomNoise:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
            "firstOctave": self.first_octave,
             "amplitudes": self.amplitudes,
         })

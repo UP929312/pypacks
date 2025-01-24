@@ -23,7 +23,6 @@ flying_helmet = CustomItem("flying_helmet", "minecraft:iron_helmet", "Flying Hel
 playable_lapis = CustomItem("playable_lapis", "minecraft:lapis_lazuli", "Playable Lapis", max_stack_size=99, rarity="epic", components=Components(jukebox_playable=JukeboxPlayable("pigstep", True)), ref_book_config=RefBookConfig(category=usable_category))
 musical_horn = CustomItem("musical_horn", "minecraft:goat_horn", "Musical Horn", components=Components(instrument=Instrument("minecraft:item.goat_horn.sound.5", "Custom description?", 5, 256)), ref_book_config=RefBookConfig(category=usable_category))
 rick_roll_horn = CustomItem("never_going_to_give_you_up", "minecraft:goat_horn", "Rick Roll", components=Components(instrument=Instrument(custom_sound, "Rick Roll", 5, 256)), ref_book_config=RefBookConfig(category=usable_category))
-rick_roll_horn_from_sound = CustomItem("never_going_to_give_you_up_from_sound", "minecraft:goat_horn", "Rick Roll From Sound", components=Components(instrument=Instrument(custom_sound, "Rick Roll From Sound", 3, 256)), ref_book_config=RefBookConfig(category=usable_category))
 written_book = CustomItem("already_written_in_book", "minecraft:written_book", "Written Book", components=Components(written_book_content=WrittenBookContent("Hello, World!", "Author", [[{"text": "abc\n"}, {"text": "def"}]])),)
 writable_book = CustomItem("writable_book", "minecraft:writable_book", "Writable Book", components=Components(writable_book_content=WritableBookContent(["Hello world"])))
 lodestone_tracker = CustomItem("lodestone_tracker", "minecraft:compass", components=Components(lodestone_tracker=LodestoneTracker(126, 68, -41)))
@@ -77,8 +76,8 @@ loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table
 
 custom_items = [
     ruby, topaz, weak_axe, flying_helmet, playable_lapis, musical_horn, written_book, rick_roll_horn,
-    rick_roll_horn_from_sound, lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book,
-    sharpness_fish, enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
+    lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book, sharpness_fish,
+    enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
     right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun,  # edible_item
     pre_charged_crossbow, steak_to_ruby_when_eaten, custom_firework, custom_firework_hex, map_with_decoration,
     colored_map, map_with_id, banner, note_block_sound_head, eating_gives_you_speed, eating_removes_speed,
@@ -242,7 +241,6 @@ custom_crafter = CustomCrafter(
         ], topaz),
     ]
 )
-# custom_crafter.on_tick("pypacks_testing")
 # endregion
 # ============================================================================================================
 datapack = Pack(

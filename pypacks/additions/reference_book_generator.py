@@ -25,7 +25,31 @@ class ItemPage:
 
     def generate_info_icons(self) -> list[Icon]:
         from pypacks.resources.custom_item import CustomItem
-
+        info_icons: list[Icon] = []
+        # ============================================================================================================
+        # More info button
+        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n{self.item.ref_book_config.description}"
+        more_info_button = Icon(
+            self.pack.font_mapping["information_icon"],
+            self.pack.namespace,
+            self.pack.font_mapping["empty_1_x_1"],
+            right_indentation=3,
+            on_hover=OnHoverShowText(more_info_text),
+        )
+        info_icons.append(more_info_button)
+        # ============================================================================================================
+        if self.item.components.instrument is not None:
+            play_sound_command = f"/playsound {self.item.components.instrument.get_reference(self.pack.namespace)} master @a[distance=..5] ~ ~ ~ 1 1"
+            play_sound_icon = Icon(
+                    self.pack.font_mapping["play_icon"],
+                    self.pack.namespace,
+                    self.pack.font_mapping["empty_1_x_1"],
+                    right_indentation=3,
+                    on_click=OnClickRunCommand(play_sound_command),
+                    on_hover=OnHoverShowText(f"Play: {self.item.custom_name}"),
+            )
+            info_icons.append(play_sound_icon)
+        # ============================================================================================================
         recipes = [
             x for x in self.pack.custom_recipes
             if not isinstance(x, SmithingTrimRecipe)
@@ -45,17 +69,9 @@ class ItemPage:
             for recipe in recipes
             if self.pack.font_mapping.get(f"{recipe.recipe_block_name}_icon")
         ]
+        info_icons.extend(recipe_icons)
         # ============================================================================================================
-        # More info button
-        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item)}:\n\n{self.item.ref_book_config.description}"
-        more_info_button = Icon(
-            self.pack.font_mapping["information_icon"],
-            self.pack.namespace,
-            self.pack.font_mapping["empty_1_x_1"],
-            right_indentation=3,
-            on_hover=OnHoverShowText(more_info_text),
-        )
-        return [more_info_button, *recipe_icons]
+        return info_icons
 
     def get_json_data(self) -> list[dict[str, Any] | list[dict[str, Any]]]:
         return [x.get_json_data() for x in self.generate_page()]

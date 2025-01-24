@@ -1,4 +1,3 @@
-import dataclasses
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -24,7 +23,7 @@ class GenericRecipe:
     datapack_subdirectory_name: str = field(init=False, repr=False, default="recipe")
 
     def __post_init__(self) -> None:
-        self.recipe_image_bytes = generate_recipe_image(self)  # type: ignore
+        self.recipe_image_bytes = generate_recipe_image(self)  # pyright: ignore
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
