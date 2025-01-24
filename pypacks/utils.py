@@ -17,12 +17,8 @@ def recursively_remove_nones_from_data(obj: Any) -> Any:
     return obj
 
 
-def _to_snbt(obj: dict[str, Any]) -> str:
-    return json.dumps(recursively_remove_nones_from_data(obj)).replace("\"'", "'").replace("'\"", "'")
-
-
 def to_component_string(obj: dict[str, Any]) -> str:
-    return ", ".join([f"{key}={_to_snbt(val)}" for key, val in obj.items() if val is not None])
+    return ", ".join([f"{key}={json.dumps(recursively_remove_nones_from_data(val))}" for key, val in obj.items() if val is not None])
 
 
 def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False, make_white: bool = True) -> str:
@@ -31,6 +27,7 @@ def colour_codes_to_json_format(text: str, auto_unitalicise: bool = False, make_
     if not text:
         return '[]'
     if "&" not in text:
+        # return f"\"{text}\""
         return json.dumps([{"text": text, "color": "white", "italic": False} if make_white else {"text": text, "italic": False}])
     # Split on colour codes, but keep the original colour codes
     split_text = [x for x in text.split("&") if x]

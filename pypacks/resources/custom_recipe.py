@@ -9,8 +9,9 @@ if TYPE_CHECKING:
 
 from pypacks.image_manipulation.recipe_image_data import generate_recipe_image
 from pypacks.resources.custom_item import CustomItem
+from pypacks.scripts.repos.all_items import MinecraftItem
 
-StringOrCustomItem: TypeAlias = str | CustomItem
+MinecraftOrCustomItem: TypeAlias = MinecraftItem | CustomItem
 RecipeCategory = Literal["blocks", "building", "equipment", "food", "misc", "redstone"]
 
 # https://minecraft.wiki/w/Recipe
@@ -34,14 +35,15 @@ class GenericRecipe:
         return item_or_string
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
+        if not isinstance(self, CustomCrafterRecipe):
+            with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+                json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass
 class CustomCrafterRecipe(GenericRecipe):
-    ingredients: list[StringOrCustomItem]
-    result: StringOrCustomItem
+    ingredients: list[MinecraftOrCustomItem | Literal["minecraft:air", "air", ""]]
+    result: MinecraftOrCustomItem
 
     recipe_block_name: str = field(init=False, repr=False, default="dispenser")
 
@@ -50,8 +52,8 @@ class CustomCrafterRecipe(GenericRecipe):
 class ShapedCraftingRecipe(GenericRecipe):
     internal_name: str
     rows: list[str]
-    keys: dict[str, list[str] | str]
-    result: StringOrCustomItem
+    keys: dict[str, list[MinecraftItem] | MinecraftItem]
+    result: MinecraftOrCustomItem
     amount: int = 1
     recipe_category: RecipeCategory = "misc"
 
@@ -90,10 +92,10 @@ class ShapedCraftingRecipe(GenericRecipe):
 @dataclass
 class ShapelessCraftingRecipe(GenericRecipe):
     internal_name: str
-    ingredients: list[list[str] | str]
+    ingredients: list[list[MinecraftItem] | MinecraftItem]
     # Ingredients can either be a list of Items (i.e. a flint and iron ingot makes a flint and steel), or a list of lists,
     # which allows you to put multiple items in, e.g. making a chest from all the types of wood.
-    result: StringOrCustomItem
+    result: MinecraftOrCustomItem
     amount: int = 1
     recipe_category: RecipeCategory = "misc"
 
@@ -122,9 +124,9 @@ class ShapelessCraftingRecipe(GenericRecipe):
 @dataclass
 class CraftingTransmuteRecipe(GenericRecipe):
     internal_name: str
-    input_item: str
-    material_item: str
-    result: str
+    input_item: MinecraftItem
+    material_item: MinecraftItem
+    result: MinecraftItem
     recipe_category: RecipeCategory = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
@@ -142,8 +144,8 @@ class CraftingTransmuteRecipe(GenericRecipe):
 @dataclass
 class FurnaceRecipe(GenericRecipe):
     internal_name: str
-    ingredient: str
-    result: StringOrCustomItem
+    ingredient: MinecraftItem
+    result: MinecraftOrCustomItem
     experience: int | None = 1
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
@@ -169,8 +171,8 @@ class FurnaceRecipe(GenericRecipe):
 @dataclass
 class BlastFurnaceRecipe(GenericRecipe):
     internal_name: str
-    ingredient: str
-    result: StringOrCustomItem
+    ingredient: MinecraftItem
+    result: MinecraftOrCustomItem
     experience: int | None = 1
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
@@ -196,8 +198,8 @@ class BlastFurnaceRecipe(GenericRecipe):
 @dataclass
 class CampfireRecipe(GenericRecipe):
     internal_name: str
-    ingredient: str
-    result: StringOrCustomItem
+    ingredient: MinecraftItem
+    result: MinecraftOrCustomItem
     experience: int | None = 1
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
@@ -223,10 +225,10 @@ class CampfireRecipe(GenericRecipe):
 @dataclass
 class SmithingTransformRecipe(GenericRecipe):
     internal_name: str
-    template_item: str
-    base_item: str
-    addition_item: str
-    result: StringOrCustomItem
+    template_item: MinecraftItem
+    base_item: MinecraftItem
+    addition_item: MinecraftItem
+    result: MinecraftOrCustomItem
     recipe_category: RecipeCategory = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
@@ -248,9 +250,9 @@ class SmithingTransformRecipe(GenericRecipe):
 @dataclass
 class SmithingTrimRecipe(GenericRecipe):
     internal_name: str
-    template_item: str
-    base_item: str
-    addition_item: str
+    template_item: MinecraftItem
+    base_item: MinecraftItem
+    addition_item: MinecraftItem
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
@@ -266,8 +268,8 @@ class SmithingTrimRecipe(GenericRecipe):
 @dataclass
 class SmokerRecipe(GenericRecipe):
     internal_name: str
-    ingredient: str
-    result: StringOrCustomItem
+    ingredient: MinecraftItem
+    result: MinecraftOrCustomItem
     experience: int | None = 1
     cooking_time_ticks: int = 200
     recipe_category: RecipeCategory = "misc"
@@ -293,8 +295,8 @@ class SmokerRecipe(GenericRecipe):
 @dataclass
 class StonecutterRecipe(GenericRecipe):
     internal_name: str
-    ingredient: str
-    result: StringOrCustomItem
+    ingredient: MinecraftItem
+    result: MinecraftOrCustomItem
     count: int = 1
     recipe_category: RecipeCategory = "misc"
 

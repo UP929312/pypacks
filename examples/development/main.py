@@ -233,7 +233,14 @@ my_custom_damage_type = CustomDamageType(
 # ============================================================================================================
 # region: Custom Crafter
 custom_crafter = CustomCrafter(
-    "my_custom_crafter", "My custom crafter", ShapedCraftingRecipe("custom_test_recipe", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}, "air")
+    "my_custom_crafter", "My custom crafter", ShapedCraftingRecipe("custom_crafter_recipe", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}, "air"),
+    recipes=[
+        CustomCrafterRecipe("topaz_recipe", [
+            ruby,  "",  ruby,
+            ruby,  "",  ruby,
+            ruby, ruby, ruby,
+        ], topaz),
+    ]
 )
 # custom_crafter.on_tick("pypacks_testing")
 # endregion

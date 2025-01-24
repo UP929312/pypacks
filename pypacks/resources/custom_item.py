@@ -117,8 +117,4 @@ class CustomItem:
         })
 
     def generate_give_command(self, pack_namespace: str) -> str:
-        components = ", ".join([
-            to_component_string({key: value})
-            for key, value in self.to_dict(pack_namespace).items()
-        ])
-        return f"give @p {self.base_item}[{components}]"
+        return f"give @p {self.base_item}[{to_component_string(self.to_dict(pack_namespace))}]"

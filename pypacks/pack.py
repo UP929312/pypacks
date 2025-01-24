@@ -91,7 +91,11 @@ class Pack:
         # Custom crafters:
         for crafter in self.custom_crafters:
             self.custom_mcfunctions.append(crafter.on_tick(self.namespace))
-            self.custom_items.append(crafter.generate_give_command(self.namespace))
+            self.custom_items.append(crafter.generate_custom_item())
+            self.custom_recipes.extend(crafter.recipes)
+            # The crafter block itself...
+            crafter.crafter_block_crafting_recipe.result = crafter.generate_custom_item()
+            self.custom_recipes.append(crafter.crafter_block_crafting_recipe)
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
@@ -145,7 +149,7 @@ class Pack:
             ],
             *[
                 f"function {custom_crafter_tick.on_tick(self.namespace).get_reference(self.namespace)}"
-                for custom_crafter_tick in self.custom_crafters  # TODO: Consider a all_crafters_tick function
+                for custom_crafter_tick in self.custom_crafters  # TODO: Consider an `all_crafters_tick` function
             ],
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ])

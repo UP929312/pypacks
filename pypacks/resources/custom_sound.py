@@ -26,6 +26,9 @@ class CustomSound:
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
 
+    def get_run_command(self, pack_namespace: str) -> str:
+        return f"playsound {self.get_reference(pack_namespace)} master @a[distance=..10] ~ ~ ~ {self.volume} {self.pitch}"
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"sounds", exist_ok=True)
         shutil.copyfile(self.ogg_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"sounds"/f"{self.internal_name}.ogg")
