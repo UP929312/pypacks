@@ -10,6 +10,7 @@ from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
+    from pypacks.resources.custom_item import CustomItem
 
 # TODO: Support non cubes? Player heads? Custom models?
 
@@ -19,7 +20,7 @@ class CustomItemModelDefinition:
     internal_name: str
     model: "ItemModelType | str" = "item/iron_sword"  # or <namespace>:<model_name>
     hand_animation_on_swap: bool = True  # Whether the down-and-up animation should be played in first-person view when the item stack is changed. (default: true)
-    showcase_item: MinecraftItem | None = None  # This is if you want it to show up in a debug command (for testing)
+    showcase_item: "MinecraftItem | CustomItem | None" = None  # This is if you want it to show up in a debug command (for testing)
 
     def __post_init__(self) -> None:
         if isinstance(self.model, str):
@@ -45,6 +46,11 @@ class CustomItemModelDefinition:
         from pypacks.resources.custom_item import CustomItem
         from pypacks.additions.reference_book_config import HIDDEN_REF_BOOK_CONFIG
         assert self.showcase_item is not None
+        if isinstance(self.showcase_item, CustomItem):
+            self.showcase_item.ref_book_config = HIDDEN_REF_BOOK_CONFIG
+            self.showcase_item.item_model = self
+            return self.showcase_item.generate_give_command(pack_namespace)
+
         return CustomItem(
             self.internal_name, self.showcase_item, custom_name=self.internal_name,
             item_model=self, ref_book_config=HIDDEN_REF_BOOK_CONFIG

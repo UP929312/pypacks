@@ -7,7 +7,7 @@ from pypacks.additions.reference_book_config import RefBookCategory
 from pypacks.generate import generate_datapack, generate_resource_pack, generate_font_pack
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.raycasting import generate_default_raycasting_functions
+from pypacks.additions.raycasting import generate_default_raycasting_functions
 from pypacks.additions.create_wall import create_wall
 
 

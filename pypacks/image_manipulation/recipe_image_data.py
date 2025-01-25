@@ -82,7 +82,7 @@ def place_ingredients_on_image(
 def generate_custom_crafter_recipe_image(recipe: "CustomCrafterRecipe") -> "ImageType":
     return place_ingredients_on_image(
         recipe,
-        [ingredient[0] if isinstance(ingredient, list) else ingredient for ingredient in recipe.ingredients],  # type: ignore[FOR-NOW]
+        [ingredient[0] if isinstance(ingredient, list) else ingredient for ingredient in recipe.ingredients],  # type: ignore[index, misc, FOR-NOW]
         recipe.result,
         crafting_recipe_coords,
     )
