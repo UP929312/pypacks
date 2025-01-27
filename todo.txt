@@ -13,8 +13,7 @@ https://github.com/Gamemode4Dev/GM4_Datapacks/blob/master/gm4/plugins/output.py#
 
 # ========
 With the ray casting, what if they have a higher `block_interaction_range`?
-Have generic "Raycast" object, which the player can use... Which also stops on entities if you want it to?
-# Add a EntityRayCast...
+EntityRaycast should be able to handle multiple mobs, and a stop for blocks option
 # ========
 
 # https://www.reddit.com/r/MinecraftCommands/comments/1i9593y/better_interface/

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.additions.reference_book_config import RefBookCategory
-from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+from pypacks.additions.raycasting import Raycast, BlockRaycast, EntityRaycast
 from pypacks.additions.create_wall import create_wall
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -89,8 +89,7 @@ class Pack:
          # ==================================================================================
          # Custom Raycasts
         if self.custom_raycasts or self.custom_blocks or [x for x in self.custom_items if x.on_right_click]:
-            self.custom_mcfunctions.extend(BlockRaycast.generate_default_raycast_functions(self.namespace))
-            self.custom_mcfunctions.extend(EntityRaycast.generate_default_raycast_functions(self.namespace))
+            self.custom_mcfunctions.extend(Raycast.generate_default_raycast_functions(self.namespace))
         # =================================================================================
         # Custom right click on items
         for item in [x for x in self.custom_items if x.on_right_click]:
@@ -138,7 +137,7 @@ class Pack:
         self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
         load_mcfunction = MCFunction("load", [
-            f"function {self.namespace}:raycast/load" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
+            f"scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
             "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
             "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
