@@ -2,10 +2,13 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from numpy import block
+
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
 from pypacks.resources.custom_mcfunction import MCFunction
+from pypacks.additions.raycasting import BlockRaycast
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -26,7 +29,7 @@ class CustomBlock:
     # silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 
-    block_item: "CustomItem | None" = field(init=False, repr=False, default=None)  # Used by datapack to create the custom icons
+    block_item: "CustomItem | None" = field(init=False, repr=False, hash=False, default=None)  # Used by datapack to create the custom icons
 
     def __post_init__(self) -> None:
         if isinstance(self.block_texture, str):
@@ -139,23 +142,18 @@ class CustomBlock:
             ["custom_blocks", "setup_item_display"],
         )
         # ============================================================================================================
-        arguments = {
-            "hit_block_function": f"{spawn_item_display.get_reference(pack_namespace)}",
-            "failed_function": f"{pack_namespace}:raycast/failed",
-            "ray_transitive_blocks": f"{self.base_block}",
-            "if_or_unless": "if",
-        }
-        formatted_arguments = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
-        populate_start_ray = MCFunction(f"populate_start_ray_{self.internal_name}", [
-                f"function {pack_namespace}:raycast/start_ray {formatted_arguments}",
-            ],
-            ["custom_blocks", "populate_start_ray"],
-        )
+        deploy_raycast_function = BlockRaycast(
+            self.internal_name,
+            on_block_hit_command=spawn_item_display.get_run_command(pack_namespace),
+            no_blocks_hit_command="say Raycasting failed!",
+            blocks_to_detect=self.base_block,
+            if_or_unless="if",
+        ).create_deploy_function(pack_namespace)
         # ============================================================================================================
         revoke_and_run_mcfunction = MCFunction(f"revoke_and_run_{self.internal_name}", [
                 f"advancement revoke @s only {pack_namespace}:placed_{self.internal_name}",
-                f"function {self.generate_detect_rotation_function().get_reference(pack_namespace)}",
-                f"function {populate_start_ray.get_reference(pack_namespace)}",
+                self.generate_detect_rotation_function().get_run_command(pack_namespace),
+                deploy_raycast_function.get_run_command(pack_namespace),
             ],
             ["custom_blocks", "revoke_and_run"],
         )
@@ -170,7 +168,7 @@ class CustomBlock:
             ["custom_blocks", "on_destroy"],
         )
         # ============================================================================================================
-        return execute_as_item_display, spawn_item_display, populate_start_ray, revoke_and_run_mcfunction, on_destroy_no_silk_touch_function
+        return execute_as_item_display, spawn_item_display, deploy_raycast_function, revoke_and_run_mcfunction, on_destroy_no_silk_touch_function
 
     @staticmethod
     def on_tick_function(pack: "Pack") -> "MCFunction":

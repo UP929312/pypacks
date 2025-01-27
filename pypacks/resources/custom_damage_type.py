@@ -18,7 +18,7 @@ class CustomDamageType:
     effects: Literal["hurt", "thorns", "drowning", "burning", "poking", "freezing"] | None = None  # Optional field controlling how incoming damage is shown to the player.
     death_message_type: Literal["default", "fall_variants", "intentional_game_design"] | None = None  # Optional field that controls the kind of death messages to use.
 
-    datapack_subdirectory_name: str = field(init=False, repr=False, default="damage_type")
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="damage_type")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {

@@ -1,5 +1,6 @@
 from pypacks.additions.constants import *  # noqa: F401, F403
 from pypacks.additions.item_components import *  # noqa: F401, F403
+from pypacks.additions.raycasting import *  # noqa: F401, F403
 from pypacks.additions.custom_crafter import *  # noqa: F401, F403
 
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403

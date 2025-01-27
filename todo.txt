@@ -4,6 +4,19 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 For custom crafting, add a nice icon, dispenser is kinda alright, but a custom one would work better.
 
+# Make functions automatically put in their required args in # ~ syntax (i.e. macros, $)
+
+# What if we somehow did cooldown effect by merging item models? Some people use composite for custom durability, replicate that for cooldown?
+
+# Upload the output directly to modrinth?
+https://github.com/Gamemode4Dev/GM4_Datapacks/blob/master/gm4/plugins/output.py#L119
+
+# ========
+With the ray casting, what if they have a higher `block_interaction_range`?
+Have generic "Raycast" object, which the player can use... Which also stops on entities if you want it to?
+# Add a EntityRayCast...
+# ========
+
 # https://www.reddit.com/r/MinecraftCommands/comments/1i9593y/better_interface/
 
 https://misode.github.io/predicate/?share=nd8QEiV96I
@@ -28,8 +41,6 @@ https://www.reddit.com/r/MinecraftCommands/comments/1i1plzs/recipe_click_detecti
 
 Use the new tests mojang implemented into datapacks!
 
-Have generic "Raycast" object, which the player can use... Which also stops on entities if you want it to?
-
 # Custom enchant idea: Reverse thorns? When you hit, you take damage
 
 ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type - Need translations
@@ -46,8 +57,6 @@ It has pretty much everything
 Add a "generic" model, including maybe blockstates, model, item, textures? So if you want to add a custom 3d model you can?
 
 A lot of examples, maybe one per item? In a new examples folder.
-
-With the ray casting, what if they have a higher `block_interaction_range`?
 
 # Change datapack init to take custom_content: list[a, b, c]
 # Make datapack just take "custom content" and filter using isinstance?

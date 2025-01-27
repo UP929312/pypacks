@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.additions.reference_book_config import RefBookCategory
-from pypacks.generate import generate_datapack, generate_resource_pack, generate_font_pack
+from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+from pypacks.additions.create_wall import create_wall
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.additions.raycasting import generate_default_raycasting_functions
-from pypacks.additions.create_wall import create_wall
+from pypacks.generate import generate_datapack, generate_resource_pack, generate_font_pack
 
 
 if TYPE_CHECKING:
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_tag import CustomTag
     from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
     from pypacks.resources.world_gen.structure_set import CustomStructureSet
+
     from pypacks.additions.custom_crafter import CustomCrafter
 
 
@@ -65,6 +66,8 @@ class Pack:
     custom_dimensions: list["CustomDimension"] = field(default_factory=list)
     custom_structures: list["CustomStructure | SingleCustomStructure"] = field(default_factory=list)
     custom_structure_sets: list["CustomStructureSet"] = field(default_factory=list)
+
+    custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
     custom_crafters: list["CustomCrafter"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -83,7 +86,13 @@ class Pack:
         self.generate_pack()
 
     def add_internal_functions(self) -> None:
-        # ============================================================================================================
+         # ==================================================================================
+         # Custom Raycasts
+        if self.custom_raycasts or self.custom_blocks or [x for x in self.custom_items if x.on_right_click]:
+            self.custom_mcfunctions.extend(BlockRaycast.generate_default_raycast_functions(self.namespace))
+            self.custom_mcfunctions.extend(EntityRaycast.generate_default_raycast_functions(self.namespace))
+        # =================================================================================
+        # Custom right click on items
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_advancement(item, self.namespace))
             self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
@@ -107,11 +116,10 @@ class Pack:
             self.custom_mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
 
         if self.custom_blocks:
-            self.custom_mcfunctions.extend(generate_default_raycasting_functions(self.namespace))
             self.custom_mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
             self.custom_mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
         # ==================================================================================
-        # Adding all the paintings' and jukebox's items to the list
+        # Adding all the paintings', jukebox's and enchanted books' items to the list
         for painting in self.custom_paintings:
             self.custom_items.append(painting.generate_custom_item(self))
         for song in self.custom_jukebox_songs:
@@ -122,15 +130,15 @@ class Pack:
         # Get all the reference book categories
         self.reference_book_categories = RefBookCategory.get_unique_categories([x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden])
         # ==================================================================================
-        # Item models (well, the items)
+        # Item models (well, the display items)
         give_all_item_models = MCFunction("give_all_item_models", [
             custom_item_model_def.generate_give_command(self.namespace)
             for custom_item_model_def in [x for x in self.custom_item_model_definitions if x.showcase_item is not None]
         ])
         self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
-        load_mcfunciton = MCFunction("load", [
-            f"function {self.namespace}:raycast/load" if (self.custom_items or self.custom_blocks) else "",
+        load_mcfunction = MCFunction("load", [
+            f"function {self.namespace}:raycast/load" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
             "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
             "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
@@ -141,7 +149,6 @@ class Pack:
             ],
             f"say Loaded into {self.name}!",
         ])
-        load_mcfunciton.create_if_empty = False
         tick_mcfunction = MCFunction("tick", [
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
@@ -153,8 +160,7 @@ class Pack:
             ],
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ])
-        tick_mcfunction.create_if_empty = False
-        self.custom_mcfunctions.extend([load_mcfunciton, tick_mcfunction])
+        self.custom_mcfunctions.extend([load_mcfunction, tick_mcfunction])
         if self.custom_items:
             self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
         # ==================================================================================

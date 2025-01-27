@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Consumable, Food, Components
+from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
@@ -28,7 +29,7 @@ class CustomItem:
     texture_path: str | None = field(repr=False, default=None)
     item_model: "str | CustomItemModelDefinition | None" = field(repr=False, default=None)
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
-    on_right_click: "str | MCFunction | None" = None  # Function to call when the item is right clicked
+    on_right_click: "str | MCFunction | BlockRaycast | EntityRaycast | None" = None  # Command/Function/Raycast to call when the item is right clicked
     components: "Components" = field(repr=False, default_factory=lambda: Components())
     ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)
 
@@ -43,9 +44,9 @@ class CustomItem:
             self.add_right_click_functionality()
 
         # TODO: Rework this, instead, just make a custom item model here instead...
-        path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
         # from pypacks.resources.custom_model import ModelItemModel
         # custom_item_model = CustomItemModelDefinition(self.internal_name, ModelItemModel(path), self.base_item)
+        path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
         with open(path, mode="rb") as file:
             self.image_bytes = file.read()
 
@@ -82,6 +83,9 @@ class CustomItem:
         # Create the give command for use in books
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w") as file:
             file.write(self.generate_give_command(pack.namespace))
+        # If they pass in a temporary raycast or MCFunction, create them like normal
+        if isinstance(self.on_right_click, (BlockRaycast, EntityRaycast, MCFunction)):
+            self.on_right_click.create_datapack_files(pack)
 
     def create_right_click_revoke_advancement_function(self, pack_namespace: str) -> MCFunction:
         revoke_and_call_mcfunction = MCFunction(
@@ -89,7 +93,7 @@ class CustomItem:
                 f"advancement revoke @s only {pack_namespace}:custom_right_click_for_{self.internal_name}",
             ], ["right_click"]
         )
-        run_code = f"function {self.on_right_click.get_reference(pack_namespace)}" if isinstance(self.on_right_click, MCFunction) else self.on_right_click
+        run_code = self.on_right_click.get_run_command(pack_namespace) if isinstance(self.on_right_click, (MCFunction, BlockRaycast, EntityRaycast)) else self.on_right_click 
         if self.use_right_click_cooldown is not None:
             action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
             revoke_and_call_mcfunction.commands.extend([

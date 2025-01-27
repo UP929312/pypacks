@@ -5,6 +5,7 @@ from pypacks.additions.item_components import (
     Equippable, FireworkExplosion, Firework, Food, Instrument, JukeboxPlayable, LodestoneTracker, MapData, MapDecoration, PotionEffect, PotionContents,
     ToolRule, Tool, TropicalFishData, UseRemainder, WrittenBookContent,
 )
+from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.additions.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 # =============================================================================
 # Providers:
@@ -64,6 +65,7 @@ __all__ = [
     "MinecraftColor",
     "AttributeModifier", "ArmorTrim", "Bee", "BundleContents", "BucketEntityData", "Components", "Cooldown", "Consumable", "ContainerContents", "DeathProtection", "EntityData",
     "Equippable", "FireworkExplosion", "Firework", "Food", "Instrument", "JukeboxPlayable", "LodestoneTracker", "MapData", "MapDecoration", "PotionEffect", "PotionContents",
+    "BlockRaycast", "EntityRaycast",
     "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
     "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
     # Providers

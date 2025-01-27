@@ -21,7 +21,7 @@ class CustomDimension:
         "minecraft:overworld", "minecraft:nether", "minecraft:end", "minecraft:large_biomes", "minecraft:amplified", "minecraft:floating_islands", "minecraft:caves"
     ] = "minecraft:overworld"  # The noise settings of the dimension.
 
-    datapack_subdirectory_name: str = field(init=False, repr=False, default="dimension")
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension")
 
     def generate_teleport_command(self, pack_namespace: str) -> str:
         return f"/execute in {pack_namespace}:{self.internal_name} run tp @s ~ ~ ~"
@@ -75,7 +75,7 @@ class CustomDimensionType:
     infiniburn: str = "#minecraft:infiniburn_overworld"  # Takes a block tag where all these blocks burn forever.
     effects: Literal["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"] = "minecraft:overworld"  # Determines the dimension effect used for this dimension. Setting to overworld makes the dimension have clouds, sun, stars and moon. Setting to the nether makes the dimension have thick fog blocking that sight, similar to the nether. Setting to the end makes the dimension have dark spotted sky similar to the end, ignoring the sky and fog color.
 
-    datapack_subdirectory_name: str = field(init=False, repr=False, default="dimension_type")
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension_type")
 
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
