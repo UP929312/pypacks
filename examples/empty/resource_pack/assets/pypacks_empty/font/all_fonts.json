@@ -6,7 +6,7 @@
             "height": 1,
             "ascent": 0,
             "chars": [
-                "\ue000"
+                "\uE000"
             ]
         },
         {
@@ -15,7 +15,7 @@
             "height": 20,
             "ascent": 10,
             "chars": [
-                "\ue001"
+                "\uE001"
             ]
         },
         {
@@ -24,7 +24,7 @@
             "height": 100,
             "ascent": 16,
             "chars": [
-                "\ue002"
+                "\uE002"
             ]
         },
         {
@@ -33,7 +33,7 @@
             "height": 18,
             "ascent": 14,
             "chars": [
-                "\ue003"
+                "\uE003"
             ]
         },
         {
@@ -42,97 +42,7 @@
             "height": 20,
             "ascent": 10,
             "chars": [
-                "\ue004"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/crafting_table_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue006"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/crafting_table_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue006"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/crafting_table_transmute_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue007"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/furnace_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue008"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/blast_furnace_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue009"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/campfire_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00a"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/smithing_table_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00c"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/smithing_table_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00c"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/smoker_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00d"
-            ]
-        },
-        {
-            "type": "bitmap",
-            "file": "pypacks_empty:font/stonecutter_icon.png",
-            "height": 18,
-            "ascent": 14,
-            "chars": [
-                "\ue00e"
+                "\uE004"
             ]
         }
     ]

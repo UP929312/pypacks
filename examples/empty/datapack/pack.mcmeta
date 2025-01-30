@@ -1,4 +1,5 @@
 {
+    "id": "pypacks_empty",
     "pack": {
         "pack_format": 61,
         "description": "An empty Datapack + Resource pack"
