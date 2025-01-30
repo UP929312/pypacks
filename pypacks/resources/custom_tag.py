@@ -16,6 +16,9 @@ class CustomTag:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="tags")
 
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:#{self.internal_name}"
+
     def to_dict(self, pack_namespace: str) -> dict[str, bool | list[str]]:
         return {
             "replace": self.replace,

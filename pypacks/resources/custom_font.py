@@ -9,6 +9,8 @@ from pypacks.image_manipulation.png_utils import get_png_height
 if TYPE_CHECKING:
     from pypacks.pack import Pack
 
+# TODO: Allow non-bitmap fonts
+
 
 @dataclass
 class FontImage:

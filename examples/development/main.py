@@ -1,5 +1,8 @@
 from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast  # noqa: F401
 from pypacks.resources import *  # noqa: F403
+from pypacks.additions.item_components import *  # noqa: F403
+from pypacks.additions.custom_crafter import CustomCrafter
+from pypacks.additions.custom_loop import CustomLoop
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -249,8 +252,13 @@ custom_crafter = CustomCrafter(
 )
 # endregion
 # ============================================================================================================
+# region: Custom Loop
+every_sixty_seconds = CustomLoop("every_two_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
+# endregion
+# ============================================================================================================
 datapack = Pack(
-    "PyPacks Testing", "A cool datapack", "pypacks_testing", "pack_icon.png", world_name="PyPacksWorld",
+    name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
+    pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
     custom_recipes=recipes,
     custom_items=custom_items,
     custom_sounds=[custom_sound],
@@ -268,4 +276,5 @@ datapack = Pack(
     # custom_advancements=[eating_advancement],
     custom_crafters=[custom_crafter],
     custom_raycasts=[block_ray_cast, entity_ray_cast],
+    custom_loops=[every_sixty_seconds],
 )

@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.custom_mcfunction import MCFunction
+    from pypacks.resources.custom_tag import CustomTag
     from pypacks.scripts.repos.all_entity_names import MinecraftEntity
 
 # This is a simple raycasting system that can be used to detect blocks in a line of sight.
@@ -20,18 +21,18 @@ if TYPE_CHECKING:
 # )
 # (This will set a stone block where the ray hits, and say "No blocks hit!" if the ray doesn't hit anything)
 
-# TODO: entity raycasts can be changed to accept any entity (or do the whole tag situation?).
+# TODO: entity raycasts can be changed to accept lists of entity (or do the whole tag situation?).
 # Also, the entity one should have a "stop for blocks" option, we can just extend the condition.
 
 
 @dataclass
 class Raycast:
     internal_name: str
-    # command_each_iteration: str = "particle minecraft:cloud ~ ~ ~"  # The command to run each iteration of the ray TODO: Implement
+    # command_ran_each_iteration: str = "particle minecraft:cloud ~ ~ ~"  # The command to run each iteration of the ray TODO: Implement
     # space_between_iterations: float = 0.01  # The space between each ray iteration
-    # max_distance: int = 550  # The maximum distance the ray can travel
+    # max_distance_in_blocks: int = 6 (multiplied by divided_by_space_between_iteration)  # The maximum distance the ray can travel
 
-    datapack_subdirectory_name: str = field(default="function/raycast", init=False, repr=False, hash=False)
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="function/raycast")
 
     @staticmethod
     def generate_default_raycast_functions(pack_namespace: str) -> tuple["MCFunction", ...]:
@@ -95,7 +96,7 @@ class Raycast:
         return on_success_set_score, setup_ray, ray
 
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
-        raise NotImplemented
+        raise NotImplementedError
 
     def get_run_command(self, pack_namespace: str) -> str:
         return self.create_deploy_function(pack_namespace).get_run_command(pack_namespace)
@@ -133,13 +134,15 @@ class BlockRaycast(Raycast):
     internal_name: str
     on_block_hit_command: str = "setblock ~ ~ ~ minecraft:gold_block"
     no_blocks_hit_command: str = "say No blocks hit!"
-    blocks_to_detect: str = "#minecraft:replaceable"  # Blocks the ray can pass through, e.g. #minecraft:replaceable (air, short grass, etc)
-    if_or_unless: str = "unless"  # If set to "if", the ray will stop if it hits a block, if set to "unless", the ray will stop if it doesn't hit the block(s)
+    blocks_to_detect: "str | CustomTag" = "#minecraft:replaceable"  # Blocks the ray can pass through (if blocks to detect is set to unless), e.g. #minecraft:replaceable (air, short grass, etc)
+    if_or_unless: Literal["if", "unless"] = "unless"  # If set to "if", the ray will stop if it hits a block, if set to "unless", the ray will stop if it doesn't hit the block(s)
 
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
+        from pypacks.resources.custom_tag import CustomTag
         assert self.if_or_unless in ("if", "unless"), "if_or_unless must be either 'if' or 'unless'"
+        block_or_block_tag = self.blocks_to_detect.get_reference(pack_namespace) if isinstance(self.blocks_to_detect, CustomTag) else self.blocks_to_detect
         return self._create_prepare_ray_command(
-            condition=f"{self.if_or_unless} block ~ ~ ~ {self.blocks_to_detect}",
+            condition=f"{self.if_or_unless} block ~ ~ ~ {block_or_block_tag}",
             on_successful_hit=self.on_block_hit_command,
             on_failure=self.no_blocks_hit_command,
             pack_namespace=pack_namespace,
@@ -154,11 +157,15 @@ class EntityRaycast(Raycast):
     internal_name: str
     on_entity_hit_command: str = "say Hit an entity!"
     no_entities_hit_command: str = "say No entities hit!"
-    entity_to_detect: MinecraftEntity = "minecraft:cow"
+    entity_to_detect: "MinecraftEntity | None" = "minecraft:cow"
 
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
         return self._create_prepare_ray_command(
-            condition=f"if entity @e[distance=..1, type={self.entity_to_detect}]",
+            condition=(
+                f"if entity @e[distance=..1, type={self.entity_to_detect}]"
+                if self.entity_to_detect is not None else
+                "if entity @e[distance=..1]"
+            ),
             on_successful_hit=self.on_entity_hit_command,
             on_failure=self.no_entities_hit_command,
             pack_namespace=pack_namespace,

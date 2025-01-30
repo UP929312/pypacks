@@ -53,7 +53,8 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
         FontImage("information_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
                                                  base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
         FontImage("play_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "play_icon.png").read_bytes(),
-                                          base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
+                                          base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14)
+                  if [x for x in pack.custom_items if hasattr(x, "components") and hasattr(x.components, "instrument")] else None,
         FontImage("satchel_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         *[  # Category icons
             FontImage(f"{category.internal_name}_category_icon", image_bytes=add_border(Path(category.image_path).read_bytes()), height=20, y_offset=10)
@@ -72,10 +73,10 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
                       image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
                                              base_image_path=EXTRA_ICON_BASE_PATH),
                       height=18, y_offset=14)
-            for recipe in ALL_RECIPES
+            for recipe in [recipe for recipe in ALL_RECIPES if recipe in [type(x) for x in pack.custom_recipes]]
         ],
     ]
-    return CustomFont("all_fonts", all_elements)
+    return CustomFont("all_fonts", [x for x in all_elements if x is not None])
 
 
 def generate_datapack(pack: "Pack") -> None:

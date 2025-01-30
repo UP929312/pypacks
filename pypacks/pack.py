@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
     from pypacks.resources.world_gen.structure_set import CustomStructureSet
 
+    from pypacks.additions.custom_loop import CustomLoop
     from pypacks.additions.custom_crafter import CustomCrafter
 
 
@@ -69,6 +70,7 @@ class Pack:
 
     custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
     custom_crafters: list["CustomCrafter"] = field(default_factory=list)
+    custom_loops: list["CustomLoop"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.datapack_output_path == "" and self.world_name:
@@ -88,9 +90,13 @@ class Pack:
     def add_internal_functions(self) -> None:
          # ==================================================================================
          # Custom Raycasts
-        if self.custom_raycasts or self.custom_blocks or [x for x in self.custom_items if x.on_right_click]:
+        if self.custom_raycasts or self.custom_blocks or any(x for x in self.custom_items if x.on_right_click):
             self.custom_mcfunctions.extend(Raycast.generate_default_raycast_functions(self.namespace))
         # =================================================================================
+        # Custom loops
+        if self.custom_loops:
+            self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).create_datapack_files(self)
+        # ==================================================================================
         # Custom right click on items
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(CustomAdvancement.generate_right_click_advancement(item, self.namespace))
@@ -137,8 +143,10 @@ class Pack:
         self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
         load_mcfunction = MCFunction("load", [
-            f"scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
+            f"scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
+            f"scoreboard objectives add {self.custom_loops[0].scoreboard_objective_name} dummy" if self.custom_loops else "",
+            "scoreboard objectives add constants dummy" if self.custom_loops else "",
             "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
             "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
             *[
@@ -146,17 +154,23 @@ class Pack:
                 f"execute as @a run scoreboard players set @s {item.internal_name}_cooldown 0"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
             ],
+            *{
+                custom_loop.generate_set_constant_command()
+                for custom_loop in self.custom_loops
+            },
             f"say Loaded into {self.name}!",
         ])
         tick_mcfunction = MCFunction("tick", [
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
-                for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
+                for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None  # TODO: Move these to a different file?
             ],
             *[
-                f"function {custom_crafter_tick.on_tick(self.namespace).get_reference(self.namespace)}"
+                custom_crafter_tick.on_tick(self.namespace).get_run_command(self.namespace)
                 for custom_crafter_tick in self.custom_crafters  # TODO: Consider an `all_crafters_tick` function
             ],
+            self.custom_loops[0].generate_global_tick_counter() if self.custom_loops else "",
+            self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).get_run_command(self.namespace) if self.custom_loops else "",
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ])
         self.custom_mcfunctions.extend([load_mcfunction, tick_mcfunction])
