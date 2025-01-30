@@ -18,7 +18,7 @@ consumable_category = RefBookCategory("consumable", "Consumable", "images/steak.
 # endregion
 # ============================================================================================================
 # region: Custom Raycasts
-block_ray_cast = BlockRaycast("block_ray_cast", on_block_hit_command="setblock ~ ~ ~ minecraft:stone", no_blocks_hit_command="say Failed!")
+block_ray_cast = BlockRaycast("block_ray_cast", on_block_hit_command="setblock ~ ~ ~ minecraft:stone", no_blocks_hit_command="say Failed!", max_distance_in_blocks=6)
 entity_ray_cast = EntityRaycast("entity_ray_cast", on_entity_hit_command="effect give @e[distance=..1] glowing 2 0", no_entities_hit_command="say No entities hit!")
 # endregion
 # ============================================================================================================
@@ -253,7 +253,7 @@ custom_crafter = CustomCrafter(
 # endregion
 # ============================================================================================================
 # region: Custom Loop
-every_sixty_seconds = CustomLoop("every_two_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
+every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
 # endregion
 # ============================================================================================================
 datapack = Pack(
