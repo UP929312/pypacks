@@ -59,7 +59,10 @@ from pypacks.resources.item_model_definition import (
     ItemModelType,
 )
 # =============================================================================
-from pypacks.scripts.repos.all_item_instances import DEFAULT_ITEMS
+try:
+    from pypacks.scripts.repos.all_item_instances import DEFAULT_ITEMS
+except:
+    DEFAULT_ITEMS = {}
 
 from pypacks.pack import Pack
 

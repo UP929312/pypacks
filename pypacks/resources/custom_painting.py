@@ -65,3 +65,72 @@ class CustomPainting:
 
     def generate_give_command(self, pack: "Pack") -> str:
         return self.generate_custom_item(pack).generate_give_command(pack.namespace)
+
+
+# Original paintings:
+KEBAB = CustomPainting("kebab", "", "Kebab med tre pepperoni", "Kristoffer Zetterstrand", 1, 1)
+AZTEC = CustomPainting("aztec", "", "de_aztec", "Kristoffer Zetterstrand", 1, 1)
+ALBANIA = CustomPainting("albania", "", "Albanian", "Kristoffer Zetterstrand", 1, 1)
+AZTEC2 = CustomPainting("aztec2", "", "de_aztec", "Kristoffer Zetterstrand", 1, 1)
+BOMB = CustomPainting("bomb", "", "Target Successfully Bombed", "Kristoffer Zetterstrand", 1, 1)
+PLANT = CustomPainting("plant", "", "Paradisträd", "Kristoffer Zetterstrand", 1, 1)
+WASTELAND = CustomPainting("wasteland", "", "Wasteland", "Kristoffer Zetterstrand", 1, 1)
+MEDITATIVE = CustomPainting("meditative", "", "Meditative", "Sarah Boeving", 1, 1)
+
+WANDERER = CustomPainting("wanderer", "", "Wanderer", "Kristoffer Zetterstrand", 1, 2)
+GRAHAM = CustomPainting("graham", "", "Graham", "Kristoffer Zetterstrand", 1, 2)
+PRAIRIE_RIDE = CustomPainting("prairie_ride", "", "Prairie Ride", "Sarah Boeving", 1, 2)
+
+POOL = CustomPainting("pool", "", "The Pool", "Kristoffer Zetterstrand", 2, 1)
+COURBET = CustomPainting("courbet", "", "Bonjour Monsieur Courbet", "Kristoffer Zetterstrand", 2, 1)
+SUNSET = CustomPainting("sunset", "", "sunset_dense", "Kristoffer Zetterstrand", 2, 1)
+SEA = CustomPainting("sea", "", "Seaside", "Kristoffer Zetterstrand", 2, 1)
+CREEBET = CustomPainting("creebet", "", "Creebet", "Kristoffer Zetterstrand", 2, 1)
+
+MATCH = CustomPainting("match", "", "Match", "Kristoffer Zetterstrand", 2, 2)
+BUST = CustomPainting("bust", "", "Bust", "Kristoffer Zetterstrand", 2, 2)
+STAGE = CustomPainting("stage", "", "The Stage Is Set", "Kristoffer Zetterstrand", 2, 2)
+VOID = CustomPainting("void", "", "The void", "Kristoffer Zetterstrand", 2, 2)
+SKULL_AND_ROSES = CustomPainting("skull_and_roses", "", "Skull and Roses", "Kristoffer Zetterstrand", 2, 2)
+WITHER = CustomPainting("wither", "", "Wither", "Mojang (Jens Bergensten)", 2, 2)
+BAROQUE = CustomPainting("baroque", "", "Baroque", "Sarah Boeving", 2, 2)
+HUMBLE = CustomPainting("humble", "", "Humble", "Sarah Boeving", 2, 2)
+
+BOUQUET = CustomPainting("bouquet", "", "Bouquet", "Kristoffer Zetterstrand", 3, 3)
+CAVEBIRD = CustomPainting("cavebird", "", "Cave Bird", "Kristoffer Zetterstrand", 3, 3)
+COTAN = CustomPainting("cotan", "", "Cotán", "Kristoffer Zetterstrand", 3, 3)
+ENDBOSS = CustomPainting("endboss", "", "End Boss", "Kristoffer Zetterstrand", 3, 3)
+FERN = CustomPainting("fern", "", "Fern", "Kristoffer Zetterstrand", 3, 3)
+OWLEMONS = CustomPainting("owlemons", "", "Owlemons", "Kristoffer Zetterstrand", 3, 3)
+SUNFLOWERS = CustomPainting("sunflowers", "", "Sunflowers", "Kristoffer Zetterstrand", 3, 3)
+TIDES = CustomPainting("tides", "", "Tides", "Kristoffer Zetterstrand", 3, 3)
+
+BACKYARD = CustomPainting("backyard", "", "Backyard", "Kristoffer Zetterstrand", 3, 4)
+POND = CustomPainting("pond", "", "Pond", "Kristoffer Zetterstrand", 3, 4)
+
+FIGHTERS = CustomPainting("fighters", "", "Fighters", "Kristoffer Zetterstrand", 4, 2)
+CHANGING = CustomPainting("changing", "", "Changing", "Kristoffer Zetterstrand", 4, 2)
+FINDING = CustomPainting("finding", "", "Finding", "Kristoffer Zetterstrand", 4, 2)
+LOWMIST = CustomPainting("lowmist", "", "Lowmist", "Kristoffer Zetterstrand", 4, 2)
+PASSAGE = CustomPainting("passage", "", "Passage", "Kristoffer Zetterstrand", 4, 2)
+
+MORTAL_COIL = CustomPainting("mortal_coil", "", "Mortal Coil", "Kristoffer Zetterstrand", 4, 3)
+KONG = CustomPainting("donkey_kong", "", "Kong", "Kristoffer Zetterstrand", 4, 3)
+
+POINTER = CustomPainting("pointer", "", "Pointer", "Kristoffer Zetterstrand", 4, 4)
+PIGSCENE = CustomPainting("pigscene", "", "Pigscene", "Kristoffer Zetterstrand", 4, 4)
+SKULL_ON_FIRE = CustomPainting("burning_skull", "", "Skull on Fire", "Kristoffer Zetterstrand", 4, 4)
+ORB = CustomPainting("orb", "", "Orb", "Kristoffer Zetterstrand", 4, 4)
+UNPACKED = CustomPainting("unpacked", "", "Unpacked", "Sarah Boeving", 4, 4)
+
+ALL_DEFAULT_PAINTINGS = [
+    KEBAB, AZTEC, ALBANIA, AZTEC2, BOMB, PLANT, WASTELAND, MEDITATIVE,
+    WANDERER, GRAHAM, PRAIRIE_RIDE,
+    POOL, COURBET, SUNSET, SEA, CREEBET,
+    MATCH, BUST, STAGE, VOID, SKULL_AND_ROSES, WITHER, BAROQUE, HUMBLE,
+    BOUQUET, CAVEBIRD, COTAN, ENDBOSS, FERN, OWLEMONS, SUNFLOWERS, TIDES,
+    BACKYARD, POND,
+    FIGHTERS, CHANGING, FINDING, LOWMIST, PASSAGE,
+    MORTAL_COIL, KONG,
+    POINTER, PIGSCENE, SKULL_ON_FIRE, ORB, UNPACKED,
+]

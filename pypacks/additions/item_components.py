@@ -364,7 +364,7 @@ class Equippable:
             dispensable=data.get("dispensable", True),
             swappable=data.get("swappable", True),
             damage_on_hurt=data.get("damage_on_hurt", True),
-            entities_which_can_wear=data.get("entities_which_can_wear", []),
+            entities_which_can_wear=data.get("entities_which_can_wear", "all"),
             camera_overlay=data.get("camera_overlay"),
         )
 
@@ -475,11 +475,17 @@ class JukeboxPlayable:
     show_in_tooltip: bool = True
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
         return {
             "song": self.get_reference(pack_namespace),
             "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "JukeboxPlayable":
+        return cls(
+            song=data["song"],
+            show_in_tooltip=data.get("show_in_tooltip", True),
+        )
 
     def get_reference(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
