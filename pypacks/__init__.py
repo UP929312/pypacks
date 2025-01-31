@@ -9,6 +9,9 @@ from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.additions.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
 # =============================================================================
 # Providers:
+from pypacks.providers.enchantment_provider import (
+    SingleEnchantmentProvider, EnchantmentsByCostProvider, EnchantmentsByCostWithDifficultyProvider,
+)
 from pypacks.providers.int_provider import (
     IntProvider, ConstantIntProvider, UniformIntProvider, BiasedToBottomIntProvider, ClampedIntProvider, ClampedNormalIntProvider, WeightedListIntProvider,
 )
@@ -69,6 +72,7 @@ __all__ = [
     "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
     "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
     # Providers
+    "SingleEnchantmentProvider", "EnchantmentsByCostProvider", "EnchantmentsByCostWithDifficultyProvider",
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",
     "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreboardNumberProvider", "StorageNumberProvider",
     # Resources

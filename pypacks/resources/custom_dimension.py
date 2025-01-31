@@ -47,7 +47,7 @@ class CustomDimension:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
         if isinstance(self.biome, CustomBiome):
             self.biome.create_datapack_files(pack)
-        if isinstance(self.dimension_type, CustomDimensionType):  # TODO: Hmmm, do we want this?
+        if isinstance(self.dimension_type, CustomDimensionType):
             self.dimension_type.create_datapack_files(pack)
 
 

@@ -41,6 +41,9 @@ class CustomLanguage:
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return self.translations
+    
+    def get_run_command(self, pack_namespace: str, phrase: str) -> str:
+        return f"tellraw @a [{{\"text\":\"{{\\\"translate\\\":\\\"{pack_namespace}.{self.language_code}.{phrase}\\\"}}\"}}]"
 
     def create_datapack_files(self, pack: "Pack") -> None:
         # import os

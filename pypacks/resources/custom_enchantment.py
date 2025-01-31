@@ -32,6 +32,9 @@ class CustomEnchantment:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="enchantment")
 
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
+
     def __post_init__(self) -> None:
         assert 0 < self.weight <= 1024, "Weight must be between 1 and 1024"
         assert 0 < self.max_level <= 255, "Max level must be between 1 and 255"
