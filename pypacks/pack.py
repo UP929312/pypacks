@@ -12,7 +12,7 @@ from pypacks.generate import generate_datapack, generate_resource_pack, generate
 
 
 if TYPE_CHECKING:
-    from pypacks.resources.custom_block import CustomBlock
+    from pypacks.additions.custom_block import CustomBlock
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment

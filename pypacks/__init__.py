@@ -23,7 +23,7 @@ from pypacks.providers.number_provider import (
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 from pypacks.resources.world_gen import CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, SpawnOverride, DisableSpawnOverrideCategory, CustomBiome, MoodSound
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
-from pypacks.resources.custom_block import CustomBlock
+from pypacks.additions.custom_block import CustomBlock
 from pypacks.resources.custom_damage_type import CustomDamageType
 from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
 from pypacks.resources.custom_enchantment import (
