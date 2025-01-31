@@ -1,3 +1,4 @@
+from typing import TypeAlias
 # =============================================================================
 # Resources
 from pypacks.resources.custom_loot_tables.custom_loot_table import (
@@ -23,7 +24,7 @@ from pypacks.resources.custom_loot_tables.functions import (  # All 39...
 )
 from pypacks.resources.world_gen import CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, SpawnOverride, DisableSpawnOverrideCategory, CustomBiome, MoodSound
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
-from pypacks.resources.custom_block import CustomBlock
+from pypacks.additions.custom_block import CustomBlock
 from pypacks.resources.custom_damage_type import CustomDamageType
 from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
 from pypacks.resources.custom_enchantment import (
@@ -59,6 +60,15 @@ from pypacks.resources.item_model_definition import (
     ItemModelType,
 )
 
+CustomResource: TypeAlias = (
+    CustomLootTable | CustomStructure | CustomAdvancement | CustomBlock | CustomDamageType | CustomDimension | CustomEnchantment | CustomItemModelDefinition |
+    CustomItem | CustomJukeboxSong | MCFunction | CustomPainting | Predicate | Recipe | CustomSound | CustomTag
+)
+AllCustomResources = [
+    CustomLootTable, CustomStructure, CustomAdvancement, CustomBlock, CustomDamageType, CustomDimension, CustomEnchantment, CustomItemModelDefinition,
+    CustomItem, CustomJukeboxSong, MCFunction, CustomPainting, Predicate, Recipe, CustomSound, CustomTag
+]
+
 __all__ = [
     # Resources
     "BinomialDistributionEntry", "UniformDistributionEntry", "SingleItemRangeEntry",
@@ -82,7 +92,6 @@ __all__ = [
 
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "CustomAdvancement", "Criteria",
-    "CustomBlock",
     "CustomDamageType",
     "CustomDimension", "CustomDimensionType", "OverworldDimension", "NetherDimension", "EndDimension",
     "CustomEnchantment",

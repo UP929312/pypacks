@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING, Literal, TypedDict
 
-from pypacks.additions.item_components import PotionEffect
-
 
 if TYPE_CHECKING:
+    from pypacks.additions.item_components import PotionEffect
     from pypacks.resources.custom_loot_tables.custom_loot_table import Entry
     from pypacks.providers.number_provider import (
         ConstantNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, UniformNumberProvider,
@@ -559,7 +558,7 @@ class SetPotionFunction:
 @dataclass
 class SetStewEffectFunction:
     """Sets the status effects for suspicious stew. Fails if invoked on an item that is not suspicious stew."""
-    effects: dict[PotionEffect, int]  # A map of effect to duration
+    effects: dict["PotionEffect", int]  # A map of effect to duration
 
     def to_dict(self) -> dict[str, Any]:
         return {

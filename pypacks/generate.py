@@ -122,7 +122,4 @@ def generate_datapack(pack: "Pack") -> None:
         if hasattr(item, "sub_directories"):
             os.makedirs(Path(pack.datapack_output_path, "data", pack.namespace, item.datapack_subdirectory_name, *item.sub_directories), exist_ok=True)  # pyright: ignore
         item.create_datapack_files(pack)
-
-    # Testing command
-    # shutil.copyfile(Path(PYPACKS_ROOT)/"scripts"/"setup_testing.mcfunction", Path(datapack.datapack_output_path)/"data"/datapack.namespace/"function"/"setup_testing.mcfunction")
     # ================================================================================================

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.additions.reference_book_config import RefBookCategory
-from pypacks.additions.raycasting import Raycast, BlockRaycast, EntityRaycast
+from pypacks.additions.raycasting import Raycast
 from pypacks.additions.create_wall import create_wall
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -12,24 +12,30 @@ from pypacks.generate import generate_datapack, generate_resource_pack, generate
 
 
 if TYPE_CHECKING:
-    from pypacks.resources.custom_block import CustomBlock
-    from pypacks.resources.custom_damage_type import CustomDamageType
-    from pypacks.resources.custom_dimension import CustomDimension
-    from pypacks.resources.custom_enchantment import CustomEnchantment
-    from pypacks.resources.custom_item import CustomItem
-    from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
-    from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
-    from pypacks.resources.custom_model import CustomItemModelDefinition
-    from pypacks.resources.custom_painting import CustomPainting
-    from pypacks.resources.custom_predicate import Predicate
-    from pypacks.resources.custom_recipe import Recipe
-    from pypacks.resources.custom_sound import CustomSound
-    from pypacks.resources.custom_tag import CustomTag
-    from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
-    from pypacks.resources.world_gen.structure_set import CustomStructureSet
+    from pypacks.additions import CustomAddition
+    from pypacks.resources import CustomResource
+    
 
-    from pypacks.additions.custom_loop import CustomLoop
-    from pypacks.additions.custom_crafter import CustomCrafter
+    # from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+
+    # from pypacks.additions.custom_block import CustomBlock
+    # from pypacks.resources.custom_damage_type import CustomDamageType
+    # from pypacks.resources.custom_dimension import CustomDimension
+    # from pypacks.resources.custom_enchantment import CustomEnchantment
+    # from pypacks.resources.custom_item import CustomItem
+    # from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
+    # from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
+    # from pypacks.resources.custom_model import CustomItemModelDefinition
+    # from pypacks.resources.custom_painting import CustomPainting
+    # from pypacks.resources.custom_predicate import Predicate
+    # from pypacks.resources.custom_recipe import Recipe
+    # from pypacks.resources.custom_sound import CustomSound
+    # from pypacks.resources.custom_tag import CustomTag
+    # from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
+    # from pypacks.resources.world_gen.structure_set import CustomStructureSet
+
+    # from pypacks.additions.custom_loop import CustomLoop
+    # from pypacks.additions.custom_crafter import CustomCrafter
 
 
 @dataclass
@@ -49,28 +55,29 @@ class Pack:
     # TODO: on_tick_function and on_load_function
     # on_tick_command: MCFunction | None = None
     # on_load_command: MCFunction | None = None
+    custom_contents: list["CustomResource | CustomAddition"] = field(default_factory=list)
 
-    custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
-    custom_blocks: list["CustomBlock"] = field(default_factory=list)
-    custom_damage_types: list["CustomDamageType"] = field(default_factory=list)
-    custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
-    custom_items: list["CustomItem"] = field(default_factory=list)
-    custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
-    custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
-    custom_paintings: list["CustomPainting"] = field(default_factory=list)
-    custom_predicates: list["Predicate"] = field(default_factory=list)
-    custom_recipes: list["Recipe"] = field(default_factory=list)
-    custom_sounds: list["CustomSound"] = field(default_factory=list)
-    custom_tags: list["CustomTag"] = field(default_factory=list)
-    custom_mcfunctions: list["MCFunction"] = field(default_factory=list)
-    custom_item_model_definitions: list["CustomItemModelDefinition"] = field(default_factory=list)
-    custom_dimensions: list["CustomDimension"] = field(default_factory=list)
-    custom_structures: list["CustomStructure | SingleCustomStructure"] = field(default_factory=list)
-    custom_structure_sets: list["CustomStructureSet"] = field(default_factory=list)
+    custom_advancements: list = field(default_factory=list, init=False)
+    custom_blocks: list = field(default_factory=list, init=False)
+    custom_damage_types: list = field(default_factory=list, init=False)
+    custom_enchantments: list = field(default_factory=list, init=False)
+    custom_items: list = field(default_factory=list, init=False)
+    custom_jukebox_songs: list = field(default_factory=list, init=False)
+    custom_loot_tables: list = field(default_factory=list, init=False)
+    custom_paintings: list = field(default_factory=list, init=False)
+    custom_predicates: list = field(default_factory=list, init=False)
+    custom_recipes: list = field(default_factory=list, init=False)
+    custom_sounds: list = field(default_factory=list, init=False)
+    custom_tags: list = field(default_factory=list, init=False)
+    custom_mcfunctions: list = field(default_factory=list, init=False)
+    custom_item_model_definitions: list = field(default_factory=list, init=False)
+    custom_dimensions: list = field(default_factory=list, init=False)
+    custom_structures: list = field(default_factory=list, init=False)
+    custom_structure_sets: list = field(default_factory=list, init=False)
 
-    custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
-    custom_crafters: list["CustomCrafter"] = field(default_factory=list)
-    custom_loops: list["CustomLoop"] = field(default_factory=list)
+    custom_raycasts: list = field(default_factory=list, init=False)
+    custom_crafters: list = field(default_factory=list, init=False)
+    custom_loops: list = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
         if self.datapack_output_path == "" and self.world_name:
@@ -84,8 +91,21 @@ class Pack:
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
 
+        self.filter_custom_elements()
         self.add_internal_functions()
         self.generate_pack()
+
+    def add_custom_element(self, custom_element: "CustomResource | CustomAddition") -> None:
+        self.custom_contents.append(custom_element)
+    
+    def pascal_to_snake_case(self, name: str) -> str:
+        return name[0].lower() + "".join([f"_{x.lower()}" if x.isupper() else x for x in name[1:]])
+
+    def filter_custom_elements(self) -> None:
+        from pypacks.additions import AllCustomAdditions
+        from pypacks.resources import AllCustomResources
+        for item in [*AllCustomResources, *AllCustomAdditions]:
+            setattr(self, f"custom_{self.pascal_to_snake_case(item.__name__)}s", [x for x in self.custom_contents if isinstance(x, item)])
 
     def add_internal_functions(self) -> None:
          # ==================================================================================

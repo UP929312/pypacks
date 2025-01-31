@@ -1,5 +1,6 @@
-from pypacks import Pack, CustomItem, Components
-from pypacks.additions.item_components import WrittenBookContent
+from pypacks import Pack
+from pypacks.resources import CustomItem
+from pypacks.additions import Components, WrittenBookContent
 from pypacks.additions.reference_book_generator import ReferenceBook
 # from pypacks.written_book_framework import FormattedWrittenBook
 

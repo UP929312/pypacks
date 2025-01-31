@@ -1,11 +1,13 @@
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from pypacks.pack import Pack
 from pypacks.providers.int_provider import IntProvider
-from pypacks.resources.custom_enchantment import CustomEnchantment
+
+if TYPE_CHECKING:
+    from pypacks.resources.custom_enchantment import CustomEnchantment
+    from pypacks.pack import Pack
 
 # TODO: These never get passed in anywhere/create_datapack_files ever ran...
 
@@ -33,6 +35,7 @@ class SingleEnchantmentProvider(EnchantmentProvider):
     level: "int | IntProvider"  #  The level of the enchantment
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_enchantment import CustomEnchantment
         return {
             "type": "minecraft:single",
             "enchantment": self.enchantment.get_reference(pack_namespace) if isinstance(self.enchantment, CustomEnchantment) else self.enchantment,
@@ -49,6 +52,7 @@ class EnchantmentsByCostProvider(EnchantmentProvider):
     cost: "int | IntProvider"  #  The cost to use to determine the enchantments
 
     def to_dict(self,  pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_enchantment import CustomEnchantment
         return {
             "type": "minecraft:enchantments_by_cost",
             "enchantments": [x.get_reference(pack_namespace) if isinstance(x, CustomEnchantment) else x for x in self.enchantments],
@@ -73,6 +77,7 @@ class EnchantmentsByCostWithDifficultyProvider(EnchantmentProvider):
         assert self.min_cost >= 1, "min_cost must be at least 1"
 
     def to_dict(self,  pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_enchantment import CustomEnchantment
         return {
             "type": "minecraft:enchantments_by_cost_with_difficulty",
             "enchantments": [x.get_reference(pack_namespace) if isinstance(x, CustomEnchantment) else x for x in self.enchantments],

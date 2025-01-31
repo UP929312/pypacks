@@ -1,8 +1,8 @@
-from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast  # noqa: F401
+from pypacks import Pack
 from pypacks.resources import *  # noqa: F403
+from pypacks.additions import RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
+from pypacks.additions import CustomLoop, CustomCrafter, CustomBlock, BlockRaycast, EntityRaycast
 from pypacks.additions.item_components import *  # noqa: F403
-from pypacks.additions.custom_crafter import CustomCrafter
-from pypacks.additions.custom_loop import CustomLoop
 
 import os
 os.chdir(os.path.dirname(__file__))

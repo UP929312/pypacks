@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any, TypeAlias
 
-from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction, SetCountFunction, SetComponentsFunction
 from pypacks.providers.number_provider import BinomialNumberProvider, UniformNumberProvider
 
@@ -193,6 +192,7 @@ class CustomLootTable:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, str]:
+        from pypacks.utils import recursively_remove_nones_from_data
         return recursively_remove_nones_from_data(  # type: ignore[no-any-return]
             {
                 "type": self.loot_table_type,
