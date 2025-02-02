@@ -6,7 +6,10 @@ import requests
 
 # from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_painting import CustomPainting
-from pypacks.additions.item_components import AttributeModifier, Components, Equippable, Tool, Instrument, JukeboxPlayable
+from pypacks.additions.item_components import (
+    AttributeModifier, Components, Cooldown, Consumable, DeathProtection, EntityData, Equippable,
+    Food, Instrument, JukeboxPlayable, PotionEffect, Tool, ToolRule, UseRemainder,
+)
 from pypacks.resources.custom_painting import ALL_DEFAULT_PAINTINGS
 
 
@@ -15,58 +18,61 @@ class FakePack:
     namespace: str = "minecraft"
 
 
-def overriden_repr(self) -> str:
-    # Retrieve the default values, handling both `default` and `default_factory`
-    default_values = {}
-    excluded_fields = set()
-
-    for f in fields(self):
-        if not f.init or not f.repr:  # Ignore fields with `init=False` or `repr=False`
-            excluded_fields.add(f.name)
-        
-        # Handle both default values and default factories
-        if f.default is not MISSING:
-            default_values[f.name] = f.default
-        elif f.default_factory is not MISSING:  # Handle default factories
-            default_values[f.name] = f.default_factory()
-
-    # Filter out attributes that:
-    # 1. Are equal to their default value (including default_factory values)
-    # 2. Are marked with `init=False` or `repr=False`
-    non_default_attrs = {
-        name: value for name, value in self.__dict__.items()
-        if name not in excluded_fields and (name not in default_values or default_values[name] != value)
+def overridden_repr(self) -> str:
+    """This function overrides the dataclasses "__repr" function to only show non-default attributes, so when we create them, it doesn't
+    show unnecessary information, i.e. ones that are already default."""
+    # Calculate default values, considering both default and default_factory
+    default_values = {
+        field.name: (field.default_factory() if field.default_factory is not MISSING else field.default)
+        for field in fields(self)
+        if field.default is not MISSING or field.default_factory is not MISSING
     }
 
-    # If no non-default values exist, return just the class name
-    if not non_default_attrs:
-        return f"{self.__class__.__name__}()"
+    # Exclude fields with `init=False` or `repr=False` and those that match defaults
+    non_default_attrs = {
+        key: value for key, value in self.__dict__.items()
+        if key not in {field.name for field in fields(self) if not field.init or not field.repr}
+        and (key not in default_values or default_values[key] != value)
+    }
 
-    # Format and return the non-default arguments
-    return f"{self.__class__.__name__}(" + ", ".join(f"{k}={repr(v)}" for k, v in non_default_attrs.items()) + ")"
+    # Return formatted non-default attributes
+    return f"{self.__class__.__name__}({', '.join(f'{key}={repr(value)}' for key, value in non_default_attrs.items())})"
 
 
-# CustomItem.__repr__ = overriden_repr
-CustomPainting.__repr__ = overriden_repr
-Instrument.__repr__ = overriden_repr
-AttributeModifier.__repr__ = overriden_repr
-Components.__repr__ = overriden_repr
-Equippable.__repr__ = overriden_repr
-Tool.__repr__ = overriden_repr
-JukeboxPlayable.__repr__ = overriden_repr
+# CustomItem.__repr__ = overridden_repr
+AttributeModifier.__repr__ = overridden_repr
+Cooldown.__repr__ = overridden_repr
+Components.__repr__ = overridden_repr
+Consumable.__repr__ = overridden_repr
+CustomPainting.__repr__ = overridden_repr
+DeathProtection.__repr__ = overridden_repr
+EntityData.__repr__ = overridden_repr
+Equippable.__repr__ = overridden_repr
+Food.__repr__ = overridden_repr
+Instrument.__repr__ = overridden_repr
+JukeboxPlayable.__repr__ = overridden_repr
+PotionEffect.__repr__ = overridden_repr
+Tool.__repr__ = overridden_repr
+ToolRule.__repr__ = overridden_repr
+UseRemainder.__repr__ = overridden_repr
 
 
 def is_not_normal_item(data: dict[str, Any]) -> bool:
+    """Filters out items that aren't interesting, like stone blocks, interesting items have one or more of these attributes."""
+    special_attributes = [
+        "minecraft:damage_resistant", "minecraft:jukebox_playable", "minecraft:consumable", "minecraft:food", "minecraft:use_cooldown",
+        "minecraft:use_remainder", "minecraft:death_protection", "minecraft:damage", "minecraft:max_damage", "minecraft:glider",
+        "minecraft:tool", "minecraft:equippable", "minecraft:repairable",
+    ]
     return bool(
         data.get("minecraft:attribute_modifiers", {}).get("modifiers") or
         data.get("minecraft:enchantments", {}).get("levels") or
-        data.get("minecraft:damage_resistant") or
-        data.get("minecraft:jukebox_playable")
-        # data.get("minecraft:enchantment_glint_override")  # Glistening melons
+         any(data.get(attr) for attr in special_attributes)
     )
 
 
 def format_custom_item_name(item: str, base_item: str, components: Components, max_stack: int, rarity: str) -> str:
+    """Converts a custom item to a string that can be used to create the item in the all_item_instances.py file."""
     max_stack_arg = (f"max_stack_size={max_stack}, ") if max_stack != 64 else ""
     rarity_arg = f"rarity=\"{rarity}\", " if (rarity != "common") else ""
     return (
@@ -79,7 +85,10 @@ all_item_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/
 
 lines = [
     "from pypacks.resources.custom_item import CustomItem",
-    "from pypacks.additions.item_components import AttributeModifier, Components, EntityData, Equippable, Tool, ToolRule, Instrument, JukeboxPlayable",
+    "from pypacks.additions.item_components import (",
+    "    AttributeModifier, Components, Cooldown, Consumable, DeathProtection, EntityData, Equippable,",
+    "    Food, Instrument, JukeboxPlayable, PotionEffect, Tool, ToolRule, UseRemainder,",
+    ")",
     "",
 ]
 items = []
@@ -92,30 +101,29 @@ for item, data in all_item_data.items():
         damage_resistance = data["minecraft:damage_resistant"]["types"] if data.get("minecraft:damage_resistant") else None
         enchantable = data["minecraft:enchantable"]["value"] if data.get("minecraft:enchantable", {}).get("value") else None
         jukebox_playable = JukeboxPlayable.from_dict(data["minecraft:jukebox_playable"]) if data.get("minecraft:jukebox_playable") else None
+        use_cooldown = Cooldown.from_dict(data["minecraft:use_cooldown"]) if data.get("minecraft:use_cooldown") else None
+        use_remainder = UseRemainder.from_dict(data["minecraft:use_remainder"]) if data.get("minecraft:use_remainder") else None
+        consumable = Consumable.from_dict(data["minecraft:consumable"]) if data.get("minecraft:consumable") else None
+        food = Food.from_dict(data["minecraft:food"]) if data.get("minecraft:food") else None
+        death_protection = DeathProtection.from_dict(data["minecraft:death_protection"]) if data.get("minecraft:death_protection") else None
+        durability = data["minecraft:max_damage"] if data.get("minecraft:max_damage") else None
+        lost_durability = data["minecraft:damage"] if data.get("minecraft:damage") else None
+        glider = data["minecraft:glider"] == {} if data.get("minecraft:glider") else False
 
         repaired_by: list[str] = [data["minecraft:repairable"]["items"]] if data.get("minecraft:repairable") else []
 
         components = Components(
             attribute_modifiers=attribute_modifiers, tool=tool, equippable=equippable, damage_resistant_to=damage_resistance,
             repaired_by=repaired_by, enchantable_at_level=enchantable, jukebox_playable=jukebox_playable,
+            cooldown=use_cooldown, use_remainder=use_remainder, food=food, death_protection=death_protection, consumable=consumable, 
+            durability=durability, lost_durability=lost_durability, glider=glider,
         )
         line = format_custom_item_name(item, item, components, data["minecraft:max_stack_size"], data.get("minecraft:rarity"))
         # custom_item = CustomItem(internal_name=f"minecraft:{item.removeprefix('minecraft:')}", base_item=item, components=components, max_stack_size=data["minecraft:max_stack_size"], rarity=data.get("minecraft:rarity"))
         items.append(item.upper())
         lines.append(line)
 
-
-# TODO: Consumable/Food
-# use_cooldown, use_remainder, `damage`, death_protection, max_damage
-
-# {'minecraft:item_model', 'minecraft:use_cooldown', 'minecraft:ominous_bottle_amplifier', 'minecraft:container', 'minecraft:repairable',
-# 'minecraft:map_color', 'minecraft:map_decorations', 'minecraft:enchantment_glint_override', 'minecraft:block_state', 'minecraft:bundle_contents',
-# 'minecraft:debug_stick_state', 'minecraft:enchantable', 'minecraft:glider', 'minecraft:use_remainder', 'minecraft:bees', 'minecraft:item_name',
-# 'minecraft:potion_contents', 'minecraft:food', 'minecraft:stored_enchantments', 'minecraft:bucket_entity_data', 'minecraft:charged_projectiles',
-# 'minecraft:equippable', 'minecraft:suspicious_stew_effects', 'minecraft:max_stack_size', 'minecraft:damage', 'minecraft:rarity', 'minecraft:recipes',
-# 'minecraft:attribute_modifiers', 'minecraft:death_protection', 'minecraft:banner_patterns', 'minecraft:tool', 'minecraft:pot_decorations',
-# 'minecraft:max_damage', 'minecraft:lore', 'minecraft:repair_cost', 'minecraft:jukebox_playable', 'minecraft:writable_book_content'
-#  'minecraft:damage_resistant', 'minecraft:consumable', 'minecraft:enchantments', 'minecraft:fireworks'}
+lines.append("\n# Manually added:")
 
 # ====================================================================================================================
 GOAT_HORN_NAMES = ["Ponder", "Sing", "Seek", "Feel", "Admire", "Call", "Yearn", "Dream"]
@@ -124,15 +132,16 @@ for goat_horn_sound_index, name in enumerate(GOAT_HORN_NAMES):
     items.append(f"GOAT_HORN_{name.upper()}")
     lines.append(format_custom_item_name(f"GOAT_HORN_{name.upper()}", "minecraft:goat_horn", components, 1, 'common'))
 # ====================================================================================================================
-# Paintings
 for painting in ALL_DEFAULT_PAINTINGS:
     painting_item = painting.generate_custom_item(FakePack())  # type: ignore[abc]
     items.append(painting_item.internal_name.upper()+"_PAINTING")
     lines.append(format_custom_item_name(painting_item.internal_name+"_PAINTING", "minecraft:painting", painting_item.components, 1, 'common'))
-
+# ====================================================================================================================
 output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\scripts\\repos\\all_item_instances.py"
 with open(output_path, "w") as file:
     file.write("\n".join(lines)+"\n\n")
-    file.write("DEFAULT_ITEMS = {\n" +
-               "".join([f"    \"{x}\": {x},\n" for x in items]) +
-               "}\n")
+    file.write(
+        "DEFAULT_ITEMS = {\n" +
+        "".join([f"    \"{x}\": {x},\n" for x in items]) +
+        "}\n"
+    )

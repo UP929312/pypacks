@@ -215,7 +215,7 @@ class BundleContents:
 # ==========================================================================================
 
 @dataclass
-class _Effect:
+class _Effects:
     """Used internally to format effects for Consumables and DeathProtection"""
     apply_affects: list["PotionEffect"] = field(default_factory=list)
     remove_affects: list["str | PotionEffect"] | Literal["all"] = field(default_factory=list)
@@ -233,6 +233,31 @@ class _Effect:
         if self.teleport_diameter != 0:
             base_dict[self.base_dict_name].append({"type": "teleport_randomly", "diameter": float(self.teleport_diameter)})
         return base_dict
+
+    @classmethod
+    def from_dict(cls, data: dict[str, list[Any]], base_dict_name: str) -> "_Effects":
+        effects_raw = data[base_dict_name]  # Contains a list of 3 datatypes: apply_effects, remove_effects, teleport_randomly
+        apply_effect_effects: list[dict[str, Any]] = (
+            [effect for effect in effects_raw if effect["type"].removeprefix("minecraft:") == "apply_effects"][0]["effects"]
+            if any(effect["type"].removeprefix("minecraft:") == "apply_effects" for effect in effects_raw)
+            else []
+        )
+        remove_effect_effects: list[str] | Literal["all"] = (
+            [effect for effect in effects_raw if effect["type"].removeprefix("minecraft:") == "remove_effects"][0]["effects"]
+            if any(effect["type"].removeprefix("minecraft:") == "remove_effects" for effect in effects_raw)
+            else []
+        )
+        remove_effect_effects = "all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects
+        return _Effects(
+            apply_affects=[PotionEffect.from_dict(effect) for effect in apply_effect_effects] ,
+            remove_affects=[effect for effect in remove_effect_effects] if remove_effect_effects != "all" else "all",
+            teleport_diameter=(
+                [effect.get("diameter") for effect in effects_raw if effect["type"].removeprefix("minecraft:") == "teleport_randomly"][0]
+                if any(effect.get("type") == "teleport_randomly" for effect in effects_raw)
+                else 0
+            ),
+            base_dict_name=base_dict_name,
+        )
 
 
 @dataclass
@@ -258,8 +283,22 @@ class Consumable:
         }
         if not self.on_consume_effects and not self.on_consume_remove_effects and self.on_consume_teleport_diameter == 0:
             return base_dict
-        effect_dict = _Effect(self.on_consume_effects, self.on_consume_remove_effects, self.on_consume_teleport_diameter).to_dict()
+        effect_dict = _Effects(self.on_consume_effects, self.on_consume_remove_effects, self.on_consume_teleport_diameter).to_dict()
         return base_dict | effect_dict
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Consumable":
+        # {'on_consume_effects': [{'type': 'minecraft:apply_effects', 'effects': [{'duration': 100, 'id': 'minecraft:poison', 'show_icon': True}]}]}
+        consume_effects = _Effects.from_dict(data, "on_consume_effects") if data.get("on_consume_effects") else None
+        return cls(
+            consume_seconds=data.get("consume_seconds", 1.6),
+            animation=data.get("animation", "none"),
+            consuming_sound=data.get("sound", "entity.generic.eat"),
+            has_consume_particles=data.get("has_consume_particles", True),
+            on_consume_effects=consume_effects.apply_affects if consume_effects else [],
+            on_consume_remove_effects=consume_effects.remove_affects if consume_effects else [],
+            on_consume_teleport_diameter=consume_effects.teleport_diameter if consume_effects else 0,
+        )
 
 
 # ==========================================================================================
@@ -303,6 +342,13 @@ class Cooldown:
             "seconds": self.seconds,
             "cooldown_group": self.cooldown_group,
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Cooldown":
+        return cls(
+            seconds=data["seconds"],
+            cooldown_group=data.get("cooldown_group"),
+        )
 
 
 # ==========================================================================================
@@ -316,8 +362,16 @@ class DeathProtection:
     teleport_diameter: float | int = 0  # The diameter of the teleportation area when the entities dies (chorus fruit is 16.0)
 
     def to_dict(self) -> dict[str, Any]:
-        return _Effect(self.apply_affects, self.remove_effects, self.teleport_diameter, base_dict_name="death_effects").to_dict()
+        return _Effects(self.apply_affects, self.remove_effects, self.teleport_diameter, base_dict_name="death_effects").to_dict()
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DeathProtection":
+        effects = _Effects.from_dict(data, "death_effects") if data.get("death_effects") else None
+        return cls(
+            apply_affects=effects.apply_affects if effects else [],
+            remove_effects=effects.remove_affects if effects else [],
+            teleport_diameter=effects.teleport_diameter if effects else 0,
+        )
 
 # ==========================================================================================
 
@@ -329,6 +383,10 @@ class EntityData:
 
     def to_dict(self) -> dict[str, Any]:
         return self.data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "EntityData":
+        return cls(data)
 
 
 # ==========================================================================================
@@ -397,6 +455,16 @@ class FireworkExplosion:
             "twinkle": True if self.has_twinkle else None,  # Defaults to False
         } if self.has_twinkle else {})
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "FireworkExplosion":
+        return cls(
+            shape=data["shape"],
+            colors=data["colors"],
+            fade_colors=data.get("fade_colors", []),
+            has_trail=data.get("trail", False),
+            has_twinkle=data.get("twinkle", False),
+        )
+
 
 @dataclass
 class Firework:
@@ -416,6 +484,13 @@ class Firework:
             "flight_duration": self.flight_duration,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Firework":
+        return cls(
+            explosions=[FireworkExplosion.from_dict(explosion) for explosion in data["explosions"]],
+            flight_duration=data.get("flight_duration", 1),
+        )
+
 
 # ==========================================================================================
 
@@ -432,6 +507,14 @@ class Food:
             "saturation": self.saturation,  # Defaults to 0 (cannot be None)
             "can_always_eat": True if self.can_always_eat else None,  # Defaults to False
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Food":
+        return cls(
+            nutrition=data.get("nutrition", 0),
+            saturation=int(data.get("saturation", 0)),
+            can_always_eat=data.get("can_always_eat", False),
+        )
 
 
 # ==========================================================================================
@@ -460,7 +543,16 @@ class Instrument:
             "sound_event": {"sound_id": self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id},
             "use_duration": self.use_duration,
         }
-    
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Instrument":
+        return cls(
+            sound_id=data["sound_event"]["sound_id"],
+            description=data.get("description"),
+            use_duration=data.get("use_duration", 5),
+            instrument_range=data.get("range", 256),
+        )
+
     def get_reference(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_sound import CustomSound
         return self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id
@@ -514,6 +606,16 @@ class LodestoneTracker:
             "tracked": False if not self.tracked else None,  # Defaults to True
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "LodestoneTracker":
+        return cls(
+            x=data["target"]["pos"][0],
+            y=data["target"]["pos"][1],
+            z=data["target"]["pos"][2],
+            dimension=data["target"]["dimension"],
+            tracked=data.get("tracked", True),
+        )
+
 
 # ==========================================================================================
 
@@ -541,6 +643,15 @@ class MapDecoration:
             "z": self.z,
             "rotation": self.rotation,
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "MapDecoration":
+        return cls(
+            type=data["type"],
+            x=data["x"],
+            z=data["z"],
+            rotation=data.get("rotation", 0),
+        )
 
 
 @dataclass
@@ -591,6 +702,17 @@ class PotionEffect:
             "show_icon": False if not self.show_icon else None,  # Defaults to True
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PotionEffect":
+        return cls(
+            effect_name=(data.get("id") or data["type"]).removeprefix("minecraft:"),
+            amplifier=data.get("amplifier", 0),
+            duration_in_ticks=data.get("duration", 1),
+            ambient=data.get("ambient", False),
+            show_particles=data.get("show_particles", True),
+            show_icon=data.get("show_icon", True),
+        )
+
 
 # ==========================================================================================
 
@@ -609,6 +731,13 @@ class PotionContents:
             "custom_effects": [effect.to_dict() for effect in self.effects],
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PotionContents":
+        return cls(
+            custom_color=int(data["custom_color"]),
+            effects=[PotionEffect.from_dict(effect) for effect in data.get("custom_effects", [])],
+        )
+
 
 # ==========================================================================================
 
@@ -626,6 +755,14 @@ class ToolRule:
             "speed": self.speed if self.speed != 1 else None,  # Note: Changed but untested
             "correct_for_drops": self.correct_for_drops,
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ToolRule":
+        return cls(
+            blocks=data["blocks"],
+            speed=data.get("speed", 1.0),
+            correct_for_drops=data.get("correct_for_drops", True),
+        )
 
 
 @dataclass
@@ -648,7 +785,7 @@ class Tool:
         return cls(
             default_mining_speed=data.get("default_mining_speed", 1.0),
             damage_per_block=data.get("damage_per_block", 1),
-            rules=[ToolRule(**rule) for rule in data.get("rules", [])],
+            rules=[ToolRule.from_dict(rule) for rule in data.get("rules", [])],
         )
 
 
@@ -667,6 +804,13 @@ class UseRemainder:
             "count": self.count,
         } | ({"components": self.item.to_dict(pack_namespace)} if isinstance(self.item, CustomItem) else {})
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "UseRemainder":
+        # TODO: I suppose if this is a custom item, it needs to be parsed as such
+        return cls(
+            item=data["id"],
+            count=data.get("count", 1),
+        )
 
 # ==========================================================================================
 
@@ -680,6 +824,12 @@ class WritableBookContent:
 
     def to_dict(self) -> dict[str, Any]:
         return {"pages": self.pages}
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "WritableBookContent":
+        return cls(
+            pages=data.get("pages", ["Hello World"]),
+        )
 
 
 @dataclass
@@ -696,8 +846,15 @@ class WrittenBookContent:
             "title": self.title,
             "author": self.author,
             "pages": [json.dumps(x, ensure_ascii=False).replace("\\\\", "\\") for x in self.pages],
-            # "pages": [str(x) for x in self.pages],  # Converts the structure from list of lists to list of strings
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "WrittenBookContent":
+        return cls(
+            title=data.get("title", "Written Book"),
+            author=data.get("author", "PyPacks"),
+            pages=[json.loads(x) for x in data.get("pages", [[{"text": "Hello"}, {"text": "World"}]])],
+        )
 
 
 # ==========================================================================================

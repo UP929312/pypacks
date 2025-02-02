@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
-from pypacks.additions.item_components import Consumable, Food, Components
+from pypacks.additions.item_components import Components, Consumable, Food
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
