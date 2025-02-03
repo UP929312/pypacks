@@ -235,8 +235,11 @@ my_dimension = CustomDimension(
 # ============================================================================================================
 # region: Custom Damage Type:
 my_custom_damage_type = CustomDamageType(
-    "halucination", "magic", exhaustion=0.0, scaling="never", effects="hurt", death_message_type="default"
+    "halucination",
+    translations=[DamageTypeTranslation("en_gb", "%s halucinated", "%s was made to halucinate by %s using %s", "%s halucinated whilst trying to escape %s")],
+    exhaustion=0.0, scaling="never", effects="hurt", death_message_type="default",
 )
+# rint(my_custom_damage_type.get_translation_commands("pypacks_testing"))
 # endregion
 # ============================================================================================================
 # region: Custom Crafter
@@ -260,14 +263,13 @@ every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound mine
 custom_languages = CustomLanguage.from_all_translation_keys(
     {
         "pypacks.item.ruby": {
-            "en_us": "Ruby", "en_gb": "Ruby", "fr_fr": "Rubis", "de_de": "Rubin", "es_es": "Rubí", "it_it": "Rubino", "pt_br": "Rubi", "nl_nl": "Robijn",
+            "en_gb": "Ruby", "fr_fr": "Rubis", "de_de": "Rubin", "es_es": "Rubí", "it_it": "Rubino", "pt_br": "Rubi", "nl_nl": "Robijn",
         },
         "pypacks.item.topaz": {
-            "en_us": "Topaz", "en_gb": "Topaz", "fr_fr": "Topaze", "de_de": "Topas", "es_es": "Topacio", "it_it": "Topazio", "pt_br": "Topázio", "nl_nl": "Topaas",
+            "en_gb": "Topaz", "fr_fr": "Topaze", "de_de": "Topas", "es_es": "Topacio", "it_it": "Topazio", "pt_br": "Topázio", "nl_nl": "Topaas",
         },
     }
 )
-# print(custom_languages[0].get_run_command("pypacks_testing", "pypacks.item.ruby"))
 # endregion
 # ============================================================================================================
 datapack = Pack(

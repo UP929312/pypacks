@@ -90,8 +90,21 @@ class Pack:
         self.generate_pack()
 
     def add_internal_functions(self) -> None:
-         # ==================================================================================
-         # Custom Raycasts
+        # ==================================================================================
+        # Custom Damage Types
+        for custom_damage_type in self.custom_damage_types:
+            self.custom_languages.extend([
+                translation.to_custom_language(self.namespace, custom_damage_type.internal_name)
+                for translation in custom_damage_type.translations  # type: ignore[abc]
+                if custom_damage_type.translations is not None
+            ])
+        # =================================================================================
+        # Custom Languages
+        if self.custom_languages:
+            self.custom_languages[0].combine_languages(self)
+            self.custom_languages[0].propogate_to_all_similar_languages(self)
+        # ==================================================================================
+        # Custom Raycasts
         if self.custom_raycasts or self.custom_blocks or any(x for x in self.custom_items if x.on_right_click):
             self.custom_mcfunctions.extend(Raycast.generate_default_raycast_functions(self.namespace))
         # =================================================================================
@@ -183,7 +196,7 @@ class Pack:
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}")
-        print(f"Generating resource pack @ {self.resource_pack_path}")
+        print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
         print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
         # Needs to go in this order
         self.custom_fonts = [generate_font_pack(self)]

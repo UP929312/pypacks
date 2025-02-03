@@ -24,7 +24,7 @@ from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 from pypacks.resources.world_gen import CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, SpawnOverride, DisableSpawnOverrideCategory, CustomBiome, MoodSound
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.additions.custom_block import CustomBlock
-from pypacks.resources.custom_damage_type import CustomDamageType
+from pypacks.resources.custom_damage_type import CustomDamageType, DamageTypeTranslation
 from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
 from pypacks.resources.custom_enchantment import (
     CustomEnchantment,
@@ -83,7 +83,7 @@ __all__ = [
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "CustomAdvancement", "Criteria",
     "CustomBlock",
-    "CustomDamageType",
+    "CustomDamageType", "DamageTypeTranslation",
     "CustomDimension", "CustomDimensionType", "OverworldDimension", "NetherDimension", "EndDimension",
     "CustomEnchantment",
     "EnchantValueEffect", "SetValueEffect", "AddValueEffect", "MultiplyValueEffect", "RemoveBinomialValueEffect", "AllOfValueEffect",
