@@ -31,7 +31,7 @@ def generate_resource_pack(pack: "Pack") -> None:
     # ================================================================================================
     # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder) & custom font (built in)
     for element in (
-        pack.custom_items+pack.custom_blocks+pack.custom_paintings+pack.custom_sounds+pack.custom_fonts+pack.custom_item_model_definitions
+        pack.custom_items+pack.custom_blocks+pack.custom_paintings+pack.custom_sounds+pack.custom_fonts+pack.custom_item_model_definitions+pack.custom_languages
     ):
         element.create_resource_pack_files(pack)
     # ================================================================================================

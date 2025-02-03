@@ -256,6 +256,20 @@ custom_crafter = CustomCrafter(
 every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
 # endregion
 # ============================================================================================================
+# region: Custom Language
+custom_languages = CustomLanguage.from_all_translation_keys(
+    {
+        "pypacks.item.ruby": {
+            "en_us": "Ruby", "en_gb": "Ruby", "fr_fr": "Rubis", "de_de": "Rubin", "es_es": "Rubí", "it_it": "Rubino", "pt_br": "Rubi", "nl_nl": "Robijn",
+        },
+        "pypacks.item.topaz": {
+            "en_us": "Topaz", "en_gb": "Topaz", "fr_fr": "Topaze", "de_de": "Topas", "es_es": "Topacio", "it_it": "Topazio", "pt_br": "Topázio", "nl_nl": "Topaas",
+        },
+    }
+)
+# print(custom_languages[0].get_run_command("pypacks_testing", "pypacks.item.ruby"))
+# endregion
+# ============================================================================================================
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -267,6 +281,7 @@ datapack = Pack(
     custom_jukebox_songs=[custom_jukebox_song],
     custom_blocks=custom_blocks,
     custom_loot_tables=loot_tables,
+    custom_languages=custom_languages,
     custom_item_model_definitions=custom_item_model_definitions,
     custom_enchantments=custom_enchantments,
     custom_dimensions=[my_dimension, overworld_dimension],
@@ -277,4 +292,5 @@ datapack = Pack(
     custom_crafters=[custom_crafter],
     custom_raycasts=[block_ray_cast, entity_ray_cast],
     custom_loops=[every_sixty_seconds],
+    
 )

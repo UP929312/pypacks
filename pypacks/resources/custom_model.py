@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.item_model_definition import ModelItemModel, ItemModelType
@@ -22,6 +22,8 @@ class CustomItemModelDefinition:
     hand_animation_on_swap: bool = True  # Whether the down-and-up animation should be played in first-person view when the item stack is changed. (default: true)
     showcase_item: "MinecraftItem | CustomItem | None" = None  # This is if you want it to show up in a debug command (for testing)
 
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="items")
+
     def __post_init__(self) -> None:
         if isinstance(self.model, str):
             self.model = ModelItemModel(self.model)
@@ -36,10 +38,10 @@ class CustomItemModelDefinition:
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # https://www.discord.com/channels/154777837382008833/1323240917792063489
         # https://minecraft.wiki/w/Items_model_definition
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
 
         # Item model definition
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"items"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(), file, indent=4)
 
     def generate_give_command(self, pack_namespace: str) -> str:
@@ -62,6 +64,8 @@ class CustomTexture:
     internal_name: str
     texture_bytes: bytes
 
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="textures/item")
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # The resource pack requires 3 things for a custom texture:
         # 1. The model definition/config (in items/<internal_name>.json)
@@ -78,7 +82,7 @@ class CustomTexture:
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
 
         layers = {"layer0": f"{pack.namespace}:item/{self.internal_name}"}
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
@@ -86,7 +90,7 @@ class CustomTexture:
 
         CustomItemModelDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item"/f"{self.internal_name}.png", "wb") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png", "wb") as file:
             file.write(self.texture_bytes)
 
 
@@ -152,6 +156,8 @@ class AsymmetricCubeModel:
     internal_name: str
     face_paths: "FacePaths"
 
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="blockstates")
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
         # ├── assets/
@@ -167,11 +173,11 @@ class AsymmetricCubeModel:
         # │           └── item/
         # │               └── <custom_block>_<top&bottom&front&back&left&right>.png
 
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
 
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump({
                 "variants": {
                     "": {"model": f"{pack.namespace}:block/{self.internal_name}"},

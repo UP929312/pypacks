@@ -38,7 +38,7 @@ Use the new tests mojang implemented into datapacks!
 
 ADD DAMAGE TYPE: https://minecraft.wiki/w/Damage_type - Need translations
 
-Translations (grrr) https://minecraft.wiki/w/Resource_pack#Language
+Translations (grrr) https://minecraft.wiki/w/Resource_pack#Language  ADDED, but want to be able to add it to custom items I guess? And also Translate("pypacks.item.ruby")
 
 For any_of enchantment, maybe just take a list as an alternative, and if it's passed in, re-construct the object to use the AnyOfValueEffect?
 

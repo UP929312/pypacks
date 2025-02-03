@@ -18,6 +18,7 @@ class CustomSound:
     stream: bool = False
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="sound")
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, default="sounds")
 
     def __post_init__(self) -> None:
         assert 0 <= self.volume <= 1, "Volume must be between 0 and 1"
@@ -30,8 +31,8 @@ class CustomSound:
         return f"playsound {self.get_reference(pack_namespace)} master @a[distance=..10] ~ ~ ~ {self.volume} {self.pitch}"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"sounds", exist_ok=True)
-        shutil.copyfile(self.ogg_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"sounds"/f"{self.internal_name}.ogg")
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
+        shutil.copyfile(self.ogg_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.ogg")
 
     def create_sound_entry(self, pack_namespace: str) -> dict[str, list[dict[str, Any]] | str]:
         return {

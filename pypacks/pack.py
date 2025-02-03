@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_enchantment import CustomEnchantment
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
+    from pypacks.resources.custom_language import CustomLanguage
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
     from pypacks.resources.custom_model import CustomItemModelDefinition
     from pypacks.resources.custom_painting import CustomPainting
@@ -56,6 +57,7 @@ class Pack:
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
+    custom_languages: list["CustomLanguage"] = field(default_factory=list)
     custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
     custom_paintings: list["CustomPainting"] = field(default_factory=list)
     custom_predicates: list["Predicate"] = field(default_factory=list)

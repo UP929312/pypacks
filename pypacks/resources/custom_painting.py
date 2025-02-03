@@ -23,6 +23,7 @@ class CustomPainting:
     height_in_blocks: int = 1
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="painting_variant")
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, default="textures/painting")
 
     def __post_init__(self) -> None:
         assert 1 <= self.width_in_blocks <= 16, "Width must be between 1 and 16"
@@ -51,8 +52,8 @@ class CustomPainting:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"painting", exist_ok=True)
-        shutil.copyfile(self.image_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"painting"/f"{self.internal_name}.png")
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
+        shutil.copyfile(self.image_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")
 
     def generate_custom_item(self, pack: "Pack") -> "CustomItem":
         return CustomItem(
