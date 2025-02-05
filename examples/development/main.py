@@ -189,7 +189,7 @@ give_arrow_function = MCFunction("give_arrow", commands=["give @a minecraft:arro
 custom_enchantment = CustomEnchantment(
     "give_item", "Give Item", "minecraft:quick_charge", "minecraft:crossbow", weight=10, max_level=1, min_cost_base=1, per_level_increase_min=10,
     max_cost_base=50, per_level_increase_max=0, anvil_cost=0, slots=["mainhand"], effects=[
-        EnchantmentEntityEffect("minecraft:post_attack", RunFunctionEntityEffect(give_arrow_function.get_reference("pypacks_testing")),
+        EnchantmentEntityEffect("minecraft:post_attack", RunFunctionEntityEffect(give_arrow_function),
                                 enchanted="attacker", affected="attacker"),
     ],
 )
@@ -239,7 +239,6 @@ my_custom_damage_type = CustomDamageType(
     translations=[DamageTypeTranslation("en_gb", "%s halucinated", "%s was made to halucinate by %s using %s", "%s halucinated whilst trying to escape %s")],
     exhaustion=0.0, scaling="never", effects="hurt", death_message_type="default",
 )
-# rint(my_custom_damage_type.get_translation_commands("pypacks_testing"))
 # endregion
 # ============================================================================================================
 # region: Custom Crafter

@@ -44,7 +44,7 @@ class CustomCrafterRecipe(GenericRecipe):
     ingredients: list[MinecraftOrCustomItem | Literal["minecraft:air", "air", ""]]
     result: MinecraftOrCustomItem
 
-    recipe_block_name: str = field(init=False, repr=False, default="dispenser")
+    recipe_block_name: str = field(init=False, repr=False, default="custom_crafter")  # "dispenser"
 
 
 @dataclass

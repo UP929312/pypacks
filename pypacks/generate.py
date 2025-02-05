@@ -73,7 +73,7 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
                       image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
                                              base_image_path=EXTRA_ICON_BASE_PATH),
                       height=18, y_offset=14)
-            for recipe in [recipe for recipe in ALL_RECIPES if recipe in [type(x) for x in pack.custom_recipes]]
+            for recipe in [recipe for recipe in ALL_RECIPES if type(recipe) in [type(x) for x in pack.custom_recipes]]
         ],
     ]
     return CustomFont("all_fonts", [x for x in all_elements if x is not None])

@@ -21,7 +21,10 @@ from pypacks.resources.custom_loot_tables.functions import (  # All 39...
     SetStewEffectFunction, SetWrittenBookPagesFunction, SetWritableBookPagesFunction,
     ToggleToolTipsFunction,
 )
-from pypacks.resources.world_gen import CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, SpawnOverride, DisableSpawnOverrideCategory, CustomBiome, MoodSound
+from pypacks.resources.world_gen import (
+    CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound
+)
+from pypacks.resources.world_gen.entity_spawner import SpawnOverride, DisableSpawnOverrideCategory
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.additions.custom_block import CustomBlock
 from pypacks.resources.custom_damage_type import CustomDamageType, DamageTypeTranslation

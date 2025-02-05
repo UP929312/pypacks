@@ -18,7 +18,7 @@ class FakePack:
     namespace: str = "minecraft"
 
 
-def overridden_repr(self) -> str:
+def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
     """This function overrides the dataclasses "__repr" function to only show non-default attributes, so when we create them, it doesn't
     show unnecessary information, i.e. ones that are already default."""
     # Calculate default values, considering both default and default_factory
@@ -39,23 +39,22 @@ def overridden_repr(self) -> str:
     return f"{self.__class__.__name__}({', '.join(f'{key}={repr(value)}' for key, value in non_default_attrs.items())})"
 
 
-# CustomItem.__repr__ = overridden_repr
-AttributeModifier.__repr__ = overridden_repr
-Cooldown.__repr__ = overridden_repr
-Components.__repr__ = overridden_repr
-Consumable.__repr__ = overridden_repr
-CustomPainting.__repr__ = overridden_repr
-DeathProtection.__repr__ = overridden_repr
-EntityData.__repr__ = overridden_repr
-Equippable.__repr__ = overridden_repr
-Food.__repr__ = overridden_repr
-Instrument.__repr__ = overridden_repr
-JukeboxPlayable.__repr__ = overridden_repr
-PotionEffect.__repr__ = overridden_repr
-Tool.__repr__ = overridden_repr
-ToolRule.__repr__ = overridden_repr
-UseRemainder.__repr__ = overridden_repr
-
+# CustomItem.__repr__ = overridden_repr  # type: ignore[method-assign]
+AttributeModifier.__repr__ = overridden_repr  # type: ignore[method-assign]
+Cooldown.__repr__ = overridden_repr  # type: ignore[method-assign]
+Components.__repr__ = overridden_repr  # type: ignore[method-assign]
+Consumable.__repr__ = overridden_repr  # type: ignore[method-assign]
+CustomPainting.__repr__ = overridden_repr  # type: ignore[method-assign]
+DeathProtection.__repr__ = overridden_repr  # type: ignore[method-assign]
+EntityData.__repr__ = overridden_repr  # type: ignore[method-assign]
+Equippable.__repr__ = overridden_repr  # type: ignore[method-assign]
+Food.__repr__ = overridden_repr  # type: ignore[method-assign]
+Instrument.__repr__ = overridden_repr  # type: ignore[method-assign]
+JukeboxPlayable.__repr__ = overridden_repr  # type: ignore[method-assign]
+PotionEffect.__repr__ = overridden_repr  # type: ignore[method-assign]
+Tool.__repr__ = overridden_repr  # type: ignore[method-assign]
+ToolRule.__repr__ = overridden_repr  # type: ignore[method-assign]
+UseRemainder.__repr__ = overridden_repr  # type: ignore[method-assign]
 
 def is_not_normal_item(data: dict[str, Any]) -> bool:
     """Filters out items that aren't interesting, like stone blocks, interesting items have one or more of these attributes."""
@@ -133,7 +132,7 @@ for goat_horn_sound_index, name in enumerate(GOAT_HORN_NAMES):
     lines.append(format_custom_item_name(f"GOAT_HORN_{name.upper()}", "minecraft:goat_horn", components, 1, 'common'))
 # ====================================================================================================================
 for painting in ALL_DEFAULT_PAINTINGS:
-    painting_item = painting.generate_custom_item(FakePack())  # type: ignore[abc]
+    painting_item = painting.generate_custom_item(FakePack())  # type: ignore[arg-type]
     items.append(painting_item.internal_name.upper()+"_PAINTING")
     lines.append(format_custom_item_name(painting_item.internal_name+"_PAINTING", "minecraft:painting", painting_item.components, 1, 'common'))
 # ====================================================================================================================

@@ -30,18 +30,19 @@ class MCFunction:
         return f"function {self.get_reference(pack_namespace)}"
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        if (not self.commands or self.commands == [""]) and not self.create_if_empty:
+        commands_str = "\n".join(self.commands)
+        if (not commands_str.strip()) and not self.create_if_empty:
             return
-        detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, "\n".join(self.commands)))))
+        detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
         # Can't use / here because of *self.sub_directories
         path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name,
                     *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
             if detected_macros:
                 macro_list = "\n".join([f"# - {x}" for x in detected_macros])
-                file.write(f"{MACRO_MESSAGE}{macro_list}\n\n"+"\n".join(self.commands))
+                file.write(f"{MACRO_MESSAGE}{macro_list}\n\n"+commands_str)
                 return
-            file.write("\n".join(self.commands))
+            file.write(commands_str)
 
     # Untested
     # def __or__(self, other: "MCFunction") -> "MCFunction":

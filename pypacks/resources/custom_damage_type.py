@@ -46,6 +46,10 @@ class CustomDamageType:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="damage_type")
 
+    def __post_init__(self) -> None:
+        language_codes = [translation.language_code for translation in self.translations] if self.translations is not None else []
+        assert self.translations is not None and len(set(language_codes)) == len(language_codes), "Each translation must have a unique language code."
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "message_id": f"{pack_namespace}:{self.internal_name}",

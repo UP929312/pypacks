@@ -151,7 +151,7 @@ class CustomLanguage:
         combined_languages: list["CustomLanguage"] = []
         all_existing_language_codes: set["LanguageCode"] = {language.language_code for language in pack.custom_languages}
         for language_code in all_existing_language_codes:
-            combined_language_translations = {}
+            combined_language_translations: dict[str, str] = {}
             for language in pack.custom_languages:
                 if language.language_code == language_code:
                     combined_language_translations |= language.translations

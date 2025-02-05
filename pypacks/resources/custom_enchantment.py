@@ -7,9 +7,10 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.resources.custom_item import CustomItem
-    from pypacks.resources.custom_predicate import Predicate
     from pypacks.additions.item_components import PotionEffectType
+    from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.custom_mcfunction import MCFunction
+    from pypacks.resources.custom_predicate import Predicate
 
 
 @dataclass
@@ -40,7 +41,7 @@ class CustomEnchantment:
         assert 0 < self.max_level <= 255, "Max level must be between 1 and 255"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        effects = [effect.to_dict() for effect in self.effects]
+        effects = [effect.to_dict(pack_namespace) for effect in self.effects]
         effects_merged = {key: value for effect in effects for key, value in effect.items()}
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "description": self.description if isinstance(self.description, dict) else {"text": self.description},
@@ -94,7 +95,7 @@ class EnchantValueEffect:
     requirements: "Predicate | None" = None  # Determines when the effect is active. Cannot be of type `minecraft:reference` - all predicates must be in-lined
     enchanted: Literal["attacker", "victim"] = "victim"  # Which entity has to have the enchantment
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             self.component_id: [
                 {
@@ -190,11 +191,11 @@ class EnchantmentEntityEffect:
     enchanted: Literal["attacker", "victim", "damaging_entity"] = "victim"  # Which entity has to have the enchantment
     affected: Literal["attacker", "victim", "damaging_entity"] = "victim"  # Which entity is affected by the  effect.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             self.component_id: [
                 {
-                    "effect": self.entity_effect.to_dict(),
+                    "effect": self.entity_effect.to_dict(pack_namespace),
                     "requirements": self.requirements.to_dict() if self.requirements else None,
                     "enchanted": self.enchanted,
                     "affected": self.affected,
@@ -209,10 +210,10 @@ class AllOfEntityEffect:
     # https://minecraft.wiki/w/Enchantment_definition#all_of_2
     effects: list["EntityEffect"]
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:all_of",
-            "effects": [effect.to_dict() for effect in self.effects],
+            "effects": [effect.to_dict(pack_namespace) for effect in self.effects],
         }
 
 
@@ -226,7 +227,7 @@ class ApplyMobEffectEntityEffect:
     min_amplifier: float = 0.0  # Minimum possible amplifier of the effect
     max_amplifier: float = 1.0  # Maximum possible amplifier of the effect
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:apply_mob_effect",
             "to_apply": self.effects,
@@ -254,7 +255,7 @@ class DamageEntityEntityEffect:
     min_damage: float = 0.5
     max_damage: float = 10.0
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:damage_entity",
             "damage_type": self.damage_type,
@@ -269,7 +270,7 @@ class ChangeItemDamageEntityEffect:
     # https://minecraft.wiki/w/Enchantment_definition#change_item_damage
     amount: int | float  # The amount to durability to remove from the item
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:change_item_damage",
             "amount": self.amount,
@@ -307,7 +308,7 @@ class ExplodeEntityEffect:
     large_particle: ParticleTypes = "explosion"
     sound: str = "entity.generic.explode"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:explode",
             "attribute_to_user": self.attribute_to_user,
@@ -330,7 +331,7 @@ class IgniteEntityEffect:
     # https://minecraft.wiki/w/Enchantment_definition#ignite
     duration: float = 5.0
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:ignite",
             "duration": self.duration,
@@ -345,7 +346,7 @@ class PlaySoundEntityEffect:
     volume: float = 1.0  # Volume of the sound
     pitch: float = 1.0  # Pitch of the sound
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         assert 0.00001 <= self.volume <= 10.0, "Volume must be between 0.00001 and 10.0"
         assert 0.00001 <= self.pitch <= 2.0, "Volume must be between 0.00001 and 2.0"
         return {
@@ -365,7 +366,7 @@ class ReplaceBlockEntityEffect:
     trigger_game_event: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] = 15
     predicate: "Predicate | None" = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:replace_block",
             "block_state": self.block_state,
@@ -386,7 +387,7 @@ class ReplaceDiskEntityEffect:
     trigger_game_event: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] = 15
     predicate: "Predicate | None" = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:replace_disk",
             "block_state": self.block_state,
@@ -402,15 +403,14 @@ class ReplaceDiskEntityEffect:
 class RunFunctionEntityEffect:
     """Run a function."""
     # https://minecraft.wiki/w/Enchantment_definition#run_function
-    function: str  # Name of the function
+    function: "str | MCFunction"  # Name of the function
 
-    def to_dict(self) -> dict[str, Any]:
-        # from pypacks.resources.custom_mcfunction import MCFunction
-        assert " " not in self.function, "Function name cannot contain spaces"
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_mcfunction import MCFunction
+        assert not isinstance(self.function, str) or " " not in self.function, f"Function name cannot contain spaces! Found: {self.function}"
         return {
             "type": "minecraft:run_function",
-            # TODO: Support Custom MCFunction
-            "function": self.function,  # self.function.get_reference(pack_reference) if isinstance(self.function, MCFunction) else self.function,
+            "function": self.function.get_reference(pack_namespace) if isinstance(self.function, MCFunction) else self.function,
         }
 
 
@@ -422,7 +422,7 @@ class SetBlockPropertiesEntityEffect:
     offset: tuple[int, int, int]
     trigger_game_event: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] = 15
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:set_block_properties",
             "properties": self.block_states,
@@ -447,7 +447,7 @@ class SpawnParticlesEntityEffect:
     vertical_velocity_base: float = 0.0
     vertical_velocity_movement_scale: float = 1.0
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:spawn_particles",
             "particle": self.particle,
@@ -479,7 +479,7 @@ class SummonEntityEntityEffect:
     entity: str | list[str]  # One or more entity type(s) (an ID, or a #tag, or an array containing IDs) - The entity or entities ​[more information needed] to spawn
     join_team: bool = False  # Should the summoned entity join the team of the owner of the enchanted item?
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:summon_entity",
             "entity": self.entity,

@@ -95,7 +95,7 @@ class Pack:
         for custom_damage_type in self.custom_damage_types:
             self.custom_languages.extend([
                 translation.to_custom_language(self.namespace, custom_damage_type.internal_name)
-                for translation in custom_damage_type.translations  # type: ignore[abc]
+                for translation in custom_damage_type.translations  # type: ignore[union-attr]
                 if custom_damage_type.translations is not None
             ])
         # =================================================================================
