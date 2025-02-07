@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from pypacks.additions.text import Text
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, Consumable, Food
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
@@ -9,7 +10,7 @@ from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
-from pypacks.utils import to_component_string, colour_codes_to_json_format, recursively_remove_nones_from_data
+from pypacks.utils import to_component_string, recursively_remove_nones_from_data
 
 from pypacks.scripts.repos.all_items import MinecraftItem
 
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
 class CustomItem:
     internal_name: str  # Internal name of the item
     base_item: MinecraftItem  # What item to base it on
-    custom_name: str | None = None  # Display name of the item
+    custom_name: "str | Text | None" = None  # Display name of the item
     lore: list[str] = field(repr=False, default_factory=list)  # Lore of the item
     max_stack_size: int = field(repr=False, default=64)  # Max stack size of the item (1-99)
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = field(repr=False, default=None)
@@ -112,10 +113,9 @@ class CustomItem:
             item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
         else:
             item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
-        # TODO: Remove color_codes_to_json_format
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,
-            "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,
+            "custom_name": Text.resolve_text(self.custom_name),
+            # "lore": "'"+str(self.lore)+"'" if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
             "rarity": self.rarity,
             "item_model": item_model,

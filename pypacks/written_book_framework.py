@@ -6,6 +6,7 @@ from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.additions.text import Text
 
 ICONS_PER_ROW = 5
 ROWS_PER_PAGE = 4
@@ -39,11 +40,17 @@ class OnClickRunCommand:
 
 @dataclass
 class OnHoverShowText:
-    text: str
+    text: str | "Text"
     font: str = "minecraft:default"
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"hoverEvent": {"action": "show_text", "contents": {"text": self.text, "font": self.font}}}
+        if isinstance(self.text, str):
+            return {"hoverEvent": {"action": "show_text", "contents": {"text": self.text, "font": self.font}}}
+        if isinstance(self.text, list):
+            unlist = self.text[0]  # type: ignore
+            unlist |= {"font": self.font}
+            return {"hoverEvent": {"action": "show_text", "contents": unlist}}
+        return {"hoverEvent": {"action": "show_text", "contents": self.text}}
 
 
 @dataclass

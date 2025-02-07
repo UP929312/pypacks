@@ -1,4 +1,4 @@
-from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast  # noqa: F401
+from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast, Text  # noqa: F401
 from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403
 from pypacks.additions.custom_crafter import CustomCrafter
@@ -24,7 +24,7 @@ entity_ray_cast = EntityRaycast("entity_ray_cast", on_entity_hit_command="effect
 # ============================================================================================================
 # region: Custom Items
 # Custom Items
-ruby = CustomItem("ruby", "minecraft:emerald", "&cSpecial &4Ruby", lore=["Custom &cRuby&f, ooh!"], texture_path="images/ruby.png", ref_book_config=RefBookConfig(description="A special rube, found in the depths of the earth."))
+ruby = CustomItem("ruby", "minecraft:emerald", Text("Special Ruby", color="red"), lore=["Custom &cRuby&f, ooh!"], texture_path="images/ruby.png", ref_book_config=RefBookConfig(description="A special rube, found in the depths of the earth."))
 topaz = CustomItem("topaz", "minecraft:redstone", "Topaz", texture_path="images/topaz.png", components=Components(equippable=Equippable("chest")))
 weak_axe = CustomItem("weak_axe", "minecraft:netherite_axe", "Weak Axe", components=Components(durability=10, lost_durability=5), ref_book_config=RefBookConfig(category=weapons_category))
 flying_helmet = CustomItem("flying_helmet", "minecraft:iron_helmet", "Flying Helmet", components=Components(glider=True, consumable=Consumable(0.5, "drink"), food=Food(5, 0, True), use_remainder=UseRemainder("minecraft:diamond", 2)), ref_book_config=RefBookConfig(category=usable_category))
@@ -255,7 +255,7 @@ custom_crafter = CustomCrafter(
 # endregion
 # ============================================================================================================
 # region: Custom Loop
-every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
+# every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
 # endregion
 # ============================================================================================================
 # region: Custom Language
@@ -292,6 +292,6 @@ datapack = Pack(
     # custom_advancements=[eating_advancement],
     custom_crafters=[custom_crafter],
     custom_raycasts=[block_ray_cast, entity_ray_cast],
-    custom_loops=[every_sixty_seconds],
+    # custom_loops=[every_sixty_seconds],
     
 )

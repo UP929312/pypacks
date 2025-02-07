@@ -1,8 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
-
-from numpy import block
+from typing import TYPE_CHECKING, Literal, Any
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
@@ -14,6 +12,7 @@ if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.additions.constants import Slabs
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.additions.text import Text
 
 
 @dataclass
@@ -22,7 +21,7 @@ class CustomBlock:
     passed in (e.g. rotatable logs). Setting drops to "self" will make the block drop itself when broken,
     and setting it to None will make it drop nothing."""
     internal_name: str
-    name: str
+    name: "str | Text"
     base_block: str
     block_texture: "str | FacePaths"
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"

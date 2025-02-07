@@ -7,6 +7,7 @@ from pypacks.additions.item_components import (
 )
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.additions.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
+from pypacks.additions.text import Text
 # =============================================================================
 # Providers:
 from pypacks.providers.enchantment_provider import (
@@ -78,6 +79,7 @@ __all__ = [
     "BlockRaycast", "EntityRaycast",
     "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
     "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
+    "Text",
     # Providers
     "SingleEnchantmentProvider", "EnchantmentsByCostProvider", "EnchantmentsByCostWithDifficultyProvider",
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",

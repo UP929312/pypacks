@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 
 if TYPE_CHECKING:
+    from pypacks.additions.constants import ColorType
+
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem
@@ -89,9 +91,6 @@ class AttributeModifier:
 
 # ==========================================================================================
 
-ColorType = Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
-COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
-
 
 @dataclass
 class BannerPattern:
@@ -103,7 +102,7 @@ class BannerPattern:
                      "square_bottom_right", "square_top_left", "square_top_right", "triangle_bottom", "triangle_top", "triangles_bottom",
                      "triangles_top", "circle", "rhombus", "border", "curly_border", "bricks", "gradient", "gradient_up", "creeper", "skull",
                      "flower", "mojang", "globe", "piglin", "flow", "guster"]  # The pattern type.
-    color: ColorType  # The color for this pattern.
+    color: "ColorType"  # The color for this pattern.
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["banner", "shield"])
 
@@ -140,10 +139,11 @@ class Bee:
 class TropicalFishData:
     size: Literal["small", "large"] = "large"
     pattern: Literal[0, 1, 2, 3, 4, 5] = 0
-    body_color: ColorType | int = "light_blue"
-    pattern_color: ColorType | int = "red"
+    body_color: "ColorType | int" = "light_blue"
+    pattern_color: "ColorType | int" = "red"
 
     def __int__(self) -> int:
+        from pypacks.additions.constants import COLORS
         body_color_index = COLORS.index(self.body_color) if isinstance(self.body_color, str) else self.body_color
         pattern_color_index = COLORS.index(self.pattern_color) if isinstance(self.pattern_color, str) else self.pattern_color
         size_int = 0 if self.size == "small" else 1

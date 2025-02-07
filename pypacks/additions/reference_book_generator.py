@@ -174,7 +174,7 @@ class ReferenceBook:
                         pack.font_mapping[f"{item.internal_name}_icon"],
                         pack.namespace,
                         indent_unicode_char=pack.font_mapping["empty_1_x_1"],
-                        on_hover=OnHoverShowText(remove_colour_codes(item.custom_name or item.base_item)),
+                        on_hover=OnHoverShowText(item.custom_name or item.base_item),
                         on_click=OnClickChangePage(ITEM_PAGE_START+item_index),
                     )
                     for item_index, item in enumerate(pack.custom_items)
