@@ -18,7 +18,7 @@ class FontImage:
     name: str
     image_bytes: bytes
     height: int | None = None  # Override, if a custom height is passed in, it won't use the image_bytes height
-    y_offset: int | None = None  # Is vertical + up, not shifted down
+    y_offset: int | None = None  # Is vertical/up, not shifted down
 
     def __post_init__(self) -> None:
         assert self.height is None or 0 < self.height <= 256, "Height must be between 1 and 256"

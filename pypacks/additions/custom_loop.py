@@ -23,18 +23,11 @@ class CustomLoop:
         return MCFunction(
             f"loop_manager",
             [
-                *[
-                    f"scoreboard players operation {loop.internal_name}_intervals loop_dispatch_counters = global_tick_counter loop_dispatch_counters"
-                    for loop in loops
-                ],
-                *[
-                    # scoreboard players operation <targets> <targetObjective> <operation> <source> <sourceObjective>‌
-                    f"scoreboard players operation {loop.internal_name}_intervals {loop.scoreboard_objective_name} %= {loop.interval_in_ticks} constants"
-                    for loop in loops
-                ],
-                *[
+                (
+                    f"scoreboard players operation {loop.internal_name}_intervals loop_dispatch_counters = global_tick_counter loop_dispatch_counters \n" +
+                    f"scoreboard players operation {loop.internal_name}_intervals {loop.scoreboard_objective_name} %= {loop.interval_in_ticks} constants \n" +
                     f"execute if score {loop.internal_name}_intervals {loop.scoreboard_objective_name} matches 0 run {loop.command.get_run_command(pack_namespace) if isinstance(loop.command, MCFunction) else loop.command}"
-                    for loop in loops
-                ],
+                )
+                for loop in loops
             ],
         )

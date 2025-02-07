@@ -112,6 +112,7 @@ class CustomItem:
             item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
         else:
             item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
+        # TODO: Remove color_codes_to_json_format
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,
             "lore": [colour_codes_to_json_format(line) for line in self.lore] if self.lore else None,

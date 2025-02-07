@@ -39,22 +39,10 @@ def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
     return f"{self.__class__.__name__}({', '.join(f'{key}={repr(value)}' for key, value in non_default_attrs.items())})"
 
 
-# CustomItem.__repr__ = overridden_repr  # type: ignore[method-assign]
-AttributeModifier.__repr__ = overridden_repr  # type: ignore[method-assign]
-Cooldown.__repr__ = overridden_repr  # type: ignore[method-assign]
-Components.__repr__ = overridden_repr  # type: ignore[method-assign]
-Consumable.__repr__ = overridden_repr  # type: ignore[method-assign]
-CustomPainting.__repr__ = overridden_repr  # type: ignore[method-assign]
-DeathProtection.__repr__ = overridden_repr  # type: ignore[method-assign]
-EntityData.__repr__ = overridden_repr  # type: ignore[method-assign]
-Equippable.__repr__ = overridden_repr  # type: ignore[method-assign]
-Food.__repr__ = overridden_repr  # type: ignore[method-assign]
-Instrument.__repr__ = overridden_repr  # type: ignore[method-assign]
-JukeboxPlayable.__repr__ = overridden_repr  # type: ignore[method-assign]
-PotionEffect.__repr__ = overridden_repr  # type: ignore[method-assign]
-Tool.__repr__ = overridden_repr  # type: ignore[method-assign]
-ToolRule.__repr__ = overridden_repr  # type: ignore[method-assign]
-UseRemainder.__repr__ = overridden_repr  # type: ignore[method-assign]
+for cls in [AttributeModifier, Cooldown, Components, Consumable, CustomPainting, DeathProtection, EntityData, Equippable,
+            Food, Instrument, JukeboxPlayable, PotionEffect, Tool, ToolRule, UseRemainder]:  # CustomItem
+    cls.__repr__ = overridden_repr  # type: ignore[method-assign]
+
 
 def is_not_normal_item(data: dict[str, Any]) -> bool:
     """Filters out items that aren't interesting, like stone blocks, interesting items have one or more of these attributes."""

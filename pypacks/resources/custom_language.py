@@ -96,15 +96,17 @@ language_groups: dict[str, list[LanguageCode]] = {
 }
 
 
-# @dataclass
-# class Translate:
-#     """Translate a string to a language"""
-#     translation_code: str
+@dataclass
+class Translate:
+    """Translate a string to a different language"""
+    translation_code: str | dict[str, Any]
 
-#     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-#         return {
-#             "translate": self.translation_code
-#         }
+    def to_dict(self) -> dict[str, Any]:
+        if isinstance(self.translation_code, dict):
+            return self.translation_code | {"translate": self.translation_code["translate"]}  # If it's a dict, merge translation translation, so just return it
+        return {
+            "translate": self.translation_code
+        }
 
 
 @dataclass
