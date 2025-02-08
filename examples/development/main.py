@@ -2,7 +2,7 @@ from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK
 from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403
 from pypacks.additions.custom_crafter import CustomCrafter
-from pypacks.additions.custom_loop import CustomLoop
+# from pypacks.additions.custom_loop import CustomLoop
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -87,7 +87,7 @@ custom_items = [
     ruby, topaz, weak_axe, flying_helmet, playable_lapis, musical_horn, written_book, rick_roll_horn,
     lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book, sharpness_fish,
     enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
-    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder, # edible_item
+    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder,  # edible_item
     pre_charged_crossbow, steak_to_ruby_when_eaten, custom_firework, custom_firework_hex, map_with_decoration,
     colored_map, map_with_id, banner, note_block_sound_head, eating_gives_you_speed, eating_removes_speed,
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
@@ -255,7 +255,7 @@ custom_crafter = CustomCrafter(
 # endregion
 # ============================================================================================================
 # region: Custom Loop
-every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
+# every_sixty_seconds = CustomLoop("every_sixty_seconds", 20 * 60, "playsound minecraft:ui.button.click block @a")
 # endregion
 # ============================================================================================================
 # region: Custom Language
@@ -292,6 +292,5 @@ datapack = Pack(
     # custom_advancements=[eating_advancement],
     custom_crafters=[custom_crafter],
     custom_raycasts=[block_ray_cast, entity_ray_cast],
-    custom_loops=[every_sixty_seconds],
-    
+    # custom_loops=[every_sixty_seconds],
 )

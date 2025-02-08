@@ -93,7 +93,7 @@ class CustomItem:
                 f"advancement revoke @s only {pack_namespace}:custom_right_click_for_{self.internal_name}",
             ], ["right_click"]
         )
-        run_code = self.on_right_click.get_run_command(pack_namespace) if isinstance(self.on_right_click, (MCFunction, BlockRaycast, EntityRaycast)) else self.on_right_click 
+        run_code = self.on_right_click.get_run_command(pack_namespace) if isinstance(self.on_right_click, (MCFunction, BlockRaycast, EntityRaycast)) else self.on_right_click
         if self.use_right_click_cooldown is not None:
             action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
             revoke_and_call_mcfunction.commands.extend([

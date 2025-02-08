@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.item_model_definition import ModelItemModel, ItemModelType
-from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.scripts.repos.all_items import MinecraftItem
 
 # TODO: Support non cubes? Player heads? Custom models?
 

@@ -21,7 +21,7 @@ class CustomLoop:
     @staticmethod
     def generate_loop_manager_function(loops: list["CustomLoop"], pack_namespace: str) -> MCFunction:
         return MCFunction(
-            f"loop_manager",
+            "loop_manager",
             [
                 (
                     f"scoreboard players operation {loop.internal_name}_intervals loop_dispatch_counters = global_tick_counter loop_dispatch_counters \n" +

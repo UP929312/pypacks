@@ -22,7 +22,7 @@ class CustomNoise:
     where m is the number of elements in the list after removing the leading and trailing zero elements"""
     # https://minecraft.wiki/w/Noise
     internal_name: str
-    first_octave: int = 1  #  First octave
+    first_octave: int = 1  # First octave
     amplitudes: list[float] = field(default_factory=lambda: [1.0])
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/noise")
@@ -32,7 +32,7 @@ class CustomNoise:
 
     def to_dict(self) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-           "firstOctave": self.first_octave,
+            "firstOctave": self.first_octave,
             "amplitudes": self.amplitudes,
         })
 

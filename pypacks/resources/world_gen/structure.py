@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class CustomStructure:
     """A structure is a large decoration, covering an area up to 256x256x256 block centered on the structure start.
-    Structures often consist of multiple pieces that are fit together to form the overall structure. 
+    Structures often consist of multiple pieces that are fit together to form the overall structure.
     N.b. To generate in a world, a structure needs to be part of at least one structure set."""
     # https://minecraft.wiki/w/Structure_definition
     internal_name: str

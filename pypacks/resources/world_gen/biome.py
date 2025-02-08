@@ -15,7 +15,7 @@ class CustomBiome:
     # https://minecraft.wiki/w/Biome_definition
     internal_name: str
     has_precipitation: bool = True  # Determines whether or not the biome has precipitation (rain and snow)
-    temperature: float = 0.8  #  Controls gameplay features like grass and foliage color, and a height adjusted temperature (which controls whether raining or snowing if `has_precipitation` is true, and generation details of some features).
+    temperature: float = 0.8  # Controls gameplay features like grass and foliage color, and a height adjusted temperature (which controls whether raining or snowing if `has_precipitation` is true, and generation details of some features).
     temperature_modifier: Literal["none", "frozen"] = "none"
     downfall: float = 0.4  # Controls grass and foliage color.
     fog_color: int = 12638463  # Decimal value converted from Hex color to use for fog.
@@ -25,7 +25,7 @@ class CustomBiome:
     foliage_color: int | None = None  # Decimal value converted from Hex color to use for tree leaves and vines. If not present, the value depends on downfall and the temperature.
     grass_color: int | None = None  # Decimal value converted from Hex color to use for grass blocks, short grass, tall grass, ferns, tall ferns, and sugar cane. If not present, the value depends on downfall and temperature.
     grass_color_modifier: Literal["none", "dark_forest", "swamp"] = "none"
-    mood_sound: "MoodSound | None" = field(default_factory=lambda: MoodSound("minecraft:ambient.cave", 6000, 8, 2))  #  Settings for mood sound.
+    mood_sound: "MoodSound | None" = field(default_factory=lambda: MoodSound("minecraft:ambient.cave", 6000, 8, 2))  # Settings for mood sound.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/biome")
 
@@ -75,7 +75,7 @@ class CustomBiome:
             },
             "carvers": [],
         })
-    
+
     def create_datapack_files(self, pack: "Pack") -> None:
         # We need to create the subdir if this is being created as part of a custom dimension:
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)

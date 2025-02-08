@@ -120,7 +120,7 @@ class CustomLanguage:
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return self.translations
-    
+
     def get_run_command(self, pack_namespace: str, translation_code: str) -> str:
         return f"tellraw @a {{\"translate\": \"{translation_code}\"}}"
 
@@ -137,15 +137,15 @@ class CustomLanguage:
         # en_us -> en_gb, en_au, en_ca, en_nz, en_ud, en_pt
         # es_es -> es_ar, es_cl, es_ec, es_mx, es_uy, es_ve
         # For each language group, find the missing languages and create a new language with the translations of the first instance of the language
-        for language_group_name, language_codes in language_groups.items():
+        for _language_group_name, language_codes in language_groups.items():
             first_instance = [x for x in pack.custom_languages if x.language_code in language_codes]
             if not first_instance:  # We have none from that group, so we can't propogate
                 continue
             currently_supported_language_codes = [language.language_code for language in pack.custom_languages]
-            missing_languages: list[LanguageCode] = [language_code for language_code in language_codes if not language_code in currently_supported_language_codes]
+            missing_languages: list[LanguageCode] = [language_code for language_code in language_codes if language_code not in currently_supported_language_codes]
             for missing_language in missing_languages:
                 pack.custom_languages.append(CustomLanguage(missing_language, first_instance[0].translations))
-                # rint("Added", missing_language, "to", language_group_name)
+                # rint("Added", missing_language, "to", _language_group_name)
 
     @staticmethod
     def combine_languages(pack: "Pack") -> None:

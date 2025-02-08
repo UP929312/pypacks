@@ -41,7 +41,7 @@ def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
 
 for cls in [AttributeModifier, Cooldown, Components, Consumable, CustomPainting, DeathProtection, EntityData, Equippable,
             Food, Instrument, JukeboxPlayable, PotionEffect, Tool, ToolRule, UseRemainder]:  # CustomItem
-    cls.__repr__ = overridden_repr  # type: ignore[method-assign]
+    cls.__repr__ = overridden_repr  # type: ignore[assignment]
 
 
 def is_not_normal_item(data: dict[str, Any]) -> bool:
@@ -54,7 +54,7 @@ def is_not_normal_item(data: dict[str, Any]) -> bool:
     return bool(
         data.get("minecraft:attribute_modifiers", {}).get("modifiers") or
         data.get("minecraft:enchantments", {}).get("levels") or
-         any(data.get(attr) for attr in special_attributes)
+        any(data.get(attr) for attr in special_attributes)
     )
 
 
@@ -102,7 +102,7 @@ for item, data in all_item_data.items():
         components = Components(
             attribute_modifiers=attribute_modifiers, tool=tool, equippable=equippable, damage_resistant_to=damage_resistance,
             repaired_by=repaired_by, enchantable_at_level=enchantable, jukebox_playable=jukebox_playable,
-            cooldown=use_cooldown, use_remainder=use_remainder, food=food, death_protection=death_protection, consumable=consumable, 
+            cooldown=use_cooldown, use_remainder=use_remainder, food=food, death_protection=death_protection, consumable=consumable,
             durability=durability, lost_durability=lost_durability, glider=glider,
         )
         line = format_custom_item_name(item, item, components, data["minecraft:max_stack_size"], data.get("minecraft:rarity"))

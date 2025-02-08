@@ -19,7 +19,7 @@ class EnchantmentProvider:
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError("This method must be implemented by the subclass")
-    
+
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
@@ -30,7 +30,7 @@ class SingleEnchantmentProvider(EnchantmentProvider):
     """Always returns the same enchantment"""
     internal_name: str
     enchantment: "str | CustomEnchantment"  # One enchantment (a string ID) - the enchantment to return
-    level: "int | IntProvider"  #  The level of the enchantment
+    level: "int | IntProvider"  # The level of the enchantment
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
@@ -46,7 +46,7 @@ class EnchantmentsByCostProvider(EnchantmentProvider):
     # https://minecraft.wiki/w/Enchantment_provider
     internal_name: str
     enchantments: list["str | CustomEnchantment"]  # List of all possible enchantments
-    cost: "int | IntProvider"  #  The cost to use to determine the enchantments
+    cost: "int | IntProvider"  # The cost to use to determine the enchantments
 
     def to_dict(self,  pack_namespace: str) -> dict[str, Any]:
         return {

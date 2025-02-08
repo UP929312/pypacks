@@ -28,7 +28,7 @@ class CustomCrafter:
     def generate_custom_item(self) -> "CustomItem":
         entity_data = {
             "id": "minecraft:item_display", "Tags": [f"{self.internal_name}_custom_crafter", "placing"],
-            "item" : {"id": "minecraft:crafting_table", "count": 1},
+            "item": {"id": "minecraft:crafting_table", "count": 1},
             "brightness": {"sky": 10, "block": 10}, "Rotation": [0.0, 0.0],
             "transformation": {"left_rotation": [0.0, 0.0, 0.0, 1.0], "right_rotation": [0.0, 0.0, 0.0, 1.0], "translation": [0.0, 0.5, 0.0], "scale": [1.01, 1.01, 1.01]},
         }
@@ -70,9 +70,9 @@ class CustomCrafter:
                 else f"unless data block ~ ~ ~ Items[{{Slot: {index}b}}] "
                 for index, ingredient in enumerate(recipe.ingredients)
             ]
-            # 
+            #
             play_sound = f"run playsound {self.on_craft_sound.get_reference(pack_namespace) if isinstance(self.on_craft_sound, CustomSound) else self.on_craft_sound} master @a[distance=..10] ~ ~ ~ 1 1"
-            play_sound_command = f"# {recipe.result} crafting command:\n"+ execute_at_command + "".join(item_checks) + play_sound
+            play_sound_command = f"# {recipe.result} crafting command:\n" + execute_at_command + "".join(item_checks) + play_sound
             on_success_commands.append(play_sound_command)
             #
             result_component = json.dumps(recipe.result.to_dict(pack_namespace)) if isinstance(recipe.result, CustomItem) else "{}"

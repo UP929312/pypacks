@@ -1,5 +1,5 @@
 import os
-import json
+# import json
 
 import requests
 
@@ -14,5 +14,4 @@ MinecraftItem = Literal"""
 with open(output_path, "w") as file:
     # combined = sorted([f"minecraft:{x}" for x in data])  # +sorted(data)
     # file.write(BASE+json.dumps(combined, indent=4)+"\n")
-    file.write("MinecraftItem = str")
-
+    file.write("MinecraftItem = str\n")

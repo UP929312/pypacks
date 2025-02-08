@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.additions.reference_book_config import RefBookCategory
-from pypacks.additions.raycasting import Raycast, BlockRaycast, EntityRaycast
+from pypacks.additions.raycasting import Raycast
 from pypacks.additions.create_wall import create_wall
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -13,6 +13,7 @@ from pypacks.generate import generate_datapack, generate_resource_pack, generate
 
 if TYPE_CHECKING:
     from pypacks.additions.custom_block import CustomBlock
+    from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment
@@ -159,7 +160,7 @@ class Pack:
         # ==================================================================================
         load_mcfunction = MCFunction("load", [
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
-            f"scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
+            "scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"scoreboard objectives add {self.custom_loops[0].scoreboard_objective_name} dummy" if self.custom_loops else "",
             "scoreboard objectives add constants dummy" if self.custom_loops else "",
             "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks

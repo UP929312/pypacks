@@ -5,6 +5,7 @@ from pypacks.additions.constants import MOB_TO_CATEGORY
 
 SpawnGroup = Literal["monster", "creature", "ambient", "water_creature", "underground_water_creature", "water_ambient", "misc", "axolotls"]
 
+
 @dataclass
 class SpawnOverride:
     entity_name: str = "minecraft:cow"
@@ -18,9 +19,10 @@ class SpawnOverride:
         spawn_overrides_dict: dict[SpawnGroup, Any] = {}
         # By group
         for group in ["monster", "creature", "ambient", "water_creature", "underground_water_creature", "water_ambient", "misc", "axolotls"]:
-            relevant_spawns = [spawn for spawn in spawn_overrides
-                               if isinstance(spawn, SpawnOverride)
-                               and MOB_TO_CATEGORY[spawn.entity_name.removeprefix("minecraft:")] == group
+            relevant_spawns = [
+                spawn for spawn in spawn_overrides
+                if isinstance(spawn, SpawnOverride)
+                and MOB_TO_CATEGORY[spawn.entity_name.removeprefix("minecraft:")] == group
             ]
             if relevant_spawns:
                 if any(x for x in spawn_overrides if isinstance(x, DisableSpawnOverrideCategory) and x.mob_category == group):

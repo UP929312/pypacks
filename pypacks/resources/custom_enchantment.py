@@ -476,7 +476,7 @@ class SpawnParticlesEntityEffect:
 class SummonEntityEntityEffect:
     """Spawns an entity."""
     # https://minecraft.wiki/w/Enchantment_definition#summon_entity
-    entity: str | list[str]  # One or more entity type(s) (an ID, or a #tag, or an array containing IDs) - The entity or entities ​[more information needed] to spawn
+    entity: str | list[str]  # One or more entity type(s) (an ID, or a #tag, or an array containing IDs) - The entity or entities [more information needed] to spawn
     join_team: bool = False  # Should the summoned entity join the team of the owner of the enchanted item?
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:

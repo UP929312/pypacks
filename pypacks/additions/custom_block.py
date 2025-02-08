@@ -2,8 +2,6 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
-from numpy import block
-
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool

@@ -249,7 +249,7 @@ class _Effects:
         )
         remove_effect_effects = "all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects
         return _Effects(
-            apply_affects=[PotionEffect.from_dict(effect) for effect in apply_effect_effects] ,
+            apply_affects=[PotionEffect.from_dict(effect) for effect in apply_effect_effects],
             remove_affects=[effect for effect in remove_effect_effects] if remove_effect_effects != "all" else "all",
             teleport_diameter=(
                 [effect.get("diameter") for effect in effects_raw if effect["type"].removeprefix("minecraft:") == "teleport_randomly"][0]
@@ -342,7 +342,7 @@ class Cooldown:
             "seconds": self.seconds,
             "cooldown_group": self.cooldown_group,
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Cooldown":
         return cls(
@@ -571,7 +571,7 @@ class JukeboxPlayable:
             "song": self.get_reference(pack_namespace),
             "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "JukeboxPlayable":
         return cls(
@@ -824,7 +824,7 @@ class WritableBookContent:
 
     def to_dict(self) -> dict[str, Any]:
         return {"pages": self.pages}
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "WritableBookContent":
         return cls(
