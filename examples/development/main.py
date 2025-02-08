@@ -20,11 +20,12 @@ consumable_category = RefBookCategory("consumable", "Consumable", "images/steak.
 # region: Custom Raycasts
 block_ray_cast = BlockRaycast("block_ray_cast", on_block_hit_command="setblock ~ ~ ~ minecraft:stone", no_blocks_hit_command="say Failed!", max_distance_in_blocks=6)
 entity_ray_cast = EntityRaycast("entity_ray_cast", on_entity_hit_command="effect give @e[distance=..1] glowing 2 0", no_entities_hit_command="say No entities hit!")
+block_blocking_entity_ray_cast = EntityRaycast("block_blocking_entity_ray_cast", on_entity_hit_command="effect give @e[distance=..1] glowing 2 0", no_entities_hit_command="say No entities hit (or block blocked)!", stop_for_blocks=True)
 # endregion
 # ============================================================================================================
 # region: Custom Items
 # Custom Items
-ruby = CustomItem("ruby", "minecraft:emerald", "&cSpecial &4Ruby", lore=["Custom &cRuby&f, ooh!"], texture_path="images/ruby.png", ref_book_config=RefBookConfig(description="A special rube, found in the depths of the earth."))
+ruby = CustomItem("ruby", "minecraft:emerald", "&cSpecial &4Ruby", lore=["Custom &cRuby&f, ooh!"], texture_path="images/ruby.png", ref_book_config=RefBookConfig(description="A special ruby, found in the depths of the earth."))
 topaz = CustomItem("topaz", "minecraft:redstone", "Topaz", texture_path="images/topaz.png", components=Components(equippable=Equippable("chest")))
 weak_axe = CustomItem("weak_axe", "minecraft:netherite_axe", "Weak Axe", components=Components(durability=10, lost_durability=5), ref_book_config=RefBookConfig(category=weapons_category))
 flying_helmet = CustomItem("flying_helmet", "minecraft:iron_helmet", "Flying Helmet", components=Components(glider=True, consumable=Consumable(0.5, "drink"), food=Food(5, 0, True), use_remainder=UseRemainder("minecraft:diamond", 2)), ref_book_config=RefBookConfig(category=usable_category))
@@ -47,6 +48,7 @@ right_clickable_nether_quartz = CustomItem("right_clickable_nether_quartz", "min
 custom_head_texture = CustomItem("custom_head_texture", "minecraft:player_head", "Custom Head Texture", components=Components(custom_head_texture="eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjg3N2M5NTA5NTg3YjNiODhjOTI3Zjc0YWE2NjlhZTg3MjVhMTRmZjU1ZGY2ZGUwMDRjNDFlMjYxNzg1YTJmOCJ9fX0="))
 ray_gun = CustomItem("ray_gun", "minecraft:blaze_rod", "Ray Gun", on_right_click=block_ray_cast, ref_book_config=RefBookConfig(category=weapons_category))
 entity_finder = CustomItem("entity_finder", "minecraft:stick", "Entity Finder", on_right_click=entity_ray_cast, ref_book_config=RefBookConfig(category=weapons_category))
+block_blocked_entity_finder = CustomItem("block_blocked_entity_finder", "minecraft:breeze_rod", "Block Blocking Entity Finder", on_right_click=block_blocking_entity_ray_cast, ref_book_config=RefBookConfig(category=weapons_category))
 pre_charged_crossbow = CustomItem("pre_charged_crossbow", "minecraft:crossbow", "Pre Charged Crossbow", components=Components(loaded_projectiles=["minecraft:arrow", "minecraft:arrow", "minecraft:arrow"]), ref_book_config=RefBookConfig(category=weapons_category))
 steak_to_ruby_when_eaten = CustomItem("steak_to_ruby_when_eaten", "minecraft:cooked_beef", "Steak to Ruby When Eat", components=Components(consumable=Consumable(0.5, "eat"), food=Food(5, 0, True), use_remainder=UseRemainder(ruby)), ref_book_config=RefBookConfig(category=consumable_category))
 custom_firework = CustomItem("custom_firework", "minecraft:firework_rocket", "Custom Firework", components=Components(firework=Firework(flight_duration=3, explosions=[FireworkExplosion(shape="star", colors=[16711680, 65280], fade_colors=[255, 16776960], has_trail=True, has_twinkle=True)])), ref_book_config=RefBookConfig(category=usable_category))
@@ -87,7 +89,8 @@ custom_items = [
     ruby, topaz, weak_axe, flying_helmet, playable_lapis, musical_horn, written_book, rick_roll_horn,
     lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book, sharpness_fish,
     enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
-    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder,  # edible_item
+    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder, 
+    block_blocked_entity_finder, # edible_item
     pre_charged_crossbow, steak_to_ruby_when_eaten, custom_firework, custom_firework_hex, map_with_decoration,
     colored_map, map_with_id, banner, note_block_sound_head, eating_gives_you_speed, eating_removes_speed,
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,

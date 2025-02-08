@@ -74,7 +74,7 @@ class CustomItem:
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
-            CustomTexture(self.internal_name, self.image_bytes).create_resource_pack_files(pack)
+            CustomTexture(self.internal_name, self.image_bytes).create_resource_pack_files(pack)  # TODO: Move the custom texture to __post__init__? Then we can remove the refernce below
         # TODO: Should this exist here? I mean, it's a sub_item creating more resources, but maybe that's fine?
         if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
             self.item_model.create_resource_pack_files(pack)
@@ -111,7 +111,7 @@ class CustomItem:
         if self.item_model:
             item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
         else:
-            item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path
+            item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path  # TODO: Remove this reference
         # TODO: Remove color_codes_to_json_format
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "custom_name": colour_codes_to_json_format(self.custom_name, auto_unitalicise=True, make_white=False) if self.custom_name is not None else None,

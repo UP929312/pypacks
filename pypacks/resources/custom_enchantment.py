@@ -73,7 +73,7 @@ class CustomEnchantment:
         return CustomItem(
             f"{self.internal_name}_enchanted_book", "enchanted_book",
             custom_name=f"{self.description} Enchanted Book",
-            components=Components(book_enchantments={f"{pack_namespace}:{self.internal_name}": 1})  # type: ignore[dict-item]
+            components=Components(book_enchantments={self.get_reference(pack_namespace): 1})  # type: ignore[dict-item]
         )
 
 # ====================================================================================================================

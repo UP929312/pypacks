@@ -9,8 +9,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_tag import CustomTag
     from pypacks.scripts.repos.all_entity_names import MinecraftEntity
 
-# TODO: entity raycasts can be changed to accept lists of entity (or do the whole tag situation?).
-# Also, the entity one should have a "stop for blocks" option, we can just extend the condition.
+# TODO: entity raycasts can be changed to accept lists of entity through a CustomTag
 
 
 @dataclass
@@ -22,9 +21,7 @@ class Raycast:
     @staticmethod
     def generate_default_raycast_functions(pack_namespace: str) -> tuple["MCFunction", ...]:
         from pypacks.resources.custom_mcfunction import MCFunction  # Avoid circular import
-
-        # DEBUG_RAYCASTING = False
-        arguments = ["stop_condition", "on_successful_hit", "on_failure",
+        arguments = ["success_condition", "on_successful_hit", "on_failure", "on_every_iteration", "end_early_if_condition",
                      "distance_between_iterations", "max_iterations", "max_iterations_plus_one"]
         arguments_replacements = {key: f"$({key})" for key in arguments}  # This is different to the one in _create_prepare_ray_command
         formatted_arguments_replacements = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments_replacements.items()]) + "}"
@@ -43,14 +40,17 @@ class Raycast:
             # "say Running the ray!",
             "",
             "# Run a function if a block was detected:",
-            f"$execute $(stop_condition) run function {on_success_set_score.get_reference(pack_namespace)} {{\"on_successful_hit\": \"$(on_successful_hit)\"}}",
+            f"$execute $(success_condition) run function {on_success_set_score.get_reference(pack_namespace)} {{\"on_successful_hit\": \"$(on_successful_hit)\"}}",
+            "",
+            "# If we want to exit early (e.g. on an entity raycast, if we hit a block)",
+            "$execute $(end_early_if_condition) run scoreboard players set #distance raycast $(max_iterations_plus_one)",
             "",
             "# Add one distance to the ray",
             "scoreboard players add #distance raycast 1",
             "",
-            # "# Added: Particle for debugging",
-            # f"{'' if DEBUG_RAYCASTING else '# '}particle minecraft:cloud ~ ~ ~",
-            # "",
+            "# On every ray iteration",
+            "$$(on_every_iteration)",  # Run the on_every_iteration command e.g. particle minecraft:cloud ~ ~ ~",
+            "",
             "# If the raycast failed, run the failed function",
             "$execute if score #hit raycast matches 0 if score #distance raycast matches $(max_iterations_plus_one).. run $(on_failure)",
             "",
@@ -89,21 +89,25 @@ class Raycast:
     def create_datapack_files(self, pack: "Pack") -> None:
         # Makedirs in case it's an inline call, e.g. on_right_click or whatever.
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
-        prepare_ray_subdirectory = self._create_prepare_ray_command("", "", "", 1, 1, "").sub_directories[-1]
+        prepare_ray_subdirectory = self._create_prepare_ray_command("", "", "", None, None).sub_directories[-1]
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/prepare_ray_subdirectory, exist_ok=True)
         self.create_deploy_function(pack.namespace).create_datapack_files(pack)
 
     def _create_prepare_ray_command(
-        self, stop_condition: str, on_successful_hit: str, on_failure: str, distance_between_iterations: float, max_distance_in_blocks: int, pack_namespace: str
+        self, pack_namespace: str, success_condition: str, on_successful_hit: str, on_failure: str | None = None, on_every_iteration: str | None = None,
+        end_early_condition: str | None = None, distance_between_iterations: float = 0.01, max_distance_in_blocks: float = 6.0,
     ) -> "MCFunction":
         from pypacks.resources.custom_mcfunction import MCFunction
+        NO_OP_COMMAND = "clear no_op"
         arguments = {
-            "stop_condition": stop_condition,  # What to check every iteration before calling the "on_successful_hit" command
+            "success_condition": success_condition,  # What to check every iteration before calling the "on_successful_hit" command
             "on_successful_hit": on_successful_hit,  # Command to run when we've hit a block/entity
-            "on_failure": on_failure,  # If we never hit anything
+            "on_failure": NO_OP_COMMAND if on_failure is None else on_failure,  # If we never hit anything
+            "on_every_iteration": NO_OP_COMMAND if on_every_iteration is None else on_every_iteration,
             "distance_between_iterations": distance_between_iterations,
-            "max_iterations": int(max_distance_in_blocks // distance_between_iterations),
-            "max_iterations_plus_one": int((max_distance_in_blocks // distance_between_iterations) + 1),
+            "max_iterations": int(max_distance_in_blocks / distance_between_iterations),
+            "max_iterations_plus_one": int(max_distance_in_blocks / distance_between_iterations) + 1,
+            "end_early_if_condition": "if entity @e[tag=nonexistent]" if end_early_condition is None else end_early_condition,
         }
         formatted_arguments = "{" + ", ".join([f"\"{key}\": \"{value}\"" for key, value in arguments.items()]) + "}"
         # This exists so we don't have to have everything in start_ray duplicated, as an interface, almost.
@@ -136,9 +140,9 @@ class BlockRaycast(Raycast):
     no_blocks_hit_command: "str | MCFunction" = "say No blocks hit!"
     blocks_to_detect: "str | CustomTag" = "#minecraft:replaceable"  # Blocks the ray can pass through (if blocks to detect is set to unless), e.g. #minecraft:replaceable (air, short grass, etc)
     if_or_unless: Literal["if", "unless"] = "unless"  # If set to "if", the ray will stop if it hits a block, if set to "unless", the ray will stop if it doesn't hit the block(s)
-    # command_ran_each_iteration: str = "particle minecraft:cloud ~ ~ ~"  # The command to run each iteration of the ray TODO: Implement
+    command_ran_each_iteration: "str | MCFunction | None" = None  # "particle minecraft:cloud ~ ~ ~"
     distance_between_iterations: float = 0.01  # The space between each ray iteration
-    max_distance_in_blocks: int = 6  # The maximum distance the ray can travel (this can be liberal, even numbers as big as 50-100 is fine!)
+    max_distance_in_blocks: float = 6.0  # The maximum distance the ray can travel (this can be liberal, even numbers as big as 50-100 is fine!)
 
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
         from pypacks.resources.custom_tag import CustomTag
@@ -146,13 +150,17 @@ class BlockRaycast(Raycast):
         assert self.if_or_unless in ("if", "unless"), "if_or_unless must be either 'if' or 'unless'"
         block_or_block_tag = self.blocks_to_detect.get_reference(pack_namespace) if isinstance(self.blocks_to_detect, CustomTag) else self.blocks_to_detect
         return self._create_prepare_ray_command(
-            stop_condition=f"{self.if_or_unless} block ~ ~ ~ {block_or_block_tag}",
+            success_condition=f"{self.if_or_unless} block ~ ~ ~ {block_or_block_tag}",
             on_successful_hit=(
                 self.on_block_hit_command.get_run_command(pack_namespace) if isinstance(self.on_block_hit_command, MCFunction) else self.on_block_hit_command
             ),
             on_failure=(
                 self.no_blocks_hit_command.get_run_command(pack_namespace) if isinstance(self.no_blocks_hit_command, MCFunction) else self.no_blocks_hit_command
             ),
+            on_every_iteration=(
+                self.command_ran_each_iteration.get_run_command(pack_namespace) if isinstance(self.command_ran_each_iteration, MCFunction) else self.command_ran_each_iteration
+            ),
+            end_early_condition=None,
             distance_between_iterations=self.distance_between_iterations,
             max_distance_in_blocks=self.max_distance_in_blocks,
             pack_namespace=pack_namespace,
@@ -168,25 +176,15 @@ class EntityRaycast(Raycast):
     on_entity_hit_command: "str | MCFunction" = "say Hit an entity!"
     no_entities_hit_command: "str | MCFunction" = "say No entities hit!"
     entity_to_detect: "MinecraftEntity | None" = "minecraft:cow"
-    # command_ran_each_iteration: str = "particle minecraft:cloud ~ ~ ~"  # The command to run each iteration of the ray TODO: Implement
+    command_ran_each_iteration: "str | MCFunction | None" = None  # "particle minecraft:cloud ~ ~ ~"
     distance_between_iterations: float = 0.01  # The space between each ray iteration
-    max_distance_in_blocks: int = 6  # The maximum distance the ray can travel (this can be liberal, even numbers as big as 50-100 is fine!)
-    # stop_for_blocks: bool = False  # If set to True, the ray will stop if it hits a non-passable block (e.g. tall grass), if set to False, the ray will pass through blocks
+    max_distance_in_blocks: float = 6.0  # The maximum distance the ray can travel (this can be liberal, even numbers as big as 50-100 is fine!)
+    stop_for_blocks: bool = False  # If set to True, the ray will stop if it hits a non-passable block (e.g. tall grass), if set to False, the ray will pass through blocks
 
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
         from pypacks.resources.custom_mcfunction import MCFunction
-        # TODO: Implement OR instead of AND for the condition, we want to somehow stop looping if we hit a block, and only call the hit entity if we hit an entity
-        # base_condition = "if entity @e[distance=..1"
-        # base_condition += f", type={self.entity_to_detect}]" if self.entity_to_detect is not None else "]"
-        # if self.stop_for_blocks:
-        #     base_condition += " " if not self.stop_for_blocks else " "
-        # condition = (
-        #     f"if entity @e[distance=..1, type={self.entity_to_detect}]"
-        #     if self.entity_to_detect is not None else
-        #     "if entity @e[distance=..1]"
-        # )
         return self._create_prepare_ray_command(
-            stop_condition=(
+            success_condition=(
                 f"if entity @e[distance=..1, type={self.entity_to_detect}]"
                 if self.entity_to_detect is not None else
                 "if entity @e[distance=..1]"
@@ -197,6 +195,10 @@ class EntityRaycast(Raycast):
             on_failure=(
                 self.no_entities_hit_command.get_run_command(pack_namespace) if isinstance(self.no_entities_hit_command, MCFunction) else self.no_entities_hit_command
             ),
+            on_every_iteration=(
+                self.command_ran_each_iteration.get_run_command(pack_namespace) if isinstance(self.command_ran_each_iteration, MCFunction) else self.command_ran_each_iteration
+            ),
+            end_early_condition="unless block ~ ~ ~ #minecraft:replaceable" if self.stop_for_blocks else None,
             distance_between_iterations=self.distance_between_iterations,
             max_distance_in_blocks=self.max_distance_in_blocks,
             pack_namespace=pack_namespace,

@@ -2,7 +2,13 @@ Consider changing components to be a list of components, rather than a big ol' c
 
 mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 && ruff check && pylint .
 
+# Whenever we add a new structure, give them a spawn egg which places it from here: https://far.ddns.me/?share=eHe0VPBDVc
+
 # Some sort of config, turn off recipe book, disable language propogation.
+
+# For structures, sub directory support
+
+# To enable blocks to have a on_right_click, set the attribute modifier's block_interaction_range to "add_value": -4.5 (so they can't place it!)
 
 Dispenser recipe book icon + crafting base isn't used anymore, remove?
 
@@ -16,8 +22,8 @@ Store the hit location of the raycast in some variable, like this: https://docs.
 https://github.com/Gamemode4Dev/GM4_Datapacks/blob/master/gm4/plugins/output.py#L119
 
 # ========
-With the ray casting, what if they have a higher `block_interaction_range`?
-EntityRaycast should be able to handle multiple mobs, and a stop for blocks option
+With the ray casting, what if they have a higher `block_interaction_range`? I suppose we could check their current item? Not a fan tbh...
+EntityRaycast should be able to handle multiple mobs using tags
 # ========
 
 # https://www.reddit.com/r/MinecraftCommands/comments/1i9593y/better_interface/

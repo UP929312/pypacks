@@ -96,6 +96,7 @@ class CustomAdvancement:
 
     @staticmethod
     def generate_right_click_advancement(item: "CustomItem", pack_namespace: str) -> "CustomAdvancement":
+        # TODO: Move this to custom_item.py
         criteria = Criteria(f"eating_{item.internal_name}", "minecraft:using_item", {
             "item": {
                 "predicates": {  # We use predicates instead of components because components require exact match, predicates require minimum match

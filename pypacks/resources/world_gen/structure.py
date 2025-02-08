@@ -10,6 +10,7 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.resources.world_gen.biome import CustomBiome
+    from pypacks.resources.world_gen.structure_set import CustomStructureSet
     from pypacks.pack import Pack
 
 # TODO: I need to properly implement Structure type, so I can give the arguments for jigsaws and such.
@@ -65,7 +66,7 @@ class SingleCustomStructure:
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
 
-    def create_datapack_files(self, pack: "Pack") -> None:
+    def create_children(self, pack: "Pack") -> tuple["CustomStructure", "CustomStructureSet", "SingleItemTemplatePool"]:
         from pypacks.resources.world_gen.biome import CustomBiome
         from pypacks.resources.world_gen.structure_set import CustomStructureSet
         biomes = self.biomes_to_spawn_in if isinstance(self.biomes_to_spawn_in, list) else [self.biomes_to_spawn_in]
@@ -81,9 +82,15 @@ class SingleCustomStructure:
             generation_step="surface_structures",
             terrain_adaptation="beard_thin",
         )
+        custom_structure_set = CustomStructureSet(self.internal_name, {custom_structure.get_reference(pack.namespace): 1})
+        single_item_template_pool = SingleItemTemplatePool(self.internal_name, self.get_reference(pack.namespace))
+        return custom_structure, custom_structure_set, single_item_template_pool
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        custom_structure, custom_structure_set, single_item_template_pool = self.create_children(pack)
         custom_structure.create_datapack_files(pack)
-        CustomStructureSet(self.internal_name, {custom_structure.get_reference(pack.namespace): 1}).create_datapack_files(pack)
-        SingleItemTemplatePool(self.internal_name, self.get_reference(pack.namespace)).create_datapack_files(pack)
+        custom_structure_set.create_datapack_files(pack)
+        single_item_template_pool.create_datapack_files(pack)
 
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure", exist_ok=True)
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure"/f"{self.internal_name}", "wb") as file:
@@ -118,11 +125,13 @@ class SingleItemTemplatePool:
 
     def to_dict(self) -> dict[str, Any]:
         assert ":" in self.element_type, "Element type must be in the format 'namespace:element'"
+        self.weight = 1
+        assert 1 <= self.weight <= 150, "Weight must be between 1 and 150"
         return {
             "fallback": "minecraft:empty",
             "elements": [
                 {
-                    "weight": 1,  # 1-150
+                    "weight": self.weight,
                     "element": {
                         "element_type": "minecraft:single_pool_element",
                         "location": self.element_type,
