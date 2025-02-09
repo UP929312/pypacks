@@ -322,7 +322,7 @@ Recipe: TypeAlias = (
     CampfireRecipe | SmithingTransformRecipe | SmithingTrimRecipe | SmokerRecipe | StonecutterRecipe
 )
 
-ALL_RECIPES: list[Recipe] = [
+ALL_RECIPES_TYPES: list[Recipe] = [
     CustomCrafterRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,  # type: ignore[list-item]
     CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe,  # type: ignore[list-item]
 ]

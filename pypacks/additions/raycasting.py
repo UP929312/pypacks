@@ -9,8 +9,6 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_tag import CustomTag
     from pypacks.scripts.repos.all_entity_names import MinecraftEntity
 
-# TODO: entity raycasts can be changed to accept lists of entity through a CustomTag
-
 
 @dataclass
 class Raycast:
@@ -175,19 +173,26 @@ class EntityRaycast(Raycast):
     internal_name: str
     on_entity_hit_command: "str | MCFunction" = "say Hit an entity!"
     no_entities_hit_command: "str | MCFunction" = "say No entities hit!"
-    entity_to_detect: "MinecraftEntity | None" = "minecraft:cow"
+    entity_to_detect: "Literal['all'] | MinecraftEntity | list[MinecraftEntity] | CustomTag" = "minecraft:cow"
     command_ran_each_iteration: "str | MCFunction | None" = None  # "particle minecraft:cloud ~ ~ ~"
     distance_between_iterations: float = 0.01  # The space between each ray iteration
     max_distance_in_blocks: float = 6.0  # The maximum distance the ray can travel (this can be liberal, even numbers as big as 50-100 is fine!)
     stop_for_blocks: bool = False  # If set to True, the ray will stop if it hits a non-passable block (e.g. tall grass), if set to False, the ray will pass through blocks
 
+    def __post_init__(self) -> None:
+        from pypacks.resources.custom_tag import CustomTag
+        if isinstance(self.entity_to_detect, list):
+            self.entity_to_detect = CustomTag(f"entities_to_detect_for_{self.internal_name}", self.entity_to_detect, "entity_type")  # type: ignore[abc]
+
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
+        from pypacks.resources.custom_tag import CustomTag
         from pypacks.resources.custom_mcfunction import MCFunction
+        entity_type = self.entity_to_detect.get_reference(pack_namespace) if isinstance(self.entity_to_detect, CustomTag) else self.entity_to_detect
         return self._create_prepare_ray_command(
             success_condition=(
-                f"if entity @e[distance=..1, type={self.entity_to_detect}]"
-                if self.entity_to_detect is not None else
-                "if entity @e[distance=..1]"
+                f"if entity @e[distance=..1, type={entity_type}]"
+                if self.entity_to_detect != "all" else
+                "if entity @e[distance=..1, type=!player]"
             ),
             on_successful_hit=(
                 self.on_entity_hit_command.get_run_command(pack_namespace) if isinstance(self.on_entity_hit_command, MCFunction) else self.on_entity_hit_command
@@ -203,3 +208,10 @@ class EntityRaycast(Raycast):
             max_distance_in_blocks=self.max_distance_in_blocks,
             pack_namespace=pack_namespace,
         )
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        from pypacks.resources.custom_tag import CustomTag
+        super().create_datapack_files(pack)
+        # Create the entity tag
+        if isinstance(self.entity_to_detect, CustomTag):
+            self.entity_to_detect.create_datapack_files(pack)

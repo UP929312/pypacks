@@ -21,10 +21,7 @@ Store the hit location of the raycast in some variable, like this: https://docs.
 # Upload the output directly to modrinth?
 https://github.com/Gamemode4Dev/GM4_Datapacks/blob/master/gm4/plugins/output.py#L119
 
-# ========
 With the ray casting, what if they have a higher `block_interaction_range`? I suppose we could check their current item? Not a fan tbh...
-EntityRaycast should be able to handle multiple mobs using tags
-# ========
 
 # https://www.reddit.com/r/MinecraftCommands/comments/1i9593y/better_interface/
 
