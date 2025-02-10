@@ -69,7 +69,7 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
             for item in pack.custom_items
         ],
         *[  # Custom recipes
-            FontImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.recipe_image_bytes, y_offset=6)
+            FontImage(f"custom_recipe_for_{custom_recipe.internal_name}_icon", image_bytes=custom_recipe.generate_recipe_image(), y_offset=6)
             for custom_recipe in [x for x in pack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and isinstance(x.result, CustomItem)]
         ],
         *[  # Custom recipe icons

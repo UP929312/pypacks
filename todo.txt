@@ -4,28 +4,23 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 # Whenever we add a new structure, give them a spawn egg which places it from here: https://far.ddns.me/?share=eHe0VPBDVc
 
-# Custom recipes should 100% accept tags! That way when using the custom crafter, we don't have to accept lists of things,
-# We can just accept the tags! Ez pz
-# Previously: Custom crafters can't take multiple options for materials, e.g. "any wood" or "any stone"
 
-# Some sort of config, turn off recipe book, disable language propogation.
+# Custom crafters currently don't support choices for custom items, i.e. they accept tags (which allows OR on ingredients),
+# But don't accept choices for custom items, instead relying on the base item...
+
+# Generic Configuration progress
 
 # RECIPE REDO
-  Not all recipes can have tags in every group, e.g. blasting can only have block and misc - EASY
   Rewrite components in recipes to use recursively remove none
-  For the image paster, I suppose I need to also now account for list of items, and tags, lists are mainly accounted for,
-    tags can be but will have to check recursively?
+
+# Add the workstation name on custom recipes
+# Allow custom icons to have subdirs, so the textures/font isn't filled with element - Difficult as they all get populated at once
 
 # For structures, sub directory support
 
 # TODO: Silk touch and fortune for custom blocks
 
-# For custom recipes, perhaps we could use composition to put a transparent "items" layer on the crafting recipe background
-# Just means we minimise the pack size a lil bit I guess?
-
 # To enable blocks to have a on_right_click, set the attribute modifier's block_interaction_range to "add_value": -4.5 (so they can't place it!)
-
-Dispenser recipe book icon + crafting base isn't used anymore, remove?
 
 Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
 

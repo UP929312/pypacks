@@ -99,6 +99,10 @@ custom_items = [
 ]
 # endregion
 # ============================================================================================================
+# region: Custom Tags
+ruby_or_topaz_tag = CustomTag("ruby_or_topaz", [ruby, topaz], "item")
+# endregion
+# ============================================================================================================
 # region: Custom Recipes
 # Custom recipes
 cobble_recipe = ShapelessCraftingRecipe("cobblestone_recipe", ["minecraft:stone", "minecraft:stick"], "minecraft:cobblestone", 2)
@@ -113,9 +117,12 @@ moss_to_pale_recipe = StonecutterRecipe("moss_to_pale_recipe", "minecraft:moss_b
 ruby_stonecutter_recipe = StonecutterRecipe("ruby_stonecutter_recipe", "minecraft:redstone", ruby, 1)
 ruby_campfire_recipe = CampfireRecipe("ruby_campfire_recipe", "redstone", ruby, 100, 20)
 ruby_smithing_tranform_recipe = SmithingTransformRecipe("ruby_transform_recipe", "gold_ingot", "iron_ingot", "redstone", ruby)
+ruby_or_topaz_to_player_head = ShapelessCraftingRecipe("ruby_or_topaz_to_player_head", [ruby_or_topaz_tag], player_head)
 
-recipes: list[Recipe] = [cobble_recipe, door_recipe, iron_helmet_recipe, burnable_diamond_recipe, smokable_redstone_recipe, lapis_campfire_recipe, ruby_recipe,
-                         ruby_furnace_recipe, moss_to_pale_recipe, ruby_stonecutter_recipe, ruby_campfire_recipe, ruby_smithing_tranform_recipe]
+recipes: list[Recipe] = [
+    cobble_recipe, door_recipe, iron_helmet_recipe, burnable_diamond_recipe, smokable_redstone_recipe, lapis_campfire_recipe, ruby_recipe,
+    ruby_furnace_recipe, moss_to_pale_recipe, ruby_stonecutter_recipe, ruby_campfire_recipe, ruby_smithing_tranform_recipe, ruby_or_topaz_to_player_head
+]
 # endregion
 # ============================================================================================================
 # region: Custom Blocks
@@ -253,6 +260,11 @@ custom_crafter = CustomCrafter(
             ruby,  "",  ruby,
             ruby, ruby, ruby,
         ], topaz),
+        CustomCrafterRecipe("custom_crafting_for_base_chest", [
+            "#minecraft:planks", "#minecraft:planks", "#minecraft:planks",
+            "#minecraft:planks", "",                  "#minecraft:planks",  # fmt: skip
+            "#minecraft:planks", "#minecraft:planks", "#minecraft:planks"
+        ], "minecraft:chest"),
     ]
 )
 # endregion
@@ -295,5 +307,6 @@ datapack = Pack(
     # custom_advancements=[eating_advancement],
     custom_crafters=[custom_crafter],
     custom_raycasts=[block_ray_cast, entity_ray_cast],
+    custom_tags=[ruby_or_topaz_tag],
     # custom_loops=[every_sixty_seconds],
 )

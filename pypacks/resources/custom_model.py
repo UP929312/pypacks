@@ -26,7 +26,7 @@ class CustomItemModelDefinition:
 
     def __post_init__(self) -> None:
         if isinstance(self.model, str):
-            self.model = ModelItemModel(self.model)
+            self.model = ModelItemModel(self.model)  # pyright: ignore
 
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"

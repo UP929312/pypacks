@@ -6,6 +6,7 @@ from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_recipe import CustomCrafterRecipe, ShapedCraftingRecipe
 from pypacks.resources.custom_sound import CustomSound
+from pypacks.resources.custom_tag import CustomTag
 
 from pypacks.utils import to_component_string
 
@@ -37,7 +38,9 @@ class CustomCrafter:
             components=Components(entity_data=EntityData(entity_data)),
         )
 
-    def _deal_with_item_components(self, ingredient: "str | CustomItem", pack_namespace: str) -> str:
+    def _deal_with_item_components(self, ingredient: "str | CustomItem | CustomTag", pack_namespace: str) -> str:
+        if isinstance(ingredient, CustomTag):
+            return ingredient.get_reference(pack_namespace)
         if isinstance(ingredient, CustomItem):
             return f"{ingredient.base_item}[{to_component_string(ingredient.to_dict(pack_namespace))}]"
         return ingredient
@@ -55,6 +58,7 @@ class CustomCrafter:
         tag_name = f"{self.internal_name}_custom_crafter"
         on_tick_block_management = [
             # Manages placing and breaking of the block (we use double because Python/JSON convert Python floats to Java doubles in Custom item, so won't make the same item)
+            "# Custom crafter block management (placing/breaking of the block):",
             f"execute at @e[type=item_display, tag={tag_name}, tag=placing] run setblock ~ ~ ~ dropper[facing=up]{{CustomName:'\"{self.crafter_name}\"'}}",
             f"tag @e[type=item_display, tag={tag_name}, tag=placing] remove placing",
             f"execute as @e[type=item_display, tag={tag_name}] at @s unless block ~ ~ ~ dropper[facing=up] run data modify entity @e[type=item,distance=..1,nbt={{Item:{{id:\"minecraft:dropper\"}}}},limit=1] Item set value {{id:\"minecraft:bat_spawn_egg\",count:1,components:{{\"custom_name\":'\"{self.crafter_name}\"',\"minecraft:entity_data\":{{id:\"minecraft:item_display\",Tags:[\"{tag_name}\",\"placing\"],Rotation:[0d,0d],brightness:{{sky:10,block:10}},transformation:{{left_rotation:[0d,0d,0d,1d],right_rotation:[0d,0d,0d,1d],translation:[0d,0.5d,0d],scale:[1.01d,1.01d,1.01d]}},item:{{id:\"minecraft:crafting_table\",count:1}}}}}}}}",
@@ -71,8 +75,9 @@ class CustomCrafter:
                 for index, ingredient in enumerate(recipe.ingredients)
             ]
             #
+            item_display_name = recipe.result.custom_name or recipe.result.base_item if isinstance(recipe.result, CustomItem) else recipe.result
             play_sound = f"run playsound {self.on_craft_sound.get_reference(pack_namespace) if isinstance(self.on_craft_sound, CustomSound) else self.on_craft_sound} master @a[distance=..10] ~ ~ ~ 1 1"
-            play_sound_command = f"# {recipe.result} crafting command:\n" + execute_at_command + "".join(item_checks) + play_sound
+            play_sound_command = f"# {item_display_name} crafting command:\n" + execute_at_command + "".join(item_checks) + play_sound
             on_success_commands.append(play_sound_command)
             #
             result_component = json.dumps(recipe.result.to_dict(pack_namespace)) if isinstance(recipe.result, CustomItem) else "{}"

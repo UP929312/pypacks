@@ -196,11 +196,11 @@ class Pack:
         self.custom_items = sorted(self.custom_items, key=lambda x: self.reference_book_categories.index(x.ref_book_config.category))
 
     def generate_pack(self) -> None:
-        print(f"Generating data pack @ {self.datapack_output_path}")
+        print(f"Generating data pack @ {self.datapack_output_path}\\data\\{self.namespace}")
         print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
         print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
-        # Needs to go in this order
+        # Needs to go in this order (i.e. datapack relies on the custom fonts for the reference book)
         self.custom_fonts = [generate_font_pack(self)]
         self.font_mapping = self.custom_fonts[0].get_mapping()
-        generate_resource_pack(self)
         generate_datapack(self)
+        generate_resource_pack(self)
