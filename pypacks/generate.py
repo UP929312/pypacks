@@ -55,9 +55,9 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
         (
             FontImage("play_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "play_icon.png").read_bytes(),
                       base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14)
-             if [x for x in pack.custom_items
-                 if hasattr(x, "components") and hasattr(x.components, "instrument") and x.components.instrument is not None]
-             else None
+            if [x for x in pack.custom_items
+                if hasattr(x, "components") and hasattr(x.components, "instrument") and x.components.instrument is not None]
+            else None
         ),
         FontImage("satchel_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "satchel.png").read_bytes()), height=20, y_offset=10),
         *[  # Category icons
@@ -77,7 +77,7 @@ def generate_font_pack(pack: "Pack") -> "CustomFont":
                       image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
                                              base_image_path=EXTRA_ICON_BASE_PATH),
                       height=18, y_offset=14)
-            for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]
+            for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]  # type: ignore[comparison-overlap]
         ],
     ]
     return CustomFont("all_fonts", [x for x in all_elements if x is not None])

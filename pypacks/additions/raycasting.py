@@ -118,17 +118,6 @@ class Raycast:
 
 
 # ====================================================================================================================
-# This is a simple raycasting system that can be used to detect blocks in a line of sight.
-# It takes 4 inputs, the hit block commaand, the failed command (no blocks in the limit), the ray traversable blocks,
-# and if the we should check if the ray_traversable_blocks is present or absent (end if we find a block, or if we don't).
-# An example of this is:
-# raycast = BlockRaycast(
-#     on_block_hit_command="setblock ~ ~ ~ minecraft:stone",
-#     no_blocks_hit_command="say No blocks hit!",
-#     blocks_to_detect="#minecraft:replaceable",
-#     if_or_unless="unless",
-# )
-# (This will set a stone block where the ray hits, and say "No blocks hit!" if the ray doesn't hit anything)
 
 
 @dataclass
@@ -181,8 +170,10 @@ class EntityRaycast(Raycast):
 
     def __post_init__(self) -> None:
         from pypacks.resources.custom_tag import CustomTag
+        if isinstance(self.entity_to_detect, CustomTag):
+            assert self.entity_to_detect.tag_type == "entity_type", "The entity_to_detect CustomTag must be of type 'entity_type'"
         if isinstance(self.entity_to_detect, list):
-            self.entity_to_detect = CustomTag(f"entities_to_detect_for_{self.internal_name}", self.entity_to_detect, "entity_type")  # type: ignore[abc]
+            self.entity_to_detect = CustomTag(f"entities_to_detect_for_{self.internal_name}", values=self.entity_to_detect, tag_type="entity_type")  # type: ignore[arg-type]
 
     def create_deploy_function(self, pack_namespace: str) -> "MCFunction":
         from pypacks.resources.custom_tag import CustomTag

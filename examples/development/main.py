@@ -89,8 +89,8 @@ custom_items = [
     ruby, topaz, weak_axe, flying_helmet, playable_lapis, musical_horn, written_book, rick_roll_horn,
     lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book, sharpness_fish,
     enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
-    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder, 
-    block_blocked_entity_finder, # edible_item
+    right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder,
+    block_blocked_entity_finder,  # edible_item
     pre_charged_crossbow, steak_to_ruby_when_eaten, custom_firework, custom_firework_hex, map_with_decoration,
     colored_map, map_with_id, banner, note_block_sound_head, eating_gives_you_speed, eating_removes_speed,
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
