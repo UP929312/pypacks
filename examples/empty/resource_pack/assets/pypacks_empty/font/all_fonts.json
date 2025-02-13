@@ -2,7 +2,7 @@
     "providers": [
         {
             "type": "bitmap",
-            "file": "pypacks_empty:font/empty_1_x_1.png",
+            "file": "pypacks_empty:font/1_pixel_indent.png",
             "height": 1,
             "ascent": 0,
             "chars": [

@@ -28,6 +28,9 @@ class CustomJukeboxSong:
     #             rint("Guessed song length: ", get_ogg_duration(file.read()))
     #             # self.length_in_seconds = get_ogg_duration(file.read())
 
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "sound_event": {"sound_id": f"{pack_namespace}:{self.internal_name}"},
@@ -50,3 +53,6 @@ class CustomJukeboxSong:
 
     def generate_give_command(self, pack: "Pack") -> str:
         return self.generate_custom_item(pack).generate_give_command(pack.namespace)
+
+    def generate_play_command(self, pack: "Pack") -> str:
+        return f"playsound {self.get_reference(pack.namespace)} master @s ~ ~ ~ 1 1"

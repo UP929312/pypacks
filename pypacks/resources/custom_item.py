@@ -102,7 +102,7 @@ class CustomItem:
             revoke_and_call_mcfunction.commands.extend([
                 f"execute as @a[scores={{{self.internal_name}_cooldown=1..}}] run {action_bar_command}",
                 f"execute as @s[scores={{{self.internal_name}_cooldown=0}}] run {run_code}",
-                f"execute as @a[scores={{{self.internal_name}_cooldown=0}}] run scoreboard players set @s {self.internal_name}_cooldown {self.use_right_click_cooldown*20}",
+                f"execute as @a[scores={{{self.internal_name}_cooldown=0}}] run scoreboard players set @s {self.internal_name}_cooldown {int(self.use_right_click_cooldown*20)}",
             ])
         else:
             revoke_and_call_mcfunction.commands.append(run_code)  # type: ignore[arg-type]

@@ -18,9 +18,6 @@ SPAWN_EGGS = [
 ]
 # Base ======
 image_mapping: dict[str, Path] = {}
-# Air (Custom override) ======
-image_mapping["air"] = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"empty_1_x_1.png"
-image_mapping[""] = Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"empty_1_x_1.png"
 # Banners ======
 image_mapping |= {banner: Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"banner.png" for banner in BANNERS}
 # Heads ======

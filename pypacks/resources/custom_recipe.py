@@ -60,7 +60,7 @@ class CustomCrafterRecipe(GenericRecipe):
 class ShapedCraftingRecipe(GenericRecipe):
     internal_name: str
     rows: list[str]
-    keys: dict[str, MinecraftItem | CustomTag | list[MinecraftItem]]
+    keys: dict[str, MinecraftItem | CustomTag | list[MinecraftItem]]  # e.g. {"I": "minecraft:iron_ingot", "S": "minecraft:stick"}
     result: MinecraftOrCustomItem
     amount: int = 1
     recipe_category: Literal["equipment", "building", "misc", "redstone"] = "misc"
@@ -257,7 +257,11 @@ class SmithingTrimRecipe(GenericRecipe):
     base_item: MinecraftItem | CustomTag | list[MinecraftItem]
     addition_item: MinecraftItem | CustomTag | list[MinecraftItem]
 
+    result: MinecraftItem | CustomTag | list[MinecraftItem] = field(init=False, repr=False, default=None)  # type: ignore[abc]
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
+
+    def __post_init__(self) -> None:
+        self.result = self.base_item
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {

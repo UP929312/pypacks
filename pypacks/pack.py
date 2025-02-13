@@ -8,7 +8,8 @@ from pypacks.additions.raycasting import Raycast
 from pypacks.additions.create_wall import create_wall
 from pypacks.resources.custom_advancement import CustomAdvancement
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.generate import generate_datapack, generate_resource_pack, generate_font_pack
+from pypacks.resources.world_gen.structure import SingleCustomStructure
+from pypacks.generate import generate_datapack, generate_resource_pack, generate_base_font
 
 
 if TYPE_CHECKING:
@@ -108,6 +109,10 @@ class Pack:
         # Custom Raycasts
         if self.custom_raycasts or self.custom_blocks or any(x for x in self.custom_items if x.on_right_click):
             self.custom_mcfunctions.extend(Raycast.generate_default_raycast_functions(self.namespace))
+        # ==================================================================================
+        # Custom Structure places (needs to be before on_right_click)
+        for structure in [x for x in self.custom_structures if isinstance(x, SingleCustomStructure)]:
+            self.custom_items.append(structure.generate_custom_item(self.namespace))
         # =================================================================================
         # Custom loops
         if self.custom_loops:
@@ -200,7 +205,7 @@ class Pack:
         print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
         print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
         # Needs to go in this order (i.e. datapack relies on the custom fonts for the reference book)
-        self.custom_fonts = [generate_font_pack(self)]
+        self.custom_fonts = [generate_base_font(self)]
         self.font_mapping = self.custom_fonts[0].get_mapping()
         generate_datapack(self)
         generate_resource_pack(self)

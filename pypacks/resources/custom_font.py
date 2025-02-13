@@ -9,11 +9,43 @@ from pypacks.image_manipulation.png_utils import get_png_height
 if TYPE_CHECKING:
     from pypacks.pack import Pack
 
-# TODO: Allow non-bitmap fonts
+# TODO: Allow non-bitmap fonts, e.g. ttf, otf, unihex (GNU Unifont, .hex) and reference links
 
 
 @dataclass
-class FontImage:
+class CustomFont:
+    """Adds a custom font to the resource pack. Not invokable manually, used internally (for now)"""
+    name: str
+    font_elements: list["BitMapFontChar | SpaceFontChar"]
+
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="font")
+
+    def get_mapping(self) -> dict[str, str]:
+        # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
+        return {element.name: f"\\uE{i:03}" for i, element in enumerate(self.font_elements)}
+
+    def to_dict(self, pack_namespace: str) -> list[dict[str, Any]]:
+        mapping = self.get_mapping()
+        return [
+            element.to_dict(pack_namespace, mapping[element.name])
+            for element in self.font_elements
+        ]
+
+    def create_resource_pack_files(self, pack: "Pack") -> None:
+        for font_element in self.font_elements:
+            font_element.create_resource_pack_files(pack)
+
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
+
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.name}.json", "w") as file:
+            file.write(json.dumps({"providers": self.to_dict(pack.namespace)}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes
+
+
+# =================================================================================================
+
+
+@dataclass
+class BitMapFontChar:
     """Represents an image in a book."""
     name: str
     image_bytes: bytes
@@ -32,34 +64,27 @@ class FontImage:
             "ascent": self.y_offset if self.y_offset is not None else min(get_png_height(image_bytes=self.image_bytes) // 2, 16),
             "chars": [char],
         }
+    
+    def create_resource_pack_files(self, pack: "Pack") -> None:
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font", exist_ok=True)
+
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font"/f"{self.name}.png", "wb") as file:
+            file.write(self.image_bytes)
 
 
 @dataclass
-class CustomFont:
-    """Adds a custom font to the resource pack. Not invokable manually, used internally (for now)"""
+class SpaceFontChar:
+    """Show chosen characters as spaces."""  # TODO: Use this instead of 1x1
     name: str
-    font_elements: list[FontImage]
+    width: int = 1  # Defines how wide the space character is
 
-    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="font")
-
-    def get_mapping(self) -> dict[str, str]:
-        # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
-        return {element.name: f"\\uE{i:03}" for i, element in enumerate(self.font_elements)}
-
-    def to_dict(self, pack_namespace: str) -> list[dict[str, Any]]:
-        mapping = self.get_mapping()
-        return [
-            element.to_dict(pack_namespace, mapping[element.name])
-            for element in self.font_elements
-        ]
-
+    def to_dict(self, pack_namespace: str, char: str) -> dict[str, Any]:
+        return  {
+            "type": "space",
+            "advances": {
+                char: self.width,
+            }
+        }
+    
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font", exist_ok=True)
-
-        for font_element in self.font_elements:
-            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font"/f"{font_element.name}.png", "wb") as file:
-                file.write(font_element.image_bytes)
-
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.name}.json", "w") as file:
-            file.write(json.dumps({"providers": self.to_dict(pack.namespace)}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes
+        pass

@@ -32,20 +32,19 @@ class ItemPage:
         more_info_button = Icon(
             self.pack.font_mapping["information_icon"],
             self.pack.namespace,
-            self.pack.font_mapping["empty_1_x_1"],
+            self.pack.font_mapping["1_pixel_indent"],
             right_indentation=3,
             on_hover=OnHoverShowText(more_info_text),
         )
         info_icons.append(more_info_button)
         # ============================================================================================================
         if self.item.components.instrument is not None:
-            play_sound_command = f"/playsound {self.item.components.instrument.get_reference(self.pack.namespace)} master @a[distance=..5] ~ ~ ~ 1 1"
             play_sound_icon = Icon(
                     self.pack.font_mapping["play_icon"],
                     self.pack.namespace,
-                    self.pack.font_mapping["empty_1_x_1"],
+                    self.pack.font_mapping["1_pixel_indent"],
                     right_indentation=3,
-                    on_click=OnClickRunCommand(play_sound_command),
+                    on_click=OnClickRunCommand(self.item.components.instrument.get_run_command(self.pack.namespace)),
                     on_hover=OnHoverShowText(f"Play: {self.item.custom_name}"),
             )
             info_icons.append(play_sound_icon)
@@ -59,7 +58,7 @@ class ItemPage:
             Icon(
                 self.pack.font_mapping[f"{recipe.recipe_block_name}_icon"],
                 self.pack.namespace,
-                self.pack.font_mapping["empty_1_x_1"],
+                self.pack.font_mapping["1_pixel_indent"],
                 right_indentation=3,
                 on_hover=OnHoverShowTextRaw([
                     {"text": self.pack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], "font": f"{self.pack.namespace}:all_fonts"},
@@ -80,13 +79,13 @@ class ItemPage:
         give_item_icon = Icon(
             self.pack.font_mapping[f"{self.item.internal_name}_icon"],
             font_namespace=self.pack.namespace,
-            indent_unicode_char=self.pack.font_mapping["empty_1_x_1"],
+            indent_unicode_char=self.pack.font_mapping["1_pixel_indent"],
             on_click=OnClickRunCommand(f"/function {self.pack.namespace}:give/{self.item.internal_name}"),
             on_hover=OnHoverShowItem(self.item, self.pack.namespace),
         )
         MORE_INFO_ICONS_PER_ROW = 5
         MORE_INFO_ICONS_TRAILING_NEW_LINES = 3
-        more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.font_mapping["empty_1_x_1"],
+        more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.font_mapping["1_pixel_indent"],
                                          self.pack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES).rows
         return [
             Text(f"{remove_colour_codes(self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title())}", underline=True, bold=True, text_color="black"),
@@ -97,7 +96,7 @@ class ItemPage:
             Text("\n"*(4-(len(more_info_icon_rows)))),
             RightAlignedIcon(
                 self.pack.font_mapping["satchel_icon"],
-                self.pack.font_mapping["empty_1_x_1"],
+                self.pack.font_mapping["1_pixel_indent"],
                 20,
                 font_namespace=self.pack.namespace,
                 left_shift=3,
@@ -115,7 +114,7 @@ class ReferenceBook:
         title_starting_char_code = "➤".encode('unicode_escape').decode('ascii')
         return ElementPage([
             Text(f"{title_starting_char_code} {pack.name} Reference Book\n\n\n", underline=True, text_color="black"),
-            Text(pack.font_mapping['empty_1_x_1']*LOGO_HORIZONTAL_SPACER, font=f"{pack.namespace}:all_fonts", text_color="white"),  # SPACER
+            Text(pack.font_mapping['1_pixel_indent']*LOGO_HORIZONTAL_SPACER, font=f"{pack.namespace}:all_fonts", text_color="white"),  # SPACER
             Text(pack.font_mapping["logo_256_x_256"], font=f"{pack.namespace}:all_fonts", text_color="white")
         ])
 
@@ -153,14 +152,14 @@ class ReferenceBook:
                 Icon(
                     pack.font_mapping[f"{category.internal_name}_category_icon"],
                     pack.namespace,
-                    indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+                    indent_unicode_char=pack.font_mapping["1_pixel_indent"],
                     on_hover=OnHoverShowText(f"Go to the `{category.name}` category"),
                     on_click=OnClickChangePage(CATEGORY_ITEMS_STARTING_PAGE+i)
                 )
                 for i, category in enumerate(pack.reference_book_categories)
             ],
             empty_icon_unicode_char=pack.font_mapping["blank_icon"],
-            indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+            indent_unicode_char=pack.font_mapping["1_pixel_indent"],
             font_namespace=pack.namespace,
         ).pages
 
@@ -173,7 +172,7 @@ class ReferenceBook:
                     Icon(
                         pack.font_mapping[f"{item.internal_name}_icon"],
                         pack.namespace,
-                        indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+                        indent_unicode_char=pack.font_mapping["1_pixel_indent"],
                         on_hover=OnHoverShowText(remove_colour_codes(item.custom_name or item.base_item.removeprefix('minecraft:').title())),
                         on_click=OnClickChangePage(ITEM_PAGE_START+item_index),
                     )
@@ -181,7 +180,7 @@ class ReferenceBook:
                     if item.ref_book_config.category.name == category.name and not item.ref_book_config.hidden
                 ],
                 empty_icon_unicode_char=pack.font_mapping["blank_icon"],
-                indent_unicode_char=pack.font_mapping["empty_1_x_1"],
+                indent_unicode_char=pack.font_mapping["1_pixel_indent"],
                 font_namespace=pack.namespace,
                 # back_button_unicode_char=pack.font_mapping["satchel_icon"],
                 # back_button_page=CATEGORIES_STARTING_PAGE,

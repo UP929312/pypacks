@@ -557,6 +557,9 @@ class Instrument:
         from pypacks.resources.custom_sound import CustomSound
         return self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id
 
+    def get_run_command(self, pack_namespace: str) -> str:
+        return f"playsound {self.get_reference(pack_namespace)} @s ~ ~ ~ 1 1"
+
 
 # ==========================================================================================
 

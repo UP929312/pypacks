@@ -53,19 +53,21 @@ smithing_recipe_coords: CoordMappingType = {
 
 
 def place_ingredients_on_image(
-    recipe: "Recipe", ingredients: list["str | CustomItem"], result: "str | CustomItem", coord_mapping: dict[int | str, tuple[int, int]]
+    recipe: "Recipe", ingredients: list["str | CustomItem"], coord_mapping: dict[int | str, tuple[int, int]]
 ) -> "ImageType":
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.custom_recipe import SmithingTrimRecipe
 
     # BASE IMAGE ========================================================
     base_image = Image.open(Path(IMAGES_PATH)/"recipe_bases"/f"{recipe.recipe_block_name}.png").convert("RGBA")
     # INGREDIENTS =======================================================
     for i, ingredient in enumerate(ingredients):
-        if ingredient != " ":  # For shaped recipes, the " " is a placeholder for air, just ignore it
+        if isinstance(ingredient, CustomItem) or ingredient.removeprefix("minecraft:") not in [" ", "", "air"]:  # For shaped recipes, the " " is a placeholder for nothing, just ignore it
             with Image.open(resolve_default_item_image(ingredient) if not isinstance(ingredient, CustomItem) else ingredient.texture_path) as ingredient_image:  # type: ignore
                 ingredient_image = ingredient_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
                 base_image.paste(ingredient_image, coord_mapping[i], ingredient_image)
     # RESULT ============================================================
+    result: str | CustomItem = recipe.result if not isinstance(recipe, SmithingTrimRecipe) else recipe.resolve_ingredient_type(recipe.base_item)
     result_texture_path = (
         resolve_default_item_image(result) if not isinstance(result, CustomItem) else (
             result.texture_path if result.texture_path is not None
@@ -88,8 +90,7 @@ def place_ingredients_on_image(
 def generate_custom_crafter_recipe_image(recipe: "CustomCrafterRecipe") -> "ImageType":
     return place_ingredients_on_image(
         recipe,
-        [ingredient[0] if isinstance(ingredient, list) else ingredient for ingredient in recipe.ingredients],  # type: ignore[index, misc, FOR-NOW]
-        recipe.result,
+        [recipe.resolve_ingredient_type(ingredient) for ingredient in recipe.ingredients],
         crafting_recipe_coords,
     )
 
@@ -98,7 +99,6 @@ def generate_shapeless_crafting_image(recipe: "ShapelessCraftingRecipe") -> "Ima
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(ingredient) for ingredient in recipe.ingredients],
-        recipe.result,
         crafting_recipe_coords,
     )
 
@@ -112,7 +112,6 @@ def generate_shaped_crafting_image(recipe: "ShapedCraftingRecipe") -> "ImageType
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(x) for x in ingredients_replaced],
-        recipe.result,
         crafting_recipe_coords,
     )
 
@@ -121,7 +120,6 @@ def generate_crafting_transmute_crafting_image(recipe: "CraftingTransmuteRecipe"
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(recipe.input_item)],
-        recipe.result,
         crafting_recipe_coords,
     )
 
@@ -130,7 +128,6 @@ def generate_furnace_recipe_image(recipe: "FurnaceRecipe | BlastFurnaceRecipe | 
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(recipe.ingredient)],
-        recipe.result,
         furnace_recipe_coords,
     )
 
@@ -139,7 +136,6 @@ def generate_stonecutter_recipe_image(recipe: "StonecutterRecipe") -> "ImageType
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(recipe.ingredient), recipe.resolve_ingredient_type(recipe.result)],
-        recipe.result,
         stonecutter_recipe_coords,
     )
 
@@ -148,7 +144,6 @@ def generate_campfire_recipe_image(recipe: "CampfireRecipe") -> "ImageType":
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(recipe.ingredient)],
-        recipe.result,
         campfire_recipe_coords,
     )
 
@@ -161,7 +156,6 @@ def generate_smithing_trim_recipe_image(recipe: "SmithingTrimRecipe") -> "ImageT
             recipe.resolve_ingredient_type(recipe.addition_item),
             recipe.resolve_ingredient_type(recipe.template_item)
         ],
-        recipe.resolve_ingredient_type(recipe.base_item),
         smithing_recipe_coords,
     )
 
@@ -174,7 +168,6 @@ def generate_smithing_transform_recipe_image(recipe: "SmithingTransformRecipe") 
             recipe.resolve_ingredient_type(recipe.addition_item),
             recipe.resolve_ingredient_type(recipe.template_item),
         ],
-        recipe.result,
         smithing_recipe_coords,
     )
 

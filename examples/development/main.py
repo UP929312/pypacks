@@ -228,9 +228,14 @@ custom_biome = CustomBiome("overworld_biome")
 bee_explosion_structure = SingleCustomStructure(
     "bee_explosion_structure",
     [custom_biome],
-    "bee_explosion.nbt",
+    "structures/bee_explosion.nbt",
 )
 overworld_dimension = CustomDimension("overworld", "overworld", custom_biome)
+my_little_house = SingleCustomStructure(
+    "my_little_house_structure",
+    [custom_biome],
+    "structures/my_little_house.nbt",
+)
 # endregion
 # ============================================================================================================
 # region: Custom Dimensions
@@ -302,7 +307,7 @@ datapack = Pack(
     custom_enchantments=custom_enchantments,
     custom_dimensions=[my_dimension, overworld_dimension],
     custom_damage_types=[my_custom_damage_type],
-    custom_structures=[bee_explosion_structure],
+    custom_structures=[bee_explosion_structure, my_little_house],
     custom_structure_sets=[custom_structure_set],
     # custom_advancements=[eating_advancement],
     custom_crafters=[custom_crafter],
