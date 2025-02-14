@@ -810,6 +810,7 @@ class UseRemainder:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "UseRemainder":
         # TODO: I suppose if this is a custom item, it needs to be parsed as such
+        # Basically, add support to parse a custom item (or really just components) from a dict...
         return cls(
             item=data["id"],
             count=data.get("count", 1),

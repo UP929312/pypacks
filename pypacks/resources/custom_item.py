@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, Consumable, Food
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemModelDefinition
@@ -73,6 +74,20 @@ class CustomItem:
         self.components.consumable = Consumable(consume_seconds=1_000_000, animation="none", consuming_sound=None, has_consume_particles=False)
         self.components.food = Food(nutrition=0, saturation=0, can_always_eat=True)
         self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
+
+    def generate_right_click_advancement(self, pack_namespace: str) -> "CustomAdvancement":
+        criteria = Criteria(f"eating_{self.internal_name}", "minecraft:using_item", {
+            "item": {
+                "predicates": {  # We use predicates instead of components because components require exact match, predicates require minimum match
+                    "minecraft:custom_data": {f"custom_right_click_for_{self.internal_name}": True},
+                },
+            }
+        })
+        eating_advancement = CustomAdvancement(
+            f"custom_right_click_for_{self.internal_name}", [criteria],
+            hidden=True, rewarded_function=f"{pack_namespace}:right_click/{self.internal_name}"
+        )
+        return eating_advancement
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)

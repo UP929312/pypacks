@@ -16,15 +16,23 @@ from pypacks.utils import to_component_string
 # Potentially, add a delay, so things aren't crafted instantly.
 
 
+# To allow a custom crafter object, we need a few things:
+# To override the entity data of the item, that's it?
+# I suppose we also need to ensure it's a spawn egg of some kind.
+
 @dataclass
 class CustomCrafter:
     """Allows for more indepth crafting with ingredients that have custom components.
     This is achieved by using droppers"""
     internal_name: str
     crafter_name: str
-    crafter_block_crafting_recipe: "ShapedCraftingRecipe"  # Output is ignored...
+    crafter_block_crafting_recipe: "ShapedCraftingRecipe | None"  # Output is ignored...
     recipes: list["CustomCrafterRecipe"]
     on_craft_sound: "str | CustomSound" = "minecraft:block.amethyst_block.chime"
+
+    def __post_init__(self) -> None:
+        if self.crafter_block_crafting_recipe is not None:
+            self.crafter_block_crafting_recipe.result = self.generate_custom_item()
 
     def generate_custom_item(self) -> "CustomItem":
         entity_data = {

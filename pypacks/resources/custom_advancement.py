@@ -7,7 +7,6 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.resources.custom_item import CustomItem
 
 TriggerType = Literal[
     "minecraft:allay_drop_item_on_block", "minecraft:any_block_use", "minecraft:avoid_vibration", "minecraft:bee_nest_destroyed",
@@ -93,19 +92,3 @@ class CustomAdvancement:
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
-
-    @staticmethod
-    def generate_right_click_advancement(item: "CustomItem", pack_namespace: str) -> "CustomAdvancement":
-        # TODO: Move this to custom_item.py
-        criteria = Criteria(f"eating_{item.internal_name}", "minecraft:using_item", {
-            "item": {
-                "predicates": {  # We use predicates instead of components because components require exact match, predicates require minimum match
-                    "minecraft:custom_data": {f"custom_right_click_for_{item.internal_name}": True},
-                },
-            }
-        })
-        eating_advancement = CustomAdvancement(
-            f"custom_right_click_for_{item.internal_name}", [criteria],
-            hidden=True, rewarded_function=f"{pack_namespace}:right_click/{item.internal_name}"
-        )
-        return eating_advancement

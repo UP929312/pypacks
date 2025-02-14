@@ -3,10 +3,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pypacks.additions.config import Config
+from pypacks.additions.create_wall import create_wall
 from pypacks.additions.reference_book_config import RefBookCategory
 from pypacks.additions.raycasting import Raycast
-from pypacks.additions.create_wall import create_wall
-from pypacks.resources.custom_advancement import CustomAdvancement
+from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.world_gen.structure import SingleCustomStructure
 from pypacks.generate import generate_datapack, generate_resource_pack, generate_base_font
@@ -15,10 +16,11 @@ from pypacks.generate import generate_datapack, generate_resource_pack, generate
 if TYPE_CHECKING:
     from pypacks.additions.custom_block import CustomBlock
     from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+    from pypacks.resources.custom_advancement import CustomAdvancement
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment
-    from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.custom_font import CustomFont
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_language import CustomLanguage
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
@@ -49,6 +51,7 @@ class Pack:
     datapack_output_path: str = ""
     resource_pack_path: str = ""
 
+    config: Config = field(default_factory=Config)
     # TODO: on_tick_function and on_load_function
     # on_tick_command: MCFunction | None = None
     # on_load_command: MCFunction | None = None
@@ -58,6 +61,7 @@ class Pack:
     custom_damage_types: list["CustomDamageType"] = field(default_factory=list)
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
+    custom_fonts: list["CustomFont"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
     custom_languages: list["CustomLanguage"] = field(default_factory=list)
     custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
@@ -104,7 +108,8 @@ class Pack:
         # Custom Languages
         if self.custom_languages:
             self.custom_languages[0].combine_languages(self)
-            self.custom_languages[0].propogate_to_all_similar_languages(self)
+            if self.config.enable_language_propogation:
+                self.custom_languages[0].propogate_to_all_similar_languages(self)
         # ==================================================================================
         # Custom Raycasts
         if self.custom_raycasts or self.custom_blocks or any(x for x in self.custom_items if x.on_right_click):
@@ -120,7 +125,7 @@ class Pack:
         # ==================================================================================
         # Custom right click on items
         for item in [x for x in self.custom_items if x.on_right_click]:
-            self.custom_advancements.append(CustomAdvancement.generate_right_click_advancement(item, self.namespace))
+            self.custom_advancements.append(item.generate_right_click_advancement(self.namespace))
             self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
         # ==================================================================================
         # Custom crafters:
@@ -129,8 +134,8 @@ class Pack:
             self.custom_items.append(crafter.generate_custom_item())
             self.custom_recipes.extend(crafter.recipes)
             # The crafter block itself...
-            crafter.crafter_block_crafting_recipe.result = crafter.generate_custom_item()
-            self.custom_recipes.append(crafter.crafter_block_crafting_recipe)
+            if crafter.crafter_block_crafting_recipe is not None:
+                self.custom_recipes.append(crafter.crafter_block_crafting_recipe)
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
@@ -154,7 +159,10 @@ class Pack:
             self.custom_items.append(enchantment.generate_custom_item(self.namespace))
         # ==================================================================================
         # Get all the reference book categories
-        self.reference_book_categories = RefBookCategory.get_unique_categories([x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden])
+        if self.config.generate_reference_book:
+            self.reference_book_categories = RefBookCategory.get_unique_categories(
+                [x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden]
+            )
         # ==================================================================================
         # Item models (well, the display items)
         give_all_item_models = MCFunction("give_all_item_models", [
@@ -195,17 +203,22 @@ class Pack:
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
         ])
         self.custom_mcfunctions.extend([load_mcfunction, tick_mcfunction])
-        if self.custom_items:
-            self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
         # ==================================================================================
-        self.custom_items = sorted(self.custom_items, key=lambda x: self.reference_book_categories.index(x.ref_book_config.category))
+        if self.custom_items and self.config.generate_create_wall_command:
+            self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
+        if self.config.generate_reference_book:
+            self.custom_items = sorted(self.custom_items, key=lambda x: self.reference_book_categories.index(x.ref_book_config.category))
+        # ==================================================================================
+        # Base font, required for reference book
+        if self.config.generate_reference_book:
+            self.custom_fonts.insert(0, generate_base_font(self))
+            self.font_mapping = self.custom_fonts[0].get_mapping()
+        # ==================================================================================
 
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}\\data\\{self.namespace}")
         print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
         print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
-        # Needs to go in this order (i.e. datapack relies on the custom fonts for the reference book)
-        self.custom_fonts = [generate_base_font(self)]
-        self.font_mapping = self.custom_fonts[0].get_mapping()
+        # Needs to go in this order (I think?)
         generate_datapack(self)
         generate_resource_pack(self)

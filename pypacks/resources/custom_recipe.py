@@ -169,7 +169,7 @@ class BlastFurnaceRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
 
@@ -194,7 +194,7 @@ class CampfireRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
 
@@ -221,7 +221,7 @@ class FurnaceRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
 
@@ -246,7 +246,7 @@ class SmithingTransformRecipe(GenericRecipe):
             },
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
 
@@ -257,7 +257,7 @@ class SmithingTrimRecipe(GenericRecipe):
     base_item: MinecraftItem | CustomTag | list[MinecraftItem]
     addition_item: MinecraftItem | CustomTag | list[MinecraftItem]
 
-    result: MinecraftItem | CustomTag | list[MinecraftItem] = field(init=False, repr=False, default=None)  # type: ignore[abc]
+    result: MinecraftItem | CustomTag | list[MinecraftItem] = field(init=False, repr=False, default=None)  # type: ignore[assignment]
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
     def __post_init__(self) -> None:
@@ -294,7 +294,7 @@ class SmokerRecipe(GenericRecipe):
             "cookingtime": self.cooking_time_ticks,
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
 
@@ -317,7 +317,7 @@ class StonecutterRecipe(GenericRecipe):
             }
         }
         if isinstance(self.result, CustomItem):
-            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index]
+            data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload]
         return data
 
 

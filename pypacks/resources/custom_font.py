@@ -74,7 +74,7 @@ class BitMapFontChar:
 
 @dataclass
 class SpaceFontChar:
-    """Show chosen characters as spaces."""  # TODO: Use this instead of 1x1
+    """Show chosen characters as spaces."""
     name: str
     width: int = 1  # Defines how wide the space character is
 

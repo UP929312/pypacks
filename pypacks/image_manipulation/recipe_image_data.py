@@ -116,7 +116,7 @@ def generate_shaped_crafting_image(recipe: "ShapedCraftingRecipe") -> "ImageType
     )
 
 
-def generate_crafting_transmute_crafting_image(recipe: "CraftingTransmuteRecipe"):
+def generate_crafting_transmute_crafting_image(recipe: "CraftingTransmuteRecipe") -> "ImageType":
     return place_ingredients_on_image(
         recipe,
         [recipe.resolve_ingredient_type(recipe.input_item)],
@@ -197,7 +197,7 @@ def generate_recipe_image(recipe: "Recipe") -> bytes:
         SmithingTransformRecipe: generate_smithing_transform_recipe_image,
     }
     function = class_to_function[type(recipe)]
-    image = function(recipe)
+    image = function(recipe)  # type: ignore[operator]
 
     # RETURN (CONVERT TO BYTES)
     # image.show()

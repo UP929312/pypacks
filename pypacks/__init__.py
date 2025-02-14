@@ -1,4 +1,5 @@
 # Additions:
+from pypacks.additions.config import Config
 from pypacks.additions.constants import MinecraftColor
 from pypacks.additions.item_components import (
     AttributeModifier, ArmorTrim, Bee, BundleContents, BucketEntityData, Components, Cooldown, Consumable, ContainerContents, DeathProtection, EntityData,
@@ -38,6 +39,7 @@ from pypacks.resources.custom_enchantment import (
 )
 from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
 from pypacks.resources.custom_item import CustomItem
+from pypacks.resources.custom_font import CustomFont
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -72,6 +74,7 @@ from pypacks.pack import Pack
 
 __all__ = [
     # Additions
+    "Config",
     "MinecraftColor",
     "AttributeModifier", "ArmorTrim", "Bee", "BundleContents", "BucketEntityData", "Components", "Cooldown", "Consumable", "ContainerContents", "DeathProtection", "EntityData",
     "Equippable", "FireworkExplosion", "Firework", "Food", "Instrument", "JukeboxPlayable", "LodestoneTracker", "MapData", "MapDecoration", "PotionEffect", "PotionContents",
@@ -94,6 +97,7 @@ __all__ = [
     "PlaySoundEntityEffect", "ReplaceBlockEntityEffect", "ReplaceDiskEntityEffect", "RunFunctionEntityEffect", "SetBlockPropertiesEntityEffect", "SpawnParticlesEntityEffect", "SummonEntityEntityEffect",
     "FacePaths", "CustomItemModelDefinition",
     "CustomItem",
+    "CustomFont",
     "CustomLanguage",
     "CustomJukeboxSong",
     "MCFunction",

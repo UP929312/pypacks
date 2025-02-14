@@ -38,6 +38,7 @@ from pypacks.resources.custom_enchantment import (
 )
 from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
 from pypacks.resources.custom_item import CustomItem
+from pypacks.resources.custom_font import CustomFont
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -95,6 +96,7 @@ __all__ = [
     "PlaySoundEntityEffect", "ReplaceBlockEntityEffect", "ReplaceDiskEntityEffect", "RunFunctionEntityEffect", "SetBlockPropertiesEntityEffect", "SpawnParticlesEntityEffect", "SummonEntityEntityEffect",
     "FacePaths", "CustomItemModelDefinition",
     "CustomItem",
+    "CustomFont",
     "CustomJukeboxSong",
     "CustomLanguage",
     "MCFunction",

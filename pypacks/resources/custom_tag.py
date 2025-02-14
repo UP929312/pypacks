@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from pypacks.resources.custom_tag import CustomTag
     from pypacks.resources.custom_item import CustomItem
     from pypacks.pack import Pack
 

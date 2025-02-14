@@ -291,6 +291,10 @@ custom_languages = CustomLanguage.from_all_translation_keys(
 )
 # endregion
 # ============================================================================================================
+# region: Custom Fonts
+# ttf_font = CustomFont("ttf_font", "fonts/minecraft.ttf")
+# endregion
+# ============================================================================================================
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -314,4 +318,5 @@ datapack = Pack(
     custom_raycasts=[block_ray_cast, entity_ray_cast],
     custom_tags=[ruby_or_topaz_tag],
     # custom_loops=[every_sixty_seconds],
+    custom_fonts=[],
 )

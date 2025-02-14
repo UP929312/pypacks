@@ -51,10 +51,10 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
         BitMapFontChar("blank_icon", Path(IMAGES_PATH, "reference_book_icons", "blank_icon.png").read_bytes()),
         BitMapFontChar("logo_256_x_256", Path(IMAGES_PATH, "reference_book_icons", "logo_256_x_256.png").read_bytes(), height=100, y_offset=16),
         BitMapFontChar("information_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
-                                                 base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
+                                                      base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
         (
             BitMapFontChar("play_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "play_icon.png").read_bytes(),
-                      base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14)
+                                                   base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14)
             if [x for x in pack.custom_items
                 if hasattr(x, "components") and hasattr(x.components, "instrument") and x.components.instrument is not None]
             else None
@@ -80,7 +80,7 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
             for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]  # type: ignore[comparison-overlap]
         ],
     ]
-    return CustomFont("all_fonts", [x for x in all_elements if x is not None])
+    return CustomFont("all_fonts", [x for x in all_elements if x is not None])   # type: ignore[misc]
 
 
 def generate_datapack(pack: "Pack") -> None:
@@ -110,9 +110,10 @@ def generate_datapack(pack: "Pack") -> None:
         with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_all.mcfunction", "w") as file:
             file.write("\n".join([custom_item.generate_give_command(pack.namespace) for custom_item in pack.custom_items]))
         # And give the book
-        book = ReferenceBook(pack.custom_items)
-        with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
-            file.write(f"\n# Give the book\n{book.generate_give_command(pack)}")
+        if pack.config.generate_reference_book:
+            book = ReferenceBook(pack.custom_items)
+            with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
+                file.write(f"\n# Give the book\n{book.generate_give_command(pack)}")
     # ================================================================================================
     # Resources
     for item in (
