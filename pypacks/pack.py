@@ -127,6 +127,10 @@ class Pack:
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(item.generate_right_click_advancement(self.namespace))
             self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))
+        has_on_drop_items = [x for x in self.custom_items if x.on_item_drop]
+        if has_on_drop_items:
+            self.custom_mcfunctions.extend(CustomItem.generate_on_drop_execute_loop(self.namespace))
+            self.custom_mcfunctions.append(MCFunction.create_run_macro_function())
         # ==================================================================================
         # Custom crafters:
         for crafter in self.custom_crafters:
@@ -201,6 +205,7 @@ class Pack:
             self.custom_loops[0].generate_global_tick_counter() if self.custom_loops else "",
             self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).get_run_command(self.namespace) if self.custom_loops else "",
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
+            CustomItem.generate_on_drop_execute_loop(self.namespace)[1].get_run_command(self.namespace) if has_on_drop_items else "",
         ])
         self.custom_mcfunctions.extend([load_mcfunction, tick_mcfunction])
         # ==================================================================================

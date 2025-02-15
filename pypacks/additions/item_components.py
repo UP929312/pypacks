@@ -962,6 +962,16 @@ class Components:
     written_book_content: "WrittenBookContent | None" = field(default=None, kw_only=True)
     writable_book_content: "WritableBookContent | None" = field(default=None, kw_only=True)
 
+    @staticmethod
+    def verify_compatible_components(item: "CustomItem") -> None:
+        """Verifies that the components for an item aren't on an item they shouldn't be on, e.g. map_data on a sword"""
+        if item.components is not None: 
+            for value in item.components.__dict__.values():  # Because Components isn't a list, we need to loop over all it's attributes
+                if hasattr(value, "allowed_items"):
+                    assert item.base_item.removeprefix("minecraft:") in value.allowed_items, (
+                        f"{value.__class__.__name__} can only be used with {' and '.join(value.allowed_items)}, not {item.base_item.removeprefix('minecraft:')}"
+                    )
+
     def __post_init__(self) -> None:
         assert self.durability is None or self.durability > 0, "durability must be a positive integer"
         assert self.lost_durability is None or self.lost_durability >= 0, "lost_durability must be a non-negative integer"

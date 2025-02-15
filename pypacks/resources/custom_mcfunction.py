@@ -44,6 +44,13 @@ class MCFunction:
                 return
             file.write(commands_str)
 
+    @staticmethod
+    def create_run_macro_function() -> "MCFunction":
+        return MCFunction("run_macro_function", [
+            f"$$(command)",
+            ],
+        )
+
     # Untested
     # def __or__(self, other: "MCFunction") -> "MCFunction":
     #     # So we can merge functions by doing | on them

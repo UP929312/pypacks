@@ -78,7 +78,10 @@ spider_spawner = CustomItem("spider_spawner", "minecraft:spawner", "Spider Spawn
 upper_slab = CustomItem("upper_slab", "minecraft:stone_slab", "Upper Slab", components=Components(block_state={"type": "top"}))
 fish_bucket = CustomItem("fish_bucket", "minecraft:tropical_fish_bucket", "Fish Bucket", components=Components(bucket_entity_data=BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))), ref_book_config=RefBookConfig(category=usable_category))
 loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table Chest", components=Components(container_loot_table="minecraft:chests/village/village_butcher"))
+on_drop_gold_ingot = CustomItem("on_drop_gold_ingot", "minecraft:gold_ingot", "On Drop Gold Ingot", on_item_drop="say Hi!")
+on_drop_copper_ingot = CustomItem("on_drop_copper_ingot", "minecraft:copper_ingot", "On Drop Copper Ingot", on_item_drop="kill @s")
 
+# invalid_component = CustomItem("invalid_component", "minecraft:sword", "Invalid Component", components=Components(map_data=MapData(map_id=1)))
 # fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
 # test = CustomItem("minecraft:emerald", "test", "Test", components=Components.from_list([Equippable("chest")]), ref_book_config=RefBookConfig(category=weapons_category))
 
@@ -95,7 +98,8 @@ custom_items = [
     colored_map, map_with_id, banner, note_block_sound_head, eating_gives_you_speed, eating_removes_speed,
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
     bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet, trimmed_leggings,
-    suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest,
+    suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest, on_drop_gold_ingot,
+    on_drop_copper_ingot,
 ]
 # endregion
 # ============================================================================================================
