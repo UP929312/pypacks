@@ -1,9 +1,16 @@
 from pypacks.providers.enchantment_provider import (  # noqa: F401, F403
-    SingleEnchantmentProvider, EnchantmentsByCostProvider, EnchantmentsByCostWithDifficultyProvider,
+    SingleEnchantmentProvider, EnchantmentsByCostProvider, EnchantmentsByCostWithDifficultyProvider, EnchantmentProvider,
+)
+from pypacks.providers.float_provider import (  # noqa: F401, F403
+    ConstantFloatProvider, UniformFloatProvider, ClampedNormalFloatProvider, TrapezoidFloatProvider, FloatProvider,
+
+)
+from pypacks.providers.height_provider import (  # noqa: F401, F403
+    ConstantHeightProvider, UniformHeightProvider, BiasedToBottomHeightProvider, VeryBiasedToBottomHeightProvider, HeightProvider,
 )
 from pypacks.providers.int_provider import (  # noqa: F401, F403
-    IntProvider, ConstantIntProvider, UniformIntProvider, BiasedToBottomIntProvider, ClampedIntProvider, ClampedNormalIntProvider, WeightedListIntProvider,
+    ConstantIntProvider, UniformIntProvider, BiasedToBottomIntProvider, ClampedIntProvider, ClampedNormalIntProvider, WeightedListIntProvider, IntProvider
 )
 from pypacks.providers.number_provider import (  # noqa: F401, F403
-    ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider,
+    ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, NumberProvider,
 )
