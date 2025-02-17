@@ -34,7 +34,6 @@ class CustomTag:
         return f"#{pack_namespace}:{'/'.join(self.sub_directories)}{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, bool | list[str]]:
-        from pypacks.resources.custom_tag import CustomTag
         from pypacks.resources.custom_item import CustomItem
         return {
             "replace": self.replace,
@@ -44,7 +43,10 @@ class CustomTag:
         }
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        # path = Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/Path(self.sub_directories)/self.tag_type/f"{self.internal_name}.json"
+        from pypacks.resources.custom_item import CustomItem
+        if any(isinstance(x, CustomItem) for x in self.values) and pack.config.warn_about_tags_with_custom_items:
+            print(f"Warning: Tag {self.internal_name} contains custom items. Custom items will be converted to their base item and will not include any components.")
+
         path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name, *self.sub_directories, self.tag_type, f"{self.internal_name}.json")
         os.makedirs(path.parent, exist_ok=True)
         with open(path, "w") as file:

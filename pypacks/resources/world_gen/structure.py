@@ -5,15 +5,14 @@ import os
 from pathlib import Path
 from typing import Any, Literal, TYPE_CHECKING
 
-from textual import on
-
-from pypacks.resources.world_gen.entity_spawner import SpawnOverride, DisableSpawnOverrideCategory
+from pypacks.resources.world_gen.entity_spawner import SpawnOverride
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.resources.world_gen.biome import CustomBiome
     from pypacks.resources.world_gen.structure_set import CustomStructureSet
     from pypacks.resources.custom_item import CustomItem
+    from pypacks.resources.world_gen.entity_spawner import DisableSpawnOverrideCategory
     from pypacks.pack import Pack
 
 # TODO: I need to properly implement Structure type, so I can give the arguments for jigsaws and such.
@@ -103,14 +102,19 @@ class SingleCustomStructure:
         from pypacks.additions.raycasting import BlockRaycast
         from pypacks.resources.custom_item import CustomItem
         from pypacks.additions.item_components import Components, Cooldown
+        from pypacks.additions.reference_book_config import DEV_ITEMS_REF_BOOK_CONFIG
         block_raycast = BlockRaycast(
             self.internal_name+"_structure_placer_raycast",
             on_block_hit_command=f"place template {self.get_reference(pack_namespace)} ~ ~1 ~",
             no_blocks_hit_command="say Oops, something went wrong!",
             max_distance_in_blocks=20,
         )
-        return CustomItem(self.internal_name+"_structure_placer", "minecraft:stick", f"Structure Placer ({self.internal_name})",
-                          on_right_click=block_raycast, components=Components(cooldown=Cooldown(0.3)))
+        return CustomItem(
+            self.internal_name+"_structure_placer", "minecraft:stick", f"Structure Placer ({self.internal_name})",
+            on_right_click=block_raycast, components=Components(cooldown=Cooldown(0.3)),
+            ref_book_config=DEV_ITEMS_REF_BOOK_CONFIG,
+        )
+
 
 @dataclass
 class JigsawStructureType:

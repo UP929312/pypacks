@@ -21,6 +21,7 @@ class RefBookCategory:
 MISC_REF_BOOK_CATEGORY = RefBookCategory("misc", "Misc", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"miscellaneous_icon.png")
 PAINTING_REF_BOOK_CATEGORY = RefBookCategory("paintings", "Paintings", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"painting.png")
 CUSTOM_BLOCKS_REF_BOOK_CATEGORY = RefBookCategory("custom_blocks", "Custom Block", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"custom_block_icon.png")
+DEV_ITEMS_REF_BOOK_CATEGORY = RefBookCategory("dev_items", "Dev Items", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"dev_items_icon.png")
 
 
 @dataclass
@@ -37,4 +38,5 @@ class RefBookConfig:
 MISC_REF_BOOK_CONFIG = RefBookConfig(category=MISC_REF_BOOK_CATEGORY, description="No description provided for this item")
 PAINTING_REF_BOOK_CONFIG = RefBookConfig(category=PAINTING_REF_BOOK_CATEGORY, description="A custom painting, added by this pack!")
 CUSTOM_BLOCKS_REF_BOOK_CONFIG = RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY, description="A custom block, added by this pack!")
+DEV_ITEMS_REF_BOOK_CONFIG = RefBookConfig(category=DEV_ITEMS_REF_BOOK_CATEGORY, description="A dev item, added by this pack!")
 HIDDEN_REF_BOOK_CONFIG = RefBookConfig(hidden=True)

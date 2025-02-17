@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, Consumable, Food
-from pypacks.additions.raycasting import BlockRaycast, EntityRaycast, Raycast
+from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_model import CustomTexture
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -16,6 +16,7 @@ from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
+    from pypacks.additions.raycasting import Raycast
     from pypacks.additions.reference_book_config import RefBookConfig
 
 
@@ -162,8 +163,8 @@ class CustomItem:
         apply_and_execute = MCFunction("apply_and_execute", [
             f"tag @s add {pack_namespace}_processed_drop",
             f"data remove storage {pack_namespace}:drop_command command",
-            f"data modify storage pypacks_testing:drop_command command set value {{\"command\": \"\"}}",
-            f"data modify storage pypacks_testing:drop_command command.command set from entity @s Item.components.\"minecraft:custom_data\".on_drop_command",
+            "data modify storage pypacks_testing:drop_command command set value {{\"command\": \"\"}}",
+            "data modify storage pypacks_testing:drop_command command.command set from entity @s Item.components.\"minecraft:custom_data\".on_drop_command",
             # Need to apply the tag
             f"execute as @s run function {pack_namespace}:run_macro_function with storage {pack_namespace}:drop_command command",
             ], ["on_drop"],

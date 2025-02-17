@@ -47,7 +47,7 @@ class MCFunction:
     @staticmethod
     def create_run_macro_function() -> "MCFunction":
         return MCFunction("run_macro_function", [
-            f"$$(command)",
+            "$$(command)",
             ],
         )
 

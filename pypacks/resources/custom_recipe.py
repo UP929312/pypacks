@@ -45,6 +45,7 @@ class GenericRecipe:
             return data[0]
         return data  # For strings and CustomItems
 
+
 @dataclass
 class CustomCrafterRecipe(GenericRecipe):
     ingredients: list[MinecraftOrCustomItem | Literal["minecraft:air", "air", ""] | CustomTag]
@@ -117,7 +118,7 @@ class ShapelessCraftingRecipe(GenericRecipe):
             "category": self.recipe_category,
             "ingredients": [(x.get_reference(pack_namespace) if isinstance(x, CustomTag) else x) for x in self.ingredients],
             "result": {
-                "id":str(self.result),
+                "id": str(self.result),
                 "count": self.amount,
             }
         }
@@ -131,7 +132,7 @@ class CraftingTransmuteRecipe(GenericRecipe):
     internal_name: str
     input_item: MinecraftItem | CustomTag | list[MinecraftItem]
     material_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftItem   
+    result: MinecraftItem
     recipe_category: Literal["equipment", "building", "misc", "redstone"] = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
@@ -239,7 +240,7 @@ class SmithingTransformRecipe(GenericRecipe):
         data = {
             "type": "minecraft:smithing_transform",
             "template": self.template_item.get_reference(pack_namespace) if isinstance(self.template_item, CustomTag) else self.template_item,
-            "base":     self.base_item.get_reference(pack_namespace)     if isinstance(self.base_item, CustomTag) else self.base_item,  # fmt: skip
+            "base":     self.base_item.get_reference(pack_namespace) if isinstance(self.base_item, CustomTag) else self.base_item,  # fmt: skip
             "addition": self.addition_item.get_reference(pack_namespace) if isinstance(self.addition_item, CustomTag) else self.addition_item,
             "result": {
                 "id": str(self.result)

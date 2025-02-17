@@ -361,7 +361,7 @@ class SetContentsFunction:
     content_type: str  # The block entity type to be written in BlockEntityTag.id.
 
     def to_dict(self) -> dict[str, Any]:
-        raise Exception("This function is not yet implemented.")  # TODO: Do this
+        raise NotImplementedError("This function is not yet implemented.")  # TODO: Do this
         return {
             "function": "minecraft:set_contents",
             "entries": [x.to_dict() for x in self.entries],  # TODO: This needs datapack (for some entries)...

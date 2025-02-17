@@ -1,7 +1,8 @@
-from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast  # noqa: F401
+from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast
 from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403
 from pypacks.additions.custom_crafter import CustomCrafter
+from pypacks.additions.config import Config
 # from pypacks.additions.custom_loop import CustomLoop
 
 import os
@@ -296,7 +297,7 @@ custom_languages = CustomLanguage.from_all_translation_keys(
 # endregion
 # ============================================================================================================
 # region: Custom Fonts
-# ttf_font = CustomFont("ttf_font", "fonts/minecraft.ttf")
+ttf_font = CustomFont("ttf_font", [TTFFontProvider("ttf_font", "fonts/Monocraft.ttf", size=9)])
 # endregion
 # ============================================================================================================
 datapack = Pack(
@@ -322,5 +323,6 @@ datapack = Pack(
     custom_raycasts=[block_ray_cast, entity_ray_cast],
     custom_tags=[ruby_or_topaz_tag],
     # custom_loops=[every_sixty_seconds],
-    custom_fonts=[],
+    custom_fonts=[ttf_font],
+    config=Config(warn_about_tags_with_custom_items=False)
 )

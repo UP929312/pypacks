@@ -1,14 +1,21 @@
 mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 && ruff check && pylint .
 
 # In the dev book, or ref book, have a button to teleport to another dimension, or to use /locate on a biome
+# For custom_structure auto generated items in the book, give them a new button to locate and teleport to the structure
+
+CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
 # New ref book category "dev" stuff like enchanted books, structure spawn eggs, that kind of thing
+
+# Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
+
+# Consider "events", which are ephemeral advancements, i.e. they get reset, maybe even with additional data, e.g. where? What block they right clicked on.
+
+Custom furnace recipes could be slightly tricky, I guess, we'd need a item display at every furnace which checks and overrides or something?
 
 Consider changing components to be a list of components, rather than a big ol' class.
 
 # Maybe for custom items, we have an "events" object? Currently have on right click, should probably do on left click, on drop, on craft?
-
-# Generic Configuration progress
 
 # Entity detection: from vdvman 1:
 execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!ray,dx=0,sort=nearest] if score #hit temp matches 0 positioned ~-0.85 ~-0.85 ~-0.85 if entity @s[dx=0] run function hit_entity
@@ -18,9 +25,11 @@ execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!
 
 # For structures, sub directory support
 
-# TODO: Silk touch and fortune for custom blocks
+# TODO: Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
+# execute if entity @s[gamemode=!creative]
 
 # To enable blocks to have a on_right_click, set the attribute modifier's block_interaction_range to "add_value": -4.5 (so they can't place it!)
+# Also do this for things like spawn eggs (can't do it for projectiles like eggs/snowballs)
 
 Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
 
@@ -28,8 +37,6 @@ Store the hit location of the raycast in some variable, like this: https://docs.
 
 # Upload the output directly to modrinth?
 https://github.com/Gamemode4Dev/GM4_Datapacks/blob/master/gm4/plugins/output.py#L119
-
-With the ray casting, what if they have a higher `block_interaction_range`? I suppose we could check their current item? Not a fan tbh...
 
 # https://www.reddit.com/r/MinecraftCommands/comments/1i9593y/better_interface/
 
@@ -48,6 +55,7 @@ Continue work on custom enchantments
 Translations should hold a fallback, including custom damage types
 
 Following smithed convention?  https://docs.smithed.dev/conventions/namespacing/
+# https://github.com/Stoupy51/python_datapack/blob/main/src/python_datapack/datapack/recipes.py#L78
 
 https://www.reddit.com/r/MinecraftCommands/comments/1i1plzs/recipe_click_detection/
 
@@ -55,7 +63,7 @@ Use the new tests mojang implemented into datapacks!
 
 # Custom enchant idea: Reverse thorns? When you hit, you take damage
 
-Translations (grrr) https://minecraft.wiki/w/Resource_pack#Language
+Translations (grrr)
 ADDED, but want to be able to add it to custom items I guess? And also Translate("pypacks.item.ruby") Need to allow item name for custom items to be JSON...
 
 For any_of enchantment, maybe just take a list as an alternative, and if it's passed in, re-construct the object to use the AnyOfValueEffect?
@@ -84,7 +92,11 @@ REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its set
 
 Loot table progress
 
+Tag all items in the world, if they aren't tagged, they're new
+
 # Naturally occuring ore veins! Would be maybe tricky...
+IntProvider for ore vein size, chance per chunk as a float?
+https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
 
 # Merge on_load with an inputted one... JUST CHANGE THE LOAD.JSON'S VALUES TO HAVE BOTH, YOU CAN HAVE TWO!
 

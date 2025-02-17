@@ -92,3 +92,9 @@ class CustomAdvancement:
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
+
+    def generate_grant_command(self) -> str:
+        return f"advancement grant @s only {self.internal_name}"
+
+    def generate_revoke_command(self) -> str:
+        return f"advancement revoke @s only {self.internal_name}"

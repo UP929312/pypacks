@@ -965,7 +965,7 @@ class Components:
     @staticmethod
     def verify_compatible_components(item: "CustomItem") -> None:
         """Verifies that the components for an item aren't on an item they shouldn't be on, e.g. map_data on a sword"""
-        if item.components is not None: 
+        if item.components is not None:
             for value in item.components.__dict__.values():  # Because Components isn't a list, we need to loop over all it's attributes
                 if hasattr(value, "allowed_items"):
                     assert item.base_item.removeprefix("minecraft:") in value.allowed_items, (

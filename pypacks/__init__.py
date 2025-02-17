@@ -7,7 +7,10 @@ from pypacks.additions.item_components import (
     ToolRule, Tool, TropicalFishData, UseRemainder, WrittenBookContent,
 )
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
-from pypacks.additions.reference_book_config import RefBookCategory, RefBookConfig, MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY
+from pypacks.additions.reference_book_config import (
+    RefBookCategory, RefBookConfig,
+    MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, DEV_ITEMS_REF_BOOK_CONFIG,
+)
 # =============================================================================
 # Providers:
 from pypacks.providers.enchantment_provider import (
@@ -33,7 +36,7 @@ from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionT
 from pypacks.resources.custom_enchantment import CustomEnchantment
 from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.custom_font import CustomFont
+from pypacks.resources.custom_font import CustomFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -68,7 +71,7 @@ __all__ = [
     "Equippable", "FireworkExplosion", "Firework", "Food", "Instrument", "JukeboxPlayable", "LodestoneTracker", "MapData", "MapDecoration", "PotionEffect", "PotionContents",
     "BlockRaycast", "EntityRaycast",
     "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
-    "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY",
+    "RefBookCategory", "RefBookConfig", "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY", "DEV_ITEMS_REF_BOOK_CONFIG",
     # Providers
     "SingleEnchantmentProvider", "EnchantmentsByCostProvider", "EnchantmentsByCostWithDifficultyProvider",
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",
@@ -82,7 +85,7 @@ __all__ = [
     "CustomEnchantment",
     "FacePaths", "CustomItemModelDefinition",
     "CustomItem",
-    "CustomFont",
+    "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomLanguage",
     "CustomJukeboxSong",
     "MCFunction",

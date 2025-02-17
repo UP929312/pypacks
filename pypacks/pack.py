@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_recipe import Recipe
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_tag import CustomTag
-    from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
+    from pypacks.resources.world_gen.structure import CustomStructure
     from pypacks.resources.world_gen.structure_set import CustomStructureSet
 
     from pypacks.additions.custom_loop import CustomLoop
@@ -123,7 +123,7 @@ class Pack:
         if self.custom_loops:
             self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).create_datapack_files(self)
         # ==================================================================================
-        # Custom right click on items
+        # Custom right click on items (and drops)
         for item in [x for x in self.custom_items if x.on_right_click]:
             self.custom_advancements.append(item.generate_right_click_advancement(self.namespace))
             self.custom_mcfunctions.append(item.create_right_click_revoke_advancement_function(self.namespace))

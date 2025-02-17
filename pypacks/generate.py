@@ -73,10 +73,12 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
             for custom_recipe in [x for x in pack.custom_recipes if not isinstance(x, SmithingTrimRecipe) and isinstance(x.result, CustomItem)]
         ],
         *[  # Custom recipe icons
-            BitMapFontChar(f"{recipe.recipe_block_name}_icon",
-                      image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
-                                             base_image_path=EXTRA_ICON_BASE_PATH),
-                      height=18, y_offset=14)
+            BitMapFontChar(
+                f"{recipe.recipe_block_name}_icon",
+                image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
+                                       base_image_path=EXTRA_ICON_BASE_PATH),
+                height=18, y_offset=14,
+            )
             for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]  # type: ignore[comparison-overlap]
         ],
     ]
