@@ -22,13 +22,16 @@ class CustomNoiseSettings:
     legacy_random_source: bool = False  # Whether to use the old random number generator from before 1.18 for world generation.
     default_block: str = "minecraft:stone"  # The default block used for the terrain.
     default_fluid: str = "minecraft:water"  # The default block used for seas and lakes.
-    spawn_target: list[dict[str, Any]] = field(default_factory=list)  # (Required, but can be empty) A list of climate parameters to specify the points around which the player tries to spawn. The game selects some horizonal locations that are not more than 2560 blocks away from the origin (0,0), then sample the noise values ("depth" noise and "offset" are always 0), and calculate ((x^2+z^2)^2) / 390625 + (the square of the mininum distance to the ranges in the list). The player spawns near the location where this value is smallest.
+    spawn_target: list[dict[str, Any]] = field(default_factory=list)  # (Required, but can be empty) A list of climate parameters to specify the points around which the player tries to spawn. The game selects some horizonal locations that are not more than 2560 blocks away from the origin (0,0), then sample the noise values ("depth" noise and "offset" are always 0), and calculate ((x^2+z^2)^2) / 390625 + (the square of the mininum distance to the ranges in the list). The player spawns near the location where this value is smallest.  # TODO: Type this
     noise_min_y: int = -2032  # The minimum Y coordinate where terrain starts generating. Value between -2032 and 2031 (both inclusive). Must be divisible by 16.
     noise_height: int = 4064  # The total height where terrain generates. Value between 0 and 4064 (both inclusive). Must be divisible by 16. And min_y + height cannot exceed 2032.
     noise_size_horizontal: int = 4  # Value between 0 and 4 (both inclusive)
     noise_size_vertical: int = 4  # Value between 0 and 4 (both inclusive)
     noise_router: dict[str, Any] = field(default_factory=dict)  # The noise router routes density functions to noise parameters used for world generation.
     surface_rule: dict[str, Any] = field(default_factory=dict)  # The main surface rule to place blocks in the terrain.
+
+    # https://minecraft.wiki/w/Noise_router
+    # https://minecraft.wiki/w/Surface_rule
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/noise_settings")
 

@@ -1,9 +1,9 @@
-from pypacks import Pack, RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast
+from pypacks import Pack
 from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403
-from pypacks.additions.custom_crafter import CustomCrafter
-from pypacks.additions.config import Config
-# from pypacks.additions.custom_loop import CustomLoop
+from pypacks.additions import (
+    RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast, CustomBlock, CustomCrafter, Config, CustomOreGeneration
+)  # , CustomLoop
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -300,6 +300,10 @@ custom_languages = CustomLanguage.from_all_translation_keys(
 ttf_font = CustomFont("ttf_font", [TTFFontProvider("ttf_font", "fonts/Monocraft.ttf", size=9)])
 # endregion
 # ============================================================================================================
+# region: Custom Ore Generation
+ruby_generation = CustomOreGeneration("ruby_generation", ruby_ore_block)
+# endregion
+# ============================================================================================================
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -324,5 +328,6 @@ datapack = Pack(
     custom_tags=[ruby_or_topaz_tag],
     # custom_loops=[every_sixty_seconds],
     custom_fonts=[ttf_font],
+    custom_ore_generations=[ruby_generation],
     config=Config(warn_about_tags_with_custom_items=False)
 )

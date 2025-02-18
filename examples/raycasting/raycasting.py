@@ -1,4 +1,5 @@
-from pypacks import Pack, BlockRaycast, EntityRaycast
+from pypacks import Pack
+from pypacks.additions import BlockRaycast, EntityRaycast
 from pypacks.resources import CustomItem
 
 import os

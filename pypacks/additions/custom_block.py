@@ -1,9 +1,9 @@
-from copy import deepcopy
+# from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
-from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
+from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel  # , SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.additions.raycasting import BlockRaycast
@@ -180,28 +180,28 @@ class CustomBlock:
     def create_slab(self, slab_block: "Slabs") -> "CustomBlock":
         """Adds a slab version of the block."""
         raise NotImplementedError
-        assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
-        # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",
-        #                          lore=self.block_item.lore)
-        # =========================
-        # TODO: Just reconstruct a new item/block here?...
-        new_slab_block: "CustomBlock" = deepcopy(self)
-        new_slab_block.internal_name = f"{self.internal_name}_slab"
-        new_slab_block.base_block = "minecraft:"+slab_block
-        # new_slab_block.drops = "self"
-        # =========================
-        slab_item: "CustomItem" = deepcopy(self.block_item)
-        slab_item.base_item = "minecraft:"+slab_block
-        slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)
-        slab_item.internal_name = f"{self.internal_name}_slab"
-        slab_item.custom_name = f"{self.name} Slab"
-        slab_item.is_block = True
-        # =========================
-        new_slab_block.drops = slab_item
-        new_slab_block.set_or_create_loot_table()
+        # assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
+        # # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",
+        # #                          lore=self.block_item.lore)
+        # # =========================
+        # # TODO: Just reconstruct a new item/block here?...
+        # new_slab_block: "CustomBlock" = deepcopy(self)
+        # new_slab_block.internal_name = f"{self.internal_name}_slab"
+        # new_slab_block.base_block = "minecraft:"+slab_block
+        # # new_slab_block.drops = "self"
+        # # =========================
+        # slab_item: "CustomItem" = deepcopy(self.block_item)
+        # slab_item.base_item = "minecraft:"+slab_block
+        # slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)
+        # slab_item.internal_name = f"{self.internal_name}_slab"
+        # slab_item.custom_name = f"{self.name} Slab"
+        # slab_item.is_block = True
+        # # =========================
+        # new_slab_block.drops = slab_item
+        # new_slab_block.set_or_create_loot_table()
 
-        new_slab_block.block_item = slab_item
-        return new_slab_block
+        # new_slab_block.block_item = slab_item
+        # return new_slab_block
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         self.model_object.create_resource_pack_files(pack)

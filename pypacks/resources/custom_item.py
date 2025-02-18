@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
-from pypacks.additions.item_components import Components, Consumable, Food
+from pypacks.additions.item_components import Components, Consumable, Food, AttributeModifier
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_model import CustomTexture
@@ -112,9 +112,17 @@ class CustomItem:
         """Adds the consuamble and food components to the item (so we can detect right clicks)"""
         if self.components.consumable is not None or self.components.food is not None:
             raise ValueError("You can't have both on_right_click and consumable/food!")
+        if (
+            self.components.attribute_modifiers is not None and
+            any(x for x in self.components.attribute_modifiers if x.attribute_type == "block_interaction_range") is None
+        ):
+            raise ValueError("You can't have both on_right_click and block_interaction_range!")
         self.components.consumable = Consumable(consume_seconds=1_000_000, animation="none", consuming_sound=None, has_consume_particles=False)
         self.components.food = Food(nutrition=0, saturation=0, can_always_eat=True)
         self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
+        # Make sure we can't interact with blocks (e.g. place blocks or spawn eggs)
+        self.components.attribute_modifiers.append(AttributeModifier(attribute_type="block_interaction_range", slot="mainhand", amount=-1000, operation="add_value"))
+        self.components.hide_tooltip
 
     def generate_right_click_advancement(self, pack_namespace: str) -> "CustomAdvancement":
         criteria = Criteria(f"eating_{self.internal_name}", "minecraft:using_item", {
@@ -163,10 +171,10 @@ class CustomItem:
         apply_and_execute = MCFunction("apply_and_execute", [
             f"tag @s add {pack_namespace}_processed_drop",
             f"data remove storage {pack_namespace}:drop_command command",
-            "data modify storage pypacks_testing:drop_command command set value {{\"command\": \"\"}}",
+            "data modify storage pypacks_testing:drop_command command set value {\"command\": \"\"}",
             "data modify storage pypacks_testing:drop_command command.command set from entity @s Item.components.\"minecraft:custom_data\".on_drop_command",
             # Need to apply the tag
-            f"execute as @s run function {pack_namespace}:run_macro_function with storage {pack_namespace}:drop_command command",
+            f"execute as @s run function {pack_namespace}:utils/run_macro_function with storage {pack_namespace}:drop_command command",
             ], ["on_drop"],
         )
         drop_detection = MCFunction("drop_detection", [

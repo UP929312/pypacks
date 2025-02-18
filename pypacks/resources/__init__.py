@@ -26,7 +26,6 @@ from pypacks.resources.world_gen import (
 )
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride, DisableSpawnOverrideCategory
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
-from pypacks.additions.custom_block import CustomBlock
 from pypacks.resources.custom_damage_type import CustomDamageType, DamageTypeTranslation
 from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
 from pypacks.resources.custom_enchantment import (
@@ -87,7 +86,6 @@ __all__ = [
 
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "CustomAdvancement", "Criteria",
-    "CustomBlock",
     "CustomDamageType", "DamageTypeTranslation",
     "CustomDimension", "CustomDimensionType", "OverworldDimension", "NetherDimension", "EndDimension",
     "CustomEnchantment",

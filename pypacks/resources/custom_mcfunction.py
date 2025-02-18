@@ -48,7 +48,18 @@ class MCFunction:
     def create_run_macro_function() -> "MCFunction":
         return MCFunction("run_macro_function", [
             "$$(command)",
-            ],
+            ], ["utils"],
+        )
+
+    @staticmethod
+    def create_scoreboard_value_to_location_functions(pack_namespace: str) -> "MCFunction":
+        return MCFunction("scoreboard_value_to_location", [
+            # Reads from three values, then calls the function with those values (x, y, z), requires objective inputs to be set with x, y, z.
+            f"execute store result storage {pack_namespace}:macro pos.x int 1 run scoreboard players get x inputs",
+            f"execute store result storage {pack_namespace}:macro pos.y int 1 run scoreboard players get y inputs",
+            f"execute store result storage {pack_namespace}:macro pos.z int 1 run scoreboard players get z inputs",
+            f"$function $(func_to_run) with storage {pack_namespace}:macro pos",
+            ], ["utils"],
         )
 
     # Untested

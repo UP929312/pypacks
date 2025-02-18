@@ -59,6 +59,7 @@ class BiasedToBottomHeightProvider:
             "inner": self.inner,
         }
 
+
 @dataclass(frozen=True)
 class VeryBiasedToBottomHeightProvider:
     """Used to specify a random value, biased towards the bottom"""
@@ -98,7 +99,7 @@ class TrapezoidHeightProvider:
 @dataclass(frozen=True)
 class WeightedListHeightProvider:
     """Used to specify a random value from a weighted list"""
-    distributions: dict["HeightProvider", int] = field(default_factory=lambda: {ConstantHeightProvider(0): 1}) #
+    distributions: dict["HeightProvider", int] = field(default_factory=lambda: {ConstantHeightProvider(0): 1})
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
@@ -108,5 +109,6 @@ class WeightedListHeightProvider:
                 for height_provider, weight in self.distributions.items()
             ],
         }
+
 
 HeightProvider: TypeAlias = ConstantHeightProvider | UniformHeightProvider | BiasedToBottomHeightProvider | TrapezoidHeightProvider | WeightedListHeightProvider

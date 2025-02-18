@@ -5,6 +5,25 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
+World gen stuff is why I'm getting the error...
+
+# pypacks_testing:clear_console
+
+# https://minecraft.wiki/w/Entity_format#Navigation
+
+Sometimes event-type advancements get "stuck" and need to be revoked. Perhaps we can look into revoking all of them somehow?
+
+# Predicate typing
+
+# Onjoin event would be cool, and on-leave for players
+
+# Naturally occuring ore veins! Would be maybe tricky...
+IntProvider for ore vein size, chance per chunk as a float?
+https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
+Also, the item display can go -100, whilst a barrier might have problems with a lower world height
+
+# Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
+
 # Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
 
 # Consider "events", which are ephemeral advancements, i.e. they get reset, maybe even with additional data, e.g. where? What block they right clicked on.
@@ -23,11 +42,10 @@ execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!
 
 # For structures, sub directory support
 
-# TODO: Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
+# Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
 # execute if entity @s[gamemode=!creative]
 
-# To enable blocks to have a on_right_click, set the attribute modifier's block_interaction_range to "add_value": -4.5 (so they can't place it!)
-# Also do this for things like spawn eggs (can't do it for projectiles like eggs/snowballs)
+# Look into disabling projectiles like eggs/snowballs with on_right_click
 
 Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
 
@@ -91,10 +109,6 @@ REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its set
 Loot table progress
 
 Tag all items in the world, if they aren't tagged, they're new
-
-# Naturally occuring ore veins! Would be maybe tricky...
-IntProvider for ore vein size, chance per chunk as a float?
-https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
 
 # Merge on_load with an inputted one... JUST CHANGE THE LOAD.JSON'S VALUES TO HAVE BOTH, YOU CAN HAVE TWO!
 

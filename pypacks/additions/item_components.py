@@ -811,6 +811,8 @@ class UseRemainder:
     def from_dict(cls, data: dict[str, Any]) -> "UseRemainder":
         # TODO: I suppose if this is a custom item, it needs to be parsed as such
         # Basically, add support to parse a custom item (or really just components) from a dict...
+        if "components" in data:
+            raise NotImplementedError("Parsing custom items from a dict is not yet supported")
         return cls(
             item=data["id"],
             count=data.get("count", 1),
@@ -1046,7 +1048,7 @@ class Components:
             "tooltip_style":              self.tooltip_style,
 
             "trim":                       self.armor_trim.to_dict() if self.armor_trim is not None else None,
-            "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers]} if self.attribute_modifiers else None,
+            "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers], "show_in_tooltip": False} if self.attribute_modifiers else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns else None,
             "bees":                       [bee.to_dict() for bee in self.bees] if self.bees else None,
             "bundle_contents":            self.bundle_contents.to_dict(pack_namespace) if self.bundle_contents is not None else None,
