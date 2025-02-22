@@ -99,9 +99,9 @@ def generate_datapack(pack: "Pack") -> None:
     # Load + Tick functions
     os.makedirs(pack.datapack_output_path/"data"/"minecraft"/"tags"/"function", exist_ok=True)
     with open(pack.datapack_output_path/"data"/"minecraft"/"tags"/"function"/"load.json", "w") as file:
-        json.dump({"values": [f"{pack.namespace}:load"]}, file, indent=4)
+        json.dump({"values": [f"{pack.namespace}:load"]}, file, indent=4)  # TODO: These are just regular function tags, not special, we can totally replace these...
 
-    if pack.custom_blocks:
+    if pack.custom_blocks or pack.custom_loops:  # TODO: We definitely do more on this...
         with open(pack.datapack_output_path/"data"/"minecraft"/"tags"/"function"/"tick.json", "w") as file:
             json.dump({"values": [f"{pack.namespace}:tick"]}, file, indent=4)
     # ================================================================================================
@@ -123,7 +123,7 @@ def generate_datapack(pack: "Pack") -> None:
         pack.custom_paintings + pack.custom_advancements + pack.custom_loot_tables +
         pack.custom_mcfunctions + pack.custom_tags + pack.custom_enchantments + pack.custom_damage_types +
         pack.custom_dimensions + pack.custom_structures + pack.custom_structure_sets + pack.custom_raycasts +
-        pack.custom_loops
+        pack.custom_loops + pack.custom_chunk_scanners + pack.custom_ore_generations
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(pack.datapack_output_path/"data"/pack.namespace/item.datapack_subdirectory_name, exist_ok=True)

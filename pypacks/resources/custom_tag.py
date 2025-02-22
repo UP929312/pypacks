@@ -24,7 +24,7 @@ class CustomTag:
     # Function tags can be called in the /function command with #<resource location>, which runs all the functions specified in the tag in the order of their first appearance in a tag. If a function is referenced multiple times in a tag and its sub-tags, it is run once.
     internal_name: str
     values: list["str | CustomTag | CustomItem"]
-    tag_type: Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
+    tag_type: Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "function", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
     sub_directories: list[str] = field(default_factory=list)
     replace: bool = False
 
@@ -47,7 +47,7 @@ class CustomTag:
         if any(isinstance(x, CustomItem) for x in self.values) and pack.config.warn_about_tags_with_custom_items:
             print(f"Warning: Tag {self.internal_name} contains custom items. Custom items will be converted to their base item and will not include any components.")
 
-        path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name, *self.sub_directories, self.tag_type, f"{self.internal_name}.json")
+        path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name, self.tag_type, *self.sub_directories, f"{self.internal_name}.json")
         os.makedirs(path.parent, exist_ok=True)
         with open(path, "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)

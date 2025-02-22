@@ -247,10 +247,9 @@ class _Effects:
             if any(effect["type"].removeprefix("minecraft:") == "remove_effects" for effect in effects_raw)
             else []
         )
-        remove_effect_effects = "all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects
         return _Effects(
             apply_affects=[PotionEffect.from_dict(effect) for effect in apply_effect_effects],
-            remove_affects=[effect for effect in remove_effect_effects] if remove_effect_effects != "all" else "all",
+            remove_affects="all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects,  # type: ignore[abc]
             teleport_diameter=(
                 [effect.get("diameter") for effect in effects_raw if effect["type"].removeprefix("minecraft:") == "teleport_randomly"][0]
                 if any(effect.get("type") == "teleport_randomly" for effect in effects_raw)
@@ -401,6 +400,7 @@ class Equippable:
     damage_on_hurt: bool = True  # Whether this item is damaged when the wearing entity is damaged. Defaults to True.
     entities_which_can_wear: str | list[str] | Literal["all"] = "all"  # The entities which can wear this item. Entity ID/Tag, or list of Entity IDs to limit.
     camera_overlay: str | None = field(repr=False, default=None)  # The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
+    # TODO: Test camera overlay
 
     def to_dict(self) -> dict[str, Any]:
         return {

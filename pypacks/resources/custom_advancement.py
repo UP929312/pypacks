@@ -46,6 +46,7 @@ class CustomAdvancement:
     # https://minecraft.wiki/w/Advancement_definition
     internal_name: str
     criteria: list[Criteria]
+    # TODO: Rewarded loot should take a loot table, the rewarded recipes should take a recipe, and the rewarded function should take a function.
     rewarded_loot: str | None = field(repr=False, default=None)  # The resource location of a loot table.
     rewarded_recipes: str | None = field(repr=False, default=None)  # The resource location of a recipe.
     rewarded_experience: int | None = field(repr=False, default=None)  # To give an amount of experience. Defaults to 0.

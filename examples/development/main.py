@@ -3,7 +3,7 @@ from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403
 from pypacks.additions import (
     RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast, CustomBlock, CustomCrafter, Config, CustomOreGeneration
-)  # , CustomLoop
+)
 
 import os
 os.chdir(os.path.dirname(__file__))

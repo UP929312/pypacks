@@ -1,14 +1,18 @@
 import json
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from pypacks.additions.item_components import Components, EntityData
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.resources.custom_recipe import CustomCrafterRecipe, ShapedCraftingRecipe
+from pypacks.resources.custom_recipe import CustomCrafterRecipe
 from pypacks.resources.custom_sound import CustomSound
 from pypacks.resources.custom_tag import CustomTag
 
 from pypacks.utils import to_component_string
+
+if TYPE_CHECKING:
+    from pypacks.resources.custom_recipe import ShapedCraftingRecipe
 
 # TODO: Add a way to customize the custom crafter object, currently it's a spawn egg with no lore or whatever. Merge with custom item?
 # TODO: Give the custom crafter a custom model (optional).

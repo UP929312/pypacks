@@ -12,16 +12,22 @@ MACRO_MESSAGE = "# This function requires the following macros to be passed in:\
 
 @dataclass
 class MCFunction:
-    """Creates a minecraft function file"""
+    """Creates a minecraft function file.
+    The order that functions get executed within a single tick is:
+    - Functions that belong to #minecraft:tick, from top to bottom.
+    - Functions that are scheduled on that tick, from whichever one was added to the queue first.
+    - Functions invoked from advancements.
+    - Functions invoked from enchantments."""  # To run a function if the executer is console: /execute unless entity @s[type=player] run function
     internal_name: str
-    commands: list[str]
+    commands: list["str | MCFunction"]
     sub_directories: list[str] = field(default_factory=list)  # Allow this to be a str
 
     create_if_empty: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, default="function")
 
     def __post_init__(self) -> None:
-        assert len("".join(self.commands)) <= 2_000_000, "MCFunction files must be less than 2 million characters!"
+        file_contents = "\n".join([x.get_reference("#"*32) if isinstance(x, MCFunction) else x for x in self.commands])
+        assert len(file_contents) <= 2_000_000, "MCFunction files must be less than ~2 million characters!"
 
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"
@@ -30,7 +36,9 @@ class MCFunction:
         return f"function {self.get_reference(pack_namespace)}"
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        commands_str = "\n".join(self.commands)
+        for mcfunction in [x for x in self.commands if isinstance(x, MCFunction)]:
+            mcfunction.create_datapack_files(pack)
+        commands_str = "\n".join([x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands])
         if (not commands_str.strip()) and not self.create_if_empty:
             return
         detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
@@ -58,7 +66,7 @@ class MCFunction:
             f"execute store result storage {pack_namespace}:macro pos.x int 1 run scoreboard players get x inputs",
             f"execute store result storage {pack_namespace}:macro pos.y int 1 run scoreboard players get y inputs",
             f"execute store result storage {pack_namespace}:macro pos.z int 1 run scoreboard players get z inputs",
-            f"$function $(func_to_run) with storage {pack_namespace}:macro pos",
+            f"$function $(function_name) with storage {pack_namespace}:macro pos",  # Passes in x, y, z
             ], ["utils"],
         )
 

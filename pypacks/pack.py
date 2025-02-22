@@ -5,8 +5,12 @@ from typing import TYPE_CHECKING
 
 from pypacks.additions.config import Config
 from pypacks.additions.create_wall import create_wall
-from pypacks.additions.reference_book_config import RefBookCategory
+from pypacks.additions.custom_chunk_scanner import CustomChunkScanner
+from pypacks.additions.custom_loop import CustomLoop
+from pypacks.additions.custom_ore_generation import CustomOreGeneration
 from pypacks.additions.raycasting import Raycast
+from pypacks.additions.reference_book_config import RefBookCategory
+
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.world_gen.structure import SingleCustomStructure
@@ -33,7 +37,6 @@ if TYPE_CHECKING:
     from pypacks.resources.world_gen.structure import CustomStructure
     from pypacks.resources.world_gen.structure_set import CustomStructureSet
 
-    from pypacks.additions.custom_loop import CustomLoop
     from pypacks.additions.custom_crafter import CustomCrafter
 
 
@@ -79,6 +82,8 @@ class Pack:
     custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
     custom_crafters: list["CustomCrafter"] = field(default_factory=list)
     custom_loops: list["CustomLoop"] = field(default_factory=list)
+    custom_ore_generations: list["CustomOreGeneration"] = field(default_factory=list)
+    custom_chunk_scanners: list["CustomChunkScanner"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.datapack_output_path == "" and self.world_name:
@@ -119,9 +124,15 @@ class Pack:
         for structure in [x for x in self.custom_structures if isinstance(x, SingleCustomStructure)]:
             self.custom_items.append(structure.generate_custom_item(self.namespace))
         # =================================================================================
-        # Custom loops
-        if self.custom_loops:
-            self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).create_datapack_files(self)
+        # Custom loops, chunk scanners, and ore generations
+        for custom_ore_generation in self.custom_ore_generations:
+            self.custom_chunk_scanners.append(custom_ore_generation.create_chunk_scanner(self.namespace))
+            self.custom_mcfunctions.append(custom_ore_generation.create_generate_ore_function(self.namespace))
+        if self.custom_chunk_scanners:
+            self.custom_mcfunctions.append(CustomChunkScanner.generate_mark_and_call_function(self.namespace))
+            self.custom_loops.append(CustomChunkScanner.generate_check_chunk_loop(self.namespace))
+        if self.custom_loops or self.custom_ore_generations:  # Has to go after the chunk scanner
+            self.custom_mcfunctions.append(CustomLoop.generate_loop_manager_function(self.custom_loops, self.namespace))
         # ==================================================================================
         # Custom right click on items (and drops)
         for item in [x for x in self.custom_items if x.on_right_click]:
@@ -147,6 +158,7 @@ class Pack:
                 self.custom_items.append(block.block_item)  # The custom item
             if block.loot_table is not None:
                 self.custom_loot_tables.append(block.loot_table)  # When breaking the block
+            self.custom_mcfunctions.append(block.generate_place_function(self.namespace))  # Function for placing the block (not by raycast)
             self.custom_advancements.append(block.create_advancement(self.namespace))  # Advancement for placing the block
             self.custom_mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
 
@@ -175,24 +187,32 @@ class Pack:
         ])
         self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
+        # Utils
+        if self.custom_chunk_scanners:
+            self.custom_mcfunctions.append(MCFunction.create_scoreboard_value_to_location_functions(self.namespace))
+        # ==================================================================================
         load_mcfunction = MCFunction("load", [
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
             "scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"scoreboard objectives add {self.custom_loops[0].scoreboard_objective_name} dummy" if self.custom_loops else "",
             "scoreboard objectives add constants dummy" if self.custom_loops else "",
-            "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",  # For custom blocks
-            "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",  # For custom blocks
+            "scoreboard objectives add player_yaw dummy" if self.custom_blocks else "",
+            "scoreboard objectives add player_pitch dummy" if self.custom_blocks else "",
+            "scoreboard objectives add coords dummy" if self.custom_chunk_scanners else "",
+            "scoreboard objectives add inputs dummy" if self.custom_chunk_scanners else "",
             *[
                 f"scoreboard objectives add {item.internal_name}_cooldown dummy \"Cooldown Timer For {item.internal_name}\"" + "\n" +
                 f"execute as @a run scoreboard players set @s {item.internal_name}_cooldown 0"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None
             ],
+            "scoreboard players set 16 constants 16" if self.custom_chunk_scanners else "",
             *{
                 custom_loop.generate_set_constant_command()
                 for custom_loop in self.custom_loops
             },
             f"say Loaded into {self.name}!",
         ])
+        # ==================================================================================
         tick_mcfunction = MCFunction("tick", [
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"

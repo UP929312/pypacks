@@ -1,6 +1,6 @@
 # from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import Literal, TYPE_CHECKING
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel  # , SlabModel
@@ -98,6 +98,14 @@ class CustomBlock:
             "execute if score rotation player_pitch matches 45..90 run scoreboard players set rotation_group player_pitch 3",  # Down
         ], ["custom_blocks"])
 
+    def generate_place_function(self, pack_namespace: str) -> "MCFunction":
+        execute_as_item_display = self.generate_functions(pack_namespace)[0]
+        return MCFunction(f"place_{self.internal_name}", [
+            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display run {execute_as_item_display.get_run_command(pack_namespace)}",
+            ],
+            ["custom_blocks", "on_place"],
+        )
+
     def generate_functions(self, pack_namespace: str) -> tuple["MCFunction", ...]:
         assert isinstance(self.block_texture, FacePaths)
         # These are in reverse order (pretty much), so we can reference them in the next function.
@@ -135,7 +143,7 @@ class CustomBlock:
         )
         # Spawn the item display, then call the setup on it directly.
         spawn_item_display = MCFunction(f"setup_item_display_{self.internal_name}", [
-            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run function {execute_as_item_display.get_reference(pack_namespace)}",
+            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run {execute_as_item_display.get_run_command(pack_namespace)}",
             ],
             ["custom_blocks", "setup_item_display"],
         )

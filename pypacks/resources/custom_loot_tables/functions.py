@@ -22,12 +22,30 @@ class LootTableFunction:
 
 @dataclass
 class ApplyBonusFunction:
-    """Applies a predefined bonus formula to the count of the item stack."""
+    """Applies a predefined bonus formula to the count of the item stack.
+    Formulas include:
+    - binomial_with_bonus_count - binomial distribution (with n=level + extra, p=probability)
+    - uniform_bonus_count - uniform distribution (from 0 to level * bonusMultiplier)
+    - ore_drops - a special function used for ore drops in the vanilla game (Count *= (max(1; randomInt(0(inclusive) .. (Level + 2)(exclusive)))))."""
     enchantment: str  # ID of an enchantment on the tool provided by loot context used for level calculation.
-    formula: str | Literal["binomial_with_bonus_count", "uniform_bonus_count", "ore_drops"]  # A resource location. Can be binomial_with_bonus_count for a binomial distribution (with n=level + extra, p=probability), uniform_bonus_count for uniform distribution (from 0 to level * bonusMultiplier), or ore_drops for a special function used for ore drops in the vanilla game (Count *= (max(1; randomInt(0(inclusive) .. (Level + 2)(exclusive))))).
+    formula: str | Literal["binomial_with_bonus_count", "uniform_bonus_count", "ore_drops"]
     extra: int | None  # For formula 'binomial_with_bonus_count', the extra value.
     probability: int | None  # For formula 'binomial_with_bonus_count', the probability.
     bonus_multiplier: int | None  # For formula 'uniform_bonus_count', the bonus multiplier.
+
+    def __post_init__(self) -> None:
+        if self.formula == "binomial_with_bonus_count":
+            assert self.extra is not None, "The extra value must be provided for the binomial_with_bonus_count formula."
+            assert self.probability is not None, "The probability must be provided for the binomial_with_bonus_count formula."
+            assert self.bonus_multiplier is None, "The bonus multiplier must not be provided for the binomial_with_bonus_count formula."
+        elif self.formula == "uniform_bonus_count":
+            assert self.extra is None, "The extra value must not be provided for the uniform_bonus_count formula."
+            assert self.probability is None, "The probability must not be provided for the uniform_bonus_count formula."
+            assert self.bonus_multiplier is not None, "The bonus multiplier must be provided for the uniform_bonus_count formula."
+        elif self.formula == "ore_drops":
+            assert self.extra is None, "The extra value must not be provided for the ore_drops formula."
+            assert self.probability is None, "The probability must not be provided for the ore_drops formula."
+            assert self.bonus_multiplier is None, "The bonus multiplier must not be provided for the ore_drops formula."
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -464,7 +482,7 @@ class SetFireWorkExplosion:
 @dataclass
 class SetInstrumentFunction:
     """Sets the item tags for instrument items to a random value from a tag."""
-    options: str  # The resource location started with # of an instrument tag, one of the listings is selected randomly.
+    options: str = "#minecraft:regular_goat_horns"  # The resource location started with # of an instrument tag, one of the listings is selected randomly.
 
     def to_dict(self) -> dict[str, Any]:
         assert self.options.startswith("#"), "The options must start with a # and be an instrument tag!"
@@ -489,6 +507,7 @@ class SetItemFunction:
 @dataclass
 class SetLootTableFunction:
     """Sets the loot table for a container block when placed and opened."""
+    # TODO: Test this, it's not used anywhere internally so \_('-')_/
     name: str  # Specifies the resource location of the loot table to be used.
     seed: int | None = None  # Optional. Specifies the loot table seed. If absent or set to 0, the seed won't be put into the NBT, and a random seed is used when opening the continer.
     block_entity_type: str = ""  # The block entity type to be written in BlockEntityTag.id.

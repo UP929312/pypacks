@@ -165,14 +165,18 @@ INEDIBLE_ITEMS = [
     "minecraft:firework_rocket",
 ]
 
-# { "required": false, "id": "minecraft:snowball" },
-#         { "required": false, "id": "minecraft:egg" },
-#         { "required": false, "id": "minecraft:ender_pearl" },
-#         { "required": false, "id": "minecraft:splash_potion" },
-#         { "required": false, "id": "minecraft:lingering_potion" },
-#         { "required": false, "id": "minecraft:ender_eye" },
-#         { "required": false, "id": "minecraft:wind_charge" },
-#         { "required": false, "id": "minecraft:trident" }
+
+THROWABLE_ITEMS = [
+    "minecraft:snowball",
+    "minecraft:egg",
+    "minecraft:ender_pearl",
+    "minecraft:splash_potion",
+    "minecraft:lingering_potion",
+    "minecraft:ender_eye",
+    "minecraft:wind_charge",
+    "minecraft:trident",
+    "minecraft:experience_bottle",
+]
 
 # A lot more
 

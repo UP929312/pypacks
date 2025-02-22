@@ -1,5 +1,6 @@
 from pypacks.additions.config import Config
 from pypacks.additions.custom_block import CustomBlock
+from pypacks.additions.custom_chunk_scanner import CustomChunkScanner
 from pypacks.additions.custom_crafter import CustomCrafter
 from pypacks.additions.custom_loop import CustomLoop
 from pypacks.additions.custom_ore_generation import CustomOreGeneration
@@ -12,6 +13,7 @@ from pypacks.additions.reference_book_config import (
 __all__ = [
     "Config",
     "CustomBlock",
+    "CustomChunkScanner",
     "CustomCrafter",
     "CustomLoop",
     "CustomOreGeneration",
