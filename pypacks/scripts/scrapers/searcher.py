@@ -19,4 +19,4 @@ def search_keyword(directory: str, keyword: str) -> None:
                 print(f"Could not read {file_path}: {e}")
 
 
-search_keyword(input_path, "set_loot_table")
+search_keyword(input_path, "creature_spawn_probability")

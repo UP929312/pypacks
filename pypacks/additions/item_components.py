@@ -249,7 +249,7 @@ class _Effects:
         )
         return _Effects(
             apply_affects=[PotionEffect.from_dict(effect) for effect in apply_effect_effects],
-            remove_affects="all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects,  # type: ignore[abc]
+            remove_affects="all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects,  # type: ignore[arg-type]
             teleport_diameter=(
                 [effect.get("diameter") for effect in effects_raw if effect["type"].removeprefix("minecraft:") == "teleport_randomly"][0]
                 if any(effect.get("type") == "teleport_randomly" for effect in effects_raw)

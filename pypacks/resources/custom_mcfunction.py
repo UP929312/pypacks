@@ -36,9 +36,20 @@ class MCFunction:
         return f"function {self.get_reference(pack_namespace)}"
 
     def create_datapack_files(self, pack: "Pack") -> None:
+        # Incase you embed mcfunctions:
         for mcfunction in [x for x in self.commands if isinstance(x, MCFunction)]:
             mcfunction.create_datapack_files(pack)
-        commands_str = "\n".join([x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands])
+        # Get all the lines
+        command_lines = [x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands]
+        # Verify Macro lines
+        if pack.config.warn_about_non_marked_macro_line:
+            for line in command_lines:
+                if "$(" in line and not line.startswith("$"):
+                    print(f"Warning, {self.internal_name}.mcfunction has lines without macro prefix: `{line}`")
+        lines_startwith_with_slash = [x for x in command_lines if x.startswith("/")]
+        if lines_startwith_with_slash:
+            print(f"Warning, {self.internal_name}.mcfunction has lines starting with /: {lines_startwith_with_slash}")
+        commands_str = "\n".join(command_lines)
         if (not commands_str.strip()) and not self.create_if_empty:
             return
         detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
@@ -56,17 +67,6 @@ class MCFunction:
     def create_run_macro_function() -> "MCFunction":
         return MCFunction("run_macro_function", [
             "$$(command)",
-            ], ["utils"],
-        )
-
-    @staticmethod
-    def create_scoreboard_value_to_location_functions(pack_namespace: str) -> "MCFunction":
-        return MCFunction("scoreboard_value_to_location", [
-            # Reads from three values, then calls the function with those values (x, y, z), requires objective inputs to be set with x, y, z.
-            f"execute store result storage {pack_namespace}:macro pos.x int 1 run scoreboard players get x inputs",
-            f"execute store result storage {pack_namespace}:macro pos.y int 1 run scoreboard players get y inputs",
-            f"execute store result storage {pack_namespace}:macro pos.z int 1 run scoreboard players get z inputs",
-            f"$function $(function_name) with storage {pack_namespace}:macro pos",  # Passes in x, y, z
             ], ["utils"],
         )
 

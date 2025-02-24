@@ -7,6 +7,9 @@ class NumberProvider:
     # https://minecraft.wiki/w/Loot_table#Number_provider
     ...
 
+    def to_dict(self) -> dict[str, Any]:
+        raise NotImplementedError
+
 
 @dataclass
 class ConstantNumberProvider(NumberProvider):

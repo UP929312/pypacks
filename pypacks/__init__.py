@@ -24,7 +24,6 @@ from pypacks.providers.int_provider import (  # noqa: F401, F403
 from pypacks.providers.number_provider import (  # noqa: F401, F403
     ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, NumberProvider,
 )
-# TODO: Sort this
 
 # =============================================================================
 # Resources
@@ -75,9 +74,11 @@ __all__ = [
     "Equippable", "FireworkExplosion", "Firework", "Food", "Instrument", "JukeboxPlayable", "LodestoneTracker", "MapData", "MapDecoration", "PotionEffect", "PotionContents",
     "ToolRule", "Tool", "TropicalFishData", "UseRemainder", "WrittenBookContent",
     # Providers
-    "SingleEnchantmentProvider", "EnchantmentsByCostProvider", "EnchantmentsByCostWithDifficultyProvider",
+    "SingleEnchantmentProvider", "EnchantmentsByCostProvider", "EnchantmentsByCostWithDifficultyProvider", "EnchantmentProvider",
+    "ConstantFloatProvider", "UniformFloatProvider", "ClampedNormalFloatProvider", "TrapezoidFloatProvider", "FloatProvider",
+    "ConstantHeightProvider", "UniformHeightProvider", "BiasedToBottomHeightProvider", "VeryBiasedToBottomHeightProvider", "HeightProvider",
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",
-    "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreboardNumberProvider", "StorageNumberProvider",
+    "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreboardNumberProvider", "StorageNumberProvider", "NumberProvider",
     # Resources
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "CustomAdvancement", "Criteria",

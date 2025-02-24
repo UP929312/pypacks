@@ -97,6 +97,9 @@ class Pack:
         self.data_pack_format_version = 61
         self.resource_pack_format_version = 46
 
+        assert self.namespace.islower(), "Namespace must be all lowercase"
+        assert all(x in "abcdefghijklmnopqrstuvwxyz0123456789_-." for x in self.namespace), "Namespace must only contain letters, numbers, _, -, and ."
+
         self.add_internal_functions()
         self.generate_pack()
 
@@ -128,6 +131,7 @@ class Pack:
         for custom_ore_generation in self.custom_ore_generations:
             self.custom_chunk_scanners.append(custom_ore_generation.create_chunk_scanner(self.namespace))
             self.custom_mcfunctions.append(custom_ore_generation.create_generate_ore_function(self.namespace))
+            self.custom_mcfunctions.extend(custom_ore_generation.create_ore_vein_function(self.namespace))  # This runs multiple times, which is fine...
         if self.custom_chunk_scanners:
             self.custom_mcfunctions.append(CustomChunkScanner.generate_mark_and_call_function(self.namespace))
             self.custom_loops.append(CustomChunkScanner.generate_check_chunk_loop(self.namespace))
@@ -187,10 +191,6 @@ class Pack:
         ])
         self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
-        # Utils
-        if self.custom_chunk_scanners:
-            self.custom_mcfunctions.append(MCFunction.create_scoreboard_value_to_location_functions(self.namespace))
-        # ==================================================================================
         load_mcfunction = MCFunction("load", [
             f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
             "scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
@@ -217,11 +217,11 @@ class Pack:
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None  # TODO: Move these to a different file?
-            ],
+            ],  # TODO: Move this to its own function and just all it here...
             *[
                 custom_crafter_tick.on_tick(self.namespace).get_run_command(self.namespace)
-                for custom_crafter_tick in self.custom_crafters  # TODO: Consider an `all_crafters_tick` function
-            ],
+                for custom_crafter_tick in self.custom_crafters
+            ],  # TODO: Move this to its own function and just all it here...
             self.custom_loops[0].generate_global_tick_counter() if self.custom_loops else "",
             self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).get_run_command(self.namespace) if self.custom_loops else "",
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
@@ -243,7 +243,7 @@ class Pack:
     def generate_pack(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}\\data\\{self.namespace}")
         print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
-        print(r"C:\Users\%USERNAME%\AppData\Roaming\.minecraft\logs")  # TODO: Eventually remove this I suppose
+        print(f"C:\\Users\\{os.environ['username']}\\AppData\\Roaming\\.minecraft\\logs\\latest.log")  # TODO: Eventually remove this I suppose
         # Needs to go in this order (I think?)
         generate_datapack(self)
         generate_resource_pack(self)

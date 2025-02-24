@@ -101,6 +101,8 @@ class CustomBlock:
     def generate_place_function(self, pack_namespace: str) -> "MCFunction":
         execute_as_item_display = self.generate_functions(pack_namespace)[0]
         return MCFunction(f"place_{self.internal_name}", [
+            f"say Placed {self.internal_name}!",
+            f"setblock ~ ~ ~ {self.base_block}",
             f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display run {execute_as_item_display.get_run_command(pack_namespace)}",
             ],
             ["custom_blocks", "on_place"],

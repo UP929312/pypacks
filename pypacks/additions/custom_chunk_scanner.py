@@ -32,7 +32,6 @@ class CustomChunkScanner:
     @staticmethod
     def generate_check_chunk_loop(pack_namespace: str) -> "CustomLoop":
         """Generates a function that checks all the chunks around the player."""
-        scoreboard_value_to_location = MCFunction.create_scoreboard_value_to_location_functions(pack_namespace).get_reference(pack_namespace)
         checked_function = CustomChunkScanner.generate_mark_and_call_function(pack_namespace).get_reference(pack_namespace)
 
         check_chunks = MCFunction("check_chunks_loop", [
@@ -49,7 +48,7 @@ class CustomChunkScanner:
             "scoreboard players operation chunk_edge_z coords = z_coord coords",
             "scoreboard players operation chunk_edge_z coords -= chunk_offset_z coords",  # This is the z coord of the corner of their chunk
             "",
-            "scoreboard players set y inputs 100",  # TODO: change to -64
+            "scoreboard players set y inputs 100",  # TODO: change to -64 or 0 or something
             "",
             *[
                 # Thirdly, with the chunk corner, we want to try in the 8 adjacent chunk corners
@@ -58,7 +57,10 @@ class CustomChunkScanner:
                 "scoreboard players operation z inputs = chunk_edge_z coords\n" +
                 (f"scoreboard players {'add' if x >= 0 else 'remove'} x inputs {abs(x)}\n" if x != 0 else "") +
                 (f"scoreboard players {'add' if z >= 0 else 'remove'} z inputs {abs(z)}\n" if z != 0 else "") +
-                f"function {scoreboard_value_to_location} {{\"function_name\": \"{checked_function}\"}}"
+                f"execute store result storage {pack_namespace}:chunk_scanner_macros pos.x int 1 run scoreboard players get x inputs\n" +
+                f"execute store result storage {pack_namespace}:chunk_scanner_macros pos.y int 1 run scoreboard players get y inputs\n" +
+                f"execute store result storage {pack_namespace}:chunk_scanner_macros pos.z int 1 run scoreboard players get z inputs\n" +
+                f"function {checked_function} with storage {pack_namespace}:chunk_scanner_macros pos\n"
                 for x in [-16, 0, 16] for z in [-16, 0, 16] if (x, z) != (0, 0)
             ],
         ], ["custom_chunk_scanning"])
@@ -70,7 +72,7 @@ class CustomChunkScanner:
             # Firstly, check if the chunk has already been processed, if so, skip it
             "$execute positioned $(x) $(y) $(z) if entity @e[type=item_display, tag=world_marker, distance=..0.5] run return fail",  # unless loaded ~ ~ ~
             # Secondly, spawn the marker, so we know that chunk has been processed.
-            "$summon item_display $(x) $(y) $(z) {Tags:[\"world_marker\"]}",  # , \"chunk_corner_$(x)_$(y)_$(z)\"
+            "$summon item_display $(x) $(y) $(z) {Tags:[\"world_marker\"]}",
             "$summon pig $(x) $(y) $(z) {NoAI:1b, NoGravity: 1b, Silent: 1b, Tags:[\"world_marker\"]}",
             # Thirdly, call all the functions with the args
             f"$function #{pack_namespace}:chunk_scanner_functions {{\"x\": $(x), \"y\": $(y), \"z\": $(z)}}",
