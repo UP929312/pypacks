@@ -9,6 +9,19 @@ if TYPE_CHECKING:
 MACRO_PATTERN = re.compile(r"(?<=\$\()[A-Za-z0-9_]*(?=\))")
 MACRO_MESSAGE = "# This function requires the following macros to be passed in:\n"
 
+# Places that require something being set before the function can be run
+VARIABLE_PATTERN = r"[A-Za-z0-9_#]*"
+# Scores set on the player =======================================================
+IF_UNLESS_SCORE_PATTERN = re.compile(f"((?<=if score )|(?<=unless score ))({VARIABLE_PATTERN}) ({VARIABLE_PATTERN})")  # 1, 2 (player, objective)
+_ = "execute store result|success score <target> <objective>"
+_ = "scoreboard players operation <target1> <objective1> <operation> <target2> <objective2>"
+# Places which need a scoreboard objective to be initialised =====================
+PLAYER_SCORE_CHANGE = re.compile(f"(?<=scoreboard players )(add|set|remove|reset) ({VARIABLE_PATTERN}) ({VARIABLE_PATTERN})")  # 2, 3 (player, objective)
+# NBT ============================================================================
+_ = "execute store result score <player> <objective> run data get <target> <path>"
+_ = "execute store success score <player> <objective> run some_command"
+_ = "data modify storage <namespace>:<name> <path> set from score <target> <objective>"
+
 
 @dataclass
 class MCFunction:
@@ -35,33 +48,44 @@ class MCFunction:
     def get_run_command(self, pack_namespace: str) -> str:
         return f"function {self.get_reference(pack_namespace)}"
 
-    def create_datapack_files(self, pack: "Pack") -> None:
-        # Incase you embed mcfunctions:
-        for mcfunction in [x for x in self.commands if isinstance(x, MCFunction)]:
-            mcfunction.create_datapack_files(pack)
-        # Get all the lines
+    def do_function_checks(self, pack: "Pack") -> None:
         command_lines = [x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands]
+        # Verify / lines
+        lines_startwith_with_slash = [x for x in command_lines if x.startswith("/")]
+        if lines_startwith_with_slash:
+            print(f"Warning, {self.internal_name}.mcfunction has lines starting with /: {lines_startwith_with_slash}")
         # Verify Macro lines
         if pack.config.warn_about_non_marked_macro_line:
             for line in command_lines:
                 if "$(" in line and not line.startswith("$"):
                     print(f"Warning, {self.internal_name}.mcfunction has lines without macro prefix: `{line}`")
-        lines_startwith_with_slash = [x for x in command_lines if x.startswith("/")]
-        if lines_startwith_with_slash:
-            print(f"Warning, {self.internal_name}.mcfunction has lines starting with /: {lines_startwith_with_slash}")
-        commands_str = "\n".join(command_lines)
+
+    def generate_headers(self, pack_namespace: str) -> str:
+        commands_str = "\n".join([x.get_reference(pack_namespace) if isinstance(x, MCFunction) else x for x in self.commands])
+        # Macros
+        detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
+        macro_list = "\n".join([f"# - {x}" for x in detected_macros])
+        # Variables required
+        # detected_variables = list(sorted(set(re.findall(r"\$\{[A-Za-z0-9_]*\}", commands_str))))
+        if detected_macros:
+            return f"{MACRO_MESSAGE}{macro_list}\n\n"
+        return ""
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        # Get all the lines
+        commands_str = "\n".join([x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands])
         if (not commands_str.strip()) and not self.create_if_empty:
             return
-        detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
+        self.do_function_checks(pack)
+        function_headers = self.generate_headers(pack.namespace)
+        # Incase you embed mcfunctions:
+        for mcfunction in [x for x in self.commands if isinstance(x, MCFunction)]:
+            mcfunction.create_datapack_files(pack)
         # Can't use / here because of *self.sub_directories
         path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name,
                     *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
-            if detected_macros:
-                macro_list = "\n".join([f"# - {x}" for x in detected_macros])
-                file.write(f"{MACRO_MESSAGE}{macro_list}\n\n"+commands_str)
-                return
-            file.write(commands_str)
+            file.write(function_headers+commands_str)
 
     @staticmethod
     def create_run_macro_function() -> "MCFunction":

@@ -50,6 +50,9 @@ class CustomDamageType:
         language_codes = [translation.language_code for translation in self.translations] if self.translations is not None else []
         assert self.translations is not None and len(set(language_codes)) == len(language_codes), "Each translation must have a unique language code."
 
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "message_id": f"{pack_namespace}:{self.internal_name}",

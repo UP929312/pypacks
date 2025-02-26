@@ -11,6 +11,19 @@ class ConstantIntProvider:
 
 
 @dataclass
+class IntRange:
+    """Not used in the actual game, but used for defining ranges of integers in, say, custom ore generation."""
+    min: int  # The minimum possible value.
+    max: int  # The maximum possible value. Cannot be less than min.
+
+    def __post_init__(self) -> None:
+        assert self.min <= self.max, "max cannot be less than min"
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"min": self.min, "max": self.max}
+
+
+@dataclass
 class UniformIntProvider:
     min_inclusive: int  # The minimum possible value.
     max_inclusive: int  # The maximum possible value. Cannot be less than min_inclusive.

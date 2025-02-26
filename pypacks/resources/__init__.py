@@ -43,7 +43,16 @@ from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
 
 from pypacks.resources.custom_painting import CustomPainting
-from pypacks.resources.custom_predicate import Predicate
+from pypacks.resources.custom_predicate import (
+    Predicate,
+    AllOfPredicate, AnyOfPredicate, BlockStatePropertyPredicate, DamageSourcePropertiesPredicate, EnchantmentActiveCheckPredicate, EntityPropertiesPredicate,
+    EntityScoresPredicate, InvertedPredicate, KilledByPlayerPredicate, LocationCheckPredicate, MatchToolPredicate, RandomChancePredicate,
+    RandomChanceWithEnchantedBonusPredicate, ReferencePredicate, SurvivesExplosionPredicate, TableBonusPredicate, TimeCheckPredicate, ValueCheckPredicate,
+    WeatherCheckPredicate,
+)
+from pypacks.resources.predicate.predicate_conditions import (
+    DamageTypeTag, EntityDistance, EntityFlags, MovementCheck, EntityCondition, BlockPredicate, FluidPredicate, LocationTag, ItemCondition,
+)
 from pypacks.resources.custom_recipe import (
     Recipe, CustomCrafterRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,
     CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe
@@ -100,7 +109,15 @@ __all__ = [
     "MCFunction",
     "CustomLootTable",
     "CustomPainting",
+
     "Predicate",
+    "AllOfPredicate", "AnyOfPredicate", "BlockStatePropertyPredicate", "DamageSourcePropertiesPredicate", "EnchantmentActiveCheckPredicate",
+    "EntityPropertiesPredicate", "EntityScoresPredicate", "InvertedPredicate", "KilledByPlayerPredicate",
+    "LocationCheckPredicate", "MatchToolPredicate", "RandomChancePredicate", "RandomChanceWithEnchantedBonusPredicate",
+    "ReferencePredicate", "SurvivesExplosionPredicate", "TableBonusPredicate", "TimeCheckPredicate", "ValueCheckPredicate",
+    "WeatherCheckPredicate",
+    "DamageTypeTag", "EntityDistance", "EntityFlags", "MovementCheck", "EntityCondition", "BlockPredicate", "FluidPredicate", "LocationTag", "ItemCondition",
+
     "Recipe", "CustomCrafterRecipe", "ShapedCraftingRecipe", "ShapelessCraftingRecipe", "CraftingTransmuteRecipe", "FurnaceRecipe", "BlastFurnaceRecipe", "SmokerRecipe",
     "CampfireRecipe", "SmithingTransformRecipe", "SmithingTrimRecipe", "StonecutterRecipe",
     "CustomSound",

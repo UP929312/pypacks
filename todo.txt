@@ -8,9 +8,7 @@ CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 Write a read-me
 
 Type Predicates ):
-
-
-# Predicate typing
+# Predicate typing - Add player specific ones, and a new datapack to test them *all*
 
 {
   "condition": "minecraft:entity_properties",
@@ -39,12 +37,10 @@ World gen stuff is why I'm getting the error...
 
 Sometimes event-type advancements get "stuck" and need to be revoked. Perhaps we can look into revoking all of them somehow?
 
-# Onjoin event would be cool, and on-leave for players
+# Onjoin event would be cool, and on-leave for players (single player wouldn't work though, annoyingly)
 
 # Naturally occuring ore veins! Would be maybe tricky...
-IntProvider for ore vein size, chance per chunk as a float?
 https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
-Also, the item display can go -100, whilst a barrier might have problems with a lower world height
 
 # Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
 

@@ -100,7 +100,7 @@ class EnchantValueEffect:
             self.component_id: [
                 {
                     "effect": self.value_effect,
-                    "requirements": self.requirements.to_dict() if self.requirements else None,
+                    "requirements": self.requirements.to_dict(pack_namespace) if self.requirements else None,
                     "enchanted": self.enchanted,
                 },
             ]
@@ -196,7 +196,7 @@ class EnchantmentEntityEffect:
             self.component_id: [
                 {
                     "effect": self.entity_effect.to_dict(pack_namespace),
-                    "requirements": self.requirements.to_dict() if self.requirements else None,
+                    "requirements": self.requirements.to_dict(pack_namespace) if self.requirements else None,
                     "enchanted": self.enchanted,
                     "affected": self.affected,
                 },
@@ -372,7 +372,7 @@ class ReplaceBlockEntityEffect:
             "block_state": self.block_state,
             "offset": list(self.offset),
             "trigger_game_event": self.trigger_game_event,
-            "predicate": self.predicate.to_dict() if self.predicate else None,
+            "predicate": self.predicate.to_dict(pack_namespace) if self.predicate else None,
         }
 
 
@@ -395,7 +395,7 @@ class ReplaceDiskEntityEffect:
             "radius": self.radius,
             "height": self.height,
             "trigger_game_event": self.trigger_game_event,
-            "predicate": self.predicate.to_dict() if self.predicate else None,
+            "predicate": self.predicate.to_dict(pack_namespace) if self.predicate else None,
         }
 
 

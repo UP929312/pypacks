@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.additions.custom_chunk_scanner import CustomChunkScanner
-from pypacks.providers.int_provider import UniformIntProvider
+from pypacks.providers.int_provider import IntRange
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -30,9 +30,9 @@ class CustomOreGeneration:
     entering 5 = 20% chance (1/5), entering 10 = 10% chance (1/10), etc"""
     internal_name: str
     block: "CustomBlock"
-    chance_of_spawning_in_a_chunk: int = 2
+    chance_of_spawning_in_a_chunk: int = 16   # 1 in 16 chance
     # depth
-    ore_vein_size: "UniformIntProvider" = field(default_factory=lambda: UniformIntProvider(3, 8))
+    ore_vein_size: "IntRange" = field(default_factory=lambda: IntRange(1, 7))
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default=None)  # type: ignore[assignment]
 
@@ -119,8 +119,8 @@ class CustomOreGeneration:
             f"execute store result storage {pack_namespace}:ore_generation_macros data.x int 1 run scoreboard players get ore_origin_x coords",
             f"execute store result storage {pack_namespace}:ore_generation_macros data.y int 1 run scoreboard players get ore_origin_y coords",
             f"execute store result storage {pack_namespace}:ore_generation_macros data.z int 1 run scoreboard players get ore_origin_z coords",
-            f"data modify storage {pack_namespace}:ore_generation_macros data.vein_min_size set value {self.ore_vein_size.min_inclusive}",
-            f"data modify storage {pack_namespace}:ore_generation_macros data.vein_max_size set value {self.ore_vein_size.max_inclusive}",
+            f"data modify storage {pack_namespace}:ore_generation_macros data.vein_min_size set value {self.ore_vein_size.min}",
+            f"data modify storage {pack_namespace}:ore_generation_macros data.vein_max_size set value {self.ore_vein_size.max}",
             f"data modify storage {pack_namespace}:ore_generation_macros data.place_ore_function set value \"{place_function}\"",
             "say About to run ore generation!",
             # f"function {spread_ore_function} with storage {pack_namespace}:ore_generation_macros data",  # Passes in the function, and x, y, z

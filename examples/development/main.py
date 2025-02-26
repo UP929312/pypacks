@@ -301,7 +301,7 @@ ttf_font = CustomFont("ttf_font", [TTFFontProvider("ttf_font", "fonts/Monocraft.
 # endregion
 # ============================================================================================================
 # region: Custom Ore Generation
-ruby_generation = CustomOreGeneration("ruby_generation", ruby_ore_block)
+ruby_generation = CustomOreGeneration("ruby_generation", ruby_ore_block, chance_of_spawning_in_a_chunk=2)
 # endregion
 # ============================================================================================================
 datapack = Pack(

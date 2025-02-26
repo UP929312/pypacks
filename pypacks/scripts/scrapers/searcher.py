@@ -1,7 +1,8 @@
 import os
 
 VERSION = "1.21.4"
-input_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\versions\\{VERSION}\\{VERSION}\\data\\minecraft"
+input_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\versions\\{VERSION}\\{VERSION}\\"
+print("Searching for input in", input_path)
 
 
 def search_keyword(directory: str, keyword: str) -> None:
@@ -19,4 +20,4 @@ def search_keyword(directory: str, keyword: str) -> None:
                 print(f"Could not read {file_path}: {e}")
 
 
-search_keyword(input_path, "creature_spawn_probability")
+search_keyword(input_path, "slots")

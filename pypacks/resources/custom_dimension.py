@@ -23,6 +23,9 @@ class CustomDimension:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension")
 
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
+
     def generate_teleport_command(self, pack_namespace: str) -> str:
         return f"/execute in {pack_namespace}:{self.internal_name} run tp @s ~ ~ ~"
 

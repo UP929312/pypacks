@@ -31,7 +31,7 @@ class Criteria:
     """A requirement for an advancement."""
     name: str
     trigger: TriggerType
-    conditions: dict[str, Any]
+    conditions: dict[str, Any]  # TODO: Type this ):
 
     def to_dict(self) -> dict[str, Any]:
         return {
