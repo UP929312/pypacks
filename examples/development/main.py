@@ -26,11 +26,11 @@ block_blocking_entity_ray_cast = EntityRaycast("block_blocking_entity_ray_cast",
 # ============================================================================================================
 # region: Custom Items
 # Custom Items
-ruby = CustomItem("ruby", "minecraft:emerald", "&cSpecial &4Ruby", lore=["Custom &cRuby&f, ooh!"], texture_path="images/ruby.png", ref_book_config=RefBookConfig(description="A special ruby, found in the depths of the earth."))
+ruby = CustomItem("ruby", "minecraft:emerald", "Special Ruby", lore=["Custom Ruby, ooh!"], texture_path="images/ruby.png", ref_book_config=RefBookConfig(description="A special ruby, found in the depths of the earth."))
 topaz = CustomItem("topaz", "minecraft:redstone", "Topaz", texture_path="images/topaz.png", components=Components(equippable=Equippable("chest")))
 weak_axe = CustomItem("weak_axe", "minecraft:netherite_axe", "Weak Axe", components=Components(durability=10, lost_durability=5), ref_book_config=RefBookConfig(category=weapons_category))
 flying_helmet = CustomItem("flying_helmet", "minecraft:iron_helmet", "Flying Helmet", components=Components(glider=True, consumable=Consumable(0.5, "drink"), food=Food(5, 0, True), use_remainder=UseRemainder("minecraft:diamond", 2)), ref_book_config=RefBookConfig(category=usable_category))
-playable_lapis = CustomItem("playable_lapis", "minecraft:lapis_lazuli", "Playable Lapis", max_stack_size=99, rarity="epic", components=Components(jukebox_playable=JukeboxPlayable("pigstep", True)), ref_book_config=RefBookConfig(category=usable_category))
+playable_lapis = CustomItem("playable_lapis", "minecraft:lapis_lazuli", "Playable Lapis", max_stack_size=99, rarity="epic", components=Components(jukebox_playable=JukeboxPlayable("pigstep")), ref_book_config=RefBookConfig(category=usable_category))
 musical_horn = CustomItem("musical_horn", "minecraft:goat_horn", "Musical Horn", components=Components(instrument=Instrument("minecraft:item.goat_horn.sound.5", "Custom description?", 5, 256)), ref_book_config=RefBookConfig(category=usable_category))
 rick_roll_horn = CustomItem("never_going_to_give_you_up", "minecraft:goat_horn", "Rick Roll", components=Components(instrument=Instrument(custom_sound, "Rick Roll", 5, 256)), ref_book_config=RefBookConfig(category=usable_category))
 written_book = CustomItem("already_written_in_book", "minecraft:written_book", "Written Book", components=Components(written_book_content=WrittenBookContent("Hello, World!", "Author", [[{"text": "abc\n"}, {"text": "def"}]])),)
@@ -70,7 +70,7 @@ bee_nest = CustomItem("bee_nest", "minecraft:bee_nest", "Bee Nest", components=C
 bundle = CustomItem("bundle", "minecraft:bundle", "Bundle", components=Components(bundle_contents=BundleContents({"minecraft:emerald": 5, ruby: 3})), ref_book_config=RefBookConfig(category=usable_category))
 filled_barrel = CustomItem("filled_barrel", "minecraft:barrel", "Filled Barrel", components=Components(container_contents=ContainerContents({"minecraft:diamond": 5, ruby: 3})), ref_book_config=RefBookConfig(category=usable_category))
 custom_potion = CustomItem("custom_potion", "minecraft:potion", "Custom Potion", components=Components(potion_contents=PotionContents(custom_color=0xFF0000, effects=[PotionEffect("speed", 1, 20*10)])), ref_book_config=RefBookConfig(category=consumable_category))
-decorated_pot = CustomItem("decorated_pot", "decorated_pot", "decorated Pot", components=Components(pot_decorations=["angler_pottery_sherd", "brick", "arms_up_pottery_sherd", "skull_pottery_sherd"]))
+decorated_pot = CustomItem("decorated_pot", "decorated_pot", "Decorated Pot", components=Components(pot_decorations=["angler_pottery_sherd", "brick", "arms_up_pottery_sherd", "skull_pottery_sherd"]))
 death_protection_star = CustomItem("death_protection_star", "minecraft:nether_star", "Death Protection Star", components=Components(death_protection=DeathProtection(apply_affects=[PotionEffect("fire_resistance", 2, 20*5)])), ref_book_config=RefBookConfig(category=consumable_category))
 dyed_helmet = CustomItem("dyed_helmet", "minecraft:leather_helmet", "Dyed Helmet", components=Components(dye_color=0xFF00FF))
 trimmed_leggings = CustomItem("trimmed_leggings", "minecraft:leather_leggings", "Trimmed Leggings", components=Components(armor_trim=ArmorTrim("host", "emerald")), ref_book_config=RefBookConfig(category=usable_category))
@@ -91,7 +91,7 @@ on_drop_copper_ingot = CustomItem("on_drop_copper_ingot", "minecraft:copper_ingo
 
 custom_items = [
     ruby, topaz, weak_axe, flying_helmet, playable_lapis, musical_horn, written_book, rick_roll_horn,
-    lodestone_tracker, speedy_porkchop, unbreakable_axe, player_head, writable_book, sharpness_fish,
+    speedy_porkchop, unbreakable_axe, player_head, writable_book, sharpness_fish,  # lodestone_tracker
     enchantment_spruce_door, attribute_modified_axe, repairable_axe, slow_enderpearl_recharge,
     right_clickable_feather, right_clickable_nether_quartz, custom_head_texture, ray_gun, entity_finder,
     block_blocked_entity_finder,  # edible_item
@@ -304,6 +304,16 @@ ttf_font = CustomFont("ttf_font", [TTFFontProvider("ttf_font", "fonts/Monocraft.
 ruby_generation = CustomOreGeneration("ruby_generation", ruby_ore_block, chance_of_spawning_in_a_chunk=2)
 # endregion
 # ============================================================================================================
+# region: Entity Variants
+sand_cat = CatVariant("sand_cat", texture_path="images/sand_cat.png")
+sand_chicken = ChickenVariant("sand_chicken", texture_path="images/sand_chicken.png")
+sand_cow = CowVariant("sand_cow", texture_path="images/sand_cow.png")
+sand_frog = FrogVariant("sand_frog", texture_path="images/sand_frog.png")
+sand_pig = PigVariant("sand_pig", texture_path="images/sand_pig.png")
+sand_wolf = WolfVariant("sand_wolf", wild_texture_path="images/sand_wolf.png", tame_texture_path="images/sand_wolf_tame.png", angry_texture_path="images/sand_wolf_angry.png")
+entity_variants = [sand_pig, sand_cow, sand_chicken, sand_cat, sand_frog, sand_wolf]
+# endregion
+# ============================================================================================================
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -328,6 +338,7 @@ datapack = Pack(
     custom_tags=[ruby_or_topaz_tag],
     # custom_loops=[every_sixty_seconds],
     custom_fonts=[ttf_font],
+    custom_entity_variants=entity_variants,
     custom_ore_generations=[ruby_generation],
-    config=Config(warn_about_tags_with_custom_items=False)
+    config=Config(warn_about_tags_with_custom_items=False),
 )

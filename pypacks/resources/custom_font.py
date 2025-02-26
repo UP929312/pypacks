@@ -24,7 +24,7 @@ class CustomFont:
 
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
-        return {element.name: f"\\uE{i:03}" for i, element in enumerate(self.font_elements)}
+        return {element.name: f"\\u{i:04}" for i, element in enumerate(self.font_elements)}
 
     def to_dict(self, pack_namespace: str) -> list[dict[str, Any]]:
         mapping = self.get_mapping()
@@ -90,7 +90,7 @@ class TTFFontProvider:
 
 
 @dataclass
-class BitMapFontChar:
+class BitMapFontChar:  # TODO: This auto-assigns characters, allow the user to add regular characters themselves
     """Represents an image in a book."""
     name: str  # e.g. "logo"
     image_bytes: bytes

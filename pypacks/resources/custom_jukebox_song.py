@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.resources.custom_item import CustomItem
 from pypacks.additions.item_components import Components, JukeboxPlayable
@@ -17,7 +17,7 @@ class CustomJukeboxSong:
     internal_name: str
     description: str
     ogg_path: str
-    comparator_output: int
+    comparator_output: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     length_in_seconds: float  # | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="jukebox_song")

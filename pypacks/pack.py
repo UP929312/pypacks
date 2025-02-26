@@ -20,6 +20,7 @@ from pypacks.generate import generate_datapack, generate_resource_pack, generate
 if TYPE_CHECKING:
     from pypacks.additions.custom_block import CustomBlock
     from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+    from pypacks.resources.entities import EntityVariant
     from pypacks.resources.custom_advancement import CustomAdvancement
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
@@ -63,6 +64,7 @@ class Pack:
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
     custom_damage_types: list["CustomDamageType"] = field(default_factory=list)
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
+    custom_entity_variants: list["EntityVariant"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
     custom_fonts: list["CustomFont"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
@@ -94,8 +96,8 @@ class Pack:
         self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[assignment]
         self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[assignment]
 
-        self.data_pack_format_version = 61
-        self.resource_pack_format_version = 46
+        self.data_pack_format_version = 69
+        self.resource_pack_format_version = 53
 
         assert self.namespace.islower(), "Namespace must be all lowercase"
         assert all(x in "abcdefghijklmnopqrstuvwxyz0123456789_-." for x in self.namespace), "Namespace must only contain letters, numbers, _, -, and ."

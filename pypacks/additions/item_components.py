@@ -567,19 +567,11 @@ class Instrument:
 @dataclass
 class JukeboxPlayable:
     song: "str | CustomJukeboxSong" = "pigstep"
-    show_in_tooltip: bool = True
-
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return {
-            "song": self.get_reference(pack_namespace),
-            "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
-        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "JukeboxPlayable":
         return cls(
             song=data["song"],
-            show_in_tooltip=data.get("show_in_tooltip", True),
         )
 
     def get_reference(self, pack_namespace: str) -> str:
@@ -603,7 +595,7 @@ class LodestoneTracker:
     def to_dict(self) -> dict[str, Any]:
         return {
             "target": {
-                "pos": [self.x, self.y, self.z],
+                "pos": f"[I; {self.x}, {self.y}, {self.z}]",
                 "dimension": self.dimension,
             },
             "tracked": False if not self.tracked else None,  # Defaults to True
@@ -847,11 +839,14 @@ class WrittenBookContent:
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["written_book"])
 
+    def __post_init__(self) -> None:
+        assert len(self.title) <= 32, "Title must be 32 characters or less"
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "title": self.title,
             "author": self.author,
-            "pages": [json.dumps(x, ensure_ascii=False).replace("\\\\", "\\") for x in self.pages],
+            "pages": self.pages,
         }
 
     @classmethod
@@ -1048,7 +1043,7 @@ class Components:
             "tooltip_style":              self.tooltip_style,
 
             "trim":                       self.armor_trim.to_dict() if self.armor_trim is not None else None,
-            "attribute_modifiers":        {"modifiers": [modifier.to_dict() for modifier in self.attribute_modifiers], "show_in_tooltip": False} if self.attribute_modifiers else None,
+            "attribute_modifiers":        [modifier.to_dict() for modifier in self.attribute_modifiers] if self.attribute_modifiers else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns else None,
             "bees":                       [bee.to_dict() for bee in self.bees] if self.bees else None,
             "bundle_contents":            self.bundle_contents.to_dict(pack_namespace) if self.bundle_contents is not None else None,
@@ -1061,7 +1056,7 @@ class Components:
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
             "fireworks":                  self.firework.to_dict() if self.firework is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,
-            "jukebox_playable":           self.jukebox_playable.to_dict(pack_namespace) if self.jukebox_playable is not None else None,
+            "jukebox_playable":           self.jukebox_playable.get_reference(pack_namespace) if self.jukebox_playable is not None else None,
             "lodestone_tracker":          self.lodestone_tracker.to_dict() if self.lodestone_tracker is not None else None,
             "map_color":                  self.map_data.to_dict()["map_color"] if self.map_data is not None else None,
             "map_id":                     self.map_data.to_dict()["map_id"] if self.map_data is not None else None,

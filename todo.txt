@@ -7,6 +7,8 @@ CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
 Write a read-me
 
+summon pig ~ ~ ~ {"variant": "pypacks_testing:sand_pig"}
+
 Type Predicates ):
 # Predicate typing - Add player specific ones, and a new datapack to test them *all*
 

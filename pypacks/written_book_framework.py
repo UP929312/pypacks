@@ -14,10 +14,6 @@ NEWLINES_BETWEEN_GRID_ROWS = 3
 
 ICON_ROW_INDENT = 2
 
-# \n has to be \\n
-# \uE<x><x><x> has to be \\uE<x><x><x>
-# https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Java_Edition
-
 # =======================================================================================================================================
 
 
@@ -26,7 +22,7 @@ class OnClickChangePage:
     page_to_change_to: int
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"clickEvent": {"action": "change_page", "value": str(self.page_to_change_to)}}
+        return {"click_event": {"action": "change_page", "page": self.page_to_change_to}}
 
 
 @dataclass
@@ -34,16 +30,16 @@ class OnClickRunCommand:
     command: str
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"clickEvent": {"action": "run_command", "value": self.command}}
+        return {"click_event": {"action": "run_command", "command": self.command}}
 
 
 @dataclass
 class OnHoverShowText:
-    text: str
+    text: str | dict[str, Any]
     font: str = "minecraft:default"
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"hoverEvent": {"action": "show_text", "contents": {"text": self.text, "font": self.font}}}
+        return {"hover_event": {"action": "show_text", "value": self.text, "font": self.font}}
 
 
 @dataclass
@@ -51,7 +47,7 @@ class OnHoverShowTextRaw:
     text: dict[str, Any] | list[dict[str, Any]]
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"hoverEvent": {"action": "show_text", "contents": self.text}}
+        return {"hover_event": {"action": "show_text", "value": self.text}}
 
 
 @dataclass
@@ -60,7 +56,7 @@ class OnHoverShowItem:
     pack_namespace: str
 
     def get_json_data(self) -> dict[str, Any]:
-        return {"hoverEvent": {"action": "show_item", "contents": {"id": self.custom_item.base_item, "components": self.custom_item.to_dict(self.pack_namespace)}}}
+        return {"hover_event": {"action": "show_item", "id": self.custom_item.base_item, "components": self.custom_item.to_dict(self.pack_namespace)}}
 
 
 # =======================================================================================================================================

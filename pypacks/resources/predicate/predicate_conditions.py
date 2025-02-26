@@ -117,7 +117,7 @@ SlotType = Literal[
     "enderchest.23", "enderchest.24", "enderchest.25", "enderchest.26", "enderchest.3", "enderchest.4", "enderchest.5", "enderchest.6", "enderchest.7",
     "enderchest.8", "enderchest.9",
     "horse.*", "horse.0", "horse.1", "horse.10", "horse.11", "horse.12", "horse.13", "horse.14", "horse.2", "horse.3", "horse.4", "horse.5", "horse.6", "horse.7",
-    "horse.8", "horse.9", "horse.chest", "horse.saddle", 
+    "horse.8", "horse.9", "horse.chest", "saddle", 
     "hotbar.*", "hotbar.0", "hotbar.1", "hotbar.2", "hotbar.3", "hotbar.4", "hotbar.5", "hotbar.6", "hotbar.7", "hotbar.8",
     "inventory.*", "inventory.0", "inventory.1", "inventory.10", "inventory.11", "inventory.12", "inventory.13", "inventory.14", "inventory.15", "inventory.16",
     "inventory.17", "inventory.18", "inventory.19", "inventory.2", "inventory.20", "inventory.21", "inventory.22", "inventory.23", "inventory.24", "inventory.25",

@@ -6,7 +6,6 @@ from pypacks.written_book_framework import (
     OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw,
     ICONS_PER_ROW, ROWS_PER_PAGE,
 )
-from pypacks.utils import remove_colour_codes
 from pypacks.resources.custom_recipe import *  # noqa: F403
 
 if TYPE_CHECKING:
@@ -28,7 +27,7 @@ class ItemPage:
         info_icons: list[Icon] = []
         # ============================================================================================================
         # More info button
-        more_info_text = f"More info about {remove_colour_codes(self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title())}:\n\n{self.item.ref_book_config.description}"
+        more_info_text = f"More info about {self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title()}:\n\n{self.item.ref_book_config.description}"
         more_info_button = Icon(
             self.pack.font_mapping["information_icon"],
             self.pack.namespace,
@@ -88,7 +87,7 @@ class ItemPage:
         more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.font_mapping["1_pixel_indent"],
                                          self.pack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES).rows
         return [
-            Text(f"{remove_colour_codes(self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title())}", underline=True, bold=True, text_color="black"),
+            Text(self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title(), underline=True, bold=True, text_color="black"),
             Text("\n"*2),
             give_item_icon,
             Text("\n"*4),
@@ -173,7 +172,7 @@ class ReferenceBook:
                         pack.font_mapping[f"{item.internal_name}_icon"],
                         pack.namespace,
                         indent_unicode_char=pack.font_mapping["1_pixel_indent"],
-                        on_hover=OnHoverShowText(remove_colour_codes(item.custom_name or item.base_item.removeprefix('minecraft:').title())),
+                        on_hover=OnHoverShowText(item.custom_name or item.base_item.removeprefix('minecraft:').title()),
                         on_click=OnClickChangePage(ITEM_PAGE_START+item_index),
                     )
                     for item_index, item in enumerate(pack.custom_items)

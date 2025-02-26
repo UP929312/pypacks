@@ -1,5 +1,5 @@
 # =============================================================================
-# Resources
+# Loot table
 from pypacks.resources.custom_loot_tables.custom_loot_table import (
     BinomialDistributionEntry, UniformDistributionEntry, SingleItemRangeEntry,
     SingleItemPool, SimpleRangePool,
@@ -21,10 +21,24 @@ from pypacks.resources.custom_loot_tables.functions import (  # All 39...
     SetStewEffectFunction, SetWrittenBookPagesFunction, SetWritableBookPagesFunction,
     ToggleToolTipsFunction,
 )
+# =============================================================================
+# Entities
+from pypacks.resources.entities.spawn_conditions import BiomeSpawnCondition, StructureSpawnCondition, MoonBrightnessSpawnCondition
+from pypacks.resources.entities import EntityVariant
+from pypacks.resources.entities.cat_variant import CatVariant
+from pypacks.resources.entities.chicken_variant import ChickenVariant
+from pypacks.resources.entities.cow_variant import CowVariant
+from pypacks.resources.entities.frog_variant import FrogVariant
+from pypacks.resources.entities.pig_variant import PigVariant
+from pypacks.resources.entities.wolf_variant import WolfVariant
+# =============================================================================
+# World Gen
 from pypacks.resources.world_gen import (
     CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound
 )
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride, DisableSpawnOverrideCategory
+# =============================================================================
+# Regular
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_damage_type import CustomDamageType, DamageTypeTranslation
 from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
@@ -73,7 +87,7 @@ from pypacks.resources.item_model_definition import (
 )
 
 __all__ = [
-    # Resources
+    # Loot Table
     "BinomialDistributionEntry", "UniformDistributionEntry", "SingleItemRangeEntry",
     "SingleItemPool", "SimpleRangePool",
     "CustomLootTable", "SimpleRangeLootTable", "SingleItemLootTable",
@@ -93,6 +107,11 @@ __all__ = [
     "SetStewEffectFunction", "SetWrittenBookPagesFunction", "SetWritableBookPagesFunction",
     "ToggleToolTipsFunction",
 
+    # Entities
+    "BiomeSpawnCondition", "StructureSpawnCondition", "MoonBrightnessSpawnCondition", "EntityVariant",
+    "CatVariant", "ChickenVariant", "CowVariant", "FrogVariant", "PigVariant", "WolfVariant",
+
+    # World Gen
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "CustomAdvancement", "Criteria",
     "CustomDamageType", "DamageTypeTranslation",
@@ -111,6 +130,7 @@ __all__ = [
     "CustomPainting",
 
     "Predicate",
+    # Predicate Conditions
     "AllOfPredicate", "AnyOfPredicate", "BlockStatePropertyPredicate", "DamageSourcePropertiesPredicate", "EnchantmentActiveCheckPredicate",
     "EntityPropertiesPredicate", "EntityScoresPredicate", "InvertedPredicate", "KilledByPlayerPredicate",
     "LocationCheckPredicate", "MatchToolPredicate", "RandomChancePredicate", "RandomChanceWithEnchantedBonusPredicate",
@@ -118,6 +138,7 @@ __all__ = [
     "WeatherCheckPredicate",
     "DamageTypeTag", "EntityDistance", "EntityFlags", "MovementCheck", "EntityCondition", "BlockPredicate", "FluidPredicate", "LocationTag", "ItemCondition",
 
+    # Rest
     "Recipe", "CustomCrafterRecipe", "ShapedCraftingRecipe", "ShapelessCraftingRecipe", "CraftingTransmuteRecipe", "FurnaceRecipe", "BlastFurnaceRecipe", "SmokerRecipe",
     "CampfireRecipe", "SmithingTransformRecipe", "SmithingTrimRecipe", "StonecutterRecipe",
     "CustomSound",
