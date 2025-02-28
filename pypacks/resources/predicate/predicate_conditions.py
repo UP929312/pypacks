@@ -27,11 +27,11 @@ FluidType = Literal["minecraft:water", "minecraft:flowing_water", "minecraft:lav
 class DamageTypeTag:
     direct_entity: "EntityCondition | None" = None
     source_entity: "EntityCondition | None" = None
-    is_direct: bool = False  #  If true, checks if the damage is direct (i.e. the direct and source entities are the same), if false checks if the damage is not direct. Omitted to not check.
+    is_direct: bool = False  # If true, checks if the damage is direct (i.e. the direct and source entities are the same), if false checks if the damage is not direct. Omitted to not check.
     tags: dict["str | CustomDamageType", str | bool] = field(default_factory=lambda: {"minecraft:is_lightning": True})  # Maps damage type tag to if it's expected or not
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "direct_entity": self.direct_entity.to_dict(pack_namespace) if self.direct_entity else None,
             "source_entity": self.source_entity.to_dict(pack_namespace) if self.source_entity else None,
             "is_direct": self.is_direct,
@@ -52,7 +52,7 @@ class EntityDistance:
     z: "float | IntRange | None" = None
 
     def to_dict(self) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "absolute": self.absolute.to_dict() if isinstance(self.absolute, IntRange) else self.absolute,
             "horizontal": self.horizontal.to_dict() if isinstance(self.horizontal, IntRange) else self.horizontal,
             "x": self.x.to_dict() if isinstance(self.x, IntRange) else self.x,
@@ -72,7 +72,7 @@ class EntityFlags:
     is_flying: bool | None = None  # Test whether the entity is or is not flying (with elytra or in creative mode).
 
     def to_dict(self) -> dict[str, bool]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "is_baby": self.is_baby,
             "is_on_fire": self.is_on_fire,
             "is_sneaking": self.is_sneaking,
@@ -93,7 +93,7 @@ class MovementCheck:
     fall_distance: "float | IntRange | None" = None  # Test the fall distance of the entity in blocks.
 
     def to_dict(self) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "x": self.x.to_dict() if isinstance(self.x, IntRange) else self.x,
             "y": self.y.to_dict() if isinstance(self.y, IntRange) else self.y,
             "z": self.z.to_dict() if isinstance(self.z, IntRange) else self.z,
@@ -117,7 +117,7 @@ SlotType = Literal[
     "enderchest.23", "enderchest.24", "enderchest.25", "enderchest.26", "enderchest.3", "enderchest.4", "enderchest.5", "enderchest.6", "enderchest.7",
     "enderchest.8", "enderchest.9",
     "horse.*", "horse.0", "horse.1", "horse.10", "horse.11", "horse.12", "horse.13", "horse.14", "horse.2", "horse.3", "horse.4", "horse.5", "horse.6", "horse.7",
-    "horse.8", "horse.9", "horse.chest", "saddle", 
+    "horse.8", "horse.9", "horse.chest", "saddle",
     "hotbar.*", "hotbar.0", "hotbar.1", "hotbar.2", "hotbar.3", "hotbar.4", "hotbar.5", "hotbar.6", "hotbar.7", "hotbar.8",
     "inventory.*", "inventory.0", "inventory.1", "inventory.10", "inventory.11", "inventory.12", "inventory.13", "inventory.14", "inventory.15", "inventory.16",
     "inventory.17", "inventory.18", "inventory.19", "inventory.2", "inventory.20", "inventory.21", "inventory.22", "inventory.23", "inventory.24", "inventory.25",
@@ -126,6 +126,7 @@ SlotType = Literal[
     "villager.*", "villager.0", "villager.1", "villager.2", "villager.3", "villager.4", "villager.5", "villager.6", "villager.7",
     "weapon", "weapon.*", "weapon.mainhand", "weapon.offhand",
 ]
+
 
 @dataclass
 class EntityCondition:
@@ -157,7 +158,7 @@ class EntityCondition:
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.additions.item_components import PotionEffect
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "type": self.entity_type if isinstance(self.entity_type, list) else self.entity_type.get_reference(pack_namespace),  # For tags
             "distance": self.distance.to_dict() if self.distance else None,
             "effects": [effect.to_dict() if isinstance(effect, PotionEffect) else effect for effect in self.effects],
@@ -305,7 +306,7 @@ class LocationTag:
         from pypacks.resources.custom_dimension import CustomDimension
         from pypacks.resources.world_gen.biome import CustomBiome
         from pypacks.resources.world_gen.structure import CustomStructure
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "biomes": [
                 biome.get_reference(pack_namespace) if isinstance(biome, CustomBiome) else biome for biome in self.biomes
             ] if isinstance(self.biomes, list) else self.biomes.get_reference(pack_namespace),  # For tags
@@ -339,7 +340,7 @@ class ItemCondition:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.providers.int_provider import UniformIntProvider
         from pypacks.resources.custom_item import CustomItem
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "items": [item.get_reference(pack_namespace) if isinstance(item, CustomItem) else item for item in self.items],
             "count": self.count.to_dict() if isinstance(self.count, UniformIntProvider) else self.count,
             "components": self.components or None,

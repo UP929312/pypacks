@@ -35,6 +35,7 @@ class CustomChunkScanner:
         checked_function = CustomChunkScanner.generate_mark_and_call_function(pack_namespace).get_reference(pack_namespace)
 
         check_chunks = MCFunction("check_chunks_loop", [
+            "return fail",
             # First, we get the players position:
             "execute as @a run execute store result score x_coord coords run data get entity @s Pos[0] 1",  # Stores their x into obj "coords" | player "x_coord"
             "execute as @a run execute store result score z_coord coords run data get entity @s Pos[2] 1",  # Stores their z into obj "coords" | player "z_coord"

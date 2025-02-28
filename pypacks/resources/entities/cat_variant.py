@@ -18,6 +18,3 @@ class CatVariant(GenericEntityVariant):
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="cat_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/cat")
     entity_type: str = field(init=False, repr=False, hash=False, default="cat")
-
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return super().to_dict(pack_namespace)

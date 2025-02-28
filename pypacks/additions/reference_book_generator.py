@@ -204,9 +204,10 @@ class ReferenceBook:
         return [cover_page, *category_pages, *category_items_pages, *item_pages, blank_page]
 
     def generate_give_command(self, pack: "Pack") -> str:
+        title = f"{pack.name} Reference Book" if len(f"{pack.name} Reference Book") <= 32 else "Reference book"
         return FormattedWrittenBook(
             pages=self.generate_pages(pack),
-            title=f"{pack.name} Reference Book",
-            author="Pypacks",
+            title=title,
+            author=pack.name,
         ).generate_give_command(pack.namespace)
 # =======================================================================================================================================

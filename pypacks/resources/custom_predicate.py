@@ -21,7 +21,7 @@ class Predicate:
 
     def to_dict(self, pack_namespace: str) -> dict[str, str]:
         raise NotImplementedError
-    
+
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
 
@@ -95,7 +95,7 @@ class EnchantmentActiveCheckPredicate(Predicate):
 @dataclass
 class EntityPropertiesPredicate(Predicate):
     """Checks properties of an entity. Invokable from any context."""
-    entity: Literal["this", "attacker", "direct_attacker", "attacking_player"]  #  The entity to check. Specifies an entity from loot context. 
+    entity: Literal["this", "attacker", "direct_attacker", "attacking_player"]  # The entity to check. Specifies an entity from loot context.
     predicate: "EntityCondition"  # Predicate applied to entity, uses same structure as advancements.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -136,7 +136,7 @@ class InvertedPredicate(Predicate):
 class KilledByPlayerPredicate(Predicate):
     """Checks if there is a attacking_player entity provided by loot context.
     Requires attacking_player entity provided by loot context, and always fails if not provided."""
-    
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "condition": "killed_by_player"
@@ -221,7 +221,7 @@ class ReferencePredicate(Predicate):
 @dataclass
 class SurvivesExplosionPredicate(Predicate):
     """Checks if the entity survives an explosion. Requires origin provided by loot context, and always fails if not provided."""
-    
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "condition": "survives_explosion"
@@ -273,7 +273,7 @@ class ValueCheckPredicate(Predicate):
         return {
             "condition": "value_check",
             "value": self.value.to_dict() if isinstance(self.value, NumberProvider) else self.value,
-    }
+        }
     # value_check—Compares a number against another number or range of numbers. Invokable from any context.
     # [Int][NBT Compound / JSON Object] value: A number provider. The number to test.
     # [NBT Compound / JSON Object] range: The range of numbers to compare [Int][NBT Compound / JSON Object] value against.

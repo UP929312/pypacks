@@ -23,9 +23,10 @@ class FontTestingBook:
         ]
 
     def generate_give_command(self, pack: "Pack") -> str:
+        title = f"{pack.name} Font Test Book" if len(f"{pack.name} Reference Book") <= 32 else "Font Test Book"
         return FormattedWrittenBook(
-            pages=self.generate_pages(pack),  # pyright: ignore
-            title=f"{pack.name} Font Test Book",
-            author="Pypacks",
+            pages=self.generate_pages(pack),  # type: ignore[arg-type]
+            title=title,
+            author=pack.name,
         ).generate_give_command(pack.namespace)
 # =======================================================================================================================================

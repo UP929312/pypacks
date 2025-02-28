@@ -229,16 +229,15 @@ class Icon:
 
 @dataclass
 class Text:
-    text: str
+    text: str | dict[str, Any]
     underline: bool = False
     bold: bool = False
     font: str = "minecraft:default"
     text_color: str | None = None
 
     def get_json_data(self) -> dict[str, Any]:
-        return_value = {
-            "text": self.text, "underlined": self.underline, "bold": self.bold, "font": self.font,
-        }
+        return_value = {"underlined": self.underline, "bold": self.bold, "font": self.font}
+        return_value |= {"text": self.text} if isinstance(self.text, str) else self.text
         if self.text_color is not None:
             return_value |= {"color": self.text_color}
         return return_value

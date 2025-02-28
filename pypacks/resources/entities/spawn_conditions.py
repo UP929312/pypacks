@@ -45,4 +45,5 @@ class MoonBrightnessSpawnCondition:
             }
         }
 
+
 SpawnConditionType: TypeAlias = BiomeSpawnCondition | StructureSpawnCondition | MoonBrightnessSpawnCondition

@@ -60,8 +60,8 @@ class CustomStructure:
 class SingleCustomStructure:
     """A single structure, most of the work is done for you."""
     internal_name: str
-    biomes_to_spawn_in: "list[str | CustomBiome] | str"  # One or more biome(s) (a biome ID, #tag, or a list containing IDs) - Biomes that this structure is allowed to generate in.
     path_to_nbt_file: Path | str
+    biomes_to_spawn_in: "list[str | CustomBiome]" = field(default_factory=list)  # Biomes that this structure is allowed to generate in.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/structure")
 
@@ -71,7 +71,6 @@ class SingleCustomStructure:
     def create_children(self, pack_namespace: str) -> tuple["CustomStructure", "CustomStructureSet", "SingleItemTemplatePool"]:
         from pypacks.resources.world_gen.biome import CustomBiome
         from pypacks.resources.world_gen.structure_set import CustomStructureSet
-        biomes = self.biomes_to_spawn_in if isinstance(self.biomes_to_spawn_in, list) else [self.biomes_to_spawn_in]
         custom_structure = CustomStructure(
             self.internal_name,
             structure_type=JigsawStructureType(
@@ -80,7 +79,7 @@ class SingleCustomStructure:
                 start_height=0,
                 project_start_to_heightmap="WORLD_SURFACE_WG",
             ),
-            biomes_to_spawn_in=[biome.get_reference(pack_namespace) if isinstance(biome, CustomBiome) else biome for biome in biomes],
+            biomes_to_spawn_in=[biome.get_reference(pack_namespace) if isinstance(biome, CustomBiome) else biome for biome in self.biomes_to_spawn_in],
             generation_step="surface_structures",
             terrain_adaptation="beard_thin",
         )
@@ -169,3 +168,27 @@ class SingleItemTemplatePool:
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool", exist_ok=True)
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool"/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(), file, indent=4)
+
+# ============================================================================================================
+
+
+@dataclass
+class GameTestStructure:
+    internal_name: str
+    path_to_structure_nbt: Path | str
+
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/structure")
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        structure = SingleCustomStructure(self.internal_name, self.path_to_structure_nbt)
+        structure.create_datapack_files(pack)
+        # os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure", exist_ok=True)
+        # with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure"/f"{self.internal_name}.nbt", "wb") as file:
+        #     file.write(Path(self.path_to_structure_nbt).read_bytes())
+
+    @classmethod
+    def from_single_custom_structure(cls, single_custom_structure: SingleCustomStructure) -> "GameTestStructure":
+        return cls(single_custom_structure.internal_name, single_custom_structure.path_to_nbt_file)
+
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"

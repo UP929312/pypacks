@@ -28,7 +28,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-exclude = [".vscode", ".mypy_cache", ".git", "__pycache__"]
+exclude = [".vscode", ".mypy_cache", ".git", "__pycache__", "examples/item_components", "examples/raycasting", "examples/tests"]
 strict = true
 
 [tool.pylint.main]

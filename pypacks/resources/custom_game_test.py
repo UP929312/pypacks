@@ -1,0 +1,171 @@
+import json
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias
+from dataclasses import dataclass, field
+
+from pypacks.utils import recursively_remove_nones_from_data
+
+if TYPE_CHECKING:
+    from pypacks.resources.custom_mcfunction import MCFunction
+    from pypacks.resources.world_gen.structure import GameTestStructure
+    from pypacks.pack import Pack
+
+
+@dataclass
+class CustomGameTest:
+    """A test instance represents a test that can be run by the GameTest framework."""
+    # https://minecraft.wiki/w/Test_instance_definition
+    internal_name: str
+    environment: "str | CustomTestEnvironment"  # The environment of this test.
+    structure: "str | GameTestStructure"  # The structure to use for the test (or a path to a structure.nbt file).
+    max_ticks: int  # A positive integer representing the maximum number of ticks allowed to pass before the test is considered timed out.
+    setup_ticks: int = 0  # Represents a number of ticks to wait after placing the structure before starting the test. Must be a non-negative integer.
+    required: bool = True  # Whether the test is considered required to pass for the full test suite to pass.
+    rotation: Literal["none", "clockwise_90", "180", "counterclockwise_90"] = "none"  # Optional rotation to apply to the test structure.
+    manual_only: bool = False  # Set to true for tests that are not included as part of automated test runs.
+    sky_access: bool = False  # Whether the test needs clear access to the sky. Tests are enclosed in barrier blocks. If set to true, the top is left open.
+    max_attempts: int = 1  # Number of attempts to run the test.
+    required_successes: int = 1  # Number of attempts that must succeed for the test to be considered successful.
+    type: Literal["block_based", "function"] = "block_based"  # The type of test.
+    function: "MCFunction | str | None" = None  # The function to run for the test. Only used if type is "function".
+
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="test_instance")
+
+    def __post_init__(self) -> None:
+        if self.type == "function" and self.function is None:
+            raise ValueError("A function must be provided for a function test.")
+        if self.type != "function" and self.function is not None:
+            raise ValueError("A function cannot be provided for a block-based test.")
+
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.world_gen.structure import GameTestStructure
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
+            "environment": self.environment.get_reference(pack_namespace) if isinstance(self.environment, CustomTestEnvironment) else self.environment,
+            "structure": self.structure.get_reference(pack_namespace) if isinstance(self.structure, GameTestStructure) else self.structure,
+            "max_ticks": self.max_ticks,
+            "setup_ticks": self.setup_ticks if self.setup_ticks != 0 else None,
+            "required": False if not self.required else None,
+            "rotation": self.rotation if self.rotation != "none" else None,
+            "manual_only": self.manual_only if self.manual_only else None,
+            "sky_access": self.sky_access if self.sky_access else None,
+            "max_attempts": self.max_attempts if self.max_attempts != 1 else None,
+            "required_successes": self.required_successes if self.required_successes != 1 else None,
+            "type": self.type,
+        })
+
+    def get_run_command(self, pack_namespace: str) -> str:
+        return f"test run {self.get_reference(pack_namespace)}"
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        from pypacks.resources.world_gen.structure import GameTestStructure
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(pack.namespace), file, indent=4)
+        if isinstance(self.structure, GameTestStructure):
+            self.structure.create_datapack_files(pack)
+
+
+@dataclass
+class GenericTestEnvironment:
+    """Do not instantiate this class directly. Use one of the subclasses instead."""
+    internal_name: str
+
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="test_environment")
+
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        raise NotImplementedError
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+            json.dump(self.to_dict(pack.namespace), file, indent=4)
+
+
+@dataclass
+class AllOfEnvironment(GenericTestEnvironment):
+    """Applies multiple environments"""
+    # https://minecraft.wiki/w/Test_environment_definition#all_of
+    definitions: list["GenericTestEnvironment | str"]  # Another test environment.
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return {
+            "type": "all_of",
+            "definitions": [
+                definition.get_reference(pack_namespace) if isinstance(definition, GenericTestEnvironment) else definition
+                for definition in self.definitions
+            ],
+        }
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        super().create_datapack_files(pack)
+        for definition in self.definitions:
+            if isinstance(definition, GenericTestEnvironment):
+                definition.create_datapack_files(pack)
+
+
+@dataclass
+class FunctionEnvironment(GenericTestEnvironment):
+    """Uses functions to set up and tear down the test."""
+    # https://minecraft.wiki/w/Test_environment_definition#function
+    setup: "MCFunction | str | None" = None  # The function to use for setup.
+    teardown: "MCFunction | str | None" = None  # The function to use for teardown.
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_mcfunction import MCFunction
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
+            "type": "function",
+            "setup": self.setup.get_reference(pack_namespace) if isinstance(self.setup, MCFunction) else self.setup,
+            "teardown": self.teardown.get_reference(pack_namespace) if isinstance(self.teardown, MCFunction) else self.teardown,
+        })
+
+
+@dataclass
+class GameRulesEnvironment(GenericTestEnvironment):
+    """Applies game rules during the test, and resets them after tests have completed."""
+    # https://minecraft.wiki/w/Test_environment_definition#game_rules
+    bool_rules: dict[str, bool] = field(default_factory=dict)  # A map of boolean game rules to set and their value. (e.g. {"doDaylightCycle": False})
+    int_rules: dict[str, int] = field(default_factory=dict)  # A map of integer game rules to set and their value. (e.g. {"randomTickSpeed": 0})
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return {
+            "type": "game_rules",
+            "bool_rules": [{"rule": key, "value": value} for key, value in self.bool_rules.items()],
+            "int_rules": [{"rule": key, "value": value} for key, value in self.int_rules.items()],
+        }
+
+
+@dataclass
+class WeatherEnvironment(GenericTestEnvironment):
+    """Applies specific weather during the test, and resets it after tests have completed."""
+    # https://minecraft.wiki/w/Test_environment_definition#weather
+    weather: Literal["clear", "rain", "thunder"]  # The weather to set.
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return {
+            "type": "weather",
+            "weather": self.weather,
+        }
+
+
+@dataclass
+class TimeOfDayEnvironment(GenericTestEnvironment):
+    """Changes the time to the specified value, and resets it after tests have completed."""
+    # https://minecraft.wiki/w/Test_environment_definition#time_of_day
+    time: int  # The time of day to set in number of ticks
+
+    def __post_init__(self) -> None:
+        if self.time < 0:
+            raise ValueError("Time must be a non-negative integer.")
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return {
+            "type": "time_of_day",
+            "time": self.time,
+        }
+
+
+CustomTestEnvironment: TypeAlias = AllOfEnvironment | FunctionEnvironment | GameRulesEnvironment | WeatherEnvironment | TimeOfDayEnvironment

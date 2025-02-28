@@ -2,7 +2,7 @@ import os
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Generic, Literal, Any
+from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.entities.entity_variant import GenericEntityVariant
 
@@ -42,7 +42,7 @@ class WolfVariant:
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
         }
 
-    generate_spawn_command = GenericEntityVariant.generate_spawn_command 
+    generate_spawn_command = GenericEntityVariant.generate_spawn_command
     create_datapack_files = GenericEntityVariant.create_datapack_files
 
     def create_resource_pack_files(self, pack: "Pack") -> None:

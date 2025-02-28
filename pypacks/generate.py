@@ -31,8 +31,8 @@ def generate_resource_pack(pack: "Pack") -> None:
     # ================================================================================================
     # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder) & custom font (built in)
     for element in (
-        pack.custom_items+pack.custom_blocks+pack.custom_paintings+pack.custom_sounds+pack.custom_fonts+pack.custom_item_model_definitions+
-        pack.custom_languages+pack.custom_entity_variants
+        pack.custom_items + pack.custom_blocks + pack.custom_paintings + pack.custom_sounds + pack.custom_fonts + pack.custom_item_model_definitions +
+        pack.custom_languages + pack.custom_entity_variants
     ):
         element.create_resource_pack_files(pack)
     # ================================================================================================
@@ -117,7 +117,7 @@ def generate_datapack(pack: "Pack") -> None:
             book = ReferenceBook(pack.custom_items)
             with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:  # TODO: Replace this with a func
                 file.write(f"\n# Give the book\n{book.generate_give_command(pack)}")
-            
+
             from pypacks.additions.font_tester import FontTestingBook
             font_tester_give_command = FontTestingBook().generate_give_command(pack)
             with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_font_tester.mcfunction", "w") as file:  # TODO: Replace this with a func
@@ -129,7 +129,8 @@ def generate_datapack(pack: "Pack") -> None:
         pack.custom_paintings + pack.custom_advancements + pack.custom_loot_tables +
         pack.custom_mcfunctions + pack.custom_tags + pack.custom_enchantments + pack.custom_damage_types +
         pack.custom_dimensions + pack.custom_structures + pack.custom_structure_sets + pack.custom_raycasts +
-        pack.custom_loops + pack.custom_chunk_scanners + pack.custom_ore_generations + pack.custom_entity_variants
+        pack.custom_loops + pack.custom_chunk_scanners + pack.custom_ore_generations + pack.custom_entity_variants +
+        pack.custom_test_environments + pack.custom_game_tests
     ):
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(pack.datapack_output_path/"data"/pack.namespace/item.datapack_subdirectory_name, exist_ok=True)

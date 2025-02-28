@@ -7,7 +7,7 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.additions.item_components import PotionEffectType
+    from pypacks.additions.item_components import PotionEffectType, DamageTypes
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_mcfunction import MCFunction
     from pypacks.resources.custom_predicate import Predicate
@@ -238,20 +238,11 @@ class ApplyMobEffectEntityEffect:
         }
 
 
-DamageTypes = Literal[
-    "arrow", "bad_respawn_point", "cactus", "campfire", "cramming", "dragon_breath", "drown", "dry_out", "ender_pearl", "explosion", "fall", "falling_anvil",
-    "falling_block", "falling_stalactite", "fireball", "fireworks", "fly_into_wall", "freeze", "generic", "generic_kill", "hot_floor", "in_fire", "in_wall",
-    "indirect_magic", "lava", "lightning_bolt", "mace_smash", "magic", "mob_attack", "mob_attack_no_aggro", "mob_projectile", "on_fire", "out_of_world",
-    "outside_border", "player_attack", "player_explosion", "sonic_boom", "spit", "stalagmite", "starve", "sting", "sweet_berry_bush", "thorns", "thrown",
-    "trident", "unattributed_fireball", "wind_charge", "wither", "wither_skull"
-]
-
-
 @dataclass
 class DamageEntityEntityEffect:
     """Deals (extra) damage to the affected entity."""
     # https://minecraft.wiki/w/Enchantment_definition#damage_entity
-    damage_type: DamageTypes
+    damage_type: "DamageTypes"
     min_damage: float = 0.5
     max_damage: float = 10.0
 
@@ -297,7 +288,7 @@ class ExplodeEntityEffect:
     """Causes an explosion"""
     # https://minecraft.wiki/w/Enchantment_definition#explode
     attribute_to_user: bool = False  # Whether the explosion should be attributed to the user
-    damage_type: DamageTypes = "generic"
+    damage_type: "DamageTypes" = "generic"
     immune_blocks: list[str] | str | None = field(default_factory=list)  # (an  ID, or a #tag, or an  array containing  IDs) - blocks that fully block the explosion and can't be destroyed.
     knockback_multiplier: float = 1.0  # The knockback multiplier of the explosion
     offset: tuple[float, float, float] = (0.0, 0.0, 0.0)  # X, Y, Z position offset to spawn the explosion.

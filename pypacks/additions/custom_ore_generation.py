@@ -15,12 +15,11 @@ RELATIVE_ORE_PLACEMENTS = [
     "~ ~ ~",  "~1 ~ ~",  "~ ~ ~1",  "~1 ~ ~1",
     "~ ~1 ~", "~1 ~1 ~", "~ ~1 ~1", "~1 ~1 ~1",
     # Then we start sprawling out, from 9 blocks - 27 blocks (3x3)
-    "~ ~ ~2",  "~1 ~ ~2",  "~2 ~ ~",  "~2 ~ ~1", "~2 ~ ~2",
-    "~ ~1 ~2", "~1 ~1 ~2", "~2 ~1 ~", "~2 ~1 ~1","~2 ~1 ~2",
+    "~ ~ ~2",  "~1 ~ ~2",  "~2 ~ ~",  "~2 ~ ~1",  "~2 ~ ~2",
+    "~ ~1 ~2", "~1 ~1 ~2", "~2 ~1 ~", "~2 ~1 ~1", "~2 ~1 ~2",
     # The third layer, 3x3
-    "~ ~2 ~", "~ ~2 ~1", "~ ~2 ~2", "~1 ~2 ~","~1 ~2 ~1", "~1 ~2 ~1", "~2 ~2 ~", "~2 ~2 ~1","~2 ~2 ~2",
+    "~ ~2 ~", "~ ~2 ~1", "~ ~2 ~2", "~1 ~2 ~", "~1 ~2 ~1", "~1 ~2 ~1", "~2 ~2 ~", "~2 ~2 ~1", "~2 ~2 ~2",
 ]
-
 
 
 @dataclass
@@ -77,13 +76,13 @@ class CustomOreGeneration:
         #     f"$execute if score random_direction inputs matches 6 run execute positioned ~ ~ ~-1 run function {pack_namespace}:custom_ore_generation/spread_vein {{\"place_ore_function\": \"$(place_ore_function)\"}}",
         # ], ["custom_ore_generation"])
         spread_vein = MCFunction("spread_vein", [
-            f"$say Spreading! $(place_ore_function) ($(vein_min_size)-$(vein_max_size))",
-            f"$execute store result score vein_size inputs run random value $(vein_min_size)..$(vein_max_size)",
+            "$say Spreading! $(place_ore_function) ($(vein_min_size)-$(vein_max_size))",
+            "$execute store result score vein_size inputs run random value $(vein_min_size)..$(vein_max_size)",
             'tellraw @a [{"text": "Randomly generated number: "}, {"score":{"name":"vein_size","objective":"inputs"}}]',
             *[
                 f"execute if score vein_size inputs matches {i}.. run say Number was bigger than {i}, so running at {relative_coords}"
                 for i, relative_coords in enumerate(RELATIVE_ORE_PLACEMENTS, 1)
-            ],  
+            ],
             *[
                 f"$execute if score vein_size inputs matches {i}.. run execute positioned {relative_coords} run function $(place_ore_function)"
                 for i, relative_coords in enumerate(RELATIVE_ORE_PLACEMENTS, 1)
@@ -91,7 +90,7 @@ class CustomOreGeneration:
         ], ["custom_ore_generation"])
 
         intermediate = MCFunction("intermediate", [
-                f"say In the intermediate function!",
+                "say In the intermediate function!",
                 f"$execute positioned $(x) $(y) $(z) run function {spread_vein.get_reference(pack_namespace)} {{\"place_ore_function\": \"$(place_ore_function)\", \"vein_min_size\": \"$(vein_min_size)\", \"vein_max_size\": \"$(vein_max_size)\"}}",
             ], ["custom_ore_generation"]
         )
@@ -100,7 +99,7 @@ class CustomOreGeneration:
     def create_generate_ore_function(self, pack_namespace: str) -> "MCFunction":
         """The function which has x, y, and z macros of the chunk corner"""
         place_function = self.block.generate_place_function(pack_namespace).get_reference(pack_namespace)
-        spread_ore_function = self.create_ore_vein_function(pack_namespace)[1].get_reference(pack_namespace)
+        # spread_ore_function = self.create_ore_vein_function(pack_namespace)[1].get_reference(pack_namespace)
         return MCFunction(f"{self.internal_name}_generate_ore", [
             f"execute store result score random_chance coords run random value 1..{self.chance_of_spawning_in_a_chunk}",
             "execute unless score random_chance coords matches 1 run return fail",
@@ -115,7 +114,7 @@ class CustomOreGeneration:
             "scoreboard players operation ore_origin_x coords += random_x_offset coords",
             "scoreboard players operation ore_origin_y coords += random_y_offset coords",
             "scoreboard players operation ore_origin_z coords += random_z_offset coords",
-            f"# Then compile them into a object and run all the create ore functions",
+            "# Then compile them into a object and run all the create ore functions",
             f"execute store result storage {pack_namespace}:ore_generation_macros data.x int 1 run scoreboard players get ore_origin_x coords",
             f"execute store result storage {pack_namespace}:ore_generation_macros data.y int 1 run scoreboard players get ore_origin_y coords",
             f"execute store result storage {pack_namespace}:ore_generation_macros data.z int 1 run scoreboard players get ore_origin_z coords",

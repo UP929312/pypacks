@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
 
+    from pypacks.resources.custom_damage_type import CustomDamageType
+    from pypacks.resources.custom_tag import CustomTag
     from pypacks.scripts.repos.loot_tables import LootTables
     from pypacks.scripts.repos.damage_tags import DamageTagsType
 
@@ -116,6 +118,7 @@ class BannerPattern:
 
 # ==========================================================================================
 
+
 @dataclass
 class Bee:
     # https://minecraft.wiki/w/Data_component_format#bees
@@ -130,6 +133,65 @@ class Bee:
             "entity_data": self.entity_data,
             "min_ticks_in_hive": self.min_ticks_in_hive,
             "ticks_in_hive": self.ticks_in_hive,
+        }
+
+
+# ==========================================================================================
+
+DamageTypes = Literal[  # TODO: This is the same one that's in repos/damage_types
+    "arrow", "bad_respawn_point", "cactus", "campfire", "cramming", "dragon_breath", "drown", "dry_out", "ender_pearl", "explosion", "fall", "falling_anvil",
+    "falling_block", "falling_stalactite", "fireball", "fireworks", "fly_into_wall", "freeze", "generic", "generic_kill", "hot_floor", "in_fire", "in_wall",
+    "indirect_magic", "lava", "lightning_bolt", "mace_smash", "magic", "mob_attack", "mob_attack_no_aggro", "mob_projectile", "on_fire", "out_of_world",
+    "outside_border", "player_attack", "player_explosion", "sonic_boom", "spit", "stalagmite", "starve", "sting", "sweet_berry_bush", "thorns", "thrown",
+    "trident", "unattributed_fireball", "wind_charge", "wither", "wither_skull"
+]
+
+
+@dataclass
+class DamageReduction:
+    types: list["DamageTypes | CustomDamageType | CustomTag"] = field(default_factory=list)  # The damage types to reduce.
+    base: float = 0.0  # The constant amount of damage to be blocked.
+    factor: float = 0.5  # The fraction of the dealt damage to be blocked.
+    horizontal_blocking_angle: float = 90.0  # The maximum angle between the users facing direction and the direction of the incoming attack to be blocked.
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_damage_type import CustomDamageType
+        from pypacks.resources.custom_tag import CustomTag
+        return {
+            "types": [damage_type.get_reference(pack_namespace) if isinstance(damage_type, (CustomDamageType, CustomTag)) else damage_type for damage_type in self.types],
+            "base": self.base,
+            "factor": self.factor,
+            "horizontal_blocking_angle": self.horizontal_blocking_angle if self.horizontal_blocking_angle != 90.0 else None,  # Defaults to 90.0
+        }
+
+
+@dataclass
+class BlocksAttacks:
+    block_delay_seconds: float = 3.0  # When present, this item can be used like a shield to block attacks to the holding player.
+    disable_cooldown_scale: float = 1.0  # The multiplier applied to the number of seconds that the item will be on cooldown for when attacked by a disabling attack.
+    damage_reductions: list["DamageReduction"] = field(default_factory=list)  # Controls how much damage should be blocked in a given attack.
+    item_damage_threshold: float = 0.0  # The minimum amount of damage dealt by the attack before item damage is applied to the item.
+    item_damage_base: float = 0.0  # The constant amount of damage applied to the item, if threshold is passed.
+    item_damage_factor: float = 0.5  # The fraction of the dealt damage that should be applied to the item, if threshold is passed.
+    block_sound: "str | CustomSound | None" = "block.anvil.place"  # One sound event to play when an attack is successfully blocked.
+    disable_sound: "str | CustomSound | None" = None  # One sound event to play when the item goes on its disabled cooldown due to an attack.
+    bypassed_by: "str | CustomTag | None" = None  # A damage type tag with # of damage types that bypass the blocking.
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_sound import CustomSound
+        from pypacks.resources.custom_tag import CustomTag
+        return {
+            "block_delay_seconds": self.block_delay_seconds,
+            "disable_cooldown_scale": self.disable_cooldown_scale,
+            "damage_reductions": [reduction.to_dict(pack_namespace) for reduction in self.damage_reductions],
+            "item_damage": {
+                "threshold": self.item_damage_threshold,
+                "base": self.item_damage_base,
+                "factor": self.item_damage_factor,
+            } if (self.item_damage_threshold != 0.0 or self.item_damage_base != 0.0 or self.item_damage_factor != 0.5) else None,
+            "block_sound": self.block_sound.get_reference(pack_namespace) if isinstance(self.block_sound, CustomSound) else self.block_sound,
+            "disable_sound": self.disable_sound.get_reference(pack_namespace) if isinstance(self.disable_sound, CustomSound) else self.disable_sound,
+            "bypassed_by": self.bypassed_by.get_reference(pack_namespace) if isinstance(self.bypassed_by, CustomTag) else self.bypassed_by,
         }
 
 
@@ -213,6 +275,7 @@ class BundleContents:
 
 
 # ==========================================================================================
+
 
 @dataclass
 class _Effects:
@@ -938,6 +1001,7 @@ class Components:
     attribute_modifiers: list[AttributeModifier] = field(default_factory=list, kw_only=True)
     bees: list[Bee] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bees  <-- Beehives/bee_nest only
     banner_patterns: list[BannerPattern] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#banner_patterns  <-- Banners only
+    blocks_attacks: "BlocksAttacks | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#blocks_attacks
     bucket_entity_data: "BucketEntityData | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bucket_entity_data  <-- Bucket of tropical fish only
     bundle_contents: "BundleContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bundle_contents  <-- Bundles only
     cooldown: "Cooldown | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#use_cooldown
@@ -1046,6 +1110,7 @@ class Components:
             "attribute_modifiers":        [modifier.to_dict() for modifier in self.attribute_modifiers] if self.attribute_modifiers else None,
             "banner_patterns":            [pattern.to_dict() for pattern in self.banner_patterns] if self.banner_patterns else None,
             "bees":                       [bee.to_dict() for bee in self.bees] if self.bees else None,
+            "blocks_attacks":             self.blocks_attacks.to_dict(pack_namespace) if self.blocks_attacks is not None else None,
             "bundle_contents":            self.bundle_contents.to_dict(pack_namespace) if self.bundle_contents is not None else None,
             "bucket_entity_data":         self.bucket_entity_data.to_dict() if self.bucket_entity_data is not None else None,
             "consumable":                 self.consumable.to_dict(pack_namespace) if self.consumable is not None else None,

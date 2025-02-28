@@ -81,6 +81,7 @@ fish_bucket = CustomItem("fish_bucket", "minecraft:tropical_fish_bucket", "Fish 
 loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table Chest", components=Components(container_loot_table="minecraft:chests/village/village_butcher"))
 on_drop_gold_ingot = CustomItem("on_drop_gold_ingot", "minecraft:gold_ingot", "On Drop Gold Ingot", on_item_drop="say Hi!")
 on_drop_copper_ingot = CustomItem("on_drop_copper_ingot", "minecraft:copper_ingot", "On Drop Copper Ingot", on_item_drop="kill @s")
+custom_shield = CustomItem("custom_shield", "minecraft:gray_dye", "Custom Shield", components=Components(blocks_attacks=BlocksAttacks(damage_reductions=[DamageReduction(["mob_attack", "arrow"])])))
 
 # invalid_component = CustomItem("invalid_component", "minecraft:sword", "Invalid Component", components=Components(map_data=MapData(map_id=1)))
 # fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
@@ -100,7 +101,7 @@ custom_items = [
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
     bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet, trimmed_leggings,
     suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest, on_drop_gold_ingot,
-    on_drop_copper_ingot,
+    on_drop_copper_ingot, custom_shield,
 ]
 # endregion
 # ============================================================================================================
@@ -232,14 +233,14 @@ custom_structure_set = CustomStructureSet(
 custom_biome = CustomBiome("overworld_biome")
 bee_explosion_structure = SingleCustomStructure(
     "bee_explosion_structure",
-    [custom_biome],
     "structures/bee_explosion.nbt",
+    [custom_biome],
 )
 overworld_dimension = CustomDimension("overworld", "overworld", custom_biome)
 my_little_house = SingleCustomStructure(
     "my_little_house_structure",
-    [custom_biome],
     "structures/my_little_house.nbt",
+    [custom_biome],
 )
 # endregion
 # ============================================================================================================
@@ -311,7 +312,7 @@ sand_cow = CowVariant("sand_cow", texture_path="images/sand_cow.png")
 sand_frog = FrogVariant("sand_frog", texture_path="images/sand_frog.png")
 sand_pig = PigVariant("sand_pig", texture_path="images/sand_pig.png")
 sand_wolf = WolfVariant("sand_wolf", wild_texture_path="images/sand_wolf.png", tame_texture_path="images/sand_wolf_tame.png", angry_texture_path="images/sand_wolf_angry.png")
-entity_variants = [sand_pig, sand_cow, sand_chicken, sand_cat, sand_frog, sand_wolf]
+entity_variants: list[EntityVariant] = [sand_pig, sand_cow, sand_chicken, sand_cat, sand_frog, sand_wolf]
 # endregion
 # ============================================================================================================
 datapack = Pack(

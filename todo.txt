@@ -7,6 +7,8 @@ CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
 Write a read-me
 
+Custom fonts needs non-auto chosing chars
+
 summon pig ~ ~ ~ {"variant": "pypacks_testing:sand_pig"}
 
 Type Predicates ):
