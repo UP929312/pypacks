@@ -33,8 +33,11 @@ class GenericEntityVariant:
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
         }
 
-    def generate_spawn_command(self, pack_namespace: str) -> str:
+    def generate_give_spawn_egg_command(self, pack_namespace: str) -> str:
         return f"/give @s {self.entity_type}_spawn_egg[{self.entity_type}/variant=\"{self.get_reference(pack_namespace)}:\"]"
+
+    def generate_summon_command(self, pack_namespace: str) -> str:
+        return f"summon {self.entity_type} ~ ~ ~ {{\"variant\": \"{pack_namespace}:{self.internal_name}\"}}"
 
     def create_datapack_files(self, pack: "Pack") -> None:
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)

@@ -7,9 +7,21 @@ CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
 Write a read-me
 
+# When creating things, a custom namespace should be added in, so we can create minecraft/ stuff, e.g. the load function tag, or tick
+
+# Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
+# Would also like to do "calls function <x>" and "is called by <function y>"  # Detect it being called by a function tag
+# We have calls, getting called by is much harder, have to go through the rest of them, ahh!
+
+# INFO: Paintings require a world reset (registry, add all registry updates as a warning!)
+
+Cleanup of temp variables, potentially?
+
 Custom fonts needs non-auto chosing chars
 
-summon pig ~ ~ ~ {"variant": "pypacks_testing:sand_pig"}
+"Default language", for if you want to use Translate() everywhere, and have it fill in the default language file.
+Maybe resource.from_file? Or maybe from_dict?
+
 
 Type Predicates ):
 # Predicate typing - Add player specific ones, and a new datapack to test them *all*
@@ -43,13 +55,10 @@ Sometimes event-type advancements get "stuck" and need to be revoked. Perhaps we
 
 # Onjoin event would be cool, and on-leave for players (single player wouldn't work though, annoyingly)
 
-# Naturally occuring ore veins! Would be maybe tricky...
+# Naturally occuring ore veins need some more randomness, they have a random size, need a random "rotation"
 https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
 
 # Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
-
-# Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
-# execute if score ore_vein_size ... means that we refer to a score/variable, add this, probably more
 
 # Consider "events", which are ephemeral advancements, i.e. they get reset, maybe even with additional data, e.g. where? What block they right clicked on.
 
@@ -70,7 +79,7 @@ execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!
 # Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
 # execute if entity @s[gamemode=!creative]
 
-# Look into disabling projectiles like eggs/snowballs with on_right_click
+# Look into disabling projectiles like eggs/snowballs with on_right_click - Don't think it's possible.
 
 Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
 
@@ -88,8 +97,6 @@ https://www.planetminecraft.com/blog/custom-world-generation-documentation/
 https://www.planetminecraft.com/blog/custom-structure-gen-documentation/
 
 C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\25w03a\25w03a\data\minecraft\worldgen\noise_settings
-
-/give @s minecraft:villager_spawn_egg[minecraft:villager/variant="plains"]
 
 Continue work on custom enchantments
 
@@ -147,8 +154,6 @@ For an "install" stuff, just give them an achievement and don't revoke!
 # Make some part of the logo clickable would be fun. Maybe a link to the project?
 
 # Signs with data, maybe even Command()?
-
-# INFO: Paintings require a world reset
 
 # JUKEBOX SONGS - Auto Length is messed up... Hmmmm
 

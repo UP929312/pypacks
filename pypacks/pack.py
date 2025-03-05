@@ -105,8 +105,6 @@ class Pack:
         assert self.namespace.islower(), "Namespace must be all lowercase"
         assert all(x in "abcdefghijklmnopqrstuvwxyz0123456789_-." for x in self.namespace), "Namespace must only contain letters, numbers, _, -, and ."
 
-        self.add_internal_functions()
-        self.generate_pack()
 
     def add_internal_functions(self) -> None:
         # ==================================================================================
@@ -190,14 +188,15 @@ class Pack:
             )
         # ==================================================================================
         # Item models (well, the display items)
-        give_all_item_models = MCFunction("give_all_item_models", [
-            custom_item_model_def.generate_give_command(self.namespace)
-            for custom_item_model_def in [x for x in self.custom_item_model_definitions if x.showcase_item is not None]
-        ])
-        self.custom_mcfunctions.append(give_all_item_models)
+        if self.custom_item_model_definitions:
+            give_all_item_models = MCFunction("give_all_item_models", [
+                custom_item_model_def.generate_give_command(self.namespace)
+                for custom_item_model_def in [x for x in self.custom_item_model_definitions if x.showcase_item is not None]
+            ])
+            self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
-        load_mcfunction = MCFunction("load", [
-            f"gamerule maxCommandChainLength {10_000_000}",  # This is generally for the reference book
+        self.load_mcfunction = MCFunction("load", [
+            f"gamerule maxCommandChainLength {10_000_000}" if self.config.generate_reference_book else "",  # This is generally for the reference book
             "scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"scoreboard objectives add {self.custom_loops[0].scoreboard_objective_name} dummy" if self.custom_loops else "",
             "scoreboard objectives add constants dummy" if self.custom_loops else "",
@@ -215,10 +214,10 @@ class Pack:
                 custom_loop.generate_set_constant_command()
                 for custom_loop in self.custom_loops
             },
-            f"say Loaded into {self.name}!",
+            f"say Loaded into {self.name}!" if self.name != "Minecraft" else "",
         ])
         # ==================================================================================
-        tick_mcfunction = MCFunction("tick", [
+        self.tick_mcfunction = MCFunction("tick", [
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None  # TODO: Move these to a different file?
@@ -232,7 +231,10 @@ class Pack:
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
             CustomItem.generate_on_drop_execute_loop(self.namespace)[1].get_run_command(self.namespace) if has_on_drop_items else "",
         ])
-        self.custom_mcfunctions.extend([load_mcfunction, tick_mcfunction])
+        if not self.load_mcfunction._is_empty:
+            self.custom_mcfunctions.append(self.load_mcfunction)
+        if not self.tick_mcfunction._is_empty:
+            self.custom_mcfunctions.append(self.tick_mcfunction)
         # ==================================================================================
         if self.custom_items and self.config.generate_create_wall_command:
             self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
@@ -246,9 +248,26 @@ class Pack:
         # ==================================================================================
 
     def generate_pack(self) -> None:
+        self.add_internal_functions()
+        if self.namespace != "minecraft":
+            self.generate_minecraft_pack()
+        self.generate_pack_parts()
+
+    def generate_pack_parts(self) -> None:
         print(f"Generating data pack @ {self.datapack_output_path}\\data\\{self.namespace}")
         print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
         print(f"C:\\Users\\{os.environ['username']}\\AppData\\Roaming\\.minecraft\\logs\\latest.log")  # TODO: Eventually remove this I suppose
         # Needs to go in this order (I think?)
         generate_datapack(self)
         generate_resource_pack(self)
+
+    def generate_minecraft_pack(self) -> None:
+        from pypacks.resources.custom_tag import CustomTag
+        tags = []
+        if not self.tick_mcfunction._is_empty:
+            tags.append(CustomTag("tick", [self.tick_mcfunction.get_reference(self.namespace)], tag_type="function"))
+        if not self.load_mcfunction._is_empty:
+            tags.append(CustomTag("load", [self.load_mcfunction.get_reference(self.namespace)], tag_type="function"))
+        minecraft = Pack("Minecraft", "The base Minecraft pack", "minecraft", datapack_output_path=self.datapack_output_path,
+                         custom_tags=tags, config=Config(generate_create_wall_command=False, generate_reference_book=False))
+        generate_datapack(minecraft)

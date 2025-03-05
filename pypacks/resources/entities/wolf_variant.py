@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 @dataclass
 class WolfVariant:
     internal_name: str
-    angry_texture_path: str | Path = ""  # A path to the texture for the angry wolf
-    wild_texture_path: str | Path = ""  # A path to the texture for the angry wolf
-    tame_texture_path: str | Path = ""  # A path to the texture for the angry wolf
+    angry_texture_path: str | Path  # A path to the texture for the angry wolf
+    wild_texture_path: str | Path  # A path to the texture for the angry wolf
+    tame_texture_path: str | Path  # A path to the texture for the angry wolf
     spawn_conditions: dict[int, "SpawnConditionType"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="wolf_variant")
@@ -26,7 +26,7 @@ class WolfVariant:
 
     def __post_init__(self) -> None:
         self.internal_generic_entity_variant = GenericEntityVariant(
-            internal_name=self.internal_name, texture_path=self.angry_texture_path, spawn_conditions=self.spawn_conditions
+            internal_name=self.internal_name, texture_path=self.wild_texture_path, spawn_conditions=self.spawn_conditions
         )
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -42,7 +42,8 @@ class WolfVariant:
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
         }
 
-    generate_spawn_command = GenericEntityVariant.generate_spawn_command
+    generate_give_spawn_egg_command = GenericEntityVariant.generate_give_spawn_egg_command
+    generate_summon_command = GenericEntityVariant.generate_summon_command
     create_datapack_files = GenericEntityVariant.create_datapack_files
 
     def create_resource_pack_files(self, pack: "Pack") -> None:

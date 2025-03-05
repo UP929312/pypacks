@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
-from pypacks.additions.item_components import Components, Consumable, Food, AttributeModifier
+from pypacks.additions.item_components import Components, Consumable, Food, AttributeModifier, TooltipDisplay
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_model import CustomTexture
@@ -121,7 +121,9 @@ class CustomItem:
         self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
         # Make sure we can't interact with blocks (e.g. place blocks or spawn eggs)
         self.components.attribute_modifiers.append(AttributeModifier(attribute_type="block_interaction_range", slot="mainhand", amount=-1000, operation="add_value"))
-        self.components.hide_tooltip
+        if self.components.tooltip_display is None:
+            self.components.tooltip_display = TooltipDisplay(hide_tooltip=False, hidden_components=[])
+        self.components.tooltip_display.hidden_components.append("minecraft:attribute_modifiers")
 
     def generate_right_click_advancement(self, pack_namespace: str) -> "CustomAdvancement":
         criteria = Criteria(f"eating_{self.internal_name}", "minecraft:using_item", {

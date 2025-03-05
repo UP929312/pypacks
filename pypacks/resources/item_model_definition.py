@@ -261,6 +261,16 @@ class CarriedConditional:
         return {"property": "minecraft:carried"}
 
 
+@dataclass
+class ComponentConditional:
+    """Uses component item sub predicates to match item components."""
+    predicate: str  # "Predicate | str"  # TODO: Allow custom predicates, convert to dict, need pack_namespace in these to_dict functions
+    value: str
+    # https://minecraft.wiki/w/Items_model_definition#component
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:component", "predicate": self.predicate, "value": self.value}
+
+
 class ExtendedViewConditional:
     """Return true if player has requested extended details by holding shift key down.
     Only works when item is displayed in UI.
@@ -303,7 +313,7 @@ class CustomModelDataConditional:
         return {"property": "minecraft:custom_model_data", "index": self.index}
 
 
-ConditionalBooleanPropertyType: TypeAlias = UsingItemConditional | BrokenConditional | DamagedConditional | HasComponentConditional | FishingRodCastConditional | BundleHasSelectedItemConditional | SelectedConditional | CarriedConditional | ExtendedViewConditional | KeyDownConditional | ViewEntityConditional | CustomModelDataConditional
+ConditionalBooleanPropertyType: TypeAlias = UsingItemConditional | BrokenConditional | DamagedConditional | HasComponentConditional | FishingRodCastConditional | BundleHasSelectedItemConditional | SelectedConditional | CarriedConditional | ComponentConditional | ExtendedViewConditional | KeyDownConditional | ViewEntityConditional | CustomModelDataConditional
 # endregion
 # ================================================================================================
 # region: SELECT DISPATCH
@@ -380,7 +390,6 @@ class TrimMaterialSelectProperty:
 
 
 @dataclass
-# block_state
 class BlockStateSelectProperty:
     """Return value for some property from minecraft:block_state component."""
     # https://minecraft.wiki/w/Items_model_definition#block_state
@@ -449,16 +458,29 @@ class ContextEntityTypeSelectProperty:
 @dataclass
 class CustomModelDataSelectProperty:
     """Return value from strings list in minecraft:custom_model_data component."""
-    index: int = 0
+    # https://minecraft.wiki/w/Items_model_definition#custom_model_data_3
     # Values: Any string.
+    index: int = 0
 
     def to_dict(self) -> dict[str, str | int]:
         return {"property": "minecraft:custom_model_data", "index": self.index}
 
 
+@dataclass
+class ComponentSelectProperty:
+    """Return value from a component. If the selected value comes from a registry and the current datapacks does not provide it,
+    the entry will be silently ignored."""
+    # https://minecraft.wiki/w/Items_model_definition#component_2
+    # Values: Depends on the target component type.
+    component: str # Namespaced ID of the component type.
+
+    def to_dict(self) -> dict[str, str]:
+        return {"property": "minecraft:component", "component": self.component}
+
+
 SelectPropertyType: TypeAlias = (
     MainHandSelectProperty | ChargeTypeSelectProperty | TrimMaterialSelectProperty | BlockStateSelectProperty | DisplayContextSelectProperty |
-    LocalTimeSelectProperty | ContextDimensionSelectProperty | ContextEntityTypeSelectProperty | CustomModelDataSelectProperty
+    LocalTimeSelectProperty | ContextDimensionSelectProperty | ContextEntityTypeSelectProperty | CustomModelDataSelectProperty | ComponentSelectProperty
 )
 # endregion
 # ================================================================================================

@@ -82,6 +82,7 @@ loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table
 on_drop_gold_ingot = CustomItem("on_drop_gold_ingot", "minecraft:gold_ingot", "On Drop Gold Ingot", on_item_drop="say Hi!")
 on_drop_copper_ingot = CustomItem("on_drop_copper_ingot", "minecraft:copper_ingot", "On Drop Copper Ingot", on_item_drop="kill @s")
 custom_shield = CustomItem("custom_shield", "minecraft:gray_dye", "Custom Shield", components=Components(blocks_attacks=BlocksAttacks(damage_reductions=[DamageReduction(["mob_attack", "arrow"])])))
+custom_weapon: CustomItem = CustomItem("custom_weapon", "minecraft:diamond_sword", "Custom Weapon", components=Components(weapon=Weapon()))
 
 # invalid_component = CustomItem("invalid_component", "minecraft:sword", "Invalid Component", components=Components(map_data=MapData(map_id=1)))
 # fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
@@ -101,7 +102,7 @@ custom_items = [
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
     bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet, trimmed_leggings,
     suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest, on_drop_gold_ingot,
-    on_drop_copper_ingot, custom_shield,
+    on_drop_copper_ingot, custom_shield, custom_weapon,
 ]
 # endregion
 # ============================================================================================================
@@ -342,4 +343,4 @@ datapack = Pack(
     custom_entity_variants=entity_variants,
     custom_ore_generations=[ruby_generation],
     config=Config(warn_about_tags_with_custom_items=False),
-)
+).generate_pack()

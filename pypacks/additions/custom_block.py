@@ -1,6 +1,6 @@
 # from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Literal, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel  # , SlabModel
@@ -9,6 +9,7 @@ from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.additions.raycasting import BlockRaycast
 
 if TYPE_CHECKING:
+    from typing import Literal
     from pypacks.pack import Pack
     from pypacks.additions.constants import Slabs
     from pypacks.resources.custom_item import CustomItem

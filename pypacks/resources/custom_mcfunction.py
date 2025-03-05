@@ -3,24 +3,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pypacks.scripts.repos.mcfunction_header_patterns import (
+    MACRO_PATTERN, MACRO_MESSAGE, VARIABLE_PAIR_PATTERNS, VARIABLE_MESSAGE, FUNCTION_PATTERNS, FUNCTION_MESSAGE,
+)
+
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-
-MACRO_PATTERN = re.compile(r"(?<=\$\()[A-Za-z0-9_]*(?=\))")
-MACRO_MESSAGE = "# This function requires the following macros to be passed in:\n"
-
-# Places that require something being set before the function can be run
-VARIABLE_PATTERN = r"[A-Za-z0-9_#]*"
-# Scores set on the player =======================================================
-IF_UNLESS_SCORE_PATTERN = re.compile(f"((?<=if score )|(?<=unless score ))({VARIABLE_PATTERN}) ({VARIABLE_PATTERN})")  # 1, 2 (player, objective)
-_ = "execute store result|success score <target> <objective>"
-_ = "scoreboard players operation <target1> <objective1> <operation> <target2> <objective2>"
-# Places which need a scoreboard objective to be initialised =====================
-PLAYER_SCORE_CHANGE = re.compile(f"(?<=scoreboard players )(add|set|remove|reset) ({VARIABLE_PATTERN}) ({VARIABLE_PATTERN})")  # 2, 3 (player, objective)
-# NBT ============================================================================
-_ = "execute store result score <player> <objective> run data get <target> <path>"
-_ = "execute store success score <player> <objective> run some_command"
-_ = "data modify storage <namespace>:<name> <path> set from score <target> <objective>"
 
 
 @dataclass
@@ -45,6 +33,10 @@ class MCFunction:
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"
 
+    @property
+    def _is_empty(self) -> bool:
+        return not any(self.commands)
+
     def get_run_command(self, pack_namespace: str) -> str:
         return f"function {self.get_reference(pack_namespace)}"
 
@@ -63,13 +55,22 @@ class MCFunction:
     def generate_headers(self, pack_namespace: str) -> str:
         commands_str = "\n".join([x.get_reference(pack_namespace) if isinstance(x, MCFunction) else x for x in self.commands])
         # Macros
-        detected_macros = list(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
-        macro_list = "\n".join([f"# - {x}" for x in detected_macros])
+        detected_macros = tuple(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
+        # Detected functions
+        detected_functions = tuple(sorted(set([x.group(1) for pattern in FUNCTION_PATTERNS for x in re.finditer(pattern, commands_str)])))
         # Variables required
-        # detected_variables = list(sorted(set(re.findall(r"\$\{[A-Za-z0-9_]*\}", commands_str))))
-        if detected_macros:
-            return f"{MACRO_MESSAGE}{macro_list}\n\n"
-        return ""
+        variables: list[tuple[str, str]] = []
+        for pattern in VARIABLE_PAIR_PATTERNS:
+            for match in re.finditer(pattern, commands_str):
+                variables.append((match.group(1), match.group(2)))  # Group 1, 2 (player, objective)
+        detected_variables = tuple(sorted(set(variables), key=lambda x: (x[1], x[0])))  # Group by objective, then player
+        # Combine
+        pairings = {
+            detected_macros:    MACRO_MESSAGE+"\n".join([f"# - {x}" for x in detected_macros]),  # fmt: skip
+            detected_functions: FUNCTION_MESSAGE+'\n'.join([f'# - {x}' for x in detected_functions]),
+            detected_variables: VARIABLE_MESSAGE+'\n'.join([f'# - Player: {x[0]}, Objective: {x[1]}' for x in detected_variables]),
+        }
+        return "\n".join([message for found_instances, message in pairings.items() if found_instances]) + ("\n\n" if any(pairings.values()) else "")
 
     def create_datapack_files(self, pack: "Pack") -> None:
         # Get all the lines

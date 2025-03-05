@@ -8,23 +8,19 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
+    from pypacks.resources.predicate.predicate_conditions import BlockPredicate
 
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_tag import CustomTag
     from pypacks.scripts.repos.loot_tables import LootTables
     from pypacks.scripts.repos.damage_tags import DamageTagsType
+    from pypacks.scripts.repos.damage_types import DamageTypesType
+    
 
 
 # ==========================================================================================
 
 
-# ArmorTrimItemType = Literal[
-#     "bolt_armor_trim_smithing_template", "coast_armor_trim_smithing_template", "dune_armor_trim_smithing_template", "eye_armor_trim_smithing_template",
-#     "flow_armor_trim_smithing_template", "host_armor_trim_smithing_template", "netherite_upgrade_armor_trim_smithing_template", "raiser_armor_trim_smithing_template",
-#     "rib_armor_trim_smithing_template", "sentry_armor_trim_smithing_template", "shaper_armor_trim_smithing_template", "silence_armor_trim_smithing_template",
-#     "snout_armor_trim_smithing_template", "spire_armor_trim_smithing_template", "tide_armor_trim_smithing_template", "vex_armor_trim_smithing_template",
-#     "ward_armor_trim_smithing_template", "wayfinder_armor_trim_smithing_template", "wild_armor_trim_smithing_template",
-# ]
 ArmorTrimType = Literal[
     "bolt", "coast", "dune", "eye", "flow", "host", "netherite_upgrade", "raiser", "rib", "sentry",
     "shaper", "silence", "snout", "spire", "tide", "vex", "ward", "wayfinder", "wild",
@@ -39,13 +35,11 @@ ArmorTrimMaterialType = Literal[
 class ArmorTrim:
     pattern: ArmorTrimType  # The ID of the trim pattern.
     material: ArmorTrimMaterialType  # The ID of the trim material, which applies a color to the trim.
-    show_in_tooltip: bool = True  # Show or hide the trim on this item's tooltip. Defaults to true.
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "pattern": self.pattern,
             "material": self.material,
-            "show_in_tooltip": False if not self.show_in_tooltip else None,  # Defaults to True
         }
 
 
@@ -138,18 +132,10 @@ class Bee:
 
 # ==========================================================================================
 
-DamageTypes = Literal[  # TODO: This is the same one that's in repos/damage_types
-    "arrow", "bad_respawn_point", "cactus", "campfire", "cramming", "dragon_breath", "drown", "dry_out", "ender_pearl", "explosion", "fall", "falling_anvil",
-    "falling_block", "falling_stalactite", "fireball", "fireworks", "fly_into_wall", "freeze", "generic", "generic_kill", "hot_floor", "in_fire", "in_wall",
-    "indirect_magic", "lava", "lightning_bolt", "mace_smash", "magic", "mob_attack", "mob_attack_no_aggro", "mob_projectile", "on_fire", "out_of_world",
-    "outside_border", "player_attack", "player_explosion", "sonic_boom", "spit", "stalagmite", "starve", "sting", "sweet_berry_bush", "thorns", "thrown",
-    "trident", "unattributed_fireball", "wind_charge", "wither", "wither_skull"
-]
-
 
 @dataclass
 class DamageReduction:
-    types: list["DamageTypes | CustomDamageType | CustomTag"] = field(default_factory=list)  # The damage types to reduce.
+    types: list["DamageTypesType | CustomDamageType | CustomTag"] = field(default_factory=list)  # The damage types to reduce.
     base: float = 0.0  # The constant amount of damage to be blocked.
     factor: float = 0.5  # The fraction of the dealt damage to be blocked.
     horizontal_blocking_angle: float = 90.0  # The maximum angle between the users facing direction and the direction of the incoming attack to be blocked.
@@ -462,8 +448,9 @@ class Equippable:
     swappable: bool = True  # Whether the item can be equipped into the relevant slot by right-clicking.
     damage_on_hurt: bool = True  # Whether this item is damaged when the wearing entity is damaged. Defaults to True.
     entities_which_can_wear: str | list[str] | Literal["all"] = "all"  # The entities which can wear this item. Entity ID/Tag, or list of Entity IDs to limit.
+    equip_on_interaction: bool = True  # Whether this item can be equipped onto a target mob by pressing use on it (as long as this item can be equipped on the target at all).
     camera_overlay: str | None = field(repr=False, default=None)  # The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
-    # TODO: Test camera overlay
+    # TODO: Test camera overlay and equip_on_interaction
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -473,9 +460,9 @@ class Equippable:
             "swappable": False if not self.swappable else None,  # Defaults to True
             "damage_on_hurt": False if not self.damage_on_hurt else None,  # Defaults to True
             "entities_which_can_wear": self.entities_which_can_wear if self.entities_which_can_wear != "all" else None,  # Defaults to "all"
-        } | ({
-            "camera_overlay": self.camera_overlay,
-        } if self.camera_overlay else {})
+            "equip_on_interaction": False if not self.equip_on_interaction else None,  # Defaults to True
+            "camera_overlay": self.camera_overlay,  # Defaults to None
+        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Equippable":
@@ -849,6 +836,40 @@ class Tool:
 
 # ==========================================================================================
 
+ComponentDisplay = Literal[
+    # Previously had `show_in_tooltip` option
+    "minecraft:attribute_modifiers", "minecraft:can_place_on", "minecraft:can_break", "minecraft:dyed_color", "minecraft:enchantments", "minecraft:stored_enchantments",
+    # Originally in `hide_additional_tooltip` option
+    "minecraft:banner_patterns", "minecraft:bees", "minecraft:block_entity_data", "minecraft:block_state", "minecraft:bundle_contents",
+    "minecraft:charged_projectiles", "minecraft:container", "minecraft:container_loot", "minecraft:firework_explosion", "minecraft:fireworks",
+    "minecraft:instrument", "minecraft:map_id", "minecraft:painting/variant", "minecraft:pot_decorations", "minecraft:potion_contents",
+    "minecraft:tropical_fish/pattern", "minecraft:written_book_content",
+    # Previously had `show_in_tooltip` option
+    "minecraft:jukebox_playable ", "minecraft:trim", "minecraft:unbreakable",
+]
+
+
+@dataclass
+class TooltipDisplay:
+    hide_tooltip: bool = False
+    hidden_components: list["str | ComponentDisplay"] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "hide_tooltip": self.hide_tooltip,
+            "hidden_components": self.hidden_components,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TooltipDisplay":
+        return cls(
+            hide_tooltip=data.get("hide_tooltip", False),
+            hidden_components=data.get("hidden_components", []),
+        )
+
+
+# ==========================================================================================
+
 
 @dataclass
 class UseRemainder:
@@ -872,6 +893,21 @@ class UseRemainder:
             item=data["id"],
             count=data.get("count", 1),
         )
+
+# ==========================================================================================
+
+
+@dataclass
+class Weapon:
+    item_damage_per_attack: int = 1  # The amount to damage the item for each attack performed.
+    disable_blocking_for_seconds: float = 0  # The amount of seconds that this item can disable a blocking shield on successful attack. If set to 0, this item cannot disable a blocking shield
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "item_damage_per_attack": self.item_damage_per_attack if self.item_damage_per_attack != 1 else None,  # Defaults to 1
+            "disable_blocking_for_seconds": self.disable_blocking_for_seconds if self.disable_blocking_for_seconds != 0 else None,  # Defaults to 0
+        }
+
 
 # ==========================================================================================
 
@@ -953,10 +989,10 @@ TOOLS = [
 # ==========================================================================================
 
 ComponentType: TypeAlias = (
-    ArmorTrim | AttributeModifier | BannerPattern | Bee | BucketEntityData | BundleContents |
+    ArmorTrim | AttributeModifier | BannerPattern | Bee | BlocksAttacks | BucketEntityData | BundleContents |
     Consumable | ContainerContents | Cooldown |
     DeathProtection | EntityData | Equippable | Firework | FireworkExplosion | Food |
-    Instrument | JukeboxPlayable | LodestoneTracker | MapData | PotionContents | Tool | UseRemainder |
+    Instrument | JukeboxPlayable | LodestoneTracker | MapData | PotionContents | Tool | UseRemainder | Weapon |
     WritableBookContent | WrittenBookContent
 )
 
@@ -972,13 +1008,12 @@ class Components:
     unbreakable: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#unbreakable
     enchantable_at_level: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantable
     # survives_in_lava: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
-    hide_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_tooltip
-    hide_additional_tooltip: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#hide_additional_tooltip
     repaired_by: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
 
     block_entity_data: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_entity_data  <-- Block entities only
     block_state: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_state  <-- Blocks only
+    break_sound: "str | CustomSound | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#break_sound
     container_loot_table: "LootTables | CustomLootTable | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container_loot  <-- Containers only
     custom_head_texture: str | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     damage_resistant_to: "DamageTagsType | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant  <-- Tools only
@@ -1004,6 +1039,8 @@ class Components:
     blocks_attacks: "BlocksAttacks | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#blocks_attacks
     bucket_entity_data: "BucketEntityData | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bucket_entity_data  <-- Bucket of tropical fish only
     bundle_contents: "BundleContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#bundle_contents  <-- Bundles only
+    can_break: "BlockPredicate | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#can_break
+    can_place_on: "BlockPredicate | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#can_place_on
     cooldown: "Cooldown | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#use_cooldown
     consumable: "Consumable | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#consumable
     container_contents: "ContainerContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container
@@ -1019,7 +1056,9 @@ class Components:
     map_data: "MapData | None" = field(default=None, kw_only=True)
     potion_contents: "PotionContents | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#potion_contents
     tool: "Tool | None" = field(default=None, kw_only=True)
+    tooltip_display: "TooltipDisplay | None" = field(default=None, kw_only=True)
     use_remainder: "UseRemainder | None" = field(default=None, kw_only=True)
+    weapon: "Weapon | None" = field(default=None, kw_only=True)
     written_book_content: "WrittenBookContent | None" = field(default=None, kw_only=True)
     writable_book_content: "WritableBookContent | None" = field(default=None, kw_only=True)
 
@@ -1079,16 +1118,15 @@ class Components:
             "damage":                     self.lost_durability,
             "enchantment_glint_override": True if self.enchantment_glint_override else None,
             "glider":                     {} if self.glider else None,
-            "unbreakable":                {"show_in_tooltip": False} if self.unbreakable else None,
+            "unbreakable":                {} if self.unbreakable else None,
             "enchantable":                {"value": self.enchantable_at_level} if self.enchantable_at_level is not None else None,
-            "hide_tooltip":               True if self.hide_tooltip else None,  # Defaults to False
-            "hide_additional_tooltip":    True if self.hide_additional_tooltip else None,  # Defaults to False
             "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by else None,
             "repair_cost":                self.repair_cost,
 
             "base_color":                 self.shield_base_color,
             "block_entity_data":          self.block_entity_data if self.block_entity_data else None,
             "block_state":                self.block_state if self.block_state else None,
+            "break_sound":                self.break_sound.get_reference(pack_namespace) if isinstance(self.break_sound, CustomSound) else self.break_sound,
             "container_loot":             ({"loot_table": (self.container_loot_table.get_reference(pack_namespace) if isinstance(self.container_loot_table, CustomLootTable)
                                            else self.container_loot_table)}
                                            if self.container_loot_table is not None else None),  # fmt: skip
@@ -1113,6 +1151,8 @@ class Components:
             "blocks_attacks":             self.blocks_attacks.to_dict(pack_namespace) if self.blocks_attacks is not None else None,
             "bundle_contents":            self.bundle_contents.to_dict(pack_namespace) if self.bundle_contents is not None else None,
             "bucket_entity_data":         self.bucket_entity_data.to_dict() if self.bucket_entity_data is not None else None,
+            "can_break":                  self.can_break.to_dict(pack_namespace) if self.can_break is not None else None,
+            "can_place_on":               self.can_place_on.to_dict(pack_namespace) if self.can_place_on is not None else None,
             "consumable":                 self.consumable.to_dict(pack_namespace) if self.consumable is not None else None,
             "container":                  self.container_contents.to_dict(pack_namespace) if self.container_contents is not None else None,
             "death_protection":           self.death_protection.to_dict() if self.death_protection is not None else None,
@@ -1130,13 +1170,18 @@ class Components:
             "pot_decorations":            self.pot_decorations if self.pot_decorations else None,
             "stored_enchantments":        self.book_enchantments if self.book_enchantments else None,
             "tool":                       self.tool.to_dict() if self.tool is not None else None,
+            "tooltip_display":            self.tooltip_display.to_dict() if self.tooltip_display is not None else None,
             "instrument":                 self.instrument.to_dict(pack_namespace) if self.instrument is not None else None,
             "use_cooldown":               self.cooldown.to_dict() if self.cooldown is not None else None,
             "use_remainder":              self.use_remainder.to_dict(pack_namespace) if self.use_remainder is not None else None,
+            "weapon":                     self.weapon.to_dict() if self.weapon is not None else None,
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
 
-# can_break Mehhh
-# can_place_on Meh
+
+# custom_model_data - https://minecraft.wiki/w/Data_component_format#custom_model_data  # TODO: This
+# potion_duration_scale - https://minecraft.wiki/w/Data_component_format#potion_duration_scale
+# provides_trim_material - https://minecraft.wiki/w/Data_component_format#provides_trim_material
+# provides_banner_patterns - https://minecraft.wiki/w/Data_component_format#provides_banner_patterns
 # lock  # https://minecraft.wiki/w/Data_component_format#lock

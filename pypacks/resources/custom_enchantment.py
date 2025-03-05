@@ -7,7 +7,8 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.additions.item_components import PotionEffectType, DamageTypes
+    from pypacks.scripts.repos.damage_types import DamageTypesType
+    from pypacks.additions.item_components import PotionEffectType
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_mcfunction import MCFunction
     from pypacks.resources.custom_predicate import Predicate
@@ -242,7 +243,7 @@ class ApplyMobEffectEntityEffect:
 class DamageEntityEntityEffect:
     """Deals (extra) damage to the affected entity."""
     # https://minecraft.wiki/w/Enchantment_definition#damage_entity
-    damage_type: "DamageTypes"
+    damage_type: "DamageTypesType"
     min_damage: float = 0.5
     max_damage: float = 10.0
 
@@ -288,7 +289,7 @@ class ExplodeEntityEffect:
     """Causes an explosion"""
     # https://minecraft.wiki/w/Enchantment_definition#explode
     attribute_to_user: bool = False  # Whether the explosion should be attributed to the user
-    damage_type: "DamageTypes" = "generic"
+    damage_type: "DamageTypesType" = "generic"
     immune_blocks: list[str] | str | None = field(default_factory=list)  # (an  ID, or a #tag, or an  array containing  IDs) - blocks that fully block the explosion and can't be destroyed.
     knockback_multiplier: float = 1.0  # The knockback multiplier of the explosion
     offset: tuple[float, float, float] = (0.0, 0.0, 0.0)  # X, Y, Z position offset to spawn the explosion.

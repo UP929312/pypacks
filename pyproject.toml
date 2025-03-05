@@ -41,7 +41,6 @@ disable = [
     "missing-module-docstring",
     "missing-class-docstring",
     "missing-function-docstring",
-    "missing-timeout",
 
     "too-few-public-methods",
     "too-many-instance-attributes",
@@ -68,6 +67,7 @@ disable = [
     "wrong-import-order",
     "wildcard-import",
     "unused-wildcard-import",
+    "unnecessary-lambda",
 ]
 
 [tool.black]

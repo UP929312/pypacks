@@ -97,15 +97,6 @@ def generate_datapack(pack: "Pack") -> None:
     if pack.pack_icon_path is not None:
         shutil.copyfile(pack.pack_icon_path, pack.datapack_output_path/"pack.png")
     # ================================================================================================
-    # Load + Tick functions
-    os.makedirs(pack.datapack_output_path/"data"/"minecraft"/"tags"/"function", exist_ok=True)
-    with open(pack.datapack_output_path/"data"/"minecraft"/"tags"/"function"/"load.json", "w") as file:
-        json.dump({"values": [f"{pack.namespace}:load"]}, file, indent=4)  # TODO: These are just regular function tags, not special, we can totally replace these...
-
-    if pack.custom_blocks or pack.custom_loops:  # TODO: We definitely do more on this...
-        with open(pack.datapack_output_path/"data"/"minecraft"/"tags"/"function"/"tick.json", "w") as file:
-            json.dump({"values": [f"{pack.namespace}:tick"]}, file, indent=4)
-    # ================================================================================================
     # Give commands
     if pack.custom_items:
         os.makedirs(pack.datapack_output_path/"data"/pack.namespace/"function"/"give", exist_ok=True)
@@ -118,10 +109,11 @@ def generate_datapack(pack: "Pack") -> None:
             with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:  # TODO: Replace this with a func
                 file.write(f"\n# Give the book\n{book.generate_give_command(pack)}")
 
-            from pypacks.additions.font_tester import FontTestingBook
-            font_tester_give_command = FontTestingBook().generate_give_command(pack)
-            with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_font_tester.mcfunction", "w") as file:  # TODO: Replace this with a func
-                file.write(f"\n# Give the font tester book\n{font_tester_give_command}")
+    if pack.config.generate_reference_book and pack.custom_fonts:
+        from pypacks.additions.font_tester import FontTestingBook
+        font_tester_give_command = FontTestingBook().generate_give_command(pack)
+        with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_font_tester.mcfunction", "w") as file:  # TODO: Replace this with a func
+            file.write(f"\n# Give the font tester book\n{font_tester_give_command}")
     # ================================================================================================
     # Resources
     for item in (
