@@ -13,6 +13,7 @@ from pypacks.additions.reference_book_config import RefBookCategory
 
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
+from pypacks.resources.custom_model import CustomModelDefinition, CustomTexture
 from pypacks.resources.world_gen.structure import SingleCustomStructure
 from pypacks.generate import generate_datapack, generate_resource_pack, generate_base_font
 
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_language import CustomLanguage
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
-    from pypacks.resources.custom_model import CustomItemModelDefinition
+    from pypacks.resources.custom_model import CustomItemRenderDefinition
     from pypacks.resources.custom_painting import CustomPainting
     from pypacks.resources.custom_predicate import Predicate
     from pypacks.resources.custom_recipe import Recipe
@@ -57,9 +58,9 @@ class Pack:
     resource_pack_path: str = ""
 
     config: Config = field(default_factory=Config)
-    # TODO: on_tick_function and on_load_function
-    # on_tick_command: MCFunction | None = None
-    # on_load_command: MCFunction | None = None
+
+    on_tick_function: "MCFunction | None" = None
+    on_load_function: "MCFunction | None" = None
 
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
@@ -79,7 +80,9 @@ class Pack:
     custom_sounds: list["CustomSound"] = field(default_factory=list)
     custom_tags: list["CustomTag"] = field(default_factory=list)
     custom_mcfunctions: list["MCFunction"] = field(default_factory=list)
-    custom_item_model_definitions: list["CustomItemModelDefinition"] = field(default_factory=list)
+    custom_model_definitions: list["CustomModelDefinition"] = field(default_factory=list)
+    custom_item_render_definitions: list["CustomItemRenderDefinition"] = field(default_factory=list)
+    custom_textures: list["CustomTexture"] = field(default_factory=list)
     custom_dimensions: list["CustomDimension"] = field(default_factory=list)
     custom_structures: list["CustomStructure | SingleCustomStructure"] = field(default_factory=list)
     custom_structure_sets: list["CustomStructureSet"] = field(default_factory=list)
@@ -99,12 +102,11 @@ class Pack:
         self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[assignment]
         self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[assignment]
 
-        self.data_pack_format_version = 69
-        self.resource_pack_format_version = 53
+        self.data_pack_format_version = 70
+        self.resource_pack_format_version = 54
 
         assert self.namespace.islower(), "Namespace must be all lowercase"
         assert all(x in "abcdefghijklmnopqrstuvwxyz0123456789_-." for x in self.namespace), "Namespace must only contain letters, numbers, _, -, and ."
-
 
     def add_internal_functions(self) -> None:
         # ==================================================================================
@@ -188,14 +190,14 @@ class Pack:
             )
         # ==================================================================================
         # Item models (well, the display items)
-        if self.custom_item_model_definitions:
+        if self.custom_item_render_definitions:
             give_all_item_models = MCFunction("give_all_item_models", [
                 custom_item_model_def.generate_give_command(self.namespace)
-                for custom_item_model_def in [x for x in self.custom_item_model_definitions if x.showcase_item is not None]
+                for custom_item_model_def in [x for x in self.custom_item_render_definitions if x.showcase_item is not None]
             ])
             self.custom_mcfunctions.append(give_all_item_models)
         # ==================================================================================
-        self.load_mcfunction = MCFunction("load", [
+        self.internal_load_mcfunction = MCFunction("internal_load", [
             f"gamerule maxCommandChainLength {10_000_000}" if self.config.generate_reference_book else "",  # This is generally for the reference book
             "scoreboard objectives add raycast dummy" if (self.custom_items or self.custom_blocks or self.custom_raycasts) else "",
             f"scoreboard objectives add {self.custom_loops[0].scoreboard_objective_name} dummy" if self.custom_loops else "",
@@ -217,24 +219,24 @@ class Pack:
             f"say Loaded into {self.name}!" if self.name != "Minecraft" else "",
         ])
         # ==================================================================================
-        self.tick_mcfunction = MCFunction("tick", [
+        self.internal_tick_mcfunction = MCFunction("internal_tick", [
             *[
                 f"execute as @a[scores={{{item.internal_name}_cooldown=1..}}] run scoreboard players remove @s {item.internal_name}_cooldown 1"
                 for item in self.custom_items if item.on_right_click and item.use_right_click_cooldown is not None  # TODO: Move these to a different file?
-            ],  # TODO: Move this to its own function and just all it here...
+            ],  # TODO: Move this to its own function and just call it here...
             *[
                 custom_crafter_tick.on_tick(self.namespace).get_run_command(self.namespace)
                 for custom_crafter_tick in self.custom_crafters
-            ],  # TODO: Move this to its own function and just all it here...
+            ],  # TODO: Move this to its own function and just call it here...
             self.custom_loops[0].generate_global_tick_counter() if self.custom_loops else "",
             self.custom_loops[0].generate_loop_manager_function(self.custom_loops, self.namespace).get_run_command(self.namespace) if self.custom_loops else "",
             f"function {self.namespace}:custom_blocks/all_blocks_tick" if self.custom_blocks else "",
             CustomItem.generate_on_drop_execute_loop(self.namespace)[1].get_run_command(self.namespace) if has_on_drop_items else "",
         ])
-        if not self.load_mcfunction._is_empty:
-            self.custom_mcfunctions.append(self.load_mcfunction)
-        if not self.tick_mcfunction._is_empty:
-            self.custom_mcfunctions.append(self.tick_mcfunction)
+        if not self.internal_load_mcfunction.is_empty:
+            self.custom_mcfunctions.append(self.internal_load_mcfunction)
+        if not self.internal_tick_mcfunction.is_empty:
+            self.custom_mcfunctions.append(self.internal_tick_mcfunction)
         # ==================================================================================
         if self.custom_items and self.config.generate_create_wall_command:
             self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
@@ -247,27 +249,29 @@ class Pack:
             self.font_mapping = self.custom_fonts[0].get_mapping()
         # ==================================================================================
 
-    def generate_pack(self) -> None:
+    def generate_pack(self) -> "Pack":
         self.add_internal_functions()
-        if self.namespace != "minecraft":
-            self.generate_minecraft_pack()
-        self.generate_pack_parts()
-
-    def generate_pack_parts(self) -> None:
+        self.generate_minecraft_pack()
         print(f"Generating data pack @ {self.datapack_output_path}\\data\\{self.namespace}")
         print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
-        print(f"C:\\Users\\{os.environ['username']}\\AppData\\Roaming\\.minecraft\\logs\\latest.log")  # TODO: Eventually remove this I suppose
+        print(f"C:\\Users\\{os.environ['username']}\\AppData\\Roaming\\.minecraft\\logs\\latest.log")
         # Needs to go in this order (I think?)
         generate_datapack(self)
         generate_resource_pack(self)
+        return self
 
     def generate_minecraft_pack(self) -> None:
         from pypacks.resources.custom_tag import CustomTag
-        tags = []
-        if not self.tick_mcfunction._is_empty:
-            tags.append(CustomTag("tick", [self.tick_mcfunction.get_reference(self.namespace)], tag_type="function"))
-        if not self.load_mcfunction._is_empty:
-            tags.append(CustomTag("load", [self.load_mcfunction.get_reference(self.namespace)], tag_type="function"))
-        minecraft = Pack("Minecraft", "The base Minecraft pack", "minecraft", datapack_output_path=self.datapack_output_path,
+        tags = [
+            CustomTag("tick", [
+                self.internal_tick_mcfunction.get_reference(self.namespace) if not self.internal_tick_mcfunction.is_empty else None,  # type: ignore[list-item]
+                self.on_tick_function.get_reference(self.namespace) if self.on_tick_function is not None else None,  # type: ignore[list-item]
+            ], tag_type="function"),
+            CustomTag("load", [
+                self.internal_load_mcfunction.get_reference(self.namespace) if not self.internal_load_mcfunction.is_empty else None,  # type: ignore[list-item]
+                self.on_load_function.get_reference(self.namespace) if self.on_load_function is not None else None,  # type: ignore[list-item]
+            ], tag_type="function"),
+        ]
+        minecraft = Pack("Minecraft", "", "minecraft", datapack_output_path=self.datapack_output_path,
                          custom_tags=tags, config=Config(generate_create_wall_command=False, generate_reference_book=False))
         generate_datapack(minecraft)

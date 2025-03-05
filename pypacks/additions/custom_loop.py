@@ -12,7 +12,7 @@ class CustomLoop:
     """This class manages loops, so you can run code every x seconds or ticks"""
     internal_name: str
     interval_in_ticks: int  # How long to wait before running the command again, to convert seconds to ticks, multiply by 20
-    command: "str | MCFunction"  # TODO: Support command`s` as well
+    command: "str | MCFunction"  # TODO: Support command`s` as well (need to potentially have something create a function for it)
 
     scoreboard_objective_name: str = field(init=False, repr=False, hash=False, default="loop_dispatch_counters")
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="function/custom_blocks")

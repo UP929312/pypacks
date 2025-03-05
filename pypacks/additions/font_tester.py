@@ -29,4 +29,9 @@ class FontTestingBook:
             title=title,
             author=pack.name,
         ).generate_give_command(pack.namespace)
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        from pypacks.resources.custom_mcfunction import MCFunction
+        MCFunction("give_font_tester", ["# Give the font tester book", self.generate_give_command(pack)]).create_datapack_files(pack)
+
 # =======================================================================================================================================

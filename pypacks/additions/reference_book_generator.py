@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pypacks.written_book_framework import (
@@ -109,6 +110,8 @@ class ItemPage:
 class ReferenceBook:
     items: list["CustomItem"]
 
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="function")
+
     def generate_cover_page(self, pack: "Pack") -> "ElementPage":
         title_starting_char_code = "➤".encode('unicode_escape').decode('ascii')
         return ElementPage([
@@ -210,4 +213,9 @@ class ReferenceBook:
             title=title,
             author=pack.name,
         ).generate_give_command(pack.namespace)
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
+            file.write(f"\n# Give the book\n{self.generate_give_command(pack)}")
+
 # =======================================================================================================================================

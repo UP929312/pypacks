@@ -6,9 +6,9 @@ from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, Consumable, Food, AttributeModifier, TooltipDisplay
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
-from pypacks.resources.custom_model import CustomTexture
+from pypacks.resources.custom_model import CustomItemTexture
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.resources.custom_model import CustomItemModelDefinition
+from pypacks.resources.custom_model import CustomItemRenderDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
 from pypacks.utils import to_component_string, recursively_remove_nones_from_data, make_white_and_remove_italics, remove_italics
 
@@ -29,7 +29,7 @@ class CustomItem:
     max_stack_size: int = field(repr=False, default=64)  # Max stack size of the item (1-99)
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = field(repr=False, default=None)
     texture_path: str | None = field(repr=False, default=None)
-    item_model: "str | CustomItemModelDefinition | None" = field(repr=False, default=None)
+    item_model: "str | CustomItemRenderDefinition | None" = field(repr=False, default=None)
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
     on_right_click: "str | MCFunction | Raycast | None" = None  # Command/Function/Raycast to call when the item is right clicked
     on_item_drop: "str | MCFunction | None" = None  # Command/Function to call when the item is dropped
@@ -49,9 +49,7 @@ class CustomItem:
         # TODO: Rework this, instead, just make a custom item model here instead...
         # from pypacks.resources.custom_model import ModelItemModel
         # custom_item_model = CustomItemModelDefinition(self.internal_name, ModelItemModel(path), self.base_item)
-        path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
-        with open(path, mode="rb") as file:
-            self.image_bytes = file.read()
+        self.path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
 
         self.use_right_click_cooldown = getattr(getattr(self.components, "cooldown", None), "seconds", None)
         Components.verify_compatible_components(self)
@@ -66,12 +64,14 @@ class CustomItem:
         return hash(self.internal_name)
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
+        from pypacks.resources.custom_model import CustomTexture
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.texture_path is not None and not self.is_block:
-            CustomTexture(self.internal_name, self.image_bytes).create_resource_pack_files(pack)  # TODO: Move the custom texture to __post__init__? Then we can remove the refernce below
-        # TODO: Should this exist here? I mean, it's a sub_item creating more resources, but maybe that's fine?
-        if self.item_model is not None and isinstance(self.item_model, CustomItemModelDefinition):
+            CustomItemTexture(self.internal_name, self.path).create_resource_pack_files(pack)  # TODO: Move the custom texture to __post__init__? Then we can remove the refernce below
+        if self.item_model is not None and isinstance(self.item_model, CustomItemRenderDefinition):
             self.item_model.create_resource_pack_files(pack)
+        if self.components and self.components.equippable is not None and isinstance(self.components.equippable.camera_overlay, CustomTexture):
+            self.components.equippable.camera_overlay.create_resource_pack_files(pack)
 
     def create_datapack_files(self, pack: "Pack") -> None:
         # Create the give command for use in books
@@ -86,7 +86,7 @@ class CustomItem:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         # TODO: Clean this up
         if self.item_model:
-            item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemModelDefinition) else self.item_model
+            item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemRenderDefinition) else self.item_model
         else:
             item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path  # TODO: Remove this reference
         if isinstance(self.on_item_drop, MCFunction):  # TODO: Somehow improve this?

@@ -34,7 +34,7 @@ class MCFunction:
         return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"
 
     @property
-    def _is_empty(self) -> bool:
+    def is_empty(self) -> bool:
         return not any(self.commands)
 
     def get_run_command(self, pack_namespace: str) -> str:
@@ -57,7 +57,7 @@ class MCFunction:
         # Macros
         detected_macros = tuple(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
         # Detected functions
-        detected_functions = tuple(sorted(set([x.group(1) for pattern in FUNCTION_PATTERNS for x in re.finditer(pattern, commands_str)])))
+        detected_functions = tuple(sorted(set(x.group(1) for pattern in FUNCTION_PATTERNS for x in re.finditer(pattern, commands_str))))
         # Variables required
         variables: list[tuple[str, str]] = []
         for pattern in VARIABLE_PAIR_PATTERNS:
@@ -78,7 +78,7 @@ class MCFunction:
         if (not commands_str.strip()) and not self.create_if_empty:
             return
         self.do_function_checks(pack)
-        function_headers = self.generate_headers(pack.namespace)
+        function_headers = self.generate_headers(pack.namespace) if pack.config.auto_generate_mcfunction_headers else ""
         # Incase you embed mcfunctions:
         for mcfunction in [x for x in self.commands if isinstance(x, MCFunction)]:
             mcfunction.create_datapack_files(pack)

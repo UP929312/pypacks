@@ -8,6 +8,8 @@ from pypacks.providers.int_provider import IntProvider
 from pypacks.resources.custom_enchantment import CustomEnchantment
 
 # TODO: These never get passed in anywhere/create_datapack_files ever ran...
+# They live in their own folder, enchantment_provider, but I want a better way to create them I suppose
+# than just a new Pack input.
 
 
 @dataclass

@@ -7,7 +7,17 @@ CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
 Write a read-me
 
+What if each resource could have a function "add required children resources" which took pack, and could do like
+pack.mcfunctions.append()
+
+Entity varieties, when creating spawn eggs or spawning mobs
+
+For item pages in the reference book, have "used in"...
+
 # When creating things, a custom namespace should be added in, so we can create minecraft/ stuff, e.g. the load function tag, or tick
+
+I suppose for like, custom model defs, I could completely allow "CustomTexture" which just gets passed over?
+Could also allow just CustomModelDefinition
 
 # Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
 # Would also like to do "calls function <x>" and "is called by <function y>"  # Detect it being called by a function tag
@@ -15,9 +25,12 @@ Write a read-me
 
 # INFO: Paintings require a world reset (registry, add all registry updates as a warning!)
 
+Give all function needs reworking, massively
+Put them in chests, or maybe bundles instead?
+
 Cleanup of temp variables, potentially?
 
-Custom fonts needs non-auto chosing chars
+Custom fonts needs non-auto choosing chars
 
 "Default language", for if you want to use Translate() everywhere, and have it fill in the default language file.
 Maybe resource.from_file? Or maybe from_dict?
@@ -115,10 +128,6 @@ Translations (grrr)
 ADDED, but want to be able to add it to custom items I guess? And also Translate("pypacks.item.ruby") Need to allow item name for custom items to be JSON...
 
 For any_of enchantment, maybe just take a list as an alternative, and if it's passed in, re-construct the object to use the AnyOfValueEffect?
-
-# Item Model = The thing that defines the model, e.g. cube data, Item state is the thing that points at the model?
-If we want to allow them to pass in a custom item model, we also need to give a way to pass in the custom texture, and the {"parent": "minecraft:item/generated", "textures": layers} bit...
-Add a "generic" model, including maybe blockstates, model, item, textures? So if you want to add a custom 3d model you can?
 
 A lot of examples, maybe one per item? In a new examples folder.
 

@@ -31,8 +31,8 @@ def generate_resource_pack(pack: "Pack") -> None:
     # ================================================================================================
     # Custom item images, model.json, item.json, etc & custom paintings (move files, create folder) & custom sounds (move sound files, create folder) & custom font (built in)
     for element in (
-        pack.custom_items + pack.custom_blocks + pack.custom_paintings + pack.custom_sounds + pack.custom_fonts + pack.custom_item_model_definitions +
-        pack.custom_languages + pack.custom_entity_variants
+        pack.custom_items + pack.custom_blocks + pack.custom_paintings + pack.custom_sounds + pack.custom_fonts + pack.custom_languages +
+        pack.custom_entity_variants + pack.custom_item_render_definitions + pack.custom_model_definitions + pack.custom_textures
     ):
         element.create_resource_pack_files(pack)
     # ================================================================================================
@@ -66,7 +66,7 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
             for category in pack.reference_book_categories
         ],
         *[  # Custom items
-            BitMapFontChar(f"{item.internal_name}_icon", image_bytes=add_border(item.image_bytes), height=20, y_offset=10)
+            BitMapFontChar(f"{item.internal_name}_icon", image_bytes=add_border(Path(item.path).read_bytes()), height=20, y_offset=10)
             for item in pack.custom_items
         ],
         *[  # Custom recipes
@@ -100,20 +100,16 @@ def generate_datapack(pack: "Pack") -> None:
     # Give commands
     if pack.custom_items:
         os.makedirs(pack.datapack_output_path/"data"/pack.namespace/"function"/"give", exist_ok=True)
-
         with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_all.mcfunction", "w") as file:
             file.write("\n".join([custom_item.generate_give_command(pack.namespace) for custom_item in pack.custom_items]))
         # And give the book
         if pack.config.generate_reference_book:
-            book = ReferenceBook(pack.custom_items)
-            with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:  # TODO: Replace this with a func
-                file.write(f"\n# Give the book\n{book.generate_give_command(pack)}")
+            ReferenceBook(pack.custom_items).create_datapack_files(pack)
 
     if pack.config.generate_reference_book and pack.custom_fonts:
         from pypacks.additions.font_tester import FontTestingBook
-        font_tester_give_command = FontTestingBook().generate_give_command(pack)
-        with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_font_tester.mcfunction", "w") as file:  # TODO: Replace this with a func
-            file.write(f"\n# Give the font tester book\n{font_tester_give_command}")
+        FontTestingBook().create_datapack_files(pack)
+
     # ================================================================================================
     # Resources
     for item in (

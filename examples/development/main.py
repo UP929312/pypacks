@@ -82,7 +82,8 @@ loot_table_chest = CustomItem("loot_table_chest", "minecraft:chest", "Loot Table
 on_drop_gold_ingot = CustomItem("on_drop_gold_ingot", "minecraft:gold_ingot", "On Drop Gold Ingot", on_item_drop="say Hi!")
 on_drop_copper_ingot = CustomItem("on_drop_copper_ingot", "minecraft:copper_ingot", "On Drop Copper Ingot", on_item_drop="kill @s")
 custom_shield = CustomItem("custom_shield", "minecraft:gray_dye", "Custom Shield", components=Components(blocks_attacks=BlocksAttacks(damage_reductions=[DamageReduction(["mob_attack", "arrow"])])))
-custom_weapon: CustomItem = CustomItem("custom_weapon", "minecraft:diamond_sword", "Custom Weapon", components=Components(weapon=Weapon()))
+custom_weapon = CustomItem("custom_weapon", "minecraft:diamond_sword", "Custom Weapon", components=Components(weapon=Weapon()))
+overlay = CustomItem("custom_overlay", "minecraft:stone", "Custom Overlay", components=Components(equippable=Equippable(camera_overlay=CustomTexture("overlay", "images/overlay.png"))))
 
 # invalid_component = CustomItem("invalid_component", "minecraft:sword", "Invalid Component", components=Components(map_data=MapData(map_id=1)))
 # fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
@@ -102,7 +103,7 @@ custom_items = [
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
     bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet, trimmed_leggings,
     suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest, on_drop_gold_ingot,
-    on_drop_copper_ingot, custom_shield, custom_weapon,
+    on_drop_copper_ingot, custom_shield, custom_weapon, overlay,
 ]
 # endregion
 # ============================================================================================================
@@ -158,16 +159,16 @@ glider_helmet_loot_table = CustomLootTable("glider_helmet_loot_table", [SingleIt
 loot_tables = [emerald_loot_table, glider_helmet_loot_table]
 # endregion
 # ============================================================================================================
-# region: Custom Item Model Definitions
-blue_sword = CustomItemModelDefinition("blue_sword", ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 0.0, 1.0))]), showcase_item="iron_sword")
-hold_model = CustomItemModelDefinition("hold_model", ConditionalItemModel(
+# region: Custom Item Render Definitions
+blue_sword = CustomItemRenderDefinition("blue_sword", ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 0.0, 1.0))]), showcase_item="iron_sword")
+hold_model = CustomItemRenderDefinition("hold_model", ConditionalItemModel(
         SelectedConditional(),
         true_model=ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((0.0, 1.0, 0.0))]),
         false_model=ModelItemModel("minecraft:item/iron_sword", tints=[ConstantTint((1.0, 0.0, 0.0))]),
     ),
     showcase_item="iron_sword"
 )
-composite_model = CustomItemModelDefinition("composite_model", CompositeItemModel(
+composite_model = CustomItemRenderDefinition("composite_model", CompositeItemModel(
         models=[
             ModelItemModel("minecraft:block/oak_pressure_plate"),
             ModelItemModel("minecraft:item/beef"),
@@ -175,13 +176,13 @@ composite_model = CustomItemModelDefinition("composite_model", CompositeItemMode
     ),
     showcase_item="acacia_door"
 )
-empty_model = CustomItemModelDefinition("empty_model", EmptyItemModel(), showcase_item="acacia_door")
-hand_model = CustomItemModelDefinition("hand_model", SelectItemModel(property_to_satisfy=MainHandSelectProperty(), cases=[
+empty_model = CustomItemRenderDefinition("empty_model", EmptyItemModel(), showcase_item="acacia_door")
+hand_model = CustomItemRenderDefinition("hand_model", SelectItemModel(property_to_satisfy=MainHandSelectProperty(), cases=[
         SelectCase(when="left", model="item/diamond_sword"), SelectCase(when="right", model="item/wooden_sword"),
     ]),
     showcase_item="golden_sword",
 )
-range_dispatch = CustomItemModelDefinition(
+range_dispatch = CustomItemRenderDefinition(
     "range_dispatch",
     RangeDispatchItemModel(
         property_to_satisfy="minecraft:damage",
@@ -193,12 +194,12 @@ range_dispatch = CustomItemModelDefinition(
     ),
     showcase_item="golden_sword",
 )
-bundle_model = CustomItemModelDefinition("bundle_model", BundleSelectedItemModel(), showcase_item="bundle")
-special_model = CustomItemModelDefinition("special_model", SpecialItemModel(
+bundle_model = CustomItemRenderDefinition("bundle_model", BundleSelectedItemModel(), showcase_item="bundle")
+special_model = CustomItemRenderDefinition("special_model", SpecialItemModel(
     "minecraft:shulker_box", base="minecraft:block/copper_bulb", additional_data={"texture": "minecraft:shulker_green", "openness": 0.3, "orientation": "up"}),
     showcase_item="acacia_sign",
 )
-custom_item_model_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model]
+custom_item_render_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model]
 # endregion
 # ============================================================================================================
 # region: Custom Enchants
@@ -316,6 +317,11 @@ sand_wolf = WolfVariant("sand_wolf", wild_texture_path="images/sand_wolf.png", t
 entity_variants: list[EntityVariant] = [sand_pig, sand_cow, sand_chicken, sand_cat, sand_frog, sand_wolf]
 # endregion
 # ============================================================================================================
+# region: Custom Item Definitions and Custom Models
+# tick_model_definition = CustomModelDefinition("tick", subdirectories=["item"])
+# tick_render_definition = CustomItemRenderDefinition("tick", "minecraft:gui/sprites/container/beacon/confirm", showcase_item="iron_sword")
+# endregion
+# ============================================================================================================
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -328,7 +334,8 @@ datapack = Pack(
     custom_blocks=custom_blocks,
     custom_loot_tables=loot_tables,
     custom_languages=custom_languages,
-    custom_item_model_definitions=custom_item_model_definitions,
+    # custom_model_definitions=[tick_model_definition],
+    custom_item_render_definitions=[*custom_item_render_definitions],  # tick_render_definition],
     custom_enchantments=custom_enchantments,
     custom_dimensions=[my_dimension, overworld_dimension],
     custom_damage_types=[my_custom_damage_type],

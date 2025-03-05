@@ -49,7 +49,7 @@ from pypacks.resources.custom_enchantment import (
     PlaySoundEntityEffect, ReplaceBlockEntityEffect, ReplaceDiskEntityEffect, RunFunctionEntityEffect, SetBlockPropertiesEntityEffect, SpawnParticlesEntityEffect, SummonEntityEntityEffect
 
 )
-from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
+from pypacks.resources.custom_model import FacePaths, CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_font import CustomFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
 from pypacks.resources.custom_game_test import (
@@ -134,7 +134,7 @@ __all__ = [
     "EnchantValueEffect", "SetValueEffect", "AddValueEffect", "MultiplyValueEffect", "RemoveBinomialValueEffect", "AllOfValueEffect",
     "EnchantmentEntityEffect", "AllOfEntityEffect", "ApplyMobEffectEntityEffect", "DamageEntityEntityEffect", "ChangeItemDamageEntityEffect", "ExplodeEntityEffect", "IgniteEntityEffect",
     "PlaySoundEntityEffect", "ReplaceBlockEntityEffect", "ReplaceDiskEntityEffect", "RunFunctionEntityEffect", "SetBlockPropertiesEntityEffect", "SpawnParticlesEntityEffect", "SummonEntityEntityEffect",
-    "FacePaths", "CustomItemModelDefinition",
+    "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
     "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomGameTest", "AllOfEnvironment", "FunctionEnvironment", "GameRulesEnvironment", "TimeOfDayEnvironment", "WeatherEnvironment", "CustomTestEnvironment",

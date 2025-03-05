@@ -267,6 +267,7 @@ class ComponentConditional:
     predicate: str  # "Predicate | str"  # TODO: Allow custom predicates, convert to dict, need pack_namespace in these to_dict functions
     value: str
     # https://minecraft.wiki/w/Items_model_definition#component
+
     def to_dict(self) -> dict[str, str]:
         return {"property": "minecraft:component", "predicate": self.predicate, "value": self.value}
 
@@ -472,7 +473,7 @@ class ComponentSelectProperty:
     the entry will be silently ignored."""
     # https://minecraft.wiki/w/Items_model_definition#component_2
     # Values: Depends on the target component type.
-    component: str # Namespaced ID of the component type.
+    component: str  # Namespaced ID of the component type.
 
     def to_dict(self) -> dict[str, str]:
         return {"property": "minecraft:component", "component": self.component}

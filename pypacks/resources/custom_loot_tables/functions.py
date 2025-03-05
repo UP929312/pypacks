@@ -380,11 +380,11 @@ class SetContentsFunction:
 
     def to_dict(self) -> dict[str, Any]:
         raise NotImplementedError("This function is not yet implemented.")  # TODO: Do this
-        return {
-            "function": "minecraft:set_contents",
-            "entries": [x.to_dict() for x in self.entries],  # TODO: This needs datapack (for some entries)...
-            "type": self.content_type,
-        }
+        # return {
+        #     "function": "minecraft:set_contents",
+        #     "entries": [x.to_dict(pack_namespace) for x in self.entries],  # TODO: This needs datapack (for some entries)...
+        #     "type": self.content_type,
+        # }
 
 
 @dataclass

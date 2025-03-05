@@ -37,7 +37,7 @@ from pypacks.additions.custom_block import CustomBlock
 from pypacks.resources.custom_damage_type import CustomDamageType, DamageTypeTranslation
 from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType, OverworldDimension, NetherDimension, EndDimension
 from pypacks.resources.custom_enchantment import CustomEnchantment
-from pypacks.resources.custom_model import FacePaths, CustomItemModelDefinition
+from pypacks.resources.custom_model import FacePaths, CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_font import CustomFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
@@ -86,7 +86,7 @@ __all__ = [
     "CustomDamageType", "DamageTypeTranslation",
     "CustomDimension", "CustomDimensionType", "OverworldDimension", "NetherDimension", "EndDimension",
     "CustomEnchantment",
-    "FacePaths", "CustomItemModelDefinition",
+    "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
     "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomLanguage",

@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable
+    from pypacks.resources.custom_model import CustomTexture
     from pypacks.resources.predicate.predicate_conditions import BlockPredicate
 
     from pypacks.resources.custom_damage_type import CustomDamageType
@@ -15,7 +16,6 @@ if TYPE_CHECKING:
     from pypacks.scripts.repos.loot_tables import LootTables
     from pypacks.scripts.repos.damage_tags import DamageTagsType
     from pypacks.scripts.repos.damage_types import DamageTypesType
-    
 
 
 # ==========================================================================================
@@ -449,10 +449,10 @@ class Equippable:
     damage_on_hurt: bool = True  # Whether this item is damaged when the wearing entity is damaged. Defaults to True.
     entities_which_can_wear: str | list[str] | Literal["all"] = "all"  # The entities which can wear this item. Entity ID/Tag, or list of Entity IDs to limit.
     equip_on_interaction: bool = True  # Whether this item can be equipped onto a target mob by pressing use on it (as long as this item can be equipped on the target at all).
-    camera_overlay: str | None = field(repr=False, default=None)  # The resource location of the overlay texture to use when equipped. The directory this refers to is assets/<namespace>/textures/<id>.
-    # TODO: Test camera overlay and equip_on_interaction
+    camera_overlay: "str | CustomTexture | None" = field(repr=False, default=None)  # A texture which is displayed on the player's screen when the item is equipped.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_model import CustomTexture
         return {
             "slot": self.slot,
             "equip_sound": self.equip_sound,
@@ -461,7 +461,7 @@ class Equippable:
             "damage_on_hurt": False if not self.damage_on_hurt else None,  # Defaults to True
             "entities_which_can_wear": self.entities_which_can_wear if self.entities_which_can_wear != "all" else None,  # Defaults to "all"
             "equip_on_interaction": False if not self.equip_on_interaction else None,  # Defaults to True
-            "camera_overlay": self.camera_overlay,  # Defaults to None
+            "camera_overlay": self.camera_overlay.get_reference(pack_namespace) if isinstance(self.camera_overlay, CustomTexture) else self.camera_overlay,  # Defaults to None
         }
 
     @classmethod
@@ -1157,7 +1157,7 @@ class Components:
             "container":                  self.container_contents.to_dict(pack_namespace) if self.container_contents is not None else None,
             "death_protection":           self.death_protection.to_dict() if self.death_protection is not None else None,
             "entity_data":                self.entity_data.to_dict() if self.entity_data is not None else None,
-            "equippable":                 self.equippable.to_dict() if self.equippable is not None else None,
+            "equippable":                 self.equippable.to_dict(pack_namespace) if self.equippable is not None else None,
             "firework_explosion":         self.firework_explosion.to_dict() if self.firework_explosion is not None else None,
             "fireworks":                  self.firework.to_dict() if self.firework is not None else None,
             "food":                       self.food.to_dict() if self.food is not None else None,

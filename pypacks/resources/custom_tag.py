@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from pypacks.pack import Pack
 
 
-# TODO: https://minecraft.wiki/w/Resource_location#Registries_and_registry_objects
+# https://minecraft.wiki/w/Resource_location#Registries_and_registry_objects
 # Type hint that ^
 
 # Block tags, Item Tags, Entity Type Tags, Function Tags
@@ -27,6 +27,7 @@ class CustomTag:
     tag_type: Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "function", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
     sub_directories: list[str] = field(default_factory=list)
     replace: bool = False
+    create_if_empty: bool = False
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="tags")
 
@@ -35,15 +36,18 @@ class CustomTag:
 
     def to_dict(self, pack_namespace: str) -> dict[str, bool | list[str]]:
         from pypacks.resources.custom_item import CustomItem
-        return {
+        from pypacks.utils import recursively_remove_nones_from_data
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "replace": self.replace,
             "values": [
                 (x.get_reference(pack_namespace) if isinstance(x, CustomTag) else (x.base_item if isinstance(x, CustomItem) else x))
                 for x in self.values],
-        }
+        })
 
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.custom_item import CustomItem
+        if not self.create_if_empty and not self.values:
+            return
         if any(isinstance(x, CustomItem) for x in self.values) and pack.config.warn_about_tags_with_custom_items:
             print(f"Warning: Tag {self.internal_name} contains custom items. Custom items will be converted to their base item and will not include any components.")
 

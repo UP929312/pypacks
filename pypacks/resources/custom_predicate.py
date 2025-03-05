@@ -251,17 +251,10 @@ class TimeCheckPredicate(Predicate):
     period: int | None = None  # If present, the day time is first reduced modulo the given number before being checked against the value. For example, setting this to 24000 causes the checked time to be equal to the current daytime.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        # TODO: Test/figure this out?
         return {
             "condition": "time_check",
             "value": self.number_provider.to_dict() if isinstance(self.number_provider, NumberProvider) else self.number_provider,
         } | {"period": self.period} if self.period is not None else {}
-    # time_check—Compares the current day time (or rather, 24000 * day count + day time) against given values. Invokable from any context.
-    # [NBT Compound / JSON Object] value: The time to compare the day time against.
-    # [Int][NBT Compound / JSON Object] min: A number provider. The minimum value.
-    # [Int][NBT Compound / JSON Object] max: A number provider. The maximum value.
-    # [Int] value: Shorthand version of [NBT Compound / JSON Object] value above, used to check for a single value only. Number providers cannot be used in this shorthand form.
-    # [Int] period: If present, the day time is first reduced modulo the given number before being checked against [NBT Compound / JSON Object][Int] value. For example, setting this to 24000 causes the checked time to be equal to the current daytime.
 
 
 @dataclass
@@ -274,12 +267,6 @@ class ValueCheckPredicate(Predicate):
             "condition": "value_check",
             "value": self.value.to_dict() if isinstance(self.value, NumberProvider) else self.value,
         }
-    # value_check—Compares a number against another number or range of numbers. Invokable from any context.
-    # [Int][NBT Compound / JSON Object] value: A number provider. The number to test.
-    # [NBT Compound / JSON Object] range: The range of numbers to compare [Int][NBT Compound / JSON Object] value against.
-    # [Int][NBT Compound / JSON Object] min: A number provider. The minimum value.
-    # [Int][NBT Compound / JSON Object] max: A number provider. The maximum value.
-    # [Int] range: Shorthand version of [NBT Compound / JSON Object] range above, used to compare [Int][NBT Compound / JSON Object] value against a single number only. Number providers cannot be used in this shorthand form.
 
 
 @dataclass
