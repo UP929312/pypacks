@@ -11,13 +11,12 @@ written_book = CustomItem("already_written_in_book", "minecraft:written_book", "
 
 # IGNORE ALL THIS!!!! #####################
 
-# from pypacks.utils import to_component_string, _to_snbt
+# from pypacks.utils import _to_snbt
 
 # a = WrittenBookContent("t", "a", [[{"text": "abc\n"}, {"text": "def\uE000, \uE0001"}]])
 # rint(a)
 # b = a.to_dict()
 # rint(b)
-# c = to_component_string(b)
 # rint(c)
 
 dummy_datapack = Pack("a", "b", "c")

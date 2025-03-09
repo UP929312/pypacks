@@ -9,8 +9,6 @@ from pypacks.resources.custom_recipe import CustomCrafterRecipe
 from pypacks.resources.custom_sound import CustomSound
 from pypacks.resources.custom_tag import CustomTag
 
-from pypacks.utils import to_component_string
-
 if TYPE_CHECKING:
     from pypacks.resources.custom_recipe import ShapedCraftingRecipe
 
@@ -54,7 +52,7 @@ class CustomCrafter:
         if isinstance(ingredient, CustomTag):
             return ingredient.get_reference(pack_namespace)
         if isinstance(ingredient, CustomItem):
-            return f"{ingredient.base_item}[{to_component_string(ingredient.to_dict(pack_namespace))}]"
+            return ingredient.generate_give_command(pack_namespace).removeprefix("give @p ")
         return ingredient
 
     def on_tick(self, pack_namespace: str) -> MCFunction:

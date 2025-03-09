@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pypacks.utils import PYPACKS_ROOT
+from pypacks.utils import IMAGES_PATH
 
 BANNERS = ["white_banner", "orange_banner", "magenta_banner", "light_blue_banner", "yellow_banner", "lime_banner", "pink_banner", "gray_banner", "light_gray_banner", "cyan_banner", "purple_banner", "blue_banner", "brown_banner", "green_banner", "red_banner", "black_banner"]
 HEADS = ["player_head", "zombie_head", "creeper_head", "skeleton_skull", "wither_skeleton_skull", "dragon_head"]
@@ -19,16 +19,16 @@ SPAWN_EGGS = [
 # Base ======
 image_mapping: dict[str, Path] = {}
 # Banners ======
-image_mapping |= {banner: Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"banner.png" for banner in BANNERS}
+image_mapping |= {banner: IMAGES_PATH/"minecraft_renders_override"/"banner.png" for banner in BANNERS}
 # Heads ======
-image_mapping |= {head: Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"player_head.png" for head in HEADS}
+image_mapping |= {head: IMAGES_PATH/"minecraft_renders_override"/"player_head.png" for head in HEADS}
 # Spawn Eggs ======
-image_mapping |= {spawn_egg: Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"spawn_egg.png" for spawn_egg in SPAWN_EGGS}
+image_mapping |= {spawn_egg: IMAGES_PATH/"minecraft_renders_override"/"spawn_egg.png" for spawn_egg in SPAWN_EGGS}
 # Random others ======
 image_mapping |= {
-    "shield": Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"shield.png",
-    "decorated_pot": Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"decorated_pot.png",
-    "chest": Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_override"/"chest.png",
+    "shield": IMAGES_PATH/"minecraft_renders_override"/"shield.png",
+    "decorated_pot": IMAGES_PATH/"minecraft_renders_override"/"decorated_pot.png",
+    "chest": IMAGES_PATH/"images"/"minecraft_renders_override"/"chest.png",
 }
 
 
@@ -37,8 +37,8 @@ def resolve_default_item_image(base_item: str) -> Path:
         return image_mapping[base_item.removeprefix('minecraft:')]
     # https://github.com/edayot/renders/tree/1.21.4-renders/resourcepack/assets/minecraft/textures/render/items
     # Most of these come from that link ^
-    path = Path(PYPACKS_ROOT)/"assets"/"images"/"minecraft_renders_cache"/"items"/f"{base_item.removeprefix('minecraft:')}.png"
+    path = IMAGES_PATH/"minecraft_renders_cache"/"items"/f"{base_item.removeprefix('minecraft:')}.png"
     if path.exists():
         return path
     print("Unknown item: |"+base_item+"|")
-    return Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"unknown.png"
+    return IMAGES_PATH/"reference_book_icons"/"unknown.png"

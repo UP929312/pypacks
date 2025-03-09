@@ -21,30 +21,8 @@ class MinecraftColor(Enum):
     WHITE = 0xFFFFFF
 
 
-COLOUR_CODE_MAPPINGS = {
-    "&0": "black",
-    "&1": "dark_blue",
-    "&2": "dark_green",
-    "&3": "dark_aqua",
-    "&4": "dark_red",
-    "&5": "dark_purple",
-    "&6": "gold",
-    "&7": "gray",
-    "&8": "dark_gray",
-    "&9": "blue",
-    "&a": "green",
-    "&b": "aqua",
-    "&c": "red",
-    "&d": "light_purple",
-    "&e": "yellow",
-    "&f": "white",
-    # "&l": "bold",
-    # "&m": "strikethrough",
-    # "&n": "underline",
-    # "&o": "italic",
-    # "&r": "reset",
-    # obfuscated?
-}
+ColorType = Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
+COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
 
 
 Slabs = Literal["oak_slab", "spruce_slab", "birch_slab", "jungle_slab", "acacia_slab", "dark_oak_slab", "mangrove_slab", "cherry_slab", "pale_oak_slab",

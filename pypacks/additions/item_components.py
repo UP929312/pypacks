@@ -1,9 +1,10 @@
-import json  # For written books
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 
 if TYPE_CHECKING:
+    from pypacks.additions.constants import ColorType
+    # from pypacks.additions.text import Text
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_item import CustomItem
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_tag import CustomTag
-    from pypacks.scripts.repos.loot_tables import LootTables
+    # from pypacks.scripts.repos.loot_tables import LootTables
     from pypacks.scripts.repos.damage_tags import DamageTagsType
     from pypacks.scripts.repos.damage_types import DamageTypesType
 
@@ -85,9 +86,6 @@ class AttributeModifier:
 
 # ==========================================================================================
 
-ColorType = Literal["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
-COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
-
 
 @dataclass
 class BannerPattern:
@@ -99,7 +97,7 @@ class BannerPattern:
                      "square_bottom_right", "square_top_left", "square_top_right", "triangle_bottom", "triangle_top", "triangles_bottom",
                      "triangles_top", "circle", "rhombus", "border", "curly_border", "bricks", "gradient", "gradient_up", "creeper", "skull",
                      "flower", "mojang", "globe", "piglin", "flow", "guster"]  # The pattern type.
-    color: ColorType  # The color for this pattern.
+    color: "ColorType"  # The color for this pattern.
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["banner", "shield"])
 
@@ -188,10 +186,11 @@ class BlocksAttacks:
 class TropicalFishData:
     size: Literal["small", "large"] = "large"
     pattern: Literal[0, 1, 2, 3, 4, 5] = 0
-    body_color: ColorType | int = "light_blue"
-    pattern_color: ColorType | int = "red"
+    body_color: "ColorType | int" = "light_blue"
+    pattern_color: "ColorType | int" = "red"
 
     def __int__(self) -> int:
+        from pypacks.additions.constants import COLORS
         body_color_index = COLORS.index(self.body_color) if isinstance(self.body_color, str) else self.body_color
         pattern_color_index = COLORS.index(self.pattern_color) if isinstance(self.pattern_color, str) else self.pattern_color
         size_int = 0 if self.size == "small" else 1
@@ -953,7 +952,7 @@ class WrittenBookContent:
         return cls(
             title=data.get("title", "Written Book"),
             author=data.get("author", "PyPacks"),
-            pages=[json.loads(x) for x in data.get("pages", [[{"text": "Hello"}, {"text": "World"}]])],
+            pages=data.get("pages", [[{"text": "Hello"}, {"text": "World"}]]),
         )
 
 
@@ -1014,7 +1013,7 @@ class Components:
     block_entity_data: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_entity_data  <-- Block entities only
     block_state: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_state  <-- Blocks only
     break_sound: "str | CustomSound | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#break_sound
-    container_loot_table: "LootTables | CustomLootTable | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container_loot  <-- Containers only
+    container_loot_table: "CustomLootTable | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#container_loot  <-- Containers only
     custom_head_texture: str | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#profile  <-- Player/Mob heads only
     damage_resistant_to: "DamageTagsType | str | None" = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant  <-- Tools only
     enchantments: dict[EnchantmentType, int] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantments

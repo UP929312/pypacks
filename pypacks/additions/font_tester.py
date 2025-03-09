@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from pypacks.written_book_framework import FormattedWrittenBook, ElementPage, Icon
+from pypacks.additions.written_book_framework import FormattedWrittenBook, ElementPage, Icon
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack

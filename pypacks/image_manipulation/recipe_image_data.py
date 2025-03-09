@@ -59,7 +59,7 @@ def place_ingredients_on_image(
     from pypacks.resources.custom_recipe import SmithingTrimRecipe
 
     # BASE IMAGE ========================================================
-    base_image = Image.open(Path(IMAGES_PATH)/"recipe_bases"/f"{recipe.recipe_block_name}.png").convert("RGBA")
+    base_image = Image.open(IMAGES_PATH/"recipe_bases"/f"{recipe.recipe_block_name}.png").convert("RGBA")
     # INGREDIENTS =======================================================
     for i, ingredient in enumerate(ingredients):
         if isinstance(ingredient, CustomItem) or ingredient.removeprefix("minecraft:") not in [" ", "", "air"]:  # For shaped recipes, the " " is a placeholder for nothing, just ignore it

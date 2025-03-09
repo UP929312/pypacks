@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from pypacks.utils import PYPACKS_ROOT
+from pypacks.utils import IMAGES_PATH
 
 
 @dataclass
@@ -18,10 +18,10 @@ class RefBookCategory:
         return reference_book_categories
 
 
-MISC_REF_BOOK_CATEGORY = RefBookCategory("misc", "Misc", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"miscellaneous_icon.png")
-PAINTING_REF_BOOK_CATEGORY = RefBookCategory("paintings", "Paintings", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"painting.png")
-CUSTOM_BLOCKS_REF_BOOK_CATEGORY = RefBookCategory("custom_blocks", "Custom Block", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"custom_block_icon.png")
-DEV_ITEMS_REF_BOOK_CATEGORY = RefBookCategory("dev_items", "Dev Items", Path(PYPACKS_ROOT)/"assets"/"images"/"reference_book_icons"/"dev_items_icon.png")
+MISC_REF_BOOK_CATEGORY = RefBookCategory("misc", "Misc", IMAGES_PATH/"reference_book_icons"/"miscellaneous_icon.png")
+PAINTING_REF_BOOK_CATEGORY = RefBookCategory("paintings", "Paintings", IMAGES_PATH/"reference_book_icons"/"painting.png")
+CUSTOM_BLOCKS_REF_BOOK_CATEGORY = RefBookCategory("custom_blocks", "Custom Block", IMAGES_PATH/"reference_book_icons"/"custom_block_icon.png")
+DEV_ITEMS_REF_BOOK_CATEGORY = RefBookCategory("dev_items", "Dev Items", IMAGES_PATH/"reference_book_icons"/"dev_items_icon.png")
 
 
 @dataclass

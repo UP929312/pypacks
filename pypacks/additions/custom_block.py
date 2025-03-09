@@ -11,6 +11,7 @@ from pypacks.additions.raycasting import BlockRaycast
 if TYPE_CHECKING:
     from typing import Literal
     from pypacks.pack import Pack
+    from pypacks.additions.text import Text
     from pypacks.additions.constants import Slabs
     from pypacks.resources.custom_item import CustomItem
 
@@ -21,7 +22,7 @@ class CustomBlock:
     passed in (e.g. rotatable logs). Setting drops to "self" will make the block drop itself when broken,
     and setting it to None will make it drop nothing."""
     internal_name: str
-    name: str | dict[str, Any]
+    name: "str | Text | dict[str, Any]"
     base_block: str
     block_texture: "str | FacePaths"
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"

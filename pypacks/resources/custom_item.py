@@ -1,16 +1,18 @@
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
-from pypacks.additions.item_components import Components, Consumable, Food, AttributeModifier, TooltipDisplay
+from pypacks.additions.item_components import Components, AttributeModifier, Consumable, Food, TooltipDisplay
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+from pypacks.additions.text import Text
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_model import CustomItemTexture
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemRenderDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
-from pypacks.utils import to_component_string, recursively_remove_nones_from_data, make_white_and_remove_italics, remove_italics
+from pypacks.utils import recursively_remove_nones_from_data
 
 from pypacks.scripts.repos.all_items import MinecraftItem
 
@@ -24,7 +26,7 @@ if TYPE_CHECKING:
 class CustomItem:
     internal_name: str  # Internal name of the item
     base_item: MinecraftItem  # What item to base it on
-    custom_name: str | dict[str, Any] | None = None  # Display name of the item
+    custom_name: str | Text | dict[str, Any] | None = None  # Display name of the item
     lore: list[str] = field(repr=False, default_factory=list)  # Lore of the item
     max_stack_size: int = field(repr=False, default=64)  # Max stack size of the item (1-99)
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = field(repr=False, default=None)
@@ -92,8 +94,8 @@ class CustomItem:
         if isinstance(self.on_item_drop, MCFunction):  # TODO: Somehow improve this?
             self.custom_data["on_drop_command"] = self.on_item_drop.get_run_command(pack_namespace)
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "custom_name": make_white_and_remove_italics(self.custom_name) if self.custom_name is not None else None,
-            "lore": [remove_italics(line) for line in self.lore] if self.lore else None,
+            "custom_name": Text.make_white_and_remove_italics(self.custom_name) if self.custom_name is not None else None,
+            "lore": [Text.remove_italics(line) for line in self.lore] if self.lore else None,
             "max_stack_size": self.max_stack_size if self.max_stack_size != 64 else None,
             "rarity": self.rarity,
             "item_model": item_model,
@@ -101,8 +103,13 @@ class CustomItem:
             **self.components.to_dict(pack_namespace),
         })
 
+    @staticmethod
+    def to_component_string(obj: dict[str, Any]) -> str:
+        replacee, replacer = "\\\\", "\\"
+        return ", ".join([f"{key}={json.dumps(recursively_remove_nones_from_data(val)).replace(replacee, replacer)}" for key, val in obj.items() if val is not None])
+
     def generate_give_command(self, pack_namespace: str) -> str:
-        return f"give @p {self.base_item}[{to_component_string(self.to_dict(pack_namespace))}]"
+        return f"give @p {self.base_item}[{self.to_component_string(self.to_dict(pack_namespace))}]"
 
     # =============================================
     # Right click

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pypacks.pack import Pack
 
 
-EXTRA_ICON_BASE_PATH = Path(IMAGES_PATH)/"reference_book_icons"/"extra_icon_base.png"
+EXTRA_ICON_BASE_PATH = IMAGES_PATH/"reference_book_icons"/"extra_icon_base.png"
 
 
 def generate_resource_pack(pack: "Pack") -> None:

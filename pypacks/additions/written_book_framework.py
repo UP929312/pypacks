@@ -2,10 +2,11 @@ from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
 
 from pypacks.additions.item_components import Components, WrittenBookContent
+from pypacks.additions.text import Text
 from pypacks.utils import chunk_list
 
 if TYPE_CHECKING:
-    from pypacks.resources.custom_item import CustomItem
+    from pypacks.additions.text import OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw, OnClickChangePage, OnHoverShowText
 
 ICONS_PER_ROW = 5
 ROWS_PER_PAGE = 4
@@ -13,50 +14,6 @@ PIXELS_PER_WIDTH = 113
 NEWLINES_BETWEEN_GRID_ROWS = 3
 
 ICON_ROW_INDENT = 2
-
-# =======================================================================================================================================
-
-
-@dataclass
-class OnClickChangePage:
-    page_to_change_to: int
-
-    def get_json_data(self) -> dict[str, Any]:
-        return {"click_event": {"action": "change_page", "page": self.page_to_change_to}}
-
-
-@dataclass
-class OnClickRunCommand:
-    command: str
-
-    def get_json_data(self) -> dict[str, Any]:
-        return {"click_event": {"action": "run_command", "command": self.command}}
-
-
-@dataclass
-class OnHoverShowText:
-    text: str | dict[str, Any]
-    font: str = "minecraft:default"
-
-    def get_json_data(self) -> dict[str, Any]:
-        return {"hover_event": {"action": "show_text", "value": self.text, "font": self.font}}
-
-
-@dataclass
-class OnHoverShowTextRaw:
-    text: dict[str, Any] | list[dict[str, Any]]
-
-    def get_json_data(self) -> dict[str, Any]:
-        return {"hover_event": {"action": "show_text", "value": self.text}}
-
-
-@dataclass
-class OnHoverShowItem:
-    custom_item: "CustomItem"
-    pack_namespace: str
-
-    def get_json_data(self) -> dict[str, Any]:
-        return {"hover_event": {"action": "show_item", "id": self.custom_item.base_item, "components": self.custom_item.to_dict(self.pack_namespace)}}
 
 
 # =======================================================================================================================================
@@ -70,9 +27,8 @@ class Row:
 
     def get_json_data(self) -> list[dict[str, Any]]:
         regular_icons = [x.get_json_data() for x in self.elements]
-        initial_padding = {
-            "text": (self.indent_unicode_char*ICON_ROW_INDENT), "color": "white",
-            "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"}
+        initial_padding = Text(self.indent_unicode_char*ICON_ROW_INDENT, color="white", underlined=False,
+                               bold=False, font=f"{self.font_namespace}:all_fonts").to_dict()
         return [initial_padding, *regular_icons]
 
 
@@ -88,10 +44,10 @@ class FilledRow:
         icons = list(self.elements)  # Shallow copy
         if len(icons) < self.row_length and self.empty_icon_unicode_char is not None:
             icons += [Icon(self.empty_icon_unicode_char, self.font_namespace, self.indent_unicode_char, include_formatting=False)]*(self.row_length-len(self.elements))
-        initial_padding = {
-            "text": (self.indent_unicode_char*ICON_ROW_INDENT), "color": "white",
-            "underlined": False, "bold": False, "font": f"{self.font_namespace}:all_fonts"
-        } if self.indent_unicode_char else {}
+        initial_padding = (
+            Text(self.indent_unicode_char*ICON_ROW_INDENT, color="white", underlined=False,
+                 bold=False, font=f"{self.font_namespace}:all_fonts").to_dict()
+        ) if self.indent_unicode_char else {}
         return [initial_padding, *[x.get_json_data() for x in icons]]
 
 
@@ -189,7 +145,7 @@ class GridPageManager:
         icons_per_page = self.icons_per_row*self.rows_per_page
         self.pages = [
             GridPage(
-                Text(self.title + (f", page {i}" if len(self.icons)//icons_per_page != 0 else ""), underline=True, text_color="black"),
+                Text(self.title + (f", page {i}" if len(self.icons)//icons_per_page != 0 else ""), underlined=True, color="black"),
                 self.empty_icon_unicode_char,
                 self.indent_unicode_char,
                 self.font_namespace,
@@ -208,39 +164,27 @@ class GridPageManager:
 
 @dataclass
 class Icon:
+    """Simply represents one icon in the written book, i.e. a unicode character, with optional formatting and click/hover events,
+    as well as as some right spacing"""
     unicode_char: str
     font_namespace: str = field(repr=False)
     indent_unicode_char: str = field(repr=False)
     include_formatting: bool = field(repr=False, default=True)
     right_indentation: int = field(repr=False, default=1)
-    on_hover: OnHoverShowText | OnHoverShowTextRaw | OnHoverShowItem | None = field(repr=False, default=None)
-    on_click: OnClickChangePage | OnClickRunCommand | None = field(repr=False, default=None)
+    on_hover: "OnHoverShowText | OnHoverShowTextRaw | OnHoverShowItem | None" = field(repr=False, default=None)
+    on_click: "OnClickChangePage | OnClickRunCommand | None" = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
-        return_value: dict[str, Any] = {"text": f"{self.unicode_char}{self.indent_unicode_char*self.right_indentation}", "color": "white", "font": f"{self.font_namespace}:all_fonts"}
+        text = Text(f"{self.unicode_char}{self.indent_unicode_char*self.right_indentation}", color="white", font=f"{self.font_namespace}:all_fonts")
         if self.include_formatting:
-            return_value |= {"color": "white", "underlined": False, "bold": False}
+            text.bold = False
+            text.underlined = False
+            text.color = "white"
         if self.on_hover:
-            return_value |= self.on_hover.get_json_data()
+            text.on_hover = self.on_hover
         if self.on_click:
-            return_value |= self.on_click.get_json_data()
-        return return_value
-
-
-@dataclass
-class Text:
-    text: str | dict[str, Any]
-    underline: bool = False
-    bold: bool = False
-    font: str = "minecraft:default"
-    text_color: str | None = None
-
-    def get_json_data(self) -> dict[str, Any]:
-        return_value = {"underlined": self.underline, "bold": self.bold, "font": self.font}
-        return_value |= {"text": self.text} if isinstance(self.text, str) else self.text
-        if self.text_color is not None:
-            return_value |= {"color": self.text_color}
-        return return_value
+            text.on_click = self.on_click
+        return text.to_dict()
 
 
 @dataclass
@@ -250,8 +194,8 @@ class RightAlignedIcon:
     char_width: int
     font_namespace: str
     left_shift: int = 0  # If you want to move it slightly left?
-    on_hover: OnHoverShowText | None = field(repr=False, default=None)
-    on_click: OnClickChangePage | None = field(repr=False, default=None)
+    on_hover: "OnHoverShowText | None" = field(repr=False, default=None)
+    on_click: "OnClickChangePage | None" = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
         padding = (PIXELS_PER_WIDTH-self.char_width)-self.left_shift

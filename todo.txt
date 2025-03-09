@@ -8,16 +8,12 @@ CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 Write a read-me
 
 What if each resource could have a function "add required children resources" which took pack, and could do like
-pack.mcfunctions.append()
+pack.mcfunctions.append(), then filtered based on type? I'm not sure if we can filter based on annotation or something?
 
 Entity varieties, when creating spawn eggs or spawning mobs
+I suppose we'd need to eventually add all the EntityData, geez
 
 For item pages in the reference book, have "used in"...
-
-# When creating things, a custom namespace should be added in, so we can create minecraft/ stuff, e.g. the load function tag, or tick
-
-I suppose for like, custom model defs, I could completely allow "CustomTexture" which just gets passed over?
-Could also allow just CustomModelDefinition
 
 # Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
 # Would also like to do "calls function <x>" and "is called by <function y>"  # Detect it being called by a function tag

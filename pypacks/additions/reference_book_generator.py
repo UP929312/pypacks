@@ -2,17 +2,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from pypacks.written_book_framework import (
-    ElementPage, GridPage, GridPageManager, Icon, OnClickChangePage, OnHoverShowText, RowManager, Text, FormattedWrittenBook, RightAlignedIcon,
-    OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw,
+from pypacks.additions.written_book_framework import (
+    ElementPage, GridPage, GridPageManager, Icon, RowManager, FormattedWrittenBook, RightAlignedIcon,
     ICONS_PER_ROW, ROWS_PER_PAGE,
 )
-from pypacks.resources.custom_recipe import *  # noqa: F403
+from pypacks.additions.text import Text, OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw, OnClickChangePage, OnHoverShowText
+from pypacks.resources.custom_recipe import SmithingTrimRecipe
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
-    from pypacks.written_book_framework import Row, FilledRow
+    from pypacks.additions.written_book_framework import Row, FilledRow
 
 LOGO_HORIZONTAL_SPACER = 6
 
@@ -87,8 +87,10 @@ class ItemPage:
         MORE_INFO_ICONS_TRAILING_NEW_LINES = 3
         more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.font_mapping["1_pixel_indent"],
                                          self.pack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES).rows
+        title = Text.from_input(self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title())
+        title.color = "black"
         return [
-            Text(self.item.custom_name or self.item.base_item.removeprefix('minecraft:').title(), underline=True, bold=True, text_color="black"),
+            title,
             Text("\n"*2),
             give_item_icon,
             Text("\n"*4),
@@ -114,10 +116,10 @@ class ReferenceBook:
 
     def generate_cover_page(self, pack: "Pack") -> "ElementPage":
         title_starting_char_code = "➤".encode('unicode_escape').decode('ascii')
+        page_content = pack.font_mapping['1_pixel_indent']*LOGO_HORIZONTAL_SPACER + pack.font_mapping["logo_256_x_256"]
         return ElementPage([
-            Text(f"{title_starting_char_code} {pack.name} Reference Book\n\n\n", underline=True, text_color="black"),
-            Text(pack.font_mapping['1_pixel_indent']*LOGO_HORIZONTAL_SPACER, font=f"{pack.namespace}:all_fonts", text_color="white"),  # SPACER
-            Text(pack.font_mapping["logo_256_x_256"], font=f"{pack.namespace}:all_fonts", text_color="white")
+            Text(f"{title_starting_char_code} {pack.name} Reference Book\n\n\n", color="black"),  # underlined=True, 
+            Text(page_content, font=f"{pack.namespace}:all_fonts", underlined=False, color="white"),
         ])
 
     def _generate_category_to_page_number(self, pack: "Pack") -> dict[str, int]:

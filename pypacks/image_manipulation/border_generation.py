@@ -5,7 +5,7 @@ from PIL import Image
 
 from pypacks.utils import IMAGES_PATH
 
-ICON_BASE = Path(IMAGES_PATH)/"reference_book_icons"/"icon_base.png"
+ICON_BASE = IMAGES_PATH/"reference_book_icons"/"icon_base.png"
 
 SCALE_UP = 1.42
 SCALE_DOWN = 0.5
