@@ -17,7 +17,7 @@ SPAWN_EGGS = [
     "zombie_horse_spawn_egg", "zombie_villager_spawn_egg", "zombified_piglin_spawn_egg",
 ]
 # Base ======
-image_mapping: dict[str, Path] = {}
+image_mapping: dict[str, "Path"] = {}
 # Banners ======
 image_mapping |= {banner: IMAGES_PATH/"minecraft_renders_override"/"banner.png" for banner in BANNERS}
 # Heads ======
@@ -28,11 +28,11 @@ image_mapping |= {spawn_egg: IMAGES_PATH/"minecraft_renders_override"/"spawn_egg
 image_mapping |= {
     "shield": IMAGES_PATH/"minecraft_renders_override"/"shield.png",
     "decorated_pot": IMAGES_PATH/"minecraft_renders_override"/"decorated_pot.png",
-    "chest": IMAGES_PATH/"images"/"minecraft_renders_override"/"chest.png",
+    "chest": IMAGES_PATH/"minecraft_renders_override"/"chest.png",
 }
 
 
-def resolve_default_item_image(base_item: str) -> Path:
+def resolve_default_item_image(base_item: str) -> "Path":
     if base_item.removeprefix('minecraft:') in image_mapping:
         return image_mapping[base_item.removeprefix('minecraft:')]
     # https://github.com/edayot/renders/tree/1.21.4-renders/resourcepack/assets/minecraft/textures/render/items

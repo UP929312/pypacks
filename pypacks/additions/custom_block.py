@@ -1,6 +1,6 @@
 # from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
 from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel  # , SlabModel
@@ -9,7 +9,7 @@ from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.additions.raycasting import BlockRaycast
 
 if TYPE_CHECKING:
-    from typing import Literal
+    from typing import Literal, Any
     from pypacks.pack import Pack
     from pypacks.additions.text import Text
     from pypacks.additions.constants import Slabs
@@ -46,11 +46,11 @@ class CustomBlock:
         self.loot_table = None
         if self.drops == "self":
             if self.block_item is not None:
-                self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.block_item)])
+                self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.block_item)])
             else:
                 raise ValueError("If drops is set to 'self', then block_item must be set.")
         elif isinstance(self.drops, (CustomItem, str)):
-            self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", [SingleItemPool(self.drops)])
+            self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.drops)])
         elif isinstance(self.drops, CustomLootTable):
             self.loot_table = self.drops
 
@@ -111,6 +111,7 @@ class CustomBlock:
         )
 
     def generate_functions(self, pack_namespace: str) -> tuple["MCFunction", ...]:
+        """Generates the spawn function, and destroy"""
         assert isinstance(self.block_texture, FacePaths)
         # These are in reverse order (pretty much), so we can reference them in the next function.
         # ============================================================================================================

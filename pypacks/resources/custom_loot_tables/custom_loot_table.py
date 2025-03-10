@@ -1,18 +1,19 @@
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, Any, TypeAlias
+from typing import TYPE_CHECKING, Literal, Any, TypeAlias, Sequence
 
+from pypacks.resources.custom_predicate import Predicate
 from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction, SetCountFunction, SetComponentsFunction
-from pypacks.providers.number_provider import BinomialNumberProvider, UniformNumberProvider
+from pypacks.providers.number_provider import NumberProvider, UniformNumberProvider
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.custom_item import CustomItem
 
 LootContextTypes = Literal["empty", "chest", "fishing", "entity", "equipment", "archaeology", "vault",
-                           "gift", "barter", "advancement_reward", "generic", "block", "sheering"]
+                           "gift", "barter", "advancement_reward", "generic", "block", "shearing"]
 LootContextPredicateTypes = Literal["command", "selector", "advancement_entity", "block_use", "enchanted_damage", "enchanted_item", "enchanted_location",
                                     "enchanted_entity", "hit_block"]
 # guaranteed_context_parameters = {
@@ -59,68 +60,39 @@ LootContextPredicateTypes = Literal["command", "selector", "advancement_entity",
 
 
 @dataclass
-class Entry:
+class SingletonEntry:
     """Base entry"""
     # https://minecraft.wiki/w/Loot_table#Entry
 
-    # functions: list[ItemModifier] | None = None
-    # conditions: list[Predicate] | None = None
-    # weight: int = 1
-    # quality: int = 0
+    item: "str | CustomItem | None" = None
+    functions: list["LootTableFunction"] = field(default_factory=list)
+    conditions: list["Predicate"] = field(default_factory=list)
+    weight: int = 1
+    quality: int = 0
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return {}
-
-
-@dataclass
-class SingleItemRangeEntry(Entry):
-    """Simple range entry for a single (custom) item."""
-    item: "str | CustomItem"
-    min_count: int = 1
-    max_count: int = 1
-
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return UniformDistributionEntry(self.item, self.min_count, self.max_count).to_dict(pack_namespace)
-
-
-@dataclass
-class BinomialDistributionEntry(Entry):
-    """Binomial distribution entry for a single (custom) item."""
-    item: "str | CustomItem"
-    n: int
-    p: float
-
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        from pypacks.resources.custom_item import CustomItem
-        components = self.item.to_dict(pack_namespace) if isinstance(self.item, CustomItem) else {}
-        return {
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "type": "minecraft:item",
-            "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
-            "functions":
-                [SetCountFunction(number_provider=BinomialNumberProvider(self.n, self.p)).to_dict()] +
-                ([SetComponentsFunction(components).to_dict()] if components else []),
-        }
+            "name": str(self.item) if self.item else None,
+            "functions": [x.to_dict(pack_namespace) for x in self.functions] if self.functions else None,
+            "conditions": [x.to_dict(pack_namespace) for x in self.conditions] if self.conditions else None,
+            "weight": self.weight if self.weight != 1 else None,
+            "quality": self.quality if self.quality != 0 else None,
+        })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "SingletonEntry":
+        internal_name = "INCOMPLETE"
+        # if data.get("type") != "minecraft:item":
+        #     print(data)
+        return cls(
+            item=data.get("name"),
+            functions=[LootTableFunction.from_dict(function) for function in data.get("functions", [])],
+            conditions=[Predicate.from_dict(internal_name, condition) for condition in data.get("conditions", [])],
+            weight=data.get("weight", 1),
+            quality=data.get("quality", 0),
+        )
 
-@dataclass
-class UniformDistributionEntry(Entry):
-    item: "str | CustomItem"
-    min_count: int = 1
-    max_count: int = 1
-
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        from pypacks.resources.custom_item import CustomItem
-        components = self.item.to_dict(pack_namespace) if isinstance(self.item, CustomItem) else {}
-        return {
-            "type": "minecraft:item",
-            "name": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
-            "functions":
-                [SetCountFunction(number_provider=UniformNumberProvider(self.min_count, self.max_count)).to_dict()] +
-                ([SetComponentsFunction(components).to_dict()] if components else []),
-        }
-
-
-PoolTableEntry: TypeAlias = "SingleItemRangeEntry | BinomialDistributionEntry | UniformDistributionEntry | Entry"
 
 # ================================================================================================================== #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~POOLS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -130,24 +102,32 @@ PoolTableEntry: TypeAlias = "SingleItemRangeEntry | BinomialDistributionEntry | 
 @dataclass
 class Pool:
     # https://minecraft.wiki/w/Loot_table#Pool
-    # conditions: list[Predicate] | None
-    functions: list[LootTableFunction] | None
-    rolls: int = 1
-    bonus_rolls: int | None = None
-    entries: list[Entry] = field(default_factory=list)
+    conditions: Sequence["Predicate"] = field(default_factory=list)  # TODO: Fix the KilledByPlayerPredicate, but figure out why the type checker is crying
+    functions: list[LootTableFunction] = field(default_factory=list)
+    rolls: "int | NumberProvider" = 1
+    bonus_rolls: int = 0
+    entries: list[SingletonEntry] = field(default_factory=list)
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        data = {
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
+            "conditions": [condition.to_dict(pack_namespace) for condition in self.conditions] if self.conditions else None,
+            "functions": [function.to_dict(pack_namespace) for function in self.functions] if self.functions else None,
             "rolls": self.rolls,
+            "bonus_rolls": self.bonus_rolls,
             "entries": [entry.to_dict(pack_namespace) for entry in self.entries]
-        }
-        # if self.bonus_rolls:
-        #     data["bonus_rolls"] = self.bonus_rolls
-        # if self.conditions:
-        #     data["conditions"] = [condition.to_dict(datapack) for condition in self.conditions]
-        # if self.functions:
-        #     data["functions"] = [function.to_dict(datapack) for function in self.functions]
-        return data
+
+        })
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Pool":
+        internal_name = "INCOMPLETE"
+        return cls(
+            conditions=[Predicate.from_dict(internal_name, condition) for condition in data.get("conditions", [])],
+            functions=[LootTableFunction.from_dict(function) for function in data.get("functions", [])],
+            rolls=int(data["rolls"]) if isinstance(data["rolls"], float) else NumberProvider.from_dict(data["rolls"]),
+            bonus_rolls=int(data.get("bonus_rolls", 0)),
+            entries=[SingletonEntry.from_dict(entry) for entry in data["entries"]],
+        )
 
 
 @dataclass
@@ -157,9 +137,19 @@ class SimpleRangePool:
     max_count: int
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_item import CustomItem
         return {
             "rolls": 1,
-            "entries": [SingleItemRangeEntry(self.item, self.min_count, self.max_count).to_dict(pack_namespace)]
+            "entries": [
+                SingletonEntry(
+                    item=self.item,
+                    functions=[  # pyright: ignore
+                        SetCountFunction(number_provider=UniformNumberProvider(min=self.min_count, max=self.max_count)),
+                    ] + ([
+                        SetComponentsFunction(components=self.item.to_dict(pack_namespace))
+                    ] if isinstance(self.item, CustomItem) else []),
+                ).to_dict(pack_namespace),
+            ],
         }
 
 
@@ -182,9 +172,9 @@ LootTablePool: TypeAlias = "Pool | SingleItemPool | SimpleRangePool"
 class CustomLootTable:
     # https://minecraft.wiki/w/Loot_table
     internal_name: str
-    pools: list[LootTablePool] = field(default_factory=list)
-    functions: list[LootTableFunction] = field(default_factory=list)
-    # random_sequence: RandomSequence | None
+    pools: Sequence["LootTablePool"] = field(default_factory=list)
+    functions: list["LootTableFunction"] = field(default_factory=list)
+    random_sequence: str | None = None
     loot_table_type: LootContextTypes = "generic"
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="loot_table")
@@ -195,10 +185,21 @@ class CustomLootTable:
     def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return recursively_remove_nones_from_data(  # type: ignore[no-any-return]
             {
-                "type": self.loot_table_type,
-                "pools": [pool.to_dict(pack_namespace) for pool in self.pools],
-                "functions": [function.to_dict() for function in self.functions] if self.functions else None
+                "pools": [pool.to_dict(pack_namespace) for pool in self.pools] if self.pools else None,
+                "functions": [function.to_dict(pack_namespace) for function in self.functions] if self.functions else None,
+                "random_sequence": self.random_sequence,
+                "type": self.loot_table_type if self.loot_table_type != "generic" else None,
             }
+        )
+
+    @classmethod
+    def from_dict(cls, name: str, data: dict[str, Any]) -> "CustomLootTable":
+        return cls(
+            internal_name=name.replace("/", "_"),
+            pools=[Pool.from_dict(pool) for pool in data.get("pools", [])],
+            functions=[LootTableFunction.from_dict(function) for function in data.get("functions", [])],
+            random_sequence=data.get("random_sequence"),
+            loot_table_type=data["type"].removeprefix("minecraft:"),
         )
 
     def create_datapack_files(self, pack: "Pack") -> None:
@@ -210,18 +211,19 @@ class CustomLootTable:
 
 
 class SingleItemLootTable(CustomLootTable):
-    def __init__(self, internal_name: str, item: "str | CustomItem"):
-        self.internal_name = internal_name
-        self.item = item
-
+    """Simple Util class for a loot table with a single item."""
+    def __init__(self, internal_name: str, item: "str | CustomItem") -> None:
+        # self.internal_name = internal_name
+        # self.item = item
         super().__init__(internal_name, pools=[SingleItemPool(item)])
 
 
 class SimpleRangeLootTable(CustomLootTable):
+    """Simple Util class for a loot table with a single item with a simple range."""
     def __init__(self, internal_name: str, item: "str | CustomItem", min_count: int = 1, max_count: int = 1) -> None:
-        self.internal_name = internal_name
-        self.item = item
-        self.min_count = min_count
-        self.max_count = max_count
+        # self.internal_name = internal_name
+        # self.item = item
+        # self.min_count = min_count
+        # self.max_count = max_count
 
         super().__init__(internal_name, pools=[SimpleRangePool(item, min_count, max_count)])

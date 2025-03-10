@@ -5,7 +5,11 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
 
+Would love to have an entire pack.from_dict, or from_folder or something, would be great.
+
 Write a read-me
+
+# More work on CompositeEntry: https://minecraft.wiki/w/Loot_table#Singleton_entry, and subclass that out fully
 
 What if each resource could have a function "add required children resources" which took pack, and could do like
 pack.mcfunctions.append(), then filtered based on type? I'm not sure if we can filter based on annotation or something?

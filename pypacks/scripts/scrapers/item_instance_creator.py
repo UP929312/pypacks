@@ -81,7 +81,6 @@ lines = [
 items = []
 for item, data in all_item_data.items():
     if is_not_normal_item(data):
-        # rint(item, data)
         attribute_modifiers = [AttributeModifier.from_dict(modifier) for modifier in data.get("minecraft:attribute_modifiers", {}).get("modifiers")]
         tool = Tool.from_dict(data["minecraft:tool"]) if data.get("minecraft:tool") else None
         equippable = Equippable.from_dict(data["minecraft:equippable"]) if data.get("minecraft:equippable") else None
@@ -124,7 +123,7 @@ for painting in ALL_DEFAULT_PAINTINGS:
     items.append(painting_item.internal_name.upper()+"_PAINTING")
     lines.append(format_custom_item_name(painting_item.internal_name+"_PAINTING", "minecraft:painting", painting_item.components, 1, 'common'))
 # ====================================================================================================================
-output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\scripts\\repos\\all_item_instances.py"
+output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\items.py"
 with open(output_path, "w") as file:
     file.write("\n".join(lines)+"\n\n")
     file.write(

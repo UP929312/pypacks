@@ -39,6 +39,16 @@ class DamageTypeTag:
                      for key, value in self.tags.items()]
         })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DamageTypeTag":
+        from pypacks.resources.predicate.predicate_conditions import EntityCondition
+        return cls(
+            direct_entity=EntityCondition.from_dict(data["direct_entity"]) if data.get("direct_entity") else None,
+            source_entity=EntityCondition.from_dict(data["source_entity"]) if data.get("source_entity") else None,
+            is_direct=data.get("is_direct", False),
+            tags={key: value for key, value in data.get("tags", {})},
+        )
+
 
 # ====================================================================================================================
 
@@ -178,6 +188,32 @@ class EntityCondition:
             "type_specific": self.type_specific,
         })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "EntityCondition":
+        from pypacks.resources.custom_tag import CustomTag
+        entity_types: list[MinecraftEntity] | CustomTag = ([data["type"]] if isinstance(data.get("type"), str) else data.get("type", []))
+        if entity_types and entity_types[0].startswith("#"):  # type: ignore[index]
+            entity_types = CustomTag(f"minecraft:{entity_types[0].removeprefix('#')}", values=entity_types, tag_type="entity_type")  # type: ignore[arg-type, index]
+        return cls(
+            entity_type=entity_types,
+            distance=EntityDistance(**data["distance"]) if data.get("distance") else None,
+            effects=[PotionEffect.from_dict(effect) if isinstance(effect, dict) else effect for effect in data.get("effects", [])],
+            equipment={slot: ItemCondition.from_dict(item) for slot, item in data.get("equipment", {}).items()},
+            flags=EntityFlags(**data["flags"]) if data.get("flags") else None,
+            location=LocationTag.from_dict(data["location"]) if data.get("location") else None,
+            nbt=data.get("nbt"),
+            passenger=cls.from_dict(data["passenger"]) if data.get("passenger") else None,
+            slots={slot: ItemCondition.from_dict(item) for slot, item in data.get("slots", {}).items()},
+            stepping_on=LocationTag.from_dict(data["stepping_on"]) if data.get("stepping_on") else None,
+            movement_affected_by=LocationTag.from_dict(data["movement_affected_by"]) if data.get("movement_affected_by") else None,
+            team=data.get("team"),
+            targeted_entity=cls.from_dict(data["targeted_entity"]) if data.get("targeted_entity") else None,
+            vehicle=cls.from_dict(data["vehicle"]) if data.get("vehicle") else None,
+            movement=MovementCheck(**data["movement"]) if data.get("movement") else None,
+            periodic_tick=data.get("periodic_tick"),
+            type_specific=data.get("type_specific", {}),
+        )
+
 # [NBT Compound / JSON Object] type_specific: To test entity properties that can only be applied to certain entity types. Supersedes lightning_bolt, player, fishing_hook and catType.
 # [String] type: Dictates which type-specific properties to test for.
 # The possible values for [String] type and associated extra contents:
@@ -274,6 +310,14 @@ class BlockPredicate:
             "state": self.state,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BlockPredicate":
+        return cls(
+            blocks=data["blocks"],
+            nbt=data.get("nbt"),
+            state=data.get("state"),
+        )
+
 
 @dataclass
 class FluidPredicate:
@@ -285,6 +329,13 @@ class FluidPredicate:
             "fluids": self.fluids.get_reference(pack_namespace) if isinstance(self.fluids, CustomTag) else self.fluids,
             "state": self.state,
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "FluidPredicate":
+        return cls(
+            fluids=data["fluids"],
+            state=data.get("state"),
+        )
 
 
 @dataclass
@@ -326,6 +377,21 @@ class LocationTag:
             ] if isinstance(self.structures, list) else self.structures.get_reference(pack_namespace),  # For tags
         })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "LocationTag":
+        return cls(
+            biomes=[CustomBiome.from_dict("TODO: Add internal name here", biome) if isinstance(biome, dict) else biome for biome in data["biomes"]],
+            block=BlockPredicate.from_dict(data["block"]) if data.get("block") else None,
+            dimension=CustomDimension.from_dict("TODO: Add an internal name here", data["dimension"]) if isinstance(data.get("dimension"), dict) else data.get("dimension"),
+            fluids=FluidPredicate.from_dict(data["fluid"]) if data.get("fluid") else None,
+            light_level=IntRange.from_dict(data["light"]) if isinstance(data.get("light"), dict) else data.get("light"),
+            x_position=IntRange.from_dict(data["position"]["x"]) if isinstance(data.get("position"), dict) else data.get("position"),
+            y_position=IntRange.from_dict(data["position"]["y"]) if isinstance(data.get("position"), dict) else data.get("position"),
+            z_position=IntRange.from_dict(data["position"]["z"]) if isinstance(data.get("position"), dict) else data.get("position"),
+            smokey=data.get("smokey", False),
+            can_see_sky=data.get("can_see_sky", False),
+            structures=[CustomStructure.from_dict(structure) if isinstance(structure, dict) else structure for structure in data.get("structures", [])],
+        )
 
 # ====================================================================================================================
 
@@ -346,6 +412,18 @@ class ItemCondition:
             "components": self.components or None,
             "predicates": [predicate.to_dict(pack_namespace) for predicate in self.predicates]
         })
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ItemCondition":
+        raise NotImplementedError  # TODO: Hmmm
+        # from pypacks.providers.int_provider import UniformIntProvider
+        # from pypacks.resources.custom_item import CustomItem
+        # return cls(
+        #     items=[CustomItem.from_dict(item) if isinstance(item, dict) else item for item in data["items"]],
+        #     count=UniformIntProvider.from_dict(data["count"]) if isinstance(data.get("count"), UniformIntProvider) else data.get("count"),
+        #     components=data["components"],
+        #     predicates=[Predicate.from_dict(predicate) for predicate in data["predicates"]],
+        # )
 
 
 # ====================================================================================================================

@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
 
 
-
 @dataclass
 class Text:
     """Represents a text component in Minecraft. This is used in many places, such as in written books, item names, etc.
@@ -27,7 +26,7 @@ class Text:
     font: str = "minecraft:default"
 
     def to_dict(self) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({  # type: ignore[abc]
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "text": self.text,
             "color": self.color,
             "bold": self.bold if self.bold else None,
@@ -49,7 +48,7 @@ class Text:
         if isinstance(data, dict):
             return cls(**data)
         return cls(data)
-    
+
     @staticmethod
     def make_white_and_remove_italics(text: "str | Text | dict[str, Any]") -> str | dict[str, Any]:
         text_obj = Text.from_input(text)
@@ -80,7 +79,7 @@ class OnClickRunCommand:
 
     # def __post_init__(self) -> None:
     #     if self.command.startswith("/"):
-    #         print("Warning: Command should not start with a /")
+    #         rint("Warning: Command should not start with a /")
 
     def to_dict(self) -> dict[str, Any]:
         return {"click_event": {"action": "run_command", "command": self.command}}

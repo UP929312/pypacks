@@ -83,13 +83,13 @@ class CustomTexture:
 
 @dataclass
 class CustomModelDefinition:
-    """A class which maps the textures to the model in <namespace>/models/item/<internal_name>.json"""
+    """A class which maps the textures to the model in <namespace>/models/<subdirectories>/<internal_name>.json"""
     internal_name: str
     parent: str = "minecraft:item/generated"
-    model_type: Literal["item", "block"] = "item"
+    model_type: Literal["item", "block"] = "item"  # Doesn't dictate where it goes, just the type of model
     subdirectories: list[str] = field(default_factory=list)
 
-    def to_dict(self, pack_namespace) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         layer_type = "layer0" if "item" in self.parent else "all"
         layers = {layer_type: f"{pack_namespace}:{self.model_type}/{self.internal_name}"}  # TODO: Probably allow a layer *value*
         return {"parent": self.parent, "textures": layers}
@@ -171,7 +171,7 @@ class SymmetricCubeModel:
         # │       └── textures/
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
-        CustomModelDefinition(self.internal_name, parent="minecraft:block/cube_all", model_type="item").create_resource_pack_files(pack)
+        CustomModelDefinition(self.internal_name, parent="minecraft:block/cube_all", model_type="item", subdirectories=["item"]).create_resource_pack_files(pack)
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
         CustomTexture(self.internal_name, self.texture_path, subdirectories=["item"]).create_resource_pack_files(pack)
 

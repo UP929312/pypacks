@@ -44,6 +44,15 @@ class CustomDimension:
             }
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDimension":
+        return cls(  # TODO: Need way more work here
+            internal_name,
+            data["dimension_type"],
+            data["biome"],
+            data["noise_settings"]
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.world_gen.biome import CustomBiome
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:

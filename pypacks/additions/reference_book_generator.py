@@ -118,7 +118,7 @@ class ReferenceBook:
         title_starting_char_code = "➤".encode('unicode_escape').decode('ascii')
         page_content = pack.font_mapping['1_pixel_indent']*LOGO_HORIZONTAL_SPACER + pack.font_mapping["logo_256_x_256"]
         return ElementPage([
-            Text(f"{title_starting_char_code} {pack.name} Reference Book\n\n\n", color="black"),  # underlined=True, 
+            Text(f"{title_starting_char_code} {pack.name} Reference Book\n\n\n", color="black"),  # underlined=True,
             Text(page_content, font=f"{pack.namespace}:all_fonts", underlined=False, color="white"),
         ])
 

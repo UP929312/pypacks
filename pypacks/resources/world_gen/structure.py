@@ -48,6 +48,24 @@ class CustomStructure:
             "spawn_overrides": SpawnOverride.combine_spawn_overrides(self.entity_spawn_overrides),
         })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "CustomStructure":
+        return cls(
+            data["internal_name"],
+            JigsawStructureType(
+                data["structure_type"]["start_pool"],
+                size=data["structure_type"]["size"],
+                start_height=data["structure_type"]["start_height"]["absolute"],
+                project_start_to_heightmap=data["structure_type"]["project_start_to_heightmap"],
+                max_distance_from_center=data["structure_type"]["max_distance_from_center"],
+                apply_waterlogging=data["structure_type"]["liquid_settings"] == "apply_waterlogging",
+            ),
+            data["biomes_to_spawn_in"],
+            data["generation_step"],
+            data["terrain_adaptation"],
+            [SpawnOverride.from_dict(spawn_override) for spawn_override in data["entity_spawn_overrides"]],
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         # If created via the CustomStructureSet, the subdirs might not exist
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)

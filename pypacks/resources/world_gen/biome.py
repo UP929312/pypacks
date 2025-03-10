@@ -63,6 +63,27 @@ class CustomBiome:
             "spawners": SpawnOverride.combine_spawn_overrides(self.spawners),  # type: ignore[arg-type]
         })
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomBiome":
+        return cls(
+            internal_name,
+            has_precipitation=data["has_precipitation"],
+            temperature=data["temperature"],
+            temperature_modifier=data.get("temperature_modifier", "none"),
+            downfall=data["downfall"],
+            fog_color=data["effects"]["fog_color"],
+            sky_color=data["effects"]["sky_color"],
+            water_color=data["effects"]["water_color"],
+            water_fog_color=data["effects"]["water_fog_color"],
+            foliage_color=data["effects"].get("foliage_color"),
+            grass_color=data["effects"].get("grass_color"),
+            grass_color_modifier=data["effects"].get("grass_color_modifier", "none"),
+            mood_sound=MoodSound(**data["effects"]["mood_sound"]) if data["effects"]["mood_sound"] else None,
+            features=FeatureGenerationSteps(*data["features"]),
+            creature_spawn_probability=data.get("creature_spawn_probability"),
+            spawners=[SpawnOverride.from_dict(spawner_data) for spawner_data in data["spawners"]]
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         # We need to create the subdir if this is being created as part of a custom dimension:
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)

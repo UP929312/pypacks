@@ -50,6 +50,15 @@ class SpawnOverride:
             "weight": self.weight,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "SpawnOverride":
+        return cls(
+            entity_name=data["type"],
+            min_count=data["minCount"],
+            max_count=data["maxCount"],
+            weight=data["weight"]
+        )
+
 
 @dataclass
 class DisableSpawnOverrideCategory:

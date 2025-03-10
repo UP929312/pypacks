@@ -8,6 +8,7 @@ from pypacks.providers.number_provider import NumberProvider
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
+    from pypacks.providers.enchantment_level_based_provider import EnchantmentLevelBasedProvider
     from pypacks.resources.custom_enchantment import CustomEnchantment
     from pypacks.resources.predicate.predicate_conditions import DamageTypeTag, EntityCondition, LocationTag, ItemCondition
 
@@ -21,6 +22,11 @@ class Predicate:
 
     def to_dict(self, pack_namespace: str) -> dict[str, str]:
         raise NotImplementedError
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "Predicate":
+        cls_ = PREDICATE_NAME_TO_CLASS[data["condition"].removeprefix("minecraft:")]
+        return cls_.from_dict(internal_name, data)
 
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"
@@ -41,6 +47,10 @@ class AllOfPredicate(Predicate):
             "terms": [term.to_dict(pack_namespace) for term in self.terms]
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AllOfPredicate":
+        return cls(internal_name, terms=[Predicate.from_dict(internal_name, term) for term in data["terms"]])
+
 
 @dataclass
 class AnyOfPredicate(Predicate):
@@ -52,6 +62,10 @@ class AnyOfPredicate(Predicate):
             "condition": "any_of",
             "terms": [term.to_dict(pack_namespace) for term in self.terms]
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AnyOfPredicate":
+        return cls(internal_name, terms=[Predicate.from_dict(internal_name, term) for term in data["terms"]])
 
 
 @dataclass
@@ -67,6 +81,10 @@ class BlockStatePropertyPredicate(Predicate):
             "properties": self.properties
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BlockStatePropertyPredicate":
+        return cls(internal_name, block=data["block"], properties=data.get("properties"))
+
 
 @dataclass
 class DamageSourcePropertiesPredicate(Predicate):
@@ -79,6 +97,11 @@ class DamageSourcePropertiesPredicate(Predicate):
             "predicate": self.predicate.to_dict(pack_namespace)
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "DamageSourcePropertiesPredicate":
+        from pypacks.resources.predicate.predicate_conditions import DamageTypeTag
+        return cls(internal_name, predicate=DamageTypeTag.from_dict(data["predicate"]))
+
 
 @dataclass
 class EnchantmentActiveCheckPredicate(Predicate):
@@ -90,6 +113,10 @@ class EnchantmentActiveCheckPredicate(Predicate):
             "condition": "enchantment_active_check",
             "active": self.active
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentActiveCheckPredicate":
+        return cls(internal_name, active=data["active"])
 
 
 @dataclass
@@ -105,6 +132,11 @@ class EntityPropertiesPredicate(Predicate):
             "predicate": self.predicate.to_dict(pack_namespace)
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityPropertiesPredicate":
+        from pypacks.resources.predicate.predicate_conditions import EntityCondition
+        return cls(internal_name, entity=data["entity"], predicate=EntityCondition.from_dict(data["predicate"]))
+
 
 @dataclass
 class EntityScoresPredicate(Predicate):
@@ -119,6 +151,10 @@ class EntityScoresPredicate(Predicate):
             "scores": {key: value.to_dict() for key, value in self.scores.items()},
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityScoresPredicate":
+        return cls(internal_name, entity=data["entity"], scores={key: IntRange.from_dict(value) for key, value in data["scores"].items()})
+
 
 @dataclass
 class InvertedPredicate(Predicate):
@@ -131,6 +167,10 @@ class InvertedPredicate(Predicate):
             "term": self.term.to_dict(pack_namespace)
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "InvertedPredicate":
+        return cls(internal_name, term=Predicate.from_dict(internal_name, data["term"]))
+
 
 @dataclass
 class KilledByPlayerPredicate(Predicate):
@@ -141,6 +181,10 @@ class KilledByPlayerPredicate(Predicate):
         return {
             "condition": "killed_by_player"
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "KilledByPlayerPredicate":
+        return cls(internal_name)
 
 
 @dataclass
@@ -160,6 +204,17 @@ class LocationCheckPredicate(Predicate):
             "predicate": self.predicate.to_dict(pack_namespace)
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "LocationCheckPredicate":
+        from pypacks.resources.predicate.predicate_conditions import LocationTag
+        return cls(
+            internal_name,
+            predicate=LocationTag.from_dict(data["predicate"]),
+            offsetX=data.get("offsetX", 0),
+            offsetY=data.get("offsetY", 0),
+            offsetZ=data.get("offsetZ", 0),
+        )
+
 
 @dataclass
 class MatchToolPredicate(Predicate):
@@ -172,11 +227,15 @@ class MatchToolPredicate(Predicate):
             "predicate": self.predicate.to_dict(pack_namespace)
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "MatchToolPredicate":
+        return cls(internal_name, predicate=data["predicate"])
+
 
 @dataclass
 class RandomChancePredicate(Predicate):
     """Generates a random number between 0.0 and 1.0, and checks if it is less than a specified value. Invokable from any context."""
-    chance: "NumberProvider"  # Success rate as a number 0.0–1.0.
+    chance: "NumberProvider | float"  # Success rate as a number 0.0–1.0.
 
     # def __post_init__(self) -> None:
     #     assert 0 <= self.chance.value <= 1, "Chance must be between 0 and 1."
@@ -184,8 +243,15 @@ class RandomChancePredicate(Predicate):
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "condition": "random_chance",
-            "chance": self.chance.to_dict()
+            "chance": self.chance.to_dict() if isinstance(self.chance, NumberProvider) else self.chance,
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "RandomChancePredicate":
+        return cls(
+            internal_name,
+            chance=data["chance"] if isinstance(data["chance"], float) else NumberProvider.from_dict(data["chance"]),
+        )
 
 
 @dataclass
@@ -193,7 +259,7 @@ class RandomChanceWithEnchantedBonusPredicate(Predicate):
     """Generates a random number between 0.0 and 1.0, and checks if it is less than the value determined using the level of a given enchantment.
     Requires attacker entity provided by loot context, and if not provided, the enchantment level is regarded as 0."""
     unenchanted_chance: float  # The success rate to use when the enchantment is not present; 0.0–1.0.
-    enchanted_chance: float  # Level-based value. The success rate based on the level when then enchantment is present; 0.0–1.0.
+    enchanted_chance: "float | EnchantmentLevelBasedProvider"  # Level-based value. The success rate based on the level when then enchantment is present; 0.0–1.0.
     enchantment: "str | CustomEnchantment"  # The enchantment whose level to use for the chance calculation. If the enchantment is not present, uses 0 as level.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -201,9 +267,19 @@ class RandomChanceWithEnchantedBonusPredicate(Predicate):
         return {
             "condition": "random_chance_with_enchanted_bonus",
             "unenchanted_chance": self.unenchanted_chance,
-            "enchanted_chance": self.enchanted_chance,
+            "enchanted_chance": self.enchanted_chance if isinstance(self.enchanted_chance, (float, int)) else self.enchanted_chance.to_dict(pack_namespace),
             "enchantment": self.enchantment.get_reference(pack_namespace) if isinstance(self.enchantment, CustomEnchantment) else self.enchantment
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "RandomChanceWithEnchantedBonusPredicate":
+        from pypacks.providers.enchantment_level_based_provider import EnchantmentLevelBasedProvider
+        return cls(
+            internal_name,
+            unenchanted_chance=data["unenchanted_chance"],
+            enchanted_chance=data["enchanted_chance"] if isinstance(data["enchanted_chance"], float) else EnchantmentLevelBasedProvider.from_dict(data["enchanted_chance"]),
+            enchantment=data["enchantment"],
+        )
 
 
 @dataclass
@@ -217,6 +293,10 @@ class ReferencePredicate(Predicate):
             "name": self.name.get_reference(pack_namespace) if isinstance(self.name, Predicate) else self.name
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ReferencePredicate":
+        return cls(internal_name, name=data["name"])
+
 
 @dataclass
 class SurvivesExplosionPredicate(Predicate):
@@ -226,6 +306,10 @@ class SurvivesExplosionPredicate(Predicate):
         return {
             "condition": "survives_explosion"
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SurvivesExplosionPredicate":
+        return cls(internal_name)
 
 
 @dataclass
@@ -243,6 +327,10 @@ class TableBonusPredicate(Predicate):
             "chances": self.chances
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TableBonusPredicate":
+        return cls(internal_name, enchantment=data["enchantment"], chances=data["chances"])
+
 
 @dataclass
 class TimeCheckPredicate(Predicate):
@@ -256,6 +344,14 @@ class TimeCheckPredicate(Predicate):
             "value": self.number_provider.to_dict() if isinstance(self.number_provider, NumberProvider) else self.number_provider,
         } | {"period": self.period} if self.period is not None else {}
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TimeCheckPredicate":
+        return cls(
+            internal_name,
+            number_provider=data["value"] if isinstance(data["value"], int) else NumberProvider.from_dict(data["value"]),
+            period=data.get("period"),
+        )
+
 
 @dataclass
 class ValueCheckPredicate(Predicate):
@@ -267,6 +363,13 @@ class ValueCheckPredicate(Predicate):
             "condition": "value_check",
             "value": self.value.to_dict() if isinstance(self.value, NumberProvider) else self.value,
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ValueCheckPredicate":
+        return cls(
+            internal_name,
+            value=data["value"] if isinstance(data["value"], int) else NumberProvider.from_dict(data["value"]),
+        )
 
 
 @dataclass
@@ -281,3 +384,34 @@ class WeatherCheckPredicate(Predicate):
             "raining": self.raining,
             "thundering": self.thundering
         }
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WeatherCheckPredicate":
+        return cls(
+            internal_name,
+            raining=data.get("raining", False),
+            thundering=data.get("thundering", False),
+        )
+
+
+PREDICATE_NAME_TO_CLASS: dict[str, type[Predicate]] = {
+    "all_of": AllOfPredicate,
+    "any_of": AnyOfPredicate,
+    "block_state_property": BlockStatePropertyPredicate,
+    "damage_source_properties": DamageSourcePropertiesPredicate,
+    "enchantment_active_check": EnchantmentActiveCheckPredicate,
+    "entity_properties": EntityPropertiesPredicate,
+    "entity_scores": EntityScoresPredicate,
+    "inverted": InvertedPredicate,
+    "killed_by_player": KilledByPlayerPredicate,
+    "location_check": LocationCheckPredicate,
+    "match_tool": MatchToolPredicate,
+    "random_chance": RandomChancePredicate,
+    "random_chance_with_enchanted_bonus": RandomChanceWithEnchantedBonusPredicate,
+    "reference": ReferencePredicate,
+    "survives_explosion": SurvivesExplosionPredicate,
+    "table_bonus": TableBonusPredicate,
+    "time_check": TimeCheckPredicate,
+    "value_check": ValueCheckPredicate,
+    "weather_check": WeatherCheckPredicate
+}

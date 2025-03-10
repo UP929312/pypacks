@@ -1,6 +1,5 @@
 import io
 from PIL import Image
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypacks.utils import IMAGES_PATH

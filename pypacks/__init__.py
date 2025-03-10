@@ -60,8 +60,8 @@ from pypacks.resources.item_model_definition import (
 )
 # =============================================================================
 try:
-    from pypacks.scripts.repos.all_item_instances import DEFAULT_ITEMS
-except ImportError:
+    from pypacks.minecraft.items import DEFAULT_ITEMS
+except ImportError:  # This exists incase I break the file, so I can still override it (as it tries to load itin first)
     DEFAULT_ITEMS = {}
 
 from pypacks.pack import Pack

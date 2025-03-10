@@ -107,6 +107,13 @@ class BannerPattern:
             "color": self.color,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BannerPattern":
+        return cls(
+            pattern=data["pattern"],
+            color=data["color"],
+        )
+
 
 # ==========================================================================================
 
@@ -295,6 +302,8 @@ class _Effects:
             if any(effect["type"].removeprefix("minecraft:") == "remove_effects" for effect in effects_raw)
             else []
         )
+        if isinstance(remove_effect_effects, str):
+            remove_effect_effects = [remove_effect_effects]
         return _Effects(
             apply_affects=[PotionEffect.from_dict(effect) for effect in apply_effect_effects],
             remove_affects="all" if any(effect["type"].removeprefix("minecraft:") == "clear_all_effects" for effect in effects_raw) else remove_effect_effects,  # type: ignore[arg-type]
@@ -724,7 +733,7 @@ PotionEffectType = Literal[
 ]
 
 
-@dataclass
+@dataclass(frozen=True)
 class PotionEffect:
     """Adds an effect to the item, e.g. a potion effect"""
     # https://minecraft.wiki/w/Effect
