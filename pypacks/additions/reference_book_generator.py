@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pypacks.additions.written_book_framework import (
-    ElementPage, GridPage, GridPageManager, Icon, RowManager, FormattedWrittenBook, RightAlignedIcon,
-    ICONS_PER_ROW, ROWS_PER_PAGE,
+    ElementPage, GridPage, GridPageManager, Icon, RowManager, FormattedWrittenBook, RightAlignedIcon, ICONS_PER_PAGE,
 )
 from pypacks.additions.text import Text, OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw, OnClickChangePage, OnHoverShowText
 from pypacks.resources.custom_recipe import SmithingTrimRecipe
@@ -127,20 +126,20 @@ class ReferenceBook:
         current_page_number = 0
         for category in pack.reference_book_categories:
             category_to_page_number[category.name] = current_page_number
-            current_page_number += (
-                len([x for x in pack.custom_items if x.ref_book_config.category.name == category.name and not x.ref_book_config.hidden]) // (ICONS_PER_ROW*ROWS_PER_PAGE) + 1
-            )
+            this_categories_items = [x for x in pack.custom_items if x.ref_book_config.category.name == category.name and not x.ref_book_config.hidden]
+            current_page_number += (len(this_categories_items) // (ICONS_PER_PAGE) + 1)
         return category_to_page_number
 
     def generate_pages(self, pack: "Pack") -> list["ElementPage | GridPage"]:
         # Page order is as follows:
+        category_to_page_number = self._generate_category_to_page_number(pack)
         COVER_PAGE = 1
         # ==============================================================================================================================
         CATEGORIES_STARTING_PAGE = COVER_PAGE + 1
-        CATEGORIES_FINISHING_PAGE = CATEGORIES_STARTING_PAGE + len(pack.reference_book_categories) // (ICONS_PER_ROW*ROWS_PER_PAGE)
+        CATEGORIES_FINISHING_PAGE = CATEGORIES_STARTING_PAGE + len(pack.reference_book_categories) // (ICONS_PER_PAGE)  # A page for each ICONS_PER_PAGE categories
         # ==============================================================================================================================
         CATEGORY_ITEMS_STARTING_PAGE = CATEGORIES_FINISHING_PAGE + 1  # One for each category
-        CATEGORY_ITEMS_FINISHING_PAGE = CATEGORY_ITEMS_STARTING_PAGE + max(self._generate_category_to_page_number(pack).values())
+        CATEGORY_ITEMS_FINISHING_PAGE = CATEGORY_ITEMS_STARTING_PAGE + max(category_to_page_number.values())
         # ==============================================================================================================================
         ITEM_PAGE_START = CATEGORY_ITEMS_FINISHING_PAGE + 1  # After we have all the categories, start adding the individual items
         # ==============================================================================================================================
@@ -158,9 +157,9 @@ class ReferenceBook:
                     pack.namespace,
                     indent_unicode_char=pack.font_mapping["1_pixel_indent"],
                     on_hover=OnHoverShowText(f"Go to the `{category.name}` category"),
-                    on_click=OnClickChangePage(CATEGORY_ITEMS_STARTING_PAGE+i)
+                    on_click=OnClickChangePage(CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number[category.name])
                 )
-                for i, category in enumerate(pack.reference_book_categories)
+                for category in pack.reference_book_categories
             ],
             empty_icon_unicode_char=pack.font_mapping["blank_icon"],
             indent_unicode_char=pack.font_mapping["1_pixel_indent"],
@@ -193,15 +192,12 @@ class ReferenceBook:
         ]
         # Flatten to a 1d list of pages
         category_items_pages = [x for y in category_items_page_managers for x in y.pages]
-
         # ==============================================================================================================================
         # Item pages
-        item_pages: list[ElementPage] = []
-        for item in pack.custom_items:
-            category_page_index = CATEGORY_ITEMS_STARTING_PAGE + self._generate_category_to_page_number(pack)[item.ref_book_config.category.name]
-            item_page = ItemPage(item, pack, category_page_index)
-            item_pages.append(item_page)  # type: ignore
-
+        item_pages: list[ElementPage] = [  # type: ignore[assignment]
+            ItemPage(item, pack, CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number[item.ref_book_config.category.name])
+            for item in pack.custom_items
+        ]
         # ==============================================================================================================================
         # Blank page:
         blank_page = ElementPage([Text("This page is intentionally left blank")])

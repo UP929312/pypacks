@@ -29,7 +29,8 @@ from pypacks.providers.number_provider import (  # noqa: F401, F403
 # Resources
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
 from pypacks.resources.world_gen import (
-    CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound
+    CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound,
+    WorldGenResources,
 )
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride, DisableSpawnOverrideCategory
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria

@@ -401,6 +401,7 @@ class ModifyContentsFunction(LootTableFunction):
         )
 
 
+@dataclass
 class ReferenceCallFunction(LootTableFunction):
     """Call sub-functions"""
     reference: str  # Location of function to call
@@ -414,7 +415,7 @@ class ReferenceCallFunction(LootTableFunction):
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ReferenceCallFunction":
         return cls(
-            reference=data["name"],  # type: ignore
+            reference=data["name"],
         )
 
 

@@ -116,7 +116,8 @@ def generate_datapack(pack: "Pack") -> None:
         pack.custom_items + pack.custom_recipes + pack.custom_jukebox_songs + pack.custom_predicates +
         pack.custom_paintings + pack.custom_advancements + pack.custom_loot_tables +
         pack.custom_mcfunctions + pack.custom_tags + pack.custom_enchantments + pack.custom_damage_types +
-        pack.custom_dimensions + pack.custom_structures + pack.custom_structure_sets + pack.custom_raycasts +
+        pack.custom_structures + pack.custom_structure_sets + pack.custom_biomes +
+        pack.custom_dimensions + pack.custom_raycasts +
         pack.custom_loops + pack.custom_chunk_scanners + pack.custom_ore_generations + pack.custom_entity_variants +
         pack.custom_test_environments + pack.custom_game_tests
     ):

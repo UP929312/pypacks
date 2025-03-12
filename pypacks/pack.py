@@ -11,10 +11,10 @@ from pypacks.additions.custom_ore_generation import CustomOreGeneration
 from pypacks.additions.raycasting import Raycast
 from pypacks.additions.reference_book_config import RefBookCategory
 
+from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomModelDefinition, CustomTexture
-from pypacks.resources.world_gen.structure import SingleCustomStructure
 from pypacks.generate import generate_datapack, generate_resource_pack, generate_base_font
 
 
@@ -37,8 +37,6 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_recipe import Recipe
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_tag import CustomTag
-    from pypacks.resources.world_gen.structure import CustomStructure
-    from pypacks.resources.world_gen.structure_set import CustomStructureSet
 
     from pypacks.additions.custom_crafter import CustomCrafter
 
@@ -65,6 +63,7 @@ class Pack:
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
     custom_damage_types: list["CustomDamageType"] = field(default_factory=list)
+    custom_dimensions: list["CustomDimension"] = field(default_factory=list)
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_entity_variants: list["EntityVariant"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
@@ -83,9 +82,7 @@ class Pack:
     custom_model_definitions: list["CustomModelDefinition"] = field(default_factory=list)
     custom_item_render_definitions: list["CustomItemRenderDefinition"] = field(default_factory=list)
     custom_textures: list["CustomTexture"] = field(default_factory=list)
-    custom_dimensions: list["CustomDimension"] = field(default_factory=list)
-    custom_structures: list["CustomStructure | SingleCustomStructure"] = field(default_factory=list)
-    custom_structure_sets: list["CustomStructureSet"] = field(default_factory=list)
+    world_gen_resources: "WorldGenResources" = field(default_factory=WorldGenResources)
 
     custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
     custom_crafters: list["CustomCrafter"] = field(default_factory=list)
@@ -104,6 +101,11 @@ class Pack:
 
         self.data_pack_format_version = 70
         self.resource_pack_format_version = 54
+
+        # Don't love this, but oh well (for the future, when I add more world gen stuff)
+        self.custom_structures = self.world_gen_resources.custom_structures
+        self.custom_structure_sets = self.world_gen_resources.custom_structure_sets
+        self.custom_biomes = self.world_gen_resources.custom_biomes
 
         assert self.namespace.islower(), "Namespace must be all lowercase"
         assert all(x in "abcdefghijklmnopqrstuvwxyz0123456789_-." for x in self.namespace), "Namespace must only contain letters, numbers, _, -, and ."
@@ -129,8 +131,8 @@ class Pack:
             self.custom_mcfunctions.extend(Raycast.generate_default_raycast_functions(self.namespace))
         # ==================================================================================
         # Custom Structure places (needs to be before on_right_click)
-        for structure in [x for x in self.custom_structures if isinstance(x, SingleCustomStructure)]:
-            self.custom_items.append(structure.generate_custom_item(self.namespace))
+        for structure in [x for x in self.custom_structures if hasattr(x, "is_simple_resource")]:
+            self.custom_items.append(structure.generate_custom_item(self.namespace))  # type: ignore[abc]
         # =================================================================================
         # Custom loops, chunk scanners, and ore generations
         for custom_ore_generation in self.custom_ore_generations:
@@ -275,3 +277,17 @@ class Pack:
         minecraft = Pack("Minecraft", "", "minecraft", datapack_output_path=self.datapack_output_path,
                          custom_tags=tags, config=Config(generate_create_wall_command=False, generate_reference_book=False))
         generate_datapack(minecraft)
+
+    @classmethod
+    def from_existing_pack(cls, path: "str | Path") -> "Pack":
+        path = Path(path)
+        from pypacks.resources.custom_painting import CustomPainting
+        from pypacks.resources.custom_advancement import CustomAdvancement
+        from pypacks.resources.custom_damage_type import CustomDamageType
+        return Pack(
+            name="", description="", namespace="a",
+            custom_advancements=CustomAdvancement.from_datapack_files(path),
+            custom_damage_types=CustomDamageType.from_datapack_files(path),
+            custom_mcfunctions=MCFunction.from_datapack_files(path),
+            custom_paintings=CustomPainting.from_datapack_files(path),
+        )

@@ -129,7 +129,6 @@ class CustomLanguage:
         return f"tellraw @a {{\"translate\": \"{translation_code}\"}}"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        # import os
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.language_code}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)

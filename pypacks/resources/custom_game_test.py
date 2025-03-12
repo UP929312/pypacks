@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, TypeAlias
+from typing import TYPE_CHECKING, Any, Literal
 from dataclasses import dataclass, field
 
 from pypacks.utils import recursively_remove_nones_from_data
@@ -58,7 +58,6 @@ class CustomGameTest:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CustomGameTest":
-        from pypacks.resources.world_gen.structure import GameTestStructure
         return cls(
             internal_name=data["internal_name"],
             environment=data["environment"],

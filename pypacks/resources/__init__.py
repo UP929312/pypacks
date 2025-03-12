@@ -33,7 +33,7 @@ from pypacks.resources.entities.wolf_variant import WolfVariant
 # =============================================================================
 # World Gen
 from pypacks.resources.world_gen import (
-    CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound, GameTestStructure,
+    CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound, GameTestStructure, WorldGenResources
 )
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride, DisableSpawnOverrideCategory
 # =============================================================================
@@ -122,7 +122,7 @@ __all__ = [
 
     # World Gen
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType",
-    "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound", "GameTestStructure",
+    "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound", "GameTestStructure", "WorldGenResources",
 
     # More
     "CustomAdvancement", "Criteria",

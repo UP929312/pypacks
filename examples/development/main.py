@@ -339,8 +339,6 @@ datapack = Pack(
     custom_enchantments=custom_enchantments,
     custom_dimensions=[my_dimension, overworld_dimension],
     custom_damage_types=[my_custom_damage_type],
-    custom_structures=[bee_explosion_structure, my_little_house],
-    custom_structure_sets=[custom_structure_set],
     # custom_advancements=[eating_advancement],
     custom_crafters=[custom_crafter],
     custom_raycasts=[block_ray_cast, entity_ray_cast],
@@ -348,6 +346,13 @@ datapack = Pack(
     # custom_loops=[every_sixty_seconds],
     custom_fonts=[ttf_font],
     custom_entity_variants=entity_variants,
+    world_gen_resources=WorldGenResources(
+        custom_structures=[bee_explosion_structure, my_little_house],
+        custom_structure_sets=[custom_structure_set],
+    ),
     custom_ore_generations=[ruby_generation],
     config=Config(warn_about_tags_with_custom_items=False),
 ).generate_pack()
+
+a = Pack.from_existing_pack(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing")
+# print(a)

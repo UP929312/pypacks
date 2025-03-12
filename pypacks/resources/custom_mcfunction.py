@@ -3,16 +3,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.scripts.repos.mcfunction_header_patterns import (
     MACRO_PATTERN, MACRO_MESSAGE, VARIABLE_PAIR_PATTERNS, VARIABLE_MESSAGE, FUNCTION_PATTERNS, FUNCTION_MESSAGE,
 )
+HEADER_DIVIDER = "#" * 100
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
 
 
 @dataclass
-class MCFunction:
+class MCFunction(BaseResource):
     """Creates a minecraft function file.
     The order that functions get executed within a single tick is:
     - Functions that belong to #minecraft:tick, from top to bottom.
@@ -29,9 +31,6 @@ class MCFunction:
     def __post_init__(self) -> None:
         file_contents = "\n".join([x.get_reference("#"*32) if isinstance(x, MCFunction) else x for x in self.commands])
         assert len(file_contents) <= 2_000_000, "MCFunction files must be less than ~2 million characters!"
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"
 
     @property
     def is_empty(self) -> bool:
@@ -70,13 +69,13 @@ class MCFunction:
             detected_functions: FUNCTION_MESSAGE+'\n'.join([f'# - {x}' for x in detected_functions]),
             detected_variables: VARIABLE_MESSAGE+'\n'.join([f'# - Player: {x[0]}, Objective: {x[1]}' for x in detected_variables]),
         }
-        return "\n".join([message for found_instances, message in pairings.items() if found_instances]) + ("\n\n" if any(pairings.values()) else "")
+        return "\n".join([message for found_instances, message in pairings.items() if found_instances]) + (("\n"+HEADER_DIVIDER+"\n\n") if any(pairings.keys()) else "")
 
     @classmethod
     def from_file_contents(cls, internal_name: str, file_contents: str, sub_directories: list[str] | None = None) -> "MCFunction":
         return cls(
             internal_name,
-            file_contents.split("\n"),  # type: ignore[abc]
+            file_contents.split("\n"),  # type: ignore[arg-type]
             sub_directories=sub_directories or [],
         )
 
@@ -95,6 +94,22 @@ class MCFunction:
                     *self.sub_directories, f"{self.internal_name}.mcfunction")
         with open(path, "w") as file:
             file.write(function_headers+commands_str)
+
+    @classmethod
+    def from_datapack_files(cls, root_path: "Path") -> list["MCFunction"]:
+        """Path should be the root of the pack"""
+        mcfunctions = []
+        for function_path_absolute, function_path_relative in BaseResource.get_all_resource_paths(cls, root_path, ".mcfunction"):
+            with open(function_path_absolute, "r") as file:
+                file_content = file.read()
+                mcfunctions.append(
+                    cls.from_file_contents(
+                        file.name,
+                        file_content.split(HEADER_DIVIDER)[1] if HEADER_DIVIDER in file_content else file_content,
+                        sub_directories=str(function_path_relative).removesuffix(file.name).split("/")
+                    )
+                )
+        return mcfunctions
 
     @staticmethod
     def create_run_macro_function() -> "MCFunction":

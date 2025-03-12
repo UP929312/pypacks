@@ -1,12 +1,10 @@
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Literal, Any, TYPE_CHECKING
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
-    from pypacks.pack import Pack
     from pypacks.resources.custom_mcfunction import MCFunction
 
 TriggerType = Literal[
@@ -41,16 +39,16 @@ class Criteria:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Criteria":
+    def from_dict(cls, name: str, data: dict[str, Any]) -> "Criteria":
         return cls(
-            name=data["name"],
+            name=name,
             trigger=data["trigger"],
             conditions=data["conditions"],
         )
 
 
 @dataclass
-class CustomAdvancement:
+class CustomAdvancement(BaseResource):
     """Rewarded loot is the reference to a LootTable"""
     # https://minecraft.wiki/w/Advancement_definition
     internal_name: str
@@ -99,13 +97,12 @@ class CustomAdvancement:
             },
             "sends_telemetry_event": True if self.send_telemetry_event else None,
         })
-    
+
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomAdvancement":
-        from pypacks.resources.custom_mcfunction import MCFunction
         return cls(
             internal_name,
-            criteria=[Criteria.from_dict(x) for x in data["criteria"]],
+            criteria=[Criteria.from_dict(key, value) for key, value in data["criteria"].items()],
             rewarded_loot=data.get("rewarded_loot"),
             rewarded_recipes=data.get("rewarded_recipes"),
             rewarded_experience=data.get("rewarded_experience"),
@@ -121,10 +118,6 @@ class CustomAdvancement:
             announce_to_chat=data.get("announce_to_chat", False),
             send_telemetry_event=data.get("send_telemetry_event", False),
         )
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def generate_grant_command(self) -> str:
         return f"advancement grant @s only {self.internal_name}"

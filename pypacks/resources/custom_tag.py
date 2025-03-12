@@ -44,14 +44,14 @@ class CustomTag:
                 (x.get_reference(pack_namespace) if isinstance(x, CustomTag) else (x.base_item if isinstance(x, CustomItem) else x))
                 for x in self.values],
         })
-    
+
     @classmethod
-    def from_dict(cls, internal_name: str, tag_type: TagType, data: dict[str, bool | list[str]]) -> "CustomTag":
+    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":
         from pypacks.resources.custom_item import CustomItem
         base_block = "minecraft:stone"  # TODO: This, I guess?
         return cls(
             internal_name,
-            [CustomItem.from_dict(internal_name, base_block, x) if isinstance(x, dict) else x for x in data["values"]],  # type: ignore[arg-type]
+            [CustomItem.from_dict(internal_name, base_block, x) if isinstance(x, dict) else x for x in data["values"]],  # type: ignore[union-attr]
             tag_type,
             replace=data.get("replace", False),  # type: ignore[arg-type]
         )

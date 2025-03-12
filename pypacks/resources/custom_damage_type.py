@@ -1,12 +1,10 @@
-import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from dataclasses import dataclass, field
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
-    from pypacks.pack import Pack
     from pypacks.resources.custom_language import LanguageCode, CustomLanguage
 
 
@@ -36,7 +34,7 @@ class DamageTypeTranslation:
 
 
 @dataclass
-class CustomDamageType:
+class CustomDamageType(BaseResource):
     """Custom damage types can be applied only by using the /damage command."""
     # https://minecraft.wiki/w/Damage_type
     internal_name: str
@@ -50,16 +48,13 @@ class CustomDamageType:
 
     def __post_init__(self) -> None:
         language_codes = [translation.language_code for translation in self.translations] if self.translations is not None else []
-        assert self.translations is not None and len(set(language_codes)) == len(language_codes), "Each translation must have a unique language code."
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
+        assert len(set(language_codes)) == len(language_codes), "Each translation must have a unique language code."
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "message_id": f"{pack_namespace}:{self.internal_name}",
             "exhaustion": self.exhaustion,
-            "scaling": self.scaling if self.scaling != "never" else None,
+            "scaling": self.scaling,
             "effects": self.effects,
             "death_message_type": self.death_message_type,
         })
@@ -77,10 +72,6 @@ class CustomDamageType:
 
     def get_translation_commands(self, pack_namespace: str) -> str:
         return f"tellraw @a [{{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}\", \"with\": [\"Player\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.item\", \"with\": [\"Victim\", \"Attacker\", \"Item\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.player\", \"with\": [\"Victim\", \"Attacker\"]}}]"
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def generate_damage_command(self, pack_namespace: str, amount: int = 1) -> str:
         return f"damage @p {amount} {pack_namespace}:{self.internal_name}"

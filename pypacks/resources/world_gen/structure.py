@@ -81,7 +81,8 @@ class SingleCustomStructure:
     path_to_nbt_file: Path | str
     biomes_to_spawn_in: "list[str | CustomBiome]" = field(default_factory=list)  # Biomes that this structure is allowed to generate in.
 
-    datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/structure")
+    is_simple_resource: bool = field(init=False, repr=False, hash=False, default=True)
+    datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="worldgen/structure")
 
     def get_reference(self, pack_namespace: str) -> str:
         return f"{pack_namespace}:{self.internal_name}"

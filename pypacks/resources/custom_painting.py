@@ -1,10 +1,10 @@
-import json
 import os
 import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from dataclasses import dataclass, field
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.custom_item import CustomItem
 from pypacks.additions.reference_book_config import PAINTING_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, EntityData
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomPainting:
+class CustomPainting(BaseResource):
     internal_name: str
     image_path: str
     title: str | None = None
@@ -31,7 +31,7 @@ class CustomPainting:
         assert 1 <= self.height_in_blocks <= 16, "Height must be between 1 and 16"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "asset_id": f"{pack_namespace}:{self.internal_name}",
             "width": self.width_in_blocks,
             "height": self.height_in_blocks,
@@ -43,18 +43,13 @@ class CustomPainting:
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomPainting":
         return cls(
             internal_name,
-            data["image_path"],
+            "UNKNOWN",
             title=data["title"]["text"] if data.get("title") else None,
             author=data["author"]["text"] if data.get("author") else None,
             width_in_blocks=data.get("width_in_blocks", 1),
             height_in_blocks=data.get("height_in_blocks", 1),
         )
-
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
-
+    
     def create_resource_pack_files(self, pack: "Pack") -> None:
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
         shutil.copyfile(self.image_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")
