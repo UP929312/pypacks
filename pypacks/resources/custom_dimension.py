@@ -121,6 +121,29 @@ class CustomDimensionType:
             "effects": self.effects
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDimensionType":
+        return cls(
+            internal_name,
+            data["height"],
+            data["logical_height"],
+            data["minimum_y"],
+            data["coordinate_scale"],
+            data["ambient_light"],
+            data["monster_spawn_light_level"],
+            data["monster_spawn_block_light_limit"],
+            data["ultrawarm"],
+            data["natural"],
+            data["has_skylight"],
+            data["has_ceiling"],
+            data["piglin_safe"],
+            data["bed_works"],
+            data["respawn_anchor_works"],
+            data["has_raids"],
+            data["infiniburn"],
+            data["effects"]
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         # If created via the CustomDimension, the subdir might not exist
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)

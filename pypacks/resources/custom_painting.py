@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pypacks.resources.custom_item import CustomItem
 from pypacks.additions.reference_book_config import PAINTING_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, EntityData
+from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -30,22 +31,25 @@ class CustomPainting:
         assert 1 <= self.height_in_blocks <= 16, "Height must be between 1 and 16"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        data = {
+        return recursively_remove_nones_from_data({
             "asset_id": f"{pack_namespace}:{self.internal_name}",
             "width": self.width_in_blocks,
             "height": self.height_in_blocks,
-        }
-        if self.title is not None:
-            data["title"] = {
-                "color": "yellow",
-                "text": self.title,
-            }
-        if self.author is not None:
-            data["author"] = {
-                "color": "gray",
-                "text": self.author,
-            }
-        return data
+            "title": {"color": "yellow", "text": self.title} if self.title is not None else None,
+            "author": {"color": "gray", "text": self.author} if self.author is not None else None,
+        })
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomPainting":
+        return cls(
+            internal_name,
+            data["image_path"],
+            title=data["title"]["text"] if data.get("title") else None,
+            author=data["author"]["text"] if data.get("author") else None,
+            width_in_blocks=data.get("width_in_blocks", 1),
+            height_in_blocks=data.get("height_in_blocks", 1),
+        )
+
 
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:

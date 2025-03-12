@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from dataclasses import dataclass, field
 
+from pypacks.utils import recursively_remove_nones_from_data
+
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.custom_language import LanguageCode, CustomLanguage
@@ -54,16 +56,24 @@ class CustomDamageType:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        data = {
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "message_id": f"{pack_namespace}:{self.internal_name}",
             "exhaustion": self.exhaustion,
-            "scaling": self.scaling,
-        }
-        if self.effects is not None:
-            data["effects"] = self.effects
-        if self.death_message_type is not None:
-            data["death_message_type"] = self.death_message_type
-        return data
+            "scaling": self.scaling if self.scaling != "never" else None,
+            "effects": self.effects,
+            "death_message_type": self.death_message_type,
+        })
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDamageType":
+        return cls(
+            internal_name,
+            translations=None,
+            exhaustion=data["exhaustion"],
+            scaling=data.get("scaling", "never"),
+            effects=data.get("effects"),
+            death_message_type=data.get("death_message_type"),
+        )
 
     def get_translation_commands(self, pack_namespace: str) -> str:
         return f"tellraw @a [{{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}\", \"with\": [\"Player\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.item\", \"with\": [\"Victim\", \"Attacker\", \"Item\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.player\", \"with\": [\"Victim\", \"Attacker\"]}}]"

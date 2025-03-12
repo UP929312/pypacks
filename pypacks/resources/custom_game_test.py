@@ -56,6 +56,25 @@ class CustomGameTest:
             "type": self.type,
         })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "CustomGameTest":
+        from pypacks.resources.world_gen.structure import GameTestStructure
+        return cls(
+            internal_name=data["internal_name"],
+            environment=data["environment"],
+            structure=data["structure"],
+            max_ticks=data["max_ticks"],
+            setup_ticks=data.get("setup_ticks", 0),
+            required=data.get("required", True),
+            rotation=data.get("rotation", "none"),
+            manual_only=data.get("manual_only", False),
+            sky_access=data.get("sky_access", False),
+            max_attempts=data.get("max_attempts", 1),
+            required_successes=data.get("required_successes", 1),
+            type=data.get("type", "block_based"),
+            function=data.get("function"),
+        )
+
     def get_run_command(self, pack_namespace: str) -> str:
         return f"test run {self.get_reference(pack_namespace)}"
 
@@ -68,7 +87,7 @@ class CustomGameTest:
 
 
 @dataclass
-class GenericTestEnvironment:
+class CustomTestEnvironment:
     """Do not instantiate this class directly. Use one of the subclasses instead."""
     internal_name: str
 
@@ -80,35 +99,47 @@ class GenericTestEnvironment:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "CustomTestEnvironment":
+        cls_ = TEST_ENVIRONMENT_TO_CLASSES[data["type"]]
+        return cls_.from_dict(data)
+
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass
-class AllOfEnvironment(GenericTestEnvironment):
+class AllOfEnvironment(CustomTestEnvironment):
     """Applies multiple environments"""
     # https://minecraft.wiki/w/Test_environment_definition#all_of
-    definitions: list["GenericTestEnvironment | str"]  # Another test environment.
+    definitions: list["CustomTestEnvironment | str"]  # Another test environment.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "all_of",
             "definitions": [
-                definition.get_reference(pack_namespace) if isinstance(definition, GenericTestEnvironment) else definition
+                definition.get_reference(pack_namespace) if isinstance(definition, CustomTestEnvironment) else definition
                 for definition in self.definitions
             ],
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "AllOfEnvironment":
+        return cls(
+            internal_name=data["internal_name"],
+            definitions=data["definitions"],
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         super().create_datapack_files(pack)
         for definition in self.definitions:
-            if isinstance(definition, GenericTestEnvironment):
+            if isinstance(definition, CustomTestEnvironment):
                 definition.create_datapack_files(pack)
 
 
 @dataclass
-class FunctionEnvironment(GenericTestEnvironment):
+class FunctionEnvironment(CustomTestEnvironment):
     """Uses functions to set up and tear down the test."""
     # https://minecraft.wiki/w/Test_environment_definition#function
     setup: "MCFunction | str | None" = None  # The function to use for setup.
@@ -122,9 +153,17 @@ class FunctionEnvironment(GenericTestEnvironment):
             "teardown": self.teardown.get_reference(pack_namespace) if isinstance(self.teardown, MCFunction) else self.teardown,
         })
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "FunctionEnvironment":
+        return cls(
+            internal_name=data["internal_name"],
+            setup=data.get("setup"),
+            teardown=data.get("teardown"),
+        )
+
 
 @dataclass
-class GameRulesEnvironment(GenericTestEnvironment):
+class GameRulesEnvironment(CustomTestEnvironment):
     """Applies game rules during the test, and resets them after tests have completed."""
     # https://minecraft.wiki/w/Test_environment_definition#game_rules
     bool_rules: dict[str, bool] = field(default_factory=dict)  # A map of boolean game rules to set and their value. (e.g. {"doDaylightCycle": False})
@@ -137,9 +176,17 @@ class GameRulesEnvironment(GenericTestEnvironment):
             "int_rules": [{"rule": key, "value": value} for key, value in self.int_rules.items()],
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "GameRulesEnvironment":
+        return cls(
+            internal_name=data["internal_name"],
+            bool_rules={rule["rule"]: rule["value"] for rule in data["bool_rules"]},
+            int_rules={rule["rule"]: rule["value"] for rule in data["int_rules"]},
+        )
+
 
 @dataclass
-class WeatherEnvironment(GenericTestEnvironment):
+class WeatherEnvironment(CustomTestEnvironment):
     """Applies specific weather during the test, and resets it after tests have completed."""
     # https://minecraft.wiki/w/Test_environment_definition#weather
     weather: Literal["clear", "rain", "thunder"]  # The weather to set.
@@ -150,9 +197,16 @@ class WeatherEnvironment(GenericTestEnvironment):
             "weather": self.weather,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "WeatherEnvironment":
+        return cls(
+            internal_name=data["internal_name"],
+            weather=data["weather"],
+        )
+
 
 @dataclass
-class TimeOfDayEnvironment(GenericTestEnvironment):
+class TimeOfDayEnvironment(CustomTestEnvironment):
     """Changes the time to the specified value, and resets it after tests have completed."""
     # https://minecraft.wiki/w/Test_environment_definition#time_of_day
     time: int  # The time of day to set in number of ticks
@@ -167,5 +221,18 @@ class TimeOfDayEnvironment(GenericTestEnvironment):
             "time": self.time,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TimeOfDayEnvironment":
+        return cls(
+            internal_name=data["internal_name"],
+            time=data["time"],
+        )
 
-CustomTestEnvironment: TypeAlias = AllOfEnvironment | FunctionEnvironment | GameRulesEnvironment | WeatherEnvironment | TimeOfDayEnvironment
+
+TEST_ENVIRONMENT_TO_CLASSES: dict[str, type["CustomTestEnvironment"]] = {
+    "all_of": AllOfEnvironment,
+    "function": FunctionEnvironment,
+    "game_rules": GameRulesEnvironment,
+    "weather": WeatherEnvironment,
+    "time_of_day": TimeOfDayEnvironment,
+}

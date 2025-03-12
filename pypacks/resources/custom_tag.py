@@ -7,12 +7,13 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
     from pypacks.pack import Pack
-
+    TagType = Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "function", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
 
 # https://minecraft.wiki/w/Resource_location#Registries_and_registry_objects
 # Type hint that ^
 
 # Block tags, Item Tags, Entity Type Tags, Function Tags
+
 
 @dataclass
 class CustomTag:
@@ -43,6 +44,17 @@ class CustomTag:
                 (x.get_reference(pack_namespace) if isinstance(x, CustomTag) else (x.base_item if isinstance(x, CustomItem) else x))
                 for x in self.values],
         })
+    
+    @classmethod
+    def from_dict(cls, internal_name: str, tag_type: TagType, data: dict[str, bool | list[str]]) -> "CustomTag":
+        from pypacks.resources.custom_item import CustomItem
+        base_block = "minecraft:stone"  # TODO: This, I guess?
+        return cls(
+            internal_name,
+            [CustomItem.from_dict(internal_name, base_block, x) if isinstance(x, dict) else x for x in data["values"]],  # type: ignore[arg-type]
+            tag_type,
+            replace=data.get("replace", False),  # type: ignore[arg-type]
+        )
 
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.custom_item import CustomItem

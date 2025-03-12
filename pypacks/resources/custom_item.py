@@ -103,6 +103,10 @@ class CustomItem:
             **self.components.to_dict(pack_namespace),
         })
 
+    @classmethod
+    def from_dict(cls, internal_name: str, base_item: MinecraftItem, data: dict[str, Any]) -> "CustomItem":
+        raise NotImplementedError
+
     @staticmethod
     def to_component_string(obj: dict[str, Any]) -> str:
         replacee, replacer = "\\\\", "\\"

@@ -121,6 +121,10 @@ class CustomLanguage:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return self.translations
 
+    @classmethod
+    def from_dict(cls, language_code: LanguageCode, data: dict[str, str]) -> "CustomLanguage":
+        return cls(language_code, data)
+
     def get_run_command(self, pack_namespace: str, translation_code: str) -> str:
         return f"tellraw @a {{\"translate\": \"{translation_code}\"}}"
 

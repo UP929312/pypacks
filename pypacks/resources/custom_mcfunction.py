@@ -72,6 +72,14 @@ class MCFunction:
         }
         return "\n".join([message for found_instances, message in pairings.items() if found_instances]) + ("\n\n" if any(pairings.values()) else "")
 
+    @classmethod
+    def from_file_contents(cls, internal_name: str, file_contents: str, sub_directories: list[str] | None = None) -> "MCFunction":
+        return cls(
+            internal_name,
+            file_contents.split("\n"),  # type: ignore[abc]
+            sub_directories=sub_directories or [],
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         # Get all the lines
         commands_str = "\n".join([x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands])

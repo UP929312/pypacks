@@ -39,6 +39,16 @@ class CustomJukeboxSong:
             "comparator_output": self.comparator_output,
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomJukeboxSong":
+        return cls(
+            internal_name,
+            description=data["description"],
+            ogg_path=data["ogg_path"],
+            comparator_output=data["comparator_output"],
+            length_in_seconds=data["length_in_seconds"],
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)

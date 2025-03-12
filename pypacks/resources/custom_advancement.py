@@ -7,6 +7,7 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
+    from pypacks.resources.custom_mcfunction import MCFunction
 
 TriggerType = Literal[
     "minecraft:allay_drop_item_on_block", "minecraft:any_block_use", "minecraft:avoid_vibration", "minecraft:bee_nest_destroyed",
@@ -39,6 +40,14 @@ class Criteria:
             "conditions": self.conditions,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Criteria":
+        return cls(
+            name=data["name"],
+            trigger=data["trigger"],
+            conditions=data["conditions"],
+        )
+
 
 @dataclass
 class CustomAdvancement:
@@ -50,7 +59,7 @@ class CustomAdvancement:
     rewarded_loot: str | None = field(repr=False, default=None)  # The resource location of a loot table.
     rewarded_recipes: str | None = field(repr=False, default=None)  # The resource location of a recipe.
     rewarded_experience: int | None = field(repr=False, default=None)  # To give an amount of experience. Defaults to 0.
-    rewarded_function: str | None = field(default=None)  # To run a function. Function tags are not allowed.
+    rewarded_function: "str | MCFunction | None" = field(default=None)  # To run a function. Function tags are not allowed.
     hidden: bool = False
 
     title: str = "Unknown"
@@ -66,6 +75,7 @@ class CustomAdvancement:
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="advancement")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_mcfunction import MCFunction
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "parent": self.parent,
             "display": {
@@ -85,10 +95,32 @@ class CustomAdvancement:
                 "experience": self.rewarded_experience,
                 "recipes": self.rewarded_recipes,
                 "loot": self.rewarded_loot,
-                "function": self.rewarded_function,
+                "function": self.rewarded_function.get_reference(pack_namespace) if isinstance(self.rewarded_function, MCFunction) else self.rewarded_function,
             },
             "sends_telemetry_event": True if self.send_telemetry_event else None,
         })
+    
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomAdvancement":
+        from pypacks.resources.custom_mcfunction import MCFunction
+        return cls(
+            internal_name,
+            criteria=[Criteria.from_dict(x) for x in data["criteria"]],
+            rewarded_loot=data.get("rewarded_loot"),
+            rewarded_recipes=data.get("rewarded_recipes"),
+            rewarded_experience=data.get("rewarded_experience"),
+            rewarded_function=data.get("rewarded_function"),
+            hidden=data.get("hidden", False),
+            title=data.get("title", "Unknown"),
+            description=data.get("description", "Unknown"),
+            parent=data.get("parent"),
+            icon_item=data.get("icon_item", "minecraft:target"),
+            frame=data.get("frame", "task"),
+            root_background=data.get("root_background", "minecraft:textures/gui/advancements/backgrounds/adventure.png"),
+            show_toast=data.get("show_toast", True),
+            announce_to_chat=data.get("announce_to_chat", False),
+            send_telemetry_event=data.get("send_telemetry_event", False),
+        )
 
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:

@@ -94,6 +94,15 @@ class CustomModelDefinition:
         layers = {layer_type: f"{pack_namespace}:{self.model_type}/{self.internal_name}"}  # TODO: Probably allow a layer *value*
         return {"parent": self.parent, "textures": layers}
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomModelDefinition":
+        return cls(
+            internal_name,
+            parent=data["parent"],
+            model_type="item" if "item" in data["parent"] else "block",
+            subdirectories=[],
+        )
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         path = Path(pack.resource_pack_path, "assets", pack.namespace, "models", *self.subdirectories)
         os.makedirs(path, exist_ok=True)
