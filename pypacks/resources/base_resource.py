@@ -1,5 +1,6 @@
 import os
 import json
+from dataclasses import fields, MISSING
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -54,3 +55,24 @@ class BaseResource:
             cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[abc]
             for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/*.json")  # type: ignore[abc]
         ]
+
+
+def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
+    """This function overrides the dataclasses "__repr__" function to only show non-default attributes, so when we create them, it doesn't
+    show unnecessary information, i.e. ones that are already default."""
+    # Calculate default values, considering both default and default_factory
+    default_values = {
+        field.name: (field.default_factory() if field.default_factory is not MISSING else field.default)
+        for field in fields(self)
+        if field.default is not MISSING or field.default_factory is not MISSING
+    }
+
+    # Exclude fields with `init=False` or `repr=False` and those that match defaults
+    non_default_attrs = {
+        key: value for key, value in self.__dict__.items()
+        if key not in {field.name for field in fields(self) if not field.init or not field.repr}  # TODO: Why do we exclude repr=False again?
+        and (key not in default_values or default_values[key] != value)
+    }
+
+    # Return formatted non-default attributes
+    return f"{self.__class__.__name__}({', '.join(f'{key}={repr(value)}' for key, value in non_default_attrs.items())})"

@@ -3,9 +3,19 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 # In the dev book, or ref book, have a button to teleport to another dimension, or to use /locate on a biome
 # For custom_structure auto generated items in the book, give them a new button to locate and teleport to the structure
 
-CATEGORY BOOK CLICKS AREN'T TAKING TO THE RIGHT PAGE!!!
-
 Would love to have an entire pack.from_dict, or from_folder or something, would be great.
+
+Loadstone trackers is still broken
+
+from_dict is still missing from custom_item and custom_recipe and all item_model definitions (ooh, maybe "pack" too? If we count that.)
+
+https://github.com/Articdive/ArticData/blob/1.20.4/1_20_4_potions.json
+
+right_click/ray_gun doesn't properly detect the function call
+custom_ore_generation/ruby_ore_generation doesn't properly detect the variables
+
+execute store result storage picker:tmp range double 0.5 run attribute @s minecraft:entity_interaction_range get
+function picker:m_search with storage picker:tmp
 
 Write a read-me
 

@@ -1,10 +1,11 @@
 import os
-from dataclasses import dataclass, fields, MISSING
+from dataclasses import dataclass
 from typing import Any
 
 import requests
 
 # from pypacks.resources.custom_item import CustomItem
+from pypacks.resources.base_resource import overridden_repr
 from pypacks.resources.custom_painting import CustomPainting
 from pypacks.additions.item_components import (
     AttributeModifier, Components, Cooldown, Consumable, DeathProtection, EntityData, Equippable,
@@ -16,27 +17,6 @@ from pypacks.resources.custom_painting import ALL_DEFAULT_PAINTINGS
 @dataclass
 class FakePack:
     namespace: str = "minecraft"
-
-
-def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
-    """This function overrides the dataclasses "__repr" function to only show non-default attributes, so when we create them, it doesn't
-    show unnecessary information, i.e. ones that are already default."""
-    # Calculate default values, considering both default and default_factory
-    default_values = {
-        field.name: (field.default_factory() if field.default_factory is not MISSING else field.default)
-        for field in fields(self)
-        if field.default is not MISSING or field.default_factory is not MISSING
-    }
-
-    # Exclude fields with `init=False` or `repr=False` and those that match defaults
-    non_default_attrs = {
-        key: value for key, value in self.__dict__.items()
-        if key not in {field.name for field in fields(self) if not field.init or not field.repr}
-        and (key not in default_values or default_values[key] != value)
-    }
-
-    # Return formatted non-default attributes
-    return f"{self.__class__.__name__}({', '.join(f'{key}={repr(value)}' for key, value in non_default_attrs.items())})"
 
 
 for cls in [AttributeModifier, Cooldown, Components, Consumable, CustomPainting, DeathProtection, EntityData, Equippable,
