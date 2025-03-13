@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pypacks.additions.reference_book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES_TYPES
-from pypacks.resources.custom_font import CustomFont, BitMapFontChar, SpaceFontChar
+from pypacks.resources.custom_font import CustomAutoAssignedFont, BitMapFontChar, SpaceFontChar
 from pypacks.resources.custom_item import CustomItem
 from pypacks.utils import IMAGES_PATH
 from pypacks.image_manipulation.border_generation import add_border
@@ -43,7 +43,7 @@ def generate_resource_pack(pack: "Pack") -> None:
     # ================================================================================================
 
 
-def generate_base_font(pack: "Pack") -> "CustomFont":
+def generate_base_font(pack: "Pack") -> "CustomAutoAssignedFont":
     # TODO: Could this move to the reference book generator?
     # https://www.youtube.com/watch?v=i4l2Ym_0VZg   <- Just cool
     # Create the providers file
@@ -83,7 +83,7 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
             for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]  # type: ignore[comparison-overlap]
         ],
     ]
-    return CustomFont("all_fonts", [x for x in all_elements if x is not None])   # type: ignore[misc]
+    return CustomAutoAssignedFont("all_fonts", [x for x in all_elements if x is not None])   # type: ignore[misc]
 
 
 def generate_datapack(pack: "Pack") -> None:

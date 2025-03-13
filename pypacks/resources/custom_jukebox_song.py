@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.custom_item import CustomItem
 from pypacks.additions.item_components import Components, JukeboxPlayable
 
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomJukeboxSong:
+class CustomJukeboxSong(BaseResource):
     """Create a CustomSound first, then set it's internal_name & audio_path to be the same as the sound's internal_name + ogg_path"""
     internal_name: str
     description: str
@@ -28,9 +29,6 @@ class CustomJukeboxSong:
     #             rint("Guessed song length: ", get_ogg_duration(file.read()))
     #             # self.length_in_seconds = get_ogg_duration(file.read())
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "sound_event": {"sound_id": f"{pack_namespace}:{self.internal_name}"},
@@ -44,7 +42,7 @@ class CustomJukeboxSong:
         return cls(
             internal_name,
             description=data["description"],
-            ogg_path=data["ogg_path"],
+            ogg_path="", # data["ogg_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
             comparator_output=data["comparator_output"],
             length_in_seconds=data["length_in_seconds"],
         )

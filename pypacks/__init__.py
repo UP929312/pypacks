@@ -40,7 +40,7 @@ from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionT
 from pypacks.resources.custom_enchantment import CustomEnchantment
 from pypacks.resources.custom_model import FacePaths, CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.custom_font import CustomFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
+from pypacks.resources.custom_font import CustomAutoAssignedFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -57,7 +57,7 @@ from pypacks.resources.custom_tag import CustomTag
 from pypacks.resources.item_model_definition import (
     ModelItemModel, ConstantTint, DyeTint, GrassTint, FireworkTint, PotionTint, MapColorTint, TeamTint, CustomModelDataTint,
     CompositeItemModel, ConditionalItemModel, SelectItemModel, RangeDispatchItemModel, EmptyItemModel, BundleSelectedItemModel, SpecialItemModel,
-    ItemModelType,
+    ItemModel,
 )
 # =============================================================================
 try:
@@ -87,6 +87,7 @@ __all__ = [
     "CustomDamageType", "DamageTypeTranslation",
     "CustomDimension", "CustomDimensionType", "OverworldDimension", "NetherDimension", "EndDimension",
     "CustomEnchantment",
+    "WorldGenResources",
     "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
     "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
@@ -108,7 +109,7 @@ __all__ = [
     "EmptyItemModel",
     "BundleSelectedItemModel",
     "SpecialItemModel",
-    "ItemModelType",
+    "ItemModel",
 
     # Script Repos
     "DEFAULT_ITEMS",

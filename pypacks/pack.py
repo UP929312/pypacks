@@ -283,15 +283,33 @@ class Pack:
     @classmethod
     def from_existing_pack(cls, path: "str | Path") -> "Pack":
         path = Path(path)
+        from pypacks.resources.entities import ALL_ENTITY_VARIANTS
         from pypacks.resources.custom_advancement import CustomAdvancement
         from pypacks.resources.custom_damage_type import CustomDamageType
         from pypacks.resources.custom_dimension import CustomDimension
+        from pypacks.resources.custom_enchantment import CustomEnchantment
+        # from pypacks.resources.custom_font import CustomAutoAssignedFont
+        # from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
+        from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
+        # from pypacks.resources.custom_model import CustomModelDefinition, CustomTexture
         from pypacks.resources.custom_painting import CustomPainting
+        from pypacks.resources.custom_predicate import Predicate
+        # from pypacks.resources.custom_sound import CustomSound
+        from pypacks.resources.custom_tag import CustomTag
+        entity_variants_2d = [x.from_datapack_files(path) for x in ALL_ENTITY_VARIANTS]
+        # print(CustomTag.from_datapack_files(path))
         return Pack(
             name="", description="", namespace="a",
             custom_advancements=CustomAdvancement.from_datapack_files(path),
             custom_damage_types=CustomDamageType.from_datapack_files(path),
             custom_dimensions=CustomDimension.from_datapack_files(path),
+            custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
+            custom_enchantments=CustomEnchantment.from_datapack_files(path),
+            custom_jukebox_songs=CustomJukeboxSong.from_datapack_files(path),
             custom_mcfunctions=MCFunction.from_datapack_files(path),
+            # custom_model_definitions=CustomModelDefinition.from_datapack_files(path),
+            # custom_textures=CustomTexture.from_datapack_files(path),  # TODO: Implement
             custom_paintings=CustomPainting.from_datapack_files(path),
+            custom_predicates=Predicate.from_datapack_files(path),
+            # custom_tags=CustomTag.from_datapack_files(path),
         )

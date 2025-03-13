@@ -84,7 +84,7 @@ class SingletonEntry:
     def from_dict(cls, data: dict[str, Any]) -> "SingletonEntry":
         internal_name = "INCOMPLETE"
         # if data.get("type") != "minecraft:item":
-        #     print(data)
+        #     rint(data)
         return cls(
             item=data.get("name"),
             functions=[LootTableFunction.from_dict(function) for function in data.get("functions", [])],

@@ -6,14 +6,14 @@ from pypacks.resources.entities.entity_variant import GenericEntityVariant
 
 
 if TYPE_CHECKING:
-    from pypacks.resources.entities.spawn_conditions import SpawnConditionType
+    from pypacks.resources.entities.spawn_conditions import SpawnCondition
 
 
 @dataclass
 class FrogVariant(GenericEntityVariant):
     internal_name: str
     texture_path: str | Path  # A path to the texture for the entity
-    spawn_conditions: dict[int, "SpawnConditionType"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
+    spawn_conditions: dict[int, "SpawnCondition | None"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="frog_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/frog")

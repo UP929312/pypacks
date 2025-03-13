@@ -5,7 +5,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
-from pypacks.resources.item_model_definition import ModelItemModel, ItemModelType
+from pypacks.resources.item_model_definition import ModelItemModel, ItemModel
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -22,7 +22,7 @@ class CustomItemRenderDefinition:
     # TODO: Flesh this out, there's lots more I haven't covered from:
     # https://minecraft.wiki/w/Model
     internal_name: str
-    model: "ItemModelType | str" = "item/iron_sword"  # or <namespace>:<model_name>
+    model: "ItemModel | str" = "item/iron_sword"  # or <namespace>:<model_name>
     hand_animation_on_swap: bool = True  # Whether the down-and-up animation should be played in first-person view when the item stack is changed. (default: true)
     showcase_item: "MinecraftItem | CustomItem | None" = None  # This is if you want it to show up in a debug command (for testing)
 
@@ -36,7 +36,7 @@ class CustomItemRenderDefinition:
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self) -> dict[str, Any]:
-        assert isinstance(self.model, ItemModelType)
+        assert isinstance(self.model, ItemModel)
         return self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {})
 
     def create_resource_pack_files(self, pack: "Pack") -> None:

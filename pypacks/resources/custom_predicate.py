@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.providers.int_provider import IntRange
 from pypacks.providers.number_provider import NumberProvider
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Predicate:
+class Predicate(BaseResource):
     # https://minecraft.wiki/w/Predicate
     internal_name: str
 
@@ -28,9 +29,6 @@ class Predicate:
         cls_ = PREDICATE_NAME_TO_CLASS[data["condition"].removeprefix("minecraft:")]
         return cls_.from_dict(internal_name, data)
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
@@ -39,7 +37,7 @@ class Predicate:
 @dataclass
 class AllOfPredicate(Predicate):
     """Evaluates a list of predicates and passes if all of them pass. Invokable from any context."""
-    terms: list[Predicate]  # The list of predicates to evaluate.
+    terms: list["Predicate"]  # The list of predicates to evaluate.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
@@ -55,7 +53,7 @@ class AllOfPredicate(Predicate):
 @dataclass
 class AnyOfPredicate(Predicate):
     """Evaluates a list of predicates and passes if any one of them passes. Invokable from any context."""
-    terms: list[Predicate]  # The list of predicates to evaluate.
+    terms: list["Predicate"]  # The list of predicates to evaluate.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
@@ -191,16 +189,16 @@ class KilledByPlayerPredicate(Predicate):
 class LocationCheckPredicate(Predicate):
     """Checks the current location against location criteria. Requires origin provided by loot context, and always fails if not provided."""
     predicate: "LocationTag"  # Predicate applied to location, uses same structure as advancements.
-    offsetX: int = 0  # An optional x offset to the location.
-    offsetY: int = 0  # An optional y offset to the location.
-    offsetZ: int = 0  # An optional z offset to the location.
+    offset_x: int = 0  # An optional x offset to the location.
+    offset_Y: int = 0  # An optional y offset to the location.
+    offset_z: int = 0  # An optional z offset to the location.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "condition": "location_check",
-            "offsetX": self.offsetX,
-            "offsetY": self.offsetY,
-            "offsetZ": self.offsetZ,
+            "offsetX": self.offset_x,
+            "offsetY": self.offset_y,
+            "offsetZ": self.offset_y,
             "predicate": self.predicate.to_dict(pack_namespace)
         }
 

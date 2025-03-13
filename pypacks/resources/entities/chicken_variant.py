@@ -6,7 +6,7 @@ from pypacks.resources.entities.entity_variant import GenericEntityVariant
 
 
 if TYPE_CHECKING:
-    from pypacks.resources.entities.spawn_conditions import SpawnConditionType
+    from pypacks.resources.entities.spawn_conditions import SpawnCondition
 
 
 @dataclass
@@ -14,7 +14,7 @@ class ChickenVariant(GenericEntityVariant):
     internal_name: str
     texture_path: str | Path  # A path to the texture for the entity
     model: Literal["normal", "cold"] = "normal"  # Normal or cold model
-    spawn_conditions: dict[int, "SpawnConditionType"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
+    spawn_conditions: dict[int, "SpawnCondition | None"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="chicken_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/chicken")
@@ -29,7 +29,7 @@ class ChickenVariant(GenericEntityVariant):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ChickenVariant":
         return cls(
             internal_name=internal_name,
-            texture_path=data["texture_path"],
+            texture_path="",  # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
             model=data.get("model", "normal"),
-            spawn_conditions={condition["priority"]: condition["condition"] for condition in data["spawn_conditions"]},
+            spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )

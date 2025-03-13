@@ -33,6 +33,8 @@ class CustomAutoAssignedFont:
             for element in self.font_elements
         ]
 
+    # def from_dict(self, data: list[dict[str, Any]]) -> "CustomAutoAssignedFont":
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         for font_element in self.font_elements:
             font_element.create_resource_pack_files(pack)

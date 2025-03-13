@@ -46,9 +46,9 @@ class CustomDimension(BaseResource):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDimension":
         return cls(
             internal_name,
-            data["dimension_type"],  # Can't convert back to CustomBiome, just a reference
-            data["biome"],  # Can't convert back to CustomBiome, just a reference
-            data["noise_settings"],
+            data["type"],  # Can't convert back to CustomBiome, just a reference
+            data["generator"]["biome_source"]["biome"],  # Can't convert back to CustomBiome, just a reference
+            data["generator"]["settings"],
         )
 
     def create_datapack_files(self, pack: "Pack") -> None:

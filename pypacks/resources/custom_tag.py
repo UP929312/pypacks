@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+from pypacks.resources.base_resource import BaseResource
+
 if TYPE_CHECKING:
     from pypacks.resources.custom_item import CustomItem
     from pypacks.pack import Pack
@@ -16,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomTag:
+class CustomTag(BaseResource):
     """A tag containing a list of values
     # WARNING, passing in custom items to this will convert them to their base item, and won't include any components."""
     # Block tags can be called when testing for block arguments in commands with #<resource location>, which succeeds if the block matches any of the blocks specified in the tag.
@@ -32,9 +34,6 @@ class CustomTag:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="tags")
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"#{pack_namespace}:{'/'.join(self.sub_directories)}{self.internal_name}"
-
     def to_dict(self, pack_namespace: str) -> dict[str, bool | list[str]]:
         from pypacks.resources.custom_item import CustomItem
         from pypacks.utils import recursively_remove_nones_from_data
@@ -46,13 +45,11 @@ class CustomTag:
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":
-        from pypacks.resources.custom_item import CustomItem
-        base_block = "minecraft:stone"  # TODO: This, I guess?
+    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":  # TODO: This has another parameter
         return cls(
             internal_name,
-            [CustomItem.from_dict(internal_name, base_block, x) if isinstance(x, dict) else x for x in data["values"]],  # type: ignore[union-attr]
-            tag_type,
+            data["values"],  # type: ignore[union-attr]
+            tag_type,  # TODO Somehow not require this?
             replace=data.get("replace", False),  # type: ignore[arg-type]
         )
 

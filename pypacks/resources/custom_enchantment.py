@@ -62,30 +62,30 @@ class CustomEnchantment(BaseResource):
             "effects": effects_merged if self.effects else None,
         })
 
-    # @classmethod  # TODO: Do this
-    # def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomEnchantment":
-    #     effects = [
-    #         EnchantValueEffect(**data) if list(data.keys())[0] in  ValueEffectComponentIdType
-    #         else EnchantmentEntityEffect(**data)
-    #         for component_id, values in data.items() for value in values for component_id, value in value.items()
-    #         for value in values for component_id, value in value.items()
-    #     ]
-    #     return cls(
-    #         internal_name,
-    #         description=data["description"],
-    #         exclusive_set=data.get("exclusive_set", []),
-    #         supported_items=data.get("supported_items", []),
-    #         primary_items=data.get("primary_items", []),
-    #         weight=data.get("weight", 1024),
-    #         max_level=data.get("max_level", 1),
-    #         min_cost_base=data.get("min_cost_base", 1),
-    #         per_level_increase_min=data.get("per_level_increase_min", 1),
-    #         max_cost_base=data.get("max_cost_base", 1),
-    #         per_level_increase_max=data.get("per_level_increase_max", 1),
-    #         anvil_cost=data.get("anvil_cost", 1),
-    #         slots=data.get("slots", ["any"]),
-    #         effects=effects,
-    #     )
+    @classmethod  
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomEnchantment":
+        effects = []  # TODO: Do this
+        #     EnchantValueEffect(**data) if list(data.keys())[0] in  ValueEffectComponentIdType
+        #     else EnchantmentEntityEffect(**data)
+        #     for component_id, values in data.items() for value in values for component_id, value in value.items()
+        #     for value in values for component_id, value in value.items()
+        # ]
+        return cls(
+            internal_name,
+            description=data["description"],
+            exclusive_set=data.get("exclusive_set", []),
+            supported_items=data.get("supported_items", []),
+            primary_items=data.get("primary_items", []),
+            weight=data.get("weight", 1024),
+            max_level=data.get("max_level", 1),
+            min_cost_base=data.get("min_cost_base", 1),
+            per_level_increase_min=data.get("per_level_increase_min", 1),
+            max_cost_base=data.get("max_cost_base", 1),
+            per_level_increase_max=data.get("per_level_increase_max", 1),
+            anvil_cost=data.get("anvil_cost", 1),
+            slots=data.get("slots", ["any"]),
+            effects=effects,
+        )
 
     def create_datapack_files(self, pack: "Pack") -> None:
         with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:

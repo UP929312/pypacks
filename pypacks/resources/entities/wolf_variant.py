@@ -4,21 +4,22 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.entities.entity_variant import GenericEntityVariant
 
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.resources.entities.spawn_conditions import SpawnConditionType
+    from pypacks.resources.entities.spawn_conditions import SpawnCondition
 
 
 @dataclass
-class WolfVariant:
+class WolfVariant(BaseResource):
     internal_name: str
     angry_texture_path: str | Path  # A path to the texture for the angry wolf
     wild_texture_path: str | Path  # A path to the texture for the angry wolf
     tame_texture_path: str | Path  # A path to the texture for the angry wolf
-    spawn_conditions: dict[int, "SpawnConditionType"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
+    spawn_conditions: dict[int, "SpawnCondition"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="wolf_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/wolf")
@@ -49,7 +50,7 @@ class WolfVariant:
             angry_texture_path=data["assets"]["angry"],
             wild_texture_path=data["assets"]["wild"],
             tame_texture_path=data["assets"]["tame"],
-            spawn_conditions={condition["priority"]: condition["condition"] for condition in data["spawn_conditions"]},
+            spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 
     generate_give_spawn_egg_command = GenericEntityVariant.generate_give_spawn_egg_command

@@ -50,7 +50,7 @@ from pypacks.resources.custom_enchantment import (
 )
 from pypacks.resources.custom_model import FacePaths, CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.custom_font import CustomFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
+from pypacks.resources.custom_font import CustomAutoAssignedFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
 from pypacks.resources.custom_game_test import (
     CustomGameTest, AllOfEnvironment, FunctionEnvironment, GameRulesEnvironment, TimeOfDayEnvironment, WeatherEnvironment, CustomTestEnvironment,
 )
@@ -85,7 +85,7 @@ from pypacks.resources.item_model_definition import (
     EmptyItemModel,
     BundleSelectedItemModel,
     SpecialItemModel,
-    ItemModelType,
+    ItemModel,
 )
 
 __all__ = [
@@ -134,7 +134,7 @@ __all__ = [
     "PlaySoundEntityEffect", "ReplaceBlockEntityEffect", "ReplaceDiskEntityEffect", "RunFunctionEntityEffect", "SetBlockPropertiesEntityEffect", "SpawnParticlesEntityEffect", "SummonEntityEntityEffect",
     "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
-    "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
+    "CustomAutoAssignedFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomGameTest", "AllOfEnvironment", "FunctionEnvironment", "GameRulesEnvironment", "TimeOfDayEnvironment", "WeatherEnvironment", "CustomTestEnvironment",
     "CustomJukeboxSong",
     "CustomLanguage",
@@ -158,5 +158,5 @@ __all__ = [
     "EmptyItemModel",
     "BundleSelectedItemModel",
     "SpecialItemModel",
-    "ItemModelType",
+    "ItemModel",
 ]

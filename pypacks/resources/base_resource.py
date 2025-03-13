@@ -53,7 +53,7 @@ class BaseResource:
         """Path should be the root of the pack"""
         return [
             cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[abc]
-            for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/*.json")  # type: ignore[abc]
+            for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[abc]
         ]
 
 

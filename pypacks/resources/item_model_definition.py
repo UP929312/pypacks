@@ -26,7 +26,7 @@ class ItemModel:
 
 
 @dataclass
-class ModelItemModel:
+class ModelItemModel(ItemModel):
     """Render a plain model from the models directory."""
     item_model_name: "str | MinecraftModels"  # Specifies the path to the model file of the item, in form of a Namespaced ID.
     tints: list["Tint"] = field(default_factory=list)  # Optional. List of tint components to apply to the model.
@@ -252,7 +252,7 @@ TINT_NAME_TO_CLASSES: dict[str, type["Tint"]] = {
 
 
 @dataclass
-class CompositeItemModel:
+class CompositeItemModel(ItemModel):
     """Render multiple sub-models in the same space."""
     # https://minecraft.wiki/w/Items_model_definition#composite
     models: list["str | ItemModel"]  # List of Item model objects to render.
@@ -287,7 +287,7 @@ class CompositeItemModel:
 
 
 @dataclass
-class ConditionalItemModel:
+class ConditionalItemModel(ItemModel):
     # https://minecraft.wiki/w/Items_model_definition#conditional
     property_to_satisfy: "ConditionalBooleanPropertyType"
     true_model: "str | ItemModel"  # The Item model object when the property is true.
@@ -519,7 +519,7 @@ CONDITIONAL_BOOLEAN_PROPERTY_NAME_TO_CLASSES = {
 
 
 @dataclass
-class SelectItemModel:
+class SelectItemModel(ItemModel):
     """Render an item model based on discrete property."""
     # https://minecraft.wiki/w/Items_model_definition#select
     property_to_satisfy: "SelectProperty" = field(default_factory=lambda: MainHandSelectProperty())  # The property to satisfy.
@@ -766,7 +766,7 @@ RangeDispatchPropertyType = Literal[
 
 
 @dataclass
-class RangeDispatchItemModel:
+class RangeDispatchItemModel(ItemModel):
     """Render an item model based on numeric property. Will select last entry with threshold less or equal to property value."""
     # https://minecraft.wiki/w/Items_model_definition#range_dispatch
     # TODO: Type hint all the Range dispatches, as well as the special model types.
@@ -813,7 +813,7 @@ class RangeDispatchItemModel:
 # region: EMPTY
 
 
-class EmptyItemModel:
+class EmptyItemModel(ItemModel):
     """Does not render anything."""
     # https://minecraft.wiki/w/Items_model_definition#empty
     def to_dict(self) -> dict[str, Any]:
@@ -829,7 +829,7 @@ class EmptyItemModel:
 # region: BUNDLE SELECTED ITEM
 
 
-class BundleSelectedItemModel:
+class BundleSelectedItemModel(ItemModel):
     """Render the selected stack in minecraft:bundle_contents component, if present, otherwise does nothing."""
     # https://minecraft.wiki/w/Items_model_definition#bundle/selected_item
     def to_dict(self) -> dict[str, Any]:
@@ -850,7 +850,7 @@ SpecialItemModelType = Literal[
 
 
 @dataclass
-class SpecialItemModel:
+class SpecialItemModel(ItemModel):
     """Render a special model."""
     # https://minecraft.wiki/w/Items_model_definition#special_model_types
     # TODO: Type this too.
