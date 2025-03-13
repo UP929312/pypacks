@@ -24,3 +24,12 @@ class PigVariant(GenericEntityVariant):
         return super().to_dict(pack_namespace) | (
             {"model": self.model} if self.model != "normal" else {}
         )
+
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "PigVariant":
+        return cls(
+            internal_name=internal_name,
+            texture_path=data["texture_path"],
+            model=data.get("model", "normal"),
+            spawn_conditions={condition["priority"]: condition["condition"] for condition in data["spawn_conditions"]},
+        )

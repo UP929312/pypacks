@@ -5,6 +5,8 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 Would love to have an entire pack.from_dict, or from_folder or something, would be great.
 
+pypacks.scripts.repos.models is a looong Literal, probably need to figure that out
+
 Loadstone trackers is still broken
 
 from_dict is still missing from custom_item and custom_recipe and all item_model definitions (ooh, maybe "pack" too? If we count that.)

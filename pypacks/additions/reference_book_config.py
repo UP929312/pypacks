@@ -26,7 +26,7 @@ DEV_ITEMS_REF_BOOK_CATEGORY = RefBookCategory("dev_items", "Dev Items", IMAGES_P
 
 @dataclass
 class RefBookConfig:
-    category: "RefBookCategory" = MISC_REF_BOOK_CATEGORY
+    category: "RefBookCategory" = field(default_factory=lambda: MISC_REF_BOOK_CATEGORY)
     description: str = "No description provided for this item"
     hidden: bool = field(kw_only=True, default=False)
     # wiki_link: str | None = field(kw_only=True, default=None)

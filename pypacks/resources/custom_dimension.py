@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.providers.int_provider import IntProvider, UniformIntProvider
 
 if TYPE_CHECKING:
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomDimension:
+class CustomDimension(BaseResource):
     # https://minecraft.wiki/w/Dimension_definition
     internal_name: str
     dimension_type: "CustomDimensionType | Literal['overworld', 'the_nether', 'the_end', 'overworld_caves']"
@@ -22,9 +23,6 @@ class CustomDimension:
     ] = "minecraft:overworld"  # The noise settings of the dimension.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def generate_teleport_command(self, pack_namespace: str) -> str:
         return f"/execute in {pack_namespace}:{self.internal_name} run tp @s ~ ~ ~"
@@ -46,11 +44,11 @@ class CustomDimension:
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDimension":
-        return cls(  # TODO: Need way more work here
+        return cls(
             internal_name,
-            data["dimension_type"],
-            data["biome"],
-            data["noise_settings"]
+            data["dimension_type"],  # Can't convert back to CustomBiome, just a reference
+            data["biome"],  # Can't convert back to CustomBiome, just a reference
+            data["noise_settings"],
         )
 
     def create_datapack_files(self, pack: "Pack") -> None:
@@ -130,7 +128,7 @@ class CustomDimensionType:
             data["minimum_y"],
             data["coordinate_scale"],
             data["ambient_light"],
-            data["monster_spawn_light_level"],
+            IntProvider.from_dict(data["monster_spawn_light_level"]) if isinstance(data["monster_spawn_light_level"], dict) else data["monster_spawn_light_level"],
             data["monster_spawn_block_light_limit"],
             data["ultrawarm"],
             data["natural"],

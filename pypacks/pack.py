@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from sys import platform
 from typing import TYPE_CHECKING
 
 from pypacks.additions.config import Config
@@ -91,10 +92,11 @@ class Pack:
     custom_chunk_scanners: list["CustomChunkScanner"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        self.minecraft_location = f"C:/Users/{os.environ['USERNAME']}/AppData/Roaming/.minecraft" if platform == "win32" else "~/Library/Application Support/minecraft"
         if self.datapack_output_path == "" and self.world_name:
-            self.datapack_output_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\saves\\{self.world_name}\\datapacks\\{self.name}"
+            self.datapack_output_path = f"{self.minecraft_location}/saves/{self.world_name}/datapacks/{self.name}"
         if self.resource_pack_path == "":
-            self.resource_pack_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\resourcepacks\\{self.name}"
+            self.resource_pack_path = f"{self.minecraft_location}/resourcepacks/{self.name}"
 
         self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[assignment]
         self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[assignment]
@@ -254,9 +256,9 @@ class Pack:
     def generate_pack(self) -> "Pack":
         self.add_internal_functions()
         self.generate_minecraft_pack()
-        print(f"Generating data pack @ {self.datapack_output_path}\\data\\{self.namespace}")
-        print(f"Generating resource pack @ {self.resource_pack_path}\\assets\\{self.namespace}")
-        print(f"C:\\Users\\{os.environ['username']}\\AppData\\Roaming\\.minecraft\\logs\\latest.log")
+        print(f"Generating data pack @ {self.datapack_output_path}/data/{self.namespace}")
+        print(f"Generating resource pack @ {self.resource_pack_path}/assets/{self.namespace}")
+        print(f"{self.minecraft_location}/logs/latest.log")
         # Needs to go in this order (I think?)
         generate_datapack(self)
         generate_resource_pack(self)
@@ -281,13 +283,15 @@ class Pack:
     @classmethod
     def from_existing_pack(cls, path: "str | Path") -> "Pack":
         path = Path(path)
-        from pypacks.resources.custom_painting import CustomPainting
         from pypacks.resources.custom_advancement import CustomAdvancement
         from pypacks.resources.custom_damage_type import CustomDamageType
+        from pypacks.resources.custom_dimension import CustomDimension
+        from pypacks.resources.custom_painting import CustomPainting
         return Pack(
             name="", description="", namespace="a",
             custom_advancements=CustomAdvancement.from_datapack_files(path),
             custom_damage_types=CustomDamageType.from_datapack_files(path),
+            custom_dimensions=CustomDimension.from_datapack_files(path),
             custom_mcfunctions=MCFunction.from_datapack_files(path),
             custom_paintings=CustomPainting.from_datapack_files(path),
         )

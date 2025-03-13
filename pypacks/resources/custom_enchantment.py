@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Any, TYPE_CHECKING, TypeAlias
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomEnchantment:
+class CustomEnchantment(BaseResource):
     # https://minecraft.wiki/w/Enchantment_definition
     internal_name: str
     description: dict[str, Any] | str  # A JSON text component - The description of the enchantment.
@@ -33,9 +34,6 @@ class CustomEnchantment:
     effects: list["EnchantValueEffect | EnchantmentEntityEffect"] = field(repr=False, default_factory=list)  # Effect components - Controls the effect of the enchantment.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="enchantment")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def __post_init__(self) -> None:
         assert 0 < self.weight <= 1024, "Weight must be between 1 and 1024"
@@ -64,7 +62,7 @@ class CustomEnchantment:
             "effects": effects_merged if self.effects else None,
         })
 
-    # @classmethod
+    # @classmethod  # TODO: Do this
     # def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomEnchantment":
     #     effects = [
     #         EnchantValueEffect(**data) if list(data.keys())[0] in  ValueEffectComponentIdType

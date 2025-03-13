@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomFont:
+class CustomAutoAssignedFont:
     """Adds a custom font to the resource pack. Not invokable manually, used internally (for now)"""
     name: str
     font_elements: list["BitMapFontChar | SpaceFontChar | TTFFontProvider | ReferenceFontProvider"]
@@ -29,7 +29,7 @@ class CustomFont:
     def to_dict(self, pack_namespace: str) -> list[dict[str, Any]]:
         mapping = self.get_mapping()
         return [
-            element.to_dict(pack_namespace, mapping[element.name])
+            element.to_dict(pack_namespace, [mapping[element.name]])
             for element in self.font_elements
         ]
 
@@ -90,7 +90,7 @@ class TTFFontProvider:
 
 
 @dataclass
-class BitMapFontChar:  # TODO: This auto-assigns characters, allow the user to add regular characters themselves
+class BitMapFontChar:
     """Represents an image in a book."""
     name: str  # e.g. "logo"
     image_bytes: bytes
@@ -101,13 +101,13 @@ class BitMapFontChar:  # TODO: This auto-assigns characters, allow the user to a
         assert self.height is None or 0 < self.height <= 256, "Height must be between 1 and 256"
         assert 0 < get_png_height(image_bytes=self.image_bytes, enforce_square=False) <= 256, f"Image height must be between 1 and 256, was {get_png_height(image_bytes=self.image_bytes)}"
 
-    def to_dict(self, pack_namespace: str, char: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str, chars: list[str]) -> dict[str, Any]:
         return {
             "type": "bitmap",
             "file": f"{pack_namespace}:font/{self.name}.png",
             "height": self.height if self.height is not None else get_png_height(image_bytes=self.image_bytes),
             "ascent": self.y_offset if self.y_offset is not None else min(get_png_height(image_bytes=self.image_bytes) // 2, 16),
-            "chars": [char],
+            "chars": chars,
         }
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
@@ -123,11 +123,12 @@ class SpaceFontChar:
     name: str
     width: int = 1  # Defines how wide the space character is
 
-    def to_dict(self, pack_namespace: str, char: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str, chars: list[str]) -> dict[str, Any]:
         return {
             "type": "space",
             "advances": {
-                char: self.width,
+                char: self.width
+                for char in chars
             }
         }
 
@@ -138,12 +139,12 @@ class SpaceFontChar:
 @dataclass
 class ReferenceFontProvider:
     name: str
-    font: "str | CustomFont"
+    font: "str | CustomAutoAssignedFont"
 
     def to_dict(self, pack_namespace: str, _: str) -> dict[str, Any]:
         return {
             "type": "reference",
-            "file": f"{pack_namespace}:font/{self.font}.json" if not isinstance(self.font, CustomFont) else self.font.get_reference(pack_namespace),
+            "file": f"{pack_namespace}:font/{self.font}.json" if not isinstance(self.font, CustomAutoAssignedFont) else self.font.get_reference(pack_namespace),
         }
 
     def create_resource_pack_files(self, pack: "Pack") -> None:

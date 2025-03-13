@@ -36,7 +36,7 @@ class CustomItem:
     on_right_click: "str | MCFunction | Raycast | None" = None  # Command/Function/Raycast to call when the item is right clicked
     on_item_drop: "str | MCFunction | None" = None  # Command/Function to call when the item is dropped
     components: "Components" = field(repr=False, default_factory=lambda: Components())
-    ref_book_config: "RefBookConfig" = field(repr=False, default=MISC_REF_BOOK_CONFIG)
+    ref_book_config: "RefBookConfig" = field(repr=False, default_factory=lambda: MISC_REF_BOOK_CONFIG)
 
     is_block: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: None = field(init=False, repr=False, hash=False, default=None)

@@ -1,3 +1,4 @@
+# from pypacks.resources.entities.entity_variant import GenericEntityVariant
 from pypacks.resources.entities.cat_variant import CatVariant
 from pypacks.resources.entities.chicken_variant import ChickenVariant
 from pypacks.resources.entities.cow_variant import CowVariant

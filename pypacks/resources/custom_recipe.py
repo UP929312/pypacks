@@ -73,7 +73,7 @@ class ShapedCraftingRecipe(GenericRecipe):
         row_1 = self.rows[0]  # Now row is a 3 length string
         row_2 = self.rows[1] if len(self.rows) >= 2 else None
         row_3 = self.rows[2] if len(self.rows) == 3 else None
-        self.removed_nones_rows = [x for x in [row_1, row_2, row_3] if x is not None]
+        self.removed_nones_rows: list[str] = [x for x in [row_1, row_2, row_3] if x is not None]
         self.enumeratable_list = [
             *[self.keys.get(x, "minecraft:air") for x in row_1],
             *[self.keys.get(x, "minecraft:air") for x in (list(row_2) if row_2 is not None else ["", "", ""])],
@@ -95,6 +95,23 @@ class ShapedCraftingRecipe(GenericRecipe):
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload, assignment]
         return data
+
+    # @classmethod  # TODO: Test
+    # def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapedCraftingRecipe":
+    #     from pypacks.resources.custom_item import CustomItem
+    #     rows = [data["pattern"][0]]
+    #     if len(data["pattern"]) > 1:
+    #         rows.append(data["pattern"][1])
+    #     if len(data["pattern"]) > 2:
+    #         rows.append(data["pattern"][2])
+    #     return cls(
+    #         internal_name,
+    #         rows=rows,
+    #         keys=data["keys"],
+    #         result=data["result"]["id"] if not data["result"].get("components") else CustomItem.from_dict(data["result"]),  # TODO: This won't work, we need to combine the id and components I suppose.
+    #         amount=data["result"]["count"],
+    #         recipe_category=data.get("recipe_category", "misc"),
+    #     )
 
 
 @dataclass
@@ -139,7 +156,7 @@ class CraftingTransmuteRecipe(GenericRecipe):
 
     def to_dict(self, pack_namespace: str) -> dict[str, str | list[str]]:
         return {
-            "type": "minecraft:crafting_shapeless",
+            "type": "minecraft:crafting_transmute",
             "category": self.recipe_category,
             "input": self.input_item.get_reference(pack_namespace) if isinstance(self.input_item, CustomTag) else self.input_item,
             "material": self.material_item.get_reference(pack_namespace) if isinstance(self.material_item, CustomTag) else self.material_item,
@@ -321,6 +338,19 @@ class StonecutterRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload]
         return data
 
+
+RECIPE_TYPE_TO_CLASSES = {
+    "minecraft:crafting_shaped": ShapedCraftingRecipe,
+    "minecraft:crafting_shapeless": ShapelessCraftingRecipe,
+    "minecraft:crafting_transmute": CraftingTransmuteRecipe,
+    "minecraft:blasting": BlastFurnaceRecipe,
+    "minecraft:campfire_cooking": CampfireRecipe,
+    "minecraft:smelting": FurnaceRecipe,
+    "minecraft:smithing_transform": SmithingTransformRecipe,
+    "minecraft:smithing_trim": SmithingTrimRecipe,
+    "minecraft:smoking": SmokerRecipe,
+    "minecraft:stonecutting": StonecutterRecipe,
+}
 
 # This is a type hint for a recipe, it can be any of the recipe types
 Recipe: TypeAlias = (

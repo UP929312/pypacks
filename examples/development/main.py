@@ -354,5 +354,5 @@ datapack = Pack(
     config=Config(warn_about_tags_with_custom_items=False),
 ).generate_pack()
 
-a = Pack.from_existing_pack(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing")
+# a = Pack.from_existing_pack(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing")
 # print(a)

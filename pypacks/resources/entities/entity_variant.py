@@ -33,6 +33,14 @@ class GenericEntityVariant:
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GenericEntityVariant":
+        return cls(
+            internal_name=internal_name,
+            texture_path=data["texture_path"],
+            spawn_conditions={condition["priority"]: condition["condition"] for condition in data["spawn_conditions"]},
+        )
+
     def generate_give_spawn_egg_command(self, pack_namespace: str) -> str:
         return f"/give @s {self.entity_type}_spawn_egg[{self.entity_type}/variant=\"{self.get_reference(pack_namespace)}:\"]"
 

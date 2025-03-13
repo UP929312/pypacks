@@ -41,7 +41,7 @@ class BaseResource:
     def get_all_resource_paths(cls_: type["BaseResource"], root_path: "Path", file_type: str) -> list[tuple["Path", "Path"]]:
         """Returns a tuple of absolute path, relative path for all resources of type, used by MCFunction"""
         item_paths = []
-        functions_directory = str(root_path/"data"/"pypacks_testing"/cls_.datapack_subdirectory_name)+"\\"
+        functions_directory = str(root_path/"data"/"pypacks_testing"/cls_.datapack_subdirectory_name)+"/"
         for root, _, files in os.walk(functions_directory):
             for file_name in files:
                 if file_name.endswith(file_type):

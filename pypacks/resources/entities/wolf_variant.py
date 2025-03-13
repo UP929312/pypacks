@@ -42,6 +42,16 @@ class WolfVariant:
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WolfVariant":
+        return cls(
+            internal_name=internal_name,
+            angry_texture_path=data["assets"]["angry"],
+            wild_texture_path=data["assets"]["wild"],
+            tame_texture_path=data["assets"]["tame"],
+            spawn_conditions={condition["priority"]: condition["condition"] for condition in data["spawn_conditions"]},
+        )
+
     generate_give_spawn_egg_command = GenericEntityVariant.generate_give_spawn_egg_command
     generate_summon_command = GenericEntityVariant.generate_summon_command
     create_datapack_files = GenericEntityVariant.create_datapack_files

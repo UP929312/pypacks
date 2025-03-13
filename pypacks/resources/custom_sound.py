@@ -31,8 +31,9 @@ class CustomSound:
         return f"playsound {self.get_reference(pack_namespace)} master @a[distance=..10] ~ ~ ~ {self.volume} {self.pitch}"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
-        shutil.copyfile(self.ogg_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.ogg")
+        path = Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name
+        os.makedirs(path, exist_ok=True)
+        shutil.copyfile(self.ogg_path, path/f"{self.internal_name}.ogg")
 
     def create_sound_entry(self, pack_namespace: str) -> dict[str, list[dict[str, Any]] | str]:
         return {

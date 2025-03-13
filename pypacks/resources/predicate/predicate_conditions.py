@@ -313,7 +313,7 @@ class BlockPredicate:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "BlockPredicate":
         return cls(
-            blocks=data["blocks"],
+            blocks=data["blocks"],  # Can't convert to Tag, don't have the values, just the tag nme
             nbt=data.get("nbt"),
             state=data.get("state"),
         )
