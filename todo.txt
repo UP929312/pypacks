@@ -1,0 +1,244 @@
+mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 && ruff check && pylint .
+
+# In the dev book, or ref book, have a button to teleport to another dimension, or to use /locate on a biome
+# For custom_structure auto generated items in the book, give them a new button to locate and teleport to the structure
+
+Would love to have an entire pack.from_dict, or from_folder or something, would be great.
+
+pypacks.scripts.repos.models is a looong Literal, probably need to figure that out
+
+Loadstone trackers is still broken
+
+from_dict is still missing from custom_item and custom_recipe and custom_font (ooh, maybe "pack" too? If we count that.)
+
+https://github.com/Articdive/ArticData/blob/1.20.4/1_20_4_potions.json
+
+right_click/ray_gun doesn't properly detect the function call
+custom_ore_generation/ruby_ore_generation doesn't properly detect the variables
+
+execute store result storage picker:tmp range double 0.5 run attribute @s minecraft:entity_interaction_range get
+function picker:m_search with storage picker:tmp
+
+Write a read-me
+
+# More work on CompositeEntry: https://minecraft.wiki/w/Loot_table#Singleton_entry, and subclass that out fully
+
+What if each resource could have a function "add required children resources" which took pack, and could do like
+pack.mcfunctions.append(), then filtered based on type? I'm not sure if we can filter based on annotation or something?
+
+Entity varieties, when creating spawn eggs or spawning mobs
+I suppose we'd need to eventually add all the EntityData, geez
+
+For item pages in the reference book, have "used in"...
+
+# Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
+# Would also like to do "calls function <x>" and "is called by <function y>"  # Detect it being called by a function tag
+# We have calls, getting called by is much harder, have to go through the rest of them, ahh!
+
+# INFO: Paintings require a world reset (registry, add all registry updates as a warning!)
+
+Give all function needs reworking, massively
+Put them in chests, or maybe bundles instead?
+
+Cleanup of temp variables, potentially?
+
+Custom fonts needs non-auto choosing chars
+
+"Default language", for if you want to use Translate() everywhere, and have it fill in the default language file.
+Maybe resource.from_file? Or maybe from_dict?
+
+
+Type Predicates ):
+# Predicate typing - Add player specific ones, and a new datapack to test them *all*
+
+{
+  "condition": "minecraft:entity_properties",
+  "entity": "this",
+  "predicate": {
+    "type_specific": {
+      "type": "minecraft:player",
+      "input": {
+        "forward": true,
+        "backward": true,
+        "left": true,
+        "right": true,
+        "jump": true,
+        "sneak": true,
+        "sprint": true
+      }
+    }
+  }
+}
+
+World gen stuff is why I'm getting the error...
+
+# pypacks_testing:clear_console
+
+# https://minecraft.wiki/w/Entity_format#Navigation
+
+Sometimes event-type advancements get "stuck" and need to be revoked. Perhaps we can look into revoking all of them somehow?
+
+# Onjoin event would be cool, and on-leave for players (single player wouldn't work though, annoyingly)
+
+# Naturally occuring ore veins need some more randomness, they have a random size, need a random "rotation"
+https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
+
+# Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
+
+# Consider "events", which are ephemeral advancements, i.e. they get reset, maybe even with additional data, e.g. where? What block they right clicked on.
+
+Custom furnace recipes could be slightly tricky, I guess, we'd need a item display at every furnace which checks and overrides or something?
+
+Consider changing components to be a list of components, rather than a big ol' class.
+
+# Maybe for custom items, we have an "events" object? Currently have on right click, should probably do on left click, on drop, on craft?
+
+# Entity detection: from vdvman 1:
+execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!ray,dx=0,sort=nearest] if score #hit temp matches 0 positioned ~-0.85 ~-0.85 ~-0.85 if entity @s[dx=0] run function hit_entity
+
+# Add the workstation name on custom recipes
+# Allow custom icons to have subdirs, so the textures/font isn't filled with element - Difficult as they all get populated at once
+
+# For structures, sub directory support
+
+# Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
+# execute if entity @s[gamemode=!creative]
+
+# Look into disabling projectiles like eggs/snowballs with on_right_click - Don't think it's possible.
+
+Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
+
+# What if we somehow did cooldown effect by merging item models? Some people use composite for custom durability, replicate that for cooldown?
+
+# Upload the output directly to modrinth?
+https://github.com/Gamemode4Dev/GM4_Datapacks/blob/master/gm4/plugins/output.py#L119
+
+# https://www.reddit.com/r/MinecraftCommands/comments/1i9593y/better_interface/
+
+https://misode.github.io/predicate/?share=nd8QEiV96I
+
+Custom Dimensions! (more work)
+https://www.planetminecraft.com/blog/custom-world-generation-documentation/
+https://www.planetminecraft.com/blog/custom-structure-gen-documentation/
+
+C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\25w03a\25w03a\data\minecraft\worldgen\noise_settings
+
+Continue work on custom enchantments
+
+Translations should hold a fallback, including custom damage types
+
+Following smithed convention?  https://docs.smithed.dev/conventions/namespacing/
+# https://github.com/Stoupy51/python_datapack/blob/main/src/python_datapack/datapack/recipes.py#L78
+
+https://www.reddit.com/r/MinecraftCommands/comments/1i1plzs/recipe_click_detection/
+
+Use the new tests mojang implemented into datapacks!
+
+# Custom enchant idea: Reverse thorns? When you hit, you take damage
+
+Translations (grrr)
+ADDED, but want to be able to add it to custom items I guess? And also Translate("pypacks.item.ruby") Need to allow item name for custom items to be JSON...
+
+For any_of enchantment, maybe just take a list as an alternative, and if it's passed in, re-construct the object to use the AnyOfValueEffect?
+
+A lot of examples, maybe one per item? In a new examples folder.
+
+# Change datapack init to take custom_content: list[a, b, c]
+# Make datapack just take "custom content" and filter using isinstance?
+
+# Analytics, python version, what custom content they added, etc - would be super useful with knowing where to focus development.
+
+# Easy to use commands to give the items outright: /loot give @s loot umultitool:<material>_<tool> (example: /loot give @s loot umultitool:netherite_paxeloe)
+# Probably won't do because the give command, but what if we had a loot table setup for all blocks,
+# Then we can use that for block drops or for the give command (could just call it?) Or custom blocks?
+
+# For recipe images, also add the ingredients underneath, like "sticks: x1, diamonds: x2" As well as the block, e.g. Stonecutter.
+
+REFERENCE BOOK OPTIMISER, go through each page, and each element, and if its setting the same info, e.g. underline=True, underline=True,
+> REMOVE IT
+
+# Move all the internal functions and textures into an "internal" subdir, e.g. functions/internal, textures/internal, etc
+
+Loot table progress
+
+Tag all items in the world, if they aren't tagged, they're new
+
+# Merge on_load with an inputted one... JUST CHANGE THE LOAD.JSON'S VALUES TO HAVE BOTH, YOU CAN HAVE TWO!
+
+# Hud overlay would be cool! Something about the pack?
+
+# Descriptors for integers & type validation? Probably just use Pydantic... Maybe just asserts?
+
+# Advancements (One for loading the datapack for the first time)
+For an "install" stuff, just give them an achievement and don't revoke!
+
+# Make some part of the logo clickable would be fun. Maybe a link to the project?
+
+# Signs with data, maybe even Command()?
+
+# JUKEBOX SONGS - Auto Length is messed up... Hmmmm
+
+# Somehow detect if you're trying to enchant an item with something that doesn't make sense, e.g. a sword with infinity, etc.
+
+# ▙ is fun for stairs, ▄▄ for slab
+# ► ▶  ➙ ➛ 	➜ ➝ ➞ ➟ ➠ ➡ ➢ ➣ ➤ ➥ ➦ ➨ ➩ ➪ ➫ ➬ ➭ ➮ ➯ ➱ ➲ ➳ ➴ ➵ ➶ ➷ ➸ ➹ ➺ ➻ ➼ ➽ ➾ 
+
+# For the ref book, have a 2nd row of invisible icons so the buttons and hover work well
+
+python -m pip install -e .
+
+# Make the default texture path point to some default texture we provide? For the datapack? Rather than the default mc one (maybe Pypacks logo?)
+
+# For things that are edible, add some lore? Same with equipable? "Can be used as a Glider", etc?
+
+# § -> &a - Kinda
+
+# ========================================
+# Custom blocks:
+
+List:
+- Custom blocks - Slab experiments (80% done)
+- Custom blocks, no drops in creative
+- Custom blocks, silk touch
+
+# Problems with slabs
+- Z fighting
+- Placing upper/double slabs is a problem...
+
+For slabs and stairs and such, maybe just have "children" of the block, then we can store it in the block, the ref book can reference that
+and also it can be created more easily, then the add_slab code will be adding it to the children
+
+Placing slabs through other slabs causes issues, hopefully it's rare though? Since the raycast doesn't check if it's already
+In a custom slab.
+They should appear in the reference book under the item page though...
+
+When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
+
+# For custom blocks, only drop their drop if they're not in creative (maybe cheat and just find the closest player?)
+# Silk touch for custom blocks
+
+# In the future, for custom inventories/block entities, do
+setblock ~ ~ ~ minecraft:chest{"CustomName": "text": "inv name"}
+# execute align xyz positioned ~.5 ~-1 ~.5 run summon minecraft:interaction ~ ~ ~ {width: 1.002f, height: 1.002f, response: 1}
+
+Custom block stairs, slabs? What if we have a function which creates them all from a base block? CustomBlock.add_variant(stairs=True, slabs=True, fence=True, etc)
+
+interaction entity for detecting right click on blocks! If we ever add custom invs | Problem is they can't break the block anymore...
+
+# ========================================
+# Custom crafting:
+
+# With crafting recipes, be able to put CustomItems in, currently just supports strings.
+This works for outputs, but I'm not sure about inputs... NOT POSSIBLE... Custom crafter???
+# Floor crafting? https://new.reddit.com/r/MinecraftCommands/comments/1clflkh/wiki_update_do_custom_crafting_with_nbt/
+# Custom crafter and floor crafting would be nice to do...
+# ========================================
+
+# https://www.reddit.com/r/mcresourcepack/comments/wpcg0a/hi_i_want_to_learn_what_does_the_ascent_and_chars/
+
+Automatic animal breeding
+
+A tag for all non-right-clickable items, like bow, where we can't add right-click functionality
+
+# Like the survival tweaks, would be nice if we could tweak the original items.
+The python code for that datapack would be so clean... We'd need to recreate every vanilla item/tool first, maybe do it anyway?
