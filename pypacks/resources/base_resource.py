@@ -19,7 +19,7 @@ class BaseResource:
 
     def get_reference(self, pack_namespace: str) -> str:
         if hasattr(self, "sub_directories"):
-            return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"  # type: ignore[abc]
+            return f"{pack_namespace}:{'/'.join(self.sub_directories)}{'/' if self.sub_directories else ''}{self.internal_name}"  # pyright: ignore
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -32,10 +32,10 @@ class BaseResource:
     def create_datapack_files(self, pack: "Pack") -> None:
         path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name)
         if hasattr(self, "sub_directories"):
-            path = Path(path, *self.sub_directories)  # type: ignore[abc]
+            path = Path(path, *self.sub_directories)  # pyright: ignore
         path = Path(path, self.internal_name+".json")
         with open(path, "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)  # type: ignore[arg-type]
+            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @staticmethod
     def get_all_resource_paths(cls_: type["BaseResource"], root_path: "Path", file_type: str) -> list[tuple["Path", "Path"]]:
@@ -52,8 +52,8 @@ class BaseResource:
     def from_datapack_files(cls: type[T], root_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
         return [
-            cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[abc]
-            for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[abc]
+            cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[attr-defined]
+            for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
         ]
 
 

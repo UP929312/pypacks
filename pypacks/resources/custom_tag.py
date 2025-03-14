@@ -45,10 +45,10 @@ class CustomTag(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":  # TODO: This has another parameter
+    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":  # type: ignore[override]  # TODO: This has another parameter
         return cls(
             internal_name,
-            data["values"],  # type: ignore[union-attr]
+            data["values"],  # type: ignore[arg-type]
             tag_type,  # TODO Somehow not require this?
             replace=data.get("replace", False),  # type: ignore[arg-type]
         )

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.entities.entity_variant import GenericEntityVariant
 
@@ -19,7 +20,7 @@ class WolfVariant(BaseResource):
     angry_texture_path: str | Path  # A path to the texture for the angry wolf
     wild_texture_path: str | Path  # A path to the texture for the angry wolf
     tame_texture_path: str | Path  # A path to the texture for the angry wolf
-    spawn_conditions: dict[int, "SpawnCondition"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
+    spawn_conditions: dict[int, "SpawnCondition | None"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="wolf_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/wolf")
@@ -31,7 +32,7 @@ class WolfVariant(BaseResource):
         )
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return {
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "assets": {
                 "angry":  f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}_angry",
                 "wild": f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}_wild",
@@ -39,9 +40,9 @@ class WolfVariant(BaseResource):
             },
             "spawn_conditions": [{
                 "priority": key,
-                "condition": value.to_dict(pack_namespace),
+                "condition": value.to_dict(pack_namespace) if value is not None else None,
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
-        }
+        })
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WolfVariant":

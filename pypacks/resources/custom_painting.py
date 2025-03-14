@@ -49,7 +49,7 @@ class CustomPainting(BaseResource):
             width_in_blocks=data.get("width_in_blocks", 1),
             height_in_blocks=data.get("height_in_blocks", 1),
         )
-    
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
         shutil.copyfile(self.image_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")

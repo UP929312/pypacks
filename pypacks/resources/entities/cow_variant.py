@@ -29,7 +29,7 @@ class CowVariant(GenericEntityVariant):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CowVariant":
         return cls(
             internal_name=internal_name,
-            texture_path="", # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
+            texture_path="",  # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
             model=data.get("model", "normal"),
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )

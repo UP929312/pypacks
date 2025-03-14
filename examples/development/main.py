@@ -1,9 +1,8 @@
 from pypacks import Pack
 from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403
-from pypacks.additions import (
-    RefBookCategory, RefBookConfig, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, BlockRaycast, EntityRaycast, CustomBlock, CustomCrafter, Config, CustomOreGeneration
-)
+from pypacks.additions import *  # noqa: F403
+
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -354,5 +353,4 @@ datapack = Pack(
     config=Config(warn_about_tags_with_custom_items=False),
 ).generate_pack()
 
-a = Pack.from_existing_pack("/Users/ben.skerritt/Documents/repos/Other/pypacks/examples/development/~/Library/Application Support/minecraft/saves/PyPacksWorld/datapacks/PyPacks Testing")
 # a = Pack.from_existing_pack(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing")

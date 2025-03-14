@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.base_resource import BaseResource
 
 if TYPE_CHECKING:
@@ -26,20 +27,20 @@ class GenericEntityVariant(BaseResource):
         return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return {
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "asset_id": f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}",
             "spawn_conditions": [{
                 "priority": key,
-                "condition": value.to_dict(pack_namespace) if value else None,
+                "condition": value.to_dict(pack_namespace) if value is not None else None,
             } for key, value in self.spawn_conditions.items()] if self.spawn_conditions else [{"priority": 0}],
-        }
+        })
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GenericEntityVariant":
         # {'asset_id': 'pypacks_testing:entity/cat/sand_cat', 'spawn_conditions': [{'priority': 0}] }
         return cls(
             internal_name=internal_name,
-            texture_path="", # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
+            texture_path="",  # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 

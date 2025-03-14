@@ -28,7 +28,7 @@ from pypacks.providers.number_provider import (  # noqa: F401, F403
 # =============================================================================
 # Resources
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
-from pypacks.resources.world_gen import (
+from pypacks.resources.world_gen import (  # type: ignore[attr-defined]
     CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound,
     WorldGenResources,
 )
@@ -90,7 +90,7 @@ __all__ = [
     "WorldGenResources",
     "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
-    "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
+    "CustomAutoAssignedFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomLanguage",
     "CustomJukeboxSong",
     "MCFunction",

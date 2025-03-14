@@ -12,6 +12,7 @@ def check_color(color: tuple[float, float, float]) -> None:
 
 # TODO: Type Range dispatch, and special model types.
 
+
 class ItemModel:
     def to_dict(self) -> dict[str, Any]:
         raise NotImplementedError
@@ -59,6 +60,7 @@ class Tint:
     def from_dict(cls, data: dict[str, Any]) -> "Tint":
         cls_ = TINT_NAME_TO_CLASSES[data["type"]]
         return cls_.from_dict(data)
+
 
 @dataclass
 class ConstantTint(Tint):
@@ -122,6 +124,7 @@ class GrassTint(Tint):
             data["temperature"],
             data["downfall"],
         )
+
 
 @dataclass
 class FireworkTint(Tint):
@@ -227,7 +230,7 @@ class CustomModelDataTint(Tint):
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TeamTint":
+    def from_dict(cls, data: dict[str, Any]) -> "CustomModelDataTint":
         return cls(
             data.get("index", 0),
             data["default"],
@@ -310,8 +313,8 @@ class ConditionalItemModel(ItemModel):
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "CompositeItemModel":
-        property_to_satisfy: ConditionalBooleanPropertyType = CONDITIONAL_BOOLEAN_PROPERTY_NAME_TO_CLASSES[data["property"]]
+    def from_dict(cls, data: dict[str, Any]) -> "ConditionalItemModel":
+        property_to_satisfy = CONDITIONAL_BOOLEAN_PROPERTY_NAME_TO_CLASSES[data["property"]]
         return cls(
             property_to_satisfy=property_to_satisfy.from_dict(data),
             true_model=ItemModel.from_dict(data["on_true"]),
@@ -320,11 +323,11 @@ class ConditionalItemModel(ItemModel):
 
 
 class ConditionalBooleanPropertyType:
-    def to_dict() -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
-    def from_dict(data: dict[str, Any]) -> "ConditionalBooleanPropertyType":
+    def from_dict(cls, data: dict[str, Any]) -> "ConditionalBooleanPropertyType":
         cls_ = CONDITIONAL_BOOLEAN_PROPERTY_NAME_TO_CLASSES[data["property"]]
         return cls_.from_dict(data)
 
@@ -468,7 +471,6 @@ class KeyDownConditional(ConditionalBooleanPropertyType):
         )
 
 
-
 class ViewEntityConditional(ConditionalBooleanPropertyType):
     """When not spectating, return true if context entity is the local player entity, i.e. the one controlled by client.
     When spectating, return true if context entity is the spectated entity.
@@ -497,7 +499,7 @@ class CustomModelDataConditional(ConditionalBooleanPropertyType):
         )
 
 
-CONDITIONAL_BOOLEAN_PROPERTY_NAME_TO_CLASSES = {
+CONDITIONAL_BOOLEAN_PROPERTY_NAME_TO_CLASSES: dict[str, type[ConditionalBooleanPropertyType]] = {
     "minecraft:using_item": UsingItemConditional,
     "minecraft:broken": BrokenConditional,
     "minecraft:damaged": DamagedConditional,
@@ -553,6 +555,7 @@ class SelectProperty:
     def from_dict(cls, data: dict[str, Any]) -> "SelectProperty":
         cls_ = SELECT_PROPERTY_NAME_TO_CLASSES[data["property"]]
         return cls_.from_dict(data)
+
 
 @dataclass
 class SelectCase:
@@ -743,7 +746,7 @@ class ComponentSelectProperty(SelectProperty):
         )
 
 
-SELECT_PROPERTY_NAME_TO_CLASSES = {
+SELECT_PROPERTY_NAME_TO_CLASSES: dict[str, type[SelectProperty]] = {
     "minecraft:main_hand": MainHandSelectProperty,
     "minecraft:charge_type": ChargeTypeSelectProperty,
     "minecraft:trim_material": TrimMaterialSelectProperty,
@@ -834,7 +837,7 @@ class BundleSelectedItemModel(ItemModel):
     # https://minecraft.wiki/w/Items_model_definition#bundle/selected_item
     def to_dict(self) -> dict[str, Any]:
         return {"model": {"type": "minecraft:bundle/selected_item"}}
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "BundleSelectedItemModel":
         return cls()

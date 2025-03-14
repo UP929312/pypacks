@@ -1,8 +1,11 @@
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-from pypacks.resources.world_gen.biome import CustomBiome
-from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
-from pypacks.resources.world_gen.structure_set import CustomStructureSet
+if TYPE_CHECKING:
+    from pypacks.resources.world_gen.biome import CustomBiome
+    from pypacks.resources.world_gen.structure import CustomStructure, SingleCustomStructure
+    from pypacks.resources.world_gen.structure_set import CustomStructureSet
+
 
 @dataclass
 class WorldGenResources:

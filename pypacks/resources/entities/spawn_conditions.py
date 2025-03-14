@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeAlias, Any
+from typing import TYPE_CHECKING, Any
 
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ class SpawnCondition:
 
 
 @dataclass
-class BiomeSpawnCondition:
+class BiomeSpawnCondition(SpawnCondition):
     biomes: list["str | CustomBiome"]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -36,7 +36,7 @@ class BiomeSpawnCondition:
 
 
 @dataclass
-class StructureSpawnCondition:
+class StructureSpawnCondition(SpawnCondition):
     structures: list["str | CustomStructure"]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -54,7 +54,7 @@ class StructureSpawnCondition:
 
 
 @dataclass
-class MoonBrightnessSpawnCondition:
+class MoonBrightnessSpawnCondition(SpawnCondition):
     min_brightness: float
     max_brightness: float
 
@@ -75,7 +75,7 @@ class MoonBrightnessSpawnCondition:
         )
 
 
-SPAWN_CONDITION_TO_CLASSES = {
+SPAWN_CONDITION_TO_CLASSES: dict[str, type[SpawnCondition]] = {
     "biome": BiomeSpawnCondition,
     "structure": StructureSpawnCondition,
     "moon_brightness": MoonBrightnessSpawnCondition,

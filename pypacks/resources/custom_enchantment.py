@@ -62,9 +62,9 @@ class CustomEnchantment(BaseResource):
             "effects": effects_merged if self.effects else None,
         })
 
-    @classmethod  
+    @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomEnchantment":
-        effects = []  # TODO: Do this
+        effects: list["EnchantValueEffect | EnchantmentEntityEffect"] = []  # TODO: Do this
         #     EnchantValueEffect(**data) if list(data.keys())[0] in  ValueEffectComponentIdType
         #     else EnchantmentEntityEffect(**data)
         #     for component_id, values in data.items() for value in values for component_id, value in value.items()

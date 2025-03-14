@@ -7,6 +7,6 @@ from pypacks.resources.entities.pig_variant import PigVariant
 from pypacks.resources.entities.wolf_variant import WolfVariant
 
 EntityVariant = CatVariant | ChickenVariant | CowVariant | FrogVariant | PigVariant | WolfVariant
-ALL_ENTITY_VARIANTS: list[EntityVariant] = [CatVariant, ChickenVariant, CowVariant, FrogVariant, PigVariant, WolfVariant]
+ALL_ENTITY_VARIANTS: list[type[EntityVariant]] = [CatVariant, ChickenVariant, CowVariant, FrogVariant, PigVariant, WolfVariant]
 
 __all__ = ["ALL_ENTITY_VARIANTS", "GenericEntityVariant", "CatVariant", "ChickenVariant", "CowVariant", "FrogVariant", "PigVariant", "WolfVariant", "EntityVariant"]
