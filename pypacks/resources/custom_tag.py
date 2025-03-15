@@ -65,6 +65,21 @@ class CustomTag(BaseResource):
         with open(path, "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
+    @classmethod
+    def from_datapack_files(cls, root_path: "Path") -> list["CustomTag"]:
+        """Path should be the root of the pack"""
+        tags = []
+        for tag_path_absolute, _ in BaseResource.get_all_resource_paths(cls, root_path):
+            with open(tag_path_absolute, "r") as file:
+                tags.append(
+                    cls.from_dict(
+                        Path(tag_path_absolute).parts[-1].removesuffix(".json"),
+                        tag_path_absolute.parts[-2],  # type: ignore[abc]
+                        json.load(file),
+                    )
+                )
+        return tags
+
     def get_first_non_tag_item(self) -> "CustomItem | str":
         """Recursively searches the tag in a depth-first search for the first non-tag item (e.g. if a tag contains a tag, search that tag etc.)"""
         for value in self.values:

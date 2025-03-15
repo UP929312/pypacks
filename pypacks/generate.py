@@ -54,6 +54,11 @@ def generate_base_font(pack: "Pack") -> "CustomAutoAssignedFont":
         BitMapFontChar("information_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "information_icon.png").read_bytes(),
                                                       base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14),
         (
+            BitMapFontChar("dimensions_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "dimensions_icon.png").read_bytes()),
+                           height=20, y_offset=10)
+            if [x for x in pack.custom_dimensions if True] else None  # TODO: Change this to in the future check if they haven't set an icon
+        ),
+        (
             BitMapFontChar("play_icon", add_border(image_bytes=Path(IMAGES_PATH, "reference_book_icons", "play_icon.png").read_bytes(),
                                                    base_image_path=EXTRA_ICON_BASE_PATH), height=18, y_offset=14)
             if [x for x in pack.custom_items
