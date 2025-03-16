@@ -1,13 +1,15 @@
 mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E123 && ruff check && pylint .
 
-# In the dev book, or ref book, have a button to teleport to another dimension, or to use /locate on a biome
+# In the dev book, or ref book, add /locate to be able to go to a biome (and custom biome pages)
 # For custom_structure auto generated items in the book, give them a new button to locate and teleport to the structure
 
 Would love to have an entire pack.from_dict, or from_folder or something, would be great.
 
-pypacks.scripts.repos.models is a looong Literal, probably need to figure that out
+Regex to enforce smithed
 
 Loadstone trackers is still broken
+
+Support for custom mcfunction header, e.g. copyright, links, etc?
 
 from_dict is still missing from custom_item and custom_recipe and custom_font (ooh, maybe "pack" too? If we count that.)
 
@@ -70,7 +72,7 @@ Type Predicates ):
   }
 }
 
-World gen stuff is why I'm getting the error...
+World gen stuff is why I'm getting the warning... add a config option for this
 
 # pypacks_testing:clear_console
 

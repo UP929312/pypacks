@@ -82,10 +82,10 @@ from pypacks.resources.item_model_definition import (
     CompositeItemModel,
     ConditionalItemModel, UsingItemConditional, BrokenConditional, DamagedConditional, HasComponentConditional, FishingRodCastConditional, BundleHasSelectedItemConditional, SelectedConditional, CarriedConditional, ExtendedViewConditional, KeyDownConditional, ViewEntityConditional, CustomModelDataConditional,
     SelectItemModel, SelectCase, MainHandSelectProperty, ChargeTypeSelectProperty, TrimMaterialSelectProperty, BlockStateSelectProperty, DisplayContextSelectProperty, LocalTimeSelectProperty, ContextDimensionSelectProperty, ContextEntityTypeSelectProperty, CustomModelDataSelectProperty, ComponentSelectProperty,
-    RangeDispatchItemModel,
+    RangeDispatchItemModel, BundleFullnessRangeDispatchProperty, CompassRangeDispatchProperty, CooldownRangeDispatchProperty, CrossbowPullRangeDispatchProperty, CountRangeDispatchProperty, CustomModelDataRangeDispatchProperty, DamageRangeDispatchProperty, RangeDispatchPropertyType, TimeRangeDispatchProperty, UseCycleRangeDispatchProperty,
     EmptyItemModel,
     BundleSelectedItemModel,
-    SpecialItemModel,
+    SpecialItemModel, BannerSpecialItemModelType, BedSpecialItemModelType, ChestSpecialItemModelType, ConduitSpecialItemModelType, DecoratedPotSpecialItemModelType, HangingSignSpecialItemModelType, HeadSpecialItemModelType, ShieldSpecialItemModelType, ShulkerBoxSpecialItemModelType, StandingSignSpecialItemModelType, TridentSpecialItemModelType,
     ItemModel,
 )
 
@@ -155,9 +155,9 @@ __all__ = [
     "CompositeItemModel",
     "ConditionalItemModel", "UsingItemConditional", "BrokenConditional", "DamagedConditional", "HasComponentConditional", "FishingRodCastConditional", "BundleHasSelectedItemConditional", "SelectedConditional", "CarriedConditional", "ExtendedViewConditional", "KeyDownConditional", "ViewEntityConditional", "CustomModelDataConditional",
     "SelectItemModel", "SelectCase", "MainHandSelectProperty", "ChargeTypeSelectProperty", "TrimMaterialSelectProperty", "BlockStateSelectProperty", "DisplayContextSelectProperty", "LocalTimeSelectProperty", "ContextDimensionSelectProperty", "ContextEntityTypeSelectProperty", "CustomModelDataSelectProperty", "ComponentSelectProperty",
-    "RangeDispatchItemModel",
+    "RangeDispatchItemModel", "BundleFullnessRangeDispatchProperty", "CompassRangeDispatchProperty", "CooldownRangeDispatchProperty", "CrossbowPullRangeDispatchProperty", "CountRangeDispatchProperty", "CustomModelDataRangeDispatchProperty", "DamageRangeDispatchProperty", "RangeDispatchPropertyType", "TimeRangeDispatchProperty", "UseCycleRangeDispatchProperty",
     "EmptyItemModel",
     "BundleSelectedItemModel",
-    "SpecialItemModel",
+    "SpecialItemModel", "BannerSpecialItemModelType", "BedSpecialItemModelType", "ChestSpecialItemModelType", "ConduitSpecialItemModelType", "DecoratedPotSpecialItemModelType", "HangingSignSpecialItemModelType", "HeadSpecialItemModelType", "ShieldSpecialItemModelType", "ShulkerBoxSpecialItemModelType", "StandingSignSpecialItemModelType", "TridentSpecialItemModelType",
     "ItemModel",
 ]

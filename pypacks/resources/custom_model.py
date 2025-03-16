@@ -85,8 +85,8 @@ class CustomTexture:
     def from_resource_pack_files(cls, root_path: "Path") -> list["CustomTexture"]:
         """Path should be the root of the pack"""
         return [
-            cls(file_path.stem, file_path, sub_directories=file_path.parts[len(root_path.parts)+1:])  # type: ignore[attr-defined]
-            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.png")  # type: ignore[attr-defined]
+            cls(file_path.stem, file_path, sub_directories=file_path.parts[len(root_path.parts)+1:])  # type: ignore[arg-type]
+            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.png")
             if "textures/font" not in str(file_path)
         ]
 

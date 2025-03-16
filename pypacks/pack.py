@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment
-    from pypacks.resources.custom_font import CustomFont
+    from pypacks.resources.custom_font import CustomAutoAssignedFont
     from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_language import CustomLanguage
@@ -68,7 +68,7 @@ class Pack:
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_entity_variants: list["EntityVariant"] = field(default_factory=list)
     custom_items: list["CustomItem"] = field(default_factory=list)
-    custom_fonts: list["CustomFont"] = field(default_factory=list)
+    custom_fonts: list["CustomAutoAssignedFont"] = field(default_factory=list)
     custom_game_tests: list["CustomGameTest"] = field(default_factory=list)
     custom_test_environments: list["CustomTestEnvironment"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
@@ -101,8 +101,8 @@ class Pack:
         self.datapack_output_path = Path(self.datapack_output_path)  # type: ignore[assignment]
         self.resource_pack_path = Path(self.resource_pack_path)  # type: ignore[assignment]
 
-        self.data_pack_format_version = 70
-        self.resource_pack_format_version = 54
+        self.data_pack_format_version = 71
+        self.resource_pack_format_version = 55
 
         # Don't love this, but oh well (for the future, when I add more world gen stuff)
         self.custom_structures = self.world_gen_resources.custom_structures
@@ -134,7 +134,7 @@ class Pack:
         # ==================================================================================
         # Custom Structure places (needs to be before on_right_click)
         for structure in [x for x in self.custom_structures if hasattr(x, "is_simple_resource")]:
-            self.custom_items.append(structure.generate_custom_item(self.namespace))  # type: ignore[abc]
+            self.custom_items.append(structure.generate_custom_item(self.namespace))  # type: ignore[union-attr]
         # =================================================================================
         # Custom loops, chunk scanners, and ore generations
         for custom_ore_generation in self.custom_ore_generations:
@@ -190,7 +190,7 @@ class Pack:
         # Get all the reference book categories
         if self.config.generate_reference_book:
             self.reference_book_categories = RefBookCategory.get_unique_categories(
-                [x.ref_book_config.category for x in self.custom_items if not x.ref_book_config.hidden]
+                [x.ref_book_config.category for x in (self.custom_items+self.custom_dimensions) if not x.ref_book_config.hidden]
             )
         # ==================================================================================
         # Item models (well, the display items)
@@ -281,8 +281,10 @@ class Pack:
         generate_datapack(minecraft)
 
     @classmethod
-    def from_existing_pack(cls, path: "str | Path") -> "Pack":
-        path = Path(path)
+    def from_existing_pack(cls, datapack_path: "str | Path", resource_pack_path: "str | Path") -> "Pack":
+        datapack_path = Path(datapack_path)
+        resource_pack_path = Path(resource_pack_path)
+        # pack_namespace = path.stem
         from pypacks.resources.entities import ALL_ENTITY_VARIANTS
         from pypacks.resources.custom_advancement import CustomAdvancement
         from pypacks.resources.custom_damage_type import CustomDamageType
@@ -296,20 +298,21 @@ class Pack:
         from pypacks.resources.custom_predicate import Predicate
         # from pypacks.resources.custom_sound import CustomSound
         from pypacks.resources.custom_tag import CustomTag
-        entity_variants_2d = [x.from_datapack_files(path) for x in ALL_ENTITY_VARIANTS]
         # print(CustomTag.from_datapack_files(path))
+        entity_variants_2d = [x.from_datapack_files(datapack_path) for x in ALL_ENTITY_VARIANTS]
+        # print(CustomTexture.from_resource_pack_files(resource_pack_path))
         return Pack(
             name="", description="", namespace="a",
-            custom_advancements=CustomAdvancement.from_datapack_files(path),
-            custom_damage_types=CustomDamageType.from_datapack_files(path),
-            custom_dimensions=CustomDimension.from_datapack_files(path),
+            custom_advancements=CustomAdvancement.from_datapack_files(datapack_path),
+            custom_damage_types=CustomDamageType.from_datapack_files(datapack_path),
+            custom_dimensions=CustomDimension.from_datapack_files(datapack_path),
             custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
-            custom_enchantments=CustomEnchantment.from_datapack_files(path),
-            custom_jukebox_songs=CustomJukeboxSong.from_datapack_files(path),
-            custom_mcfunctions=MCFunction.from_datapack_files(path),
-            # custom_model_definitions=CustomModelDefinition.from_datapack_files(path),
-            # custom_textures=CustomTexture.from_datapack_files(path),  # TODO: Implement
-            custom_paintings=CustomPainting.from_datapack_files(path),
-            custom_predicates=Predicate.from_datapack_files(path),
-            # custom_tags=CustomTag.from_datapack_files(path),
+            custom_enchantments=CustomEnchantment.from_datapack_files(datapack_path),
+            custom_jukebox_songs=CustomJukeboxSong.from_datapack_files(datapack_path),
+            custom_mcfunctions=MCFunction.from_datapack_files(datapack_path),
+            custom_model_definitions=CustomModelDefinition.from_resource_pack_files(resource_pack_path),
+            custom_textures=CustomTexture.from_resource_pack_files(resource_pack_path),
+            custom_paintings=CustomPainting.from_datapack_files(datapack_path),
+            custom_predicates=Predicate.from_datapack_files(datapack_path),
+            custom_tags=CustomTag.from_datapack_files(datapack_path),
         )

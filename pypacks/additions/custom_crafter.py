@@ -52,7 +52,7 @@ class CustomCrafter:
         if isinstance(ingredient, CustomTag):
             return ingredient.get_reference(pack_namespace)
         if isinstance(ingredient, CustomItem):
-            return ingredient.generate_give_command(pack_namespace).removeprefix("give @p ")
+            return f"{ingredient.base_item}[{CustomItem.to_component_string(ingredient.to_dict(pack_namespace))}, count=1]"
         return ingredient
 
     def on_tick(self, pack_namespace: str) -> MCFunction:

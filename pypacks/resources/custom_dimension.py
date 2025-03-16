@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.resources.base_resource import BaseResource
 from pypacks.providers.int_provider import IntProvider, UniformIntProvider
+from pypacks.additions.reference_book_config import RefBookConfig, DIMENSIONS_REF_BOOK_CONFIG
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -21,6 +22,7 @@ class CustomDimension(BaseResource):
     noise_settings: Literal[
         "minecraft:overworld", "minecraft:nether", "minecraft:end", "minecraft:large_biomes", "minecraft:amplified", "minecraft:floating_islands", "minecraft:caves"
     ] = "minecraft:overworld"  # The noise settings of the dimension.
+    ref_book_config: "RefBookConfig" = field(repr=False, default_factory=lambda: DIMENSIONS_REF_BOOK_CONFIG)
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension")
 

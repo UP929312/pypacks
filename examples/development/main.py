@@ -184,8 +184,7 @@ hand_model = CustomItemRenderDefinition("hand_model", SelectItemModel(property_t
 range_dispatch = CustomItemRenderDefinition(
     "range_dispatch",
     RangeDispatchItemModel(
-        property_to_satisfy="minecraft:damage",
-        additional_data={"normalize": True},
+        property_to_satisfy=DamageRangeDispatchProperty(normalize=True),
         entries={
             0.8: ModelItemModel("item/diamond_sword"),
         },
@@ -195,8 +194,8 @@ range_dispatch = CustomItemRenderDefinition(
 )
 bundle_model = CustomItemRenderDefinition("bundle_model", BundleSelectedItemModel(), showcase_item="bundle")
 special_model = CustomItemRenderDefinition("special_model", SpecialItemModel(
-    "minecraft:shulker_box", base="minecraft:block/copper_bulb", additional_data={"texture": "minecraft:shulker_green", "openness": 0.3, "orientation": "up"}),
-    showcase_item="acacia_sign",
+    ShulkerBoxSpecialItemModelType(texture="minecraft:shulker_green", openness=0.3, orientation="up"),
+    base="minecraft:block/copper_bulb"), showcase_item="acacia_sign",
 )
 custom_item_render_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model]
 # endregion
@@ -353,4 +352,8 @@ datapack = Pack(
     config=Config(warn_about_tags_with_custom_items=False),
 ).generate_pack()
 
-# a = Pack.from_existing_pack(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing")
+a = Pack.from_existing_pack(
+    r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing",
+    r"C:\Users\Ben\AppData\Roaming\.minecraft\resourcepacks\PyPacks Testing\assets\pypacks_testing"
+)
+# print(a)

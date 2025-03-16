@@ -43,7 +43,6 @@ class BaseResource:
         if hasattr(self, "sub_directories"):
             path = Path(path, *self.sub_directories)  # pyright: ignore
         os.makedirs(path, exist_ok=True)
-        print(path)
         with open(Path(path, f"{self.internal_name}.json"), "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
@@ -65,7 +64,7 @@ class BaseResource:
             cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[attr-defined]
             for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
         ]
-    
+
     @classmethod
     def from_resource_pack_files(cls: type[T], root_path: "Path") -> list[T]:
         """Path should be the root of the pack"""

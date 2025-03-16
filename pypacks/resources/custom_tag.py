@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     TagType = Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "function", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
 
 # https://minecraft.wiki/w/Resource_location#Registries_and_registry_objects
-# Type hint that ^
+# Type hint that ^?
 
 # Block tags, Item Tags, Entity Type Tags, Function Tags
 
@@ -74,7 +74,7 @@ class CustomTag(BaseResource):
                 tags.append(
                     cls.from_dict(
                         Path(tag_path_absolute).parts[-1].removesuffix(".json"),
-                        tag_path_absolute.parts[-2],  # type: ignore[abc]
+                        tag_path_absolute.parts[-2],  # type: ignore[arg-type]
                         json.load(file),
                     )
                 )

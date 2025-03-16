@@ -56,7 +56,13 @@ from pypacks.resources.custom_tag import CustomTag
 
 from pypacks.resources.item_model_definition import (
     ModelItemModel, ConstantTint, DyeTint, GrassTint, FireworkTint, PotionTint, MapColorTint, TeamTint, CustomModelDataTint,
-    CompositeItemModel, ConditionalItemModel, SelectItemModel, RangeDispatchItemModel, EmptyItemModel, BundleSelectedItemModel, SpecialItemModel,
+    CompositeItemModel,
+    ConditionalItemModel, UsingItemConditional, BrokenConditional, DamagedConditional, HasComponentConditional, FishingRodCastConditional, BundleHasSelectedItemConditional, SelectedConditional, CarriedConditional, ExtendedViewConditional, KeyDownConditional, ViewEntityConditional, CustomModelDataConditional,
+    SelectItemModel, SelectCase, MainHandSelectProperty, ChargeTypeSelectProperty, TrimMaterialSelectProperty, BlockStateSelectProperty, DisplayContextSelectProperty, LocalTimeSelectProperty, ContextDimensionSelectProperty, ContextEntityTypeSelectProperty, CustomModelDataSelectProperty, ComponentSelectProperty,
+    RangeDispatchItemModel, BundleFullnessRangeDispatchProperty, CompassRangeDispatchProperty, CooldownRangeDispatchProperty, CrossbowPullRangeDispatchProperty, CountRangeDispatchProperty, CustomModelDataRangeDispatchProperty, DamageRangeDispatchProperty, RangeDispatchPropertyType, TimeRangeDispatchProperty, UseCycleRangeDispatchProperty,
+    EmptyItemModel,
+    BundleSelectedItemModel,
+    SpecialItemModel, BannerSpecialItemModelType, BedSpecialItemModelType, ChestSpecialItemModelType, ConduitSpecialItemModelType, DecoratedPotSpecialItemModelType, HangingSignSpecialItemModelType, HeadSpecialItemModelType, ShieldSpecialItemModelType, ShulkerBoxSpecialItemModelType, StandingSignSpecialItemModelType, TridentSpecialItemModelType,
     ItemModel,
 )
 # =============================================================================
@@ -101,14 +107,15 @@ __all__ = [
     "CampfireRecipe", "SmithingTransformRecipe", "SmithingTrimRecipe", "StonecutterRecipe",
     "CustomSound",
     "CustomTag",
+
     "ModelItemModel", "ConstantTint", "DyeTint", "GrassTint", "FireworkTint", "PotionTint", "MapColorTint", "TeamTint", "CustomModelDataTint",
     "CompositeItemModel",
-    "ConditionalItemModel",
-    "SelectItemModel",
-    "RangeDispatchItemModel",
+    "ConditionalItemModel", "UsingItemConditional", "BrokenConditional", "DamagedConditional", "HasComponentConditional", "FishingRodCastConditional", "BundleHasSelectedItemConditional", "SelectedConditional", "CarriedConditional", "ExtendedViewConditional", "KeyDownConditional", "ViewEntityConditional", "CustomModelDataConditional",
+    "SelectItemModel", "SelectCase", "MainHandSelectProperty", "ChargeTypeSelectProperty", "TrimMaterialSelectProperty", "BlockStateSelectProperty", "DisplayContextSelectProperty", "LocalTimeSelectProperty", "ContextDimensionSelectProperty", "ContextEntityTypeSelectProperty", "CustomModelDataSelectProperty", "ComponentSelectProperty",
+    "RangeDispatchItemModel", "BundleFullnessRangeDispatchProperty", "CompassRangeDispatchProperty", "CooldownRangeDispatchProperty", "CrossbowPullRangeDispatchProperty", "CountRangeDispatchProperty", "CustomModelDataRangeDispatchProperty", "DamageRangeDispatchProperty", "RangeDispatchPropertyType", "TimeRangeDispatchProperty", "UseCycleRangeDispatchProperty",
     "EmptyItemModel",
     "BundleSelectedItemModel",
-    "SpecialItemModel",
+    "SpecialItemModel", "BannerSpecialItemModelType", "BedSpecialItemModelType", "ChestSpecialItemModelType", "ConduitSpecialItemModelType", "DecoratedPotSpecialItemModelType", "HangingSignSpecialItemModelType", "HeadSpecialItemModelType", "ShieldSpecialItemModelType", "ShulkerBoxSpecialItemModelType", "StandingSignSpecialItemModelType", "TridentSpecialItemModelType",
     "ItemModel",
 
     # Script Repos
