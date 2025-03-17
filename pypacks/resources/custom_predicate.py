@@ -190,7 +190,7 @@ class LocationCheckPredicate(Predicate):
     """Checks the current location against location criteria. Requires origin provided by loot context, and always fails if not provided."""
     predicate: "LocationTag"  # Predicate applied to location, uses same structure as advancements.
     offset_x: int = 0  # An optional x offset to the location.
-    offset_Y: int = 0  # An optional y offset to the location.
+    offset_y: int = 0  # An optional y offset to the location.
     offset_z: int = 0  # An optional z offset to the location.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -208,9 +208,9 @@ class LocationCheckPredicate(Predicate):
         return cls(
             internal_name,
             predicate=LocationTag.from_dict(data["predicate"]),
-            offsetX=data.get("offsetX", 0),
-            offsetY=data.get("offsetY", 0),
-            offsetZ=data.get("offsetZ", 0),
+            offset_x=data.get("offsetX", 0),
+            offset_y=data.get("offsetY", 0),
+            offset_z=data.get("offsetZ", 0),
         )
 
 

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     TagType = Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "function", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
 
 # https://minecraft.wiki/w/Resource_location#Registries_and_registry_objects
-# Type hint that ^
+# Type hint that ^?
 
 # Block tags, Item Tags, Entity Type Tags, Function Tags
 
@@ -45,10 +45,10 @@ class CustomTag(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":  # TODO: This has another parameter
+    def from_dict(cls, internal_name: str, tag_type: "TagType", data: dict[str, bool | list[str]]) -> "CustomTag":  # type: ignore[override]  # TODO: This has another parameter
         return cls(
             internal_name,
-            data["values"],  # type: ignore[union-attr]
+            data["values"],  # type: ignore[arg-type]
             tag_type,  # TODO Somehow not require this?
             replace=data.get("replace", False),  # type: ignore[arg-type]
         )
@@ -64,6 +64,21 @@ class CustomTag(BaseResource):
         os.makedirs(path.parent, exist_ok=True)
         with open(path, "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
+
+    @classmethod
+    def from_datapack_files(cls, root_path: "Path") -> list["CustomTag"]:
+        """Path should be the root of the pack"""
+        tags = []
+        for tag_path_absolute, _ in BaseResource.get_all_resource_paths(cls, root_path):
+            with open(tag_path_absolute, "r") as file:
+                tags.append(
+                    cls.from_dict(
+                        Path(tag_path_absolute).parts[-1].removesuffix(".json"),
+                        tag_path_absolute.parts[-2],  # type: ignore[arg-type]
+                        json.load(file),
+                    )
+                )
+        return tags
 
     def get_first_non_tag_item(self) -> "CustomItem | str":
         """Recursively searches the tag in a depth-first search for the first non-tag item (e.g. if a tag contains a tag, search that tag etc.)"""

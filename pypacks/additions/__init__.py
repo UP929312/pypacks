@@ -8,6 +8,7 @@ from pypacks.additions.raycasting import Raycast, BlockRaycast, EntityRaycast
 from pypacks.additions.reference_book_config import (
     RefBookCategory, RefBookConfig,
     MISC_REF_BOOK_CATEGORY, PAINTING_REF_BOOK_CATEGORY, CUSTOM_BLOCKS_REF_BOOK_CATEGORY, DEV_ITEMS_REF_BOOK_CONFIG,
+    DIMENSIONS_REF_BOOK_CONFIG, BIOMES_REF_BOOK_CONFIG,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "Raycast", "BlockRaycast", "EntityRaycast",
     "RefBookCategory", "RefBookConfig",
     "MISC_REF_BOOK_CATEGORY", "PAINTING_REF_BOOK_CATEGORY", "CUSTOM_BLOCKS_REF_BOOK_CATEGORY", "DEV_ITEMS_REF_BOOK_CONFIG",
+    "DIMENSIONS_REF_BOOK_CONFIG", "BIOMES_REF_BOOK_CONFIG",
 ]

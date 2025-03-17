@@ -5,6 +5,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.item_model_definition import ModelItemModel, ItemModel
 
 if TYPE_CHECKING:
@@ -68,7 +69,7 @@ class CustomTexture:
     """A simple class which copies the textures from your source to the resource pack."""
     internal_name: str
     path_to_texture: Path | str
-    subdirectories: list[str] = field(default_factory=list)
+    sub_directories: list[str] = field(default_factory=list)
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="textures")
 
@@ -76,18 +77,29 @@ class CustomTexture:
         return f"{pack_namespace}:{self.internal_name}"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        path = Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/Path(*self.subdirectories)
+        path = Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/Path(*self.sub_directories)
         os.makedirs(path, exist_ok=True)
         shutil.copyfile(self.path_to_texture, path/f"{self.internal_name}.png")
 
+    @classmethod
+    def from_resource_pack_files(cls, root_path: "Path") -> list["CustomTexture"]:
+        """Path should be the root of the pack"""
+        return [
+            cls(file_path.stem, file_path, sub_directories=file_path.parts[len(root_path.parts)+1:])  # type: ignore[arg-type]
+            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.png")
+            if "textures/font" not in str(file_path)
+        ]
+
 
 @dataclass
-class CustomModelDefinition:
+class CustomModelDefinition(BaseResource):
     """A class which maps the textures to the model in <namespace>/models/<subdirectories>/<internal_name>.json"""
     internal_name: str
     parent: str = "minecraft:item/generated"
     model_type: Literal["item", "block"] = "item"  # Doesn't dictate where it goes, just the type of model
-    subdirectories: list[str] = field(default_factory=list)
+    sub_directories: list[str] = field(default_factory=list)
+
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="models")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         layer_type = "layer0" if "item" in self.parent else "all"
@@ -100,14 +112,8 @@ class CustomModelDefinition:
             internal_name,
             parent=data["parent"],
             model_type="item" if "item" in data["parent"] else "block",
-            subdirectories=[],
+            sub_directories=[],  # TODO: Implement sub_directories here
         )
-
-    def create_resource_pack_files(self, pack: "Pack") -> None:
-        path = Path(pack.resource_pack_path, "assets", pack.namespace, "models", *self.subdirectories)
-        os.makedirs(path, exist_ok=True)
-        with open(path/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass
@@ -133,8 +139,8 @@ class CustomItemTexture:
         # │       └── textures/
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
-        CustomTexture(self.internal_name, self.path_to_texture, subdirectories=["item"]).create_resource_pack_files(pack)
-        CustomModelDefinition(self.internal_name, parent="minecraft:item/generated", model_type="item", subdirectories=["item"]).create_resource_pack_files(pack)
+        CustomTexture(self.internal_name, self.path_to_texture, sub_directories=["item"]).create_resource_pack_files(pack)
+        CustomModelDefinition(self.internal_name, parent="minecraft:item/generated", model_type="item", sub_directories=["item"]).create_resource_pack_files(pack)
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
 
@@ -180,9 +186,9 @@ class SymmetricCubeModel:
         # │       └── textures/
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
-        CustomModelDefinition(self.internal_name, parent="minecraft:block/cube_all", model_type="item", subdirectories=["item"]).create_resource_pack_files(pack)
+        CustomModelDefinition(self.internal_name, parent="minecraft:block/cube_all", model_type="item", sub_directories=["item"]).create_resource_pack_files(pack)
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
-        CustomTexture(self.internal_name, self.texture_path, subdirectories=["item"]).create_resource_pack_files(pack)
+        CustomTexture(self.internal_name, self.texture_path, sub_directories=["item"]).create_resource_pack_files(pack)
 
 
 @dataclass

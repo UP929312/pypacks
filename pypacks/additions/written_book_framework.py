@@ -138,9 +138,6 @@ class GridPageManager:
     icons: list["Icon"]
     icons_per_row: int = ICONS_PER_ROW
     rows_per_page: int = ROWS_PER_PAGE
-    # UNUSED:
-    back_button_unicode_char: str | None = None
-    back_button_page: int | None = None
 
     def __post_init__(self) -> None:
         icons_per_page = self.icons_per_row*self.rows_per_page
@@ -153,8 +150,6 @@ class GridPageManager:
                 icons=page_icons,  # Here's the magic
                 icons_per_row=self.icons_per_row,
                 rows_per_page=self.rows_per_page,
-                # back_button_unicode_char=self.back_button_unicode_char,
-                # back_button_page=self.back_button_page
             )
             for i, page_icons in enumerate(chunk_list(self.icons, self.icons_per_row*self.rows_per_page), 1)
         ]

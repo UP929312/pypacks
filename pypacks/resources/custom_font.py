@@ -67,7 +67,7 @@ class TTFFontProvider:
         assert str(self.font_path).endswith(".ttf"), "Font path must end with .ttf!"
         assert self.oversample > 0, "Oversample must be greater than 0"
 
-    def to_dict(self, pack_namespace: str, _: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str, _: list[str]) -> dict[str, Any]:
         # TTF Fonts require the following structure:
         # assets/
         # ├── <namespace>/
@@ -143,7 +143,7 @@ class ReferenceFontProvider:
     name: str
     font: "str | CustomAutoAssignedFont"
 
-    def to_dict(self, pack_namespace: str, _: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str, _: list[str]) -> dict[str, Any]:
         return {
             "type": "reference",
             "file": f"{pack_namespace}:font/{self.font}.json" if not isinstance(self.font, CustomAutoAssignedFont) else self.font.get_reference(pack_namespace),

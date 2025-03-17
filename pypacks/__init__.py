@@ -28,7 +28,7 @@ from pypacks.providers.number_provider import (  # noqa: F401, F403
 # =============================================================================
 # Resources
 from pypacks.resources.custom_loot_tables import *  # noqa: F401, F403
-from pypacks.resources.world_gen import (
+from pypacks.resources.world_gen import (  # type: ignore[attr-defined]
     CustomStructure, JigsawStructureType, SingleCustomStructure, CustomStructureSet, RandomSpreadPlacementType, ConcentricRingsPlacementType, CustomBiome, MoodSound,
     WorldGenResources,
 )
@@ -56,7 +56,13 @@ from pypacks.resources.custom_tag import CustomTag
 
 from pypacks.resources.item_model_definition import (
     ModelItemModel, ConstantTint, DyeTint, GrassTint, FireworkTint, PotionTint, MapColorTint, TeamTint, CustomModelDataTint,
-    CompositeItemModel, ConditionalItemModel, SelectItemModel, RangeDispatchItemModel, EmptyItemModel, BundleSelectedItemModel, SpecialItemModel,
+    CompositeItemModel,
+    ConditionalItemModel, UsingItemConditional, BrokenConditional, DamagedConditional, HasComponentConditional, FishingRodCastConditional, BundleHasSelectedItemConditional, SelectedConditional, CarriedConditional, ExtendedViewConditional, KeyDownConditional, ViewEntityConditional, CustomModelDataConditional,
+    SelectItemModel, SelectCase, MainHandSelectProperty, ChargeTypeSelectProperty, TrimMaterialSelectProperty, BlockStateSelectProperty, DisplayContextSelectProperty, LocalTimeSelectProperty, ContextDimensionSelectProperty, ContextEntityTypeSelectProperty, CustomModelDataSelectProperty, ComponentSelectProperty,
+    RangeDispatchItemModel, BundleFullnessRangeDispatchProperty, CompassRangeDispatchProperty, CooldownRangeDispatchProperty, CrossbowPullRangeDispatchProperty, CountRangeDispatchProperty, CustomModelDataRangeDispatchProperty, DamageRangeDispatchProperty, RangeDispatchPropertyType, TimeRangeDispatchProperty, UseCycleRangeDispatchProperty,
+    EmptyItemModel,
+    BundleSelectedItemModel,
+    SpecialItemModel, BannerSpecialItemModelType, BedSpecialItemModelType, ChestSpecialItemModelType, ConduitSpecialItemModelType, DecoratedPotSpecialItemModelType, HangingSignSpecialItemModelType, HeadSpecialItemModelType, ShieldSpecialItemModelType, ShulkerBoxSpecialItemModelType, StandingSignSpecialItemModelType, TridentSpecialItemModelType,
     ItemModel,
 )
 # =============================================================================
@@ -90,7 +96,7 @@ __all__ = [
     "WorldGenResources",
     "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
-    "CustomFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
+    "CustomAutoAssignedFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomLanguage",
     "CustomJukeboxSong",
     "MCFunction",
@@ -101,14 +107,15 @@ __all__ = [
     "CampfireRecipe", "SmithingTransformRecipe", "SmithingTrimRecipe", "StonecutterRecipe",
     "CustomSound",
     "CustomTag",
+
     "ModelItemModel", "ConstantTint", "DyeTint", "GrassTint", "FireworkTint", "PotionTint", "MapColorTint", "TeamTint", "CustomModelDataTint",
     "CompositeItemModel",
-    "ConditionalItemModel",
-    "SelectItemModel",
-    "RangeDispatchItemModel",
+    "ConditionalItemModel", "UsingItemConditional", "BrokenConditional", "DamagedConditional", "HasComponentConditional", "FishingRodCastConditional", "BundleHasSelectedItemConditional", "SelectedConditional", "CarriedConditional", "ExtendedViewConditional", "KeyDownConditional", "ViewEntityConditional", "CustomModelDataConditional",
+    "SelectItemModel", "SelectCase", "MainHandSelectProperty", "ChargeTypeSelectProperty", "TrimMaterialSelectProperty", "BlockStateSelectProperty", "DisplayContextSelectProperty", "LocalTimeSelectProperty", "ContextDimensionSelectProperty", "ContextEntityTypeSelectProperty", "CustomModelDataSelectProperty", "ComponentSelectProperty",
+    "RangeDispatchItemModel", "BundleFullnessRangeDispatchProperty", "CompassRangeDispatchProperty", "CooldownRangeDispatchProperty", "CrossbowPullRangeDispatchProperty", "CountRangeDispatchProperty", "CustomModelDataRangeDispatchProperty", "DamageRangeDispatchProperty", "RangeDispatchPropertyType", "TimeRangeDispatchProperty", "UseCycleRangeDispatchProperty",
     "EmptyItemModel",
     "BundleSelectedItemModel",
-    "SpecialItemModel",
+    "SpecialItemModel", "BannerSpecialItemModelType", "BedSpecialItemModelType", "ChestSpecialItemModelType", "ConduitSpecialItemModelType", "DecoratedPotSpecialItemModelType", "HangingSignSpecialItemModelType", "HeadSpecialItemModelType", "ShieldSpecialItemModelType", "ShulkerBoxSpecialItemModelType", "StandingSignSpecialItemModelType", "TridentSpecialItemModelType",
     "ItemModel",
 
     # Script Repos

@@ -42,7 +42,7 @@ class CustomJukeboxSong(BaseResource):
         return cls(
             internal_name,
             description=data["description"],
-            ogg_path="", # data["ogg_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
+            ogg_path="",  # data["ogg_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
             comparator_output=data["comparator_output"],
             length_in_seconds=data["length_in_seconds"],
         )
