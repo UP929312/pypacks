@@ -93,6 +93,15 @@ class OnClickOpenURL:
         return {"click_event": {"action": "open_url", "url": self.url}}
 
 
+
+@dataclass
+class OnClickCopyToClipboard:
+    value: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"click_event": {"action": "copy_to_clipboard", "value": self.value}}
+
+
 @dataclass
 class OnHoverShowText:
     text: "str | Text | dict[str, Any]"
@@ -124,6 +133,7 @@ class OnHoverShowItem:
 
 # @dataclass
 # class TranslatableText(Text):
+#     # https://minecraft.wiki/w/Text_component_format#Translated_Text
 #     translate: str
 #     with_: list[Text] = None
 

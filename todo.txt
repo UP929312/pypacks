@@ -9,6 +9,8 @@ Regex to enforce smithed
 
 Loadstone trackers is still broken
 
+# Should CustomTag.from_json() look and try to find the values?
+
 Support for custom mcfunction header, e.g. copyright, links, etc?
 
 from_dict is still missing from custom_item and custom_recipe and custom_font (ooh, maybe "pack" too? If we count that.)

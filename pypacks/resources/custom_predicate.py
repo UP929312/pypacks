@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Predicate(BaseResource):
+    """Parent Predicate, do not use directly."""
     # https://minecraft.wiki/w/Predicate
     internal_name: str
 
@@ -103,7 +104,9 @@ class DamageSourcePropertiesPredicate(Predicate):
 
 @dataclass
 class EnchantmentActiveCheckPredicate(Predicate):
-    """Checks if the enchantment has been active. Requires enchantment active status provided by loot context, and always fails if not provided. It is therefore only usable from the enchanted_location loot context."""
+    """Checks if the enchantment has been active.
+    Requires enchantment active status provided by loot context, and always fails if not provided.
+    It is therefore only usable from the enchanted_location loot context."""
     active: bool
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:

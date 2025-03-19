@@ -35,7 +35,7 @@ class BaseResource:
         if hasattr(self, "sub_directories"):
             path = Path(path, *self.sub_directories)  # pyright: ignore
         os.makedirs(path, exist_ok=True)
-        with open(Path(path, f"{self.internal_name}.json"), "w") as file:
+        with open(path/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
@@ -43,18 +43,18 @@ class BaseResource:
         if hasattr(self, "sub_directories"):
             path = Path(path, *self.sub_directories)  # pyright: ignore
         os.makedirs(path, exist_ok=True)
-        with open(Path(path, f"{self.internal_name}.json"), "w") as file:
+        with open(path/f"{self.internal_name}.json", "w") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @staticmethod
-    def get_all_resource_paths(cls_: type["BaseResource"], root_path: "Path", file_type: str = ".json") -> list[tuple["Path", "Path"]]:
-        """Returns a tuple of absolute path, relative (parent directory) path for all resources of type, used by MCFunction and CustomTag"""
+    def get_all_resource_paths(cls_: type["BaseResource"], root_path: "Path", file_type: str = ".json") -> list["Path"]:
+        """Returns an absolute path for all resources of type, used by MCFunction and CustomTag"""
         item_paths = []
         functions_directory = str(root_path/"data"/"pypacks_testing"/cls_.datapack_subdirectory_name)+"/"
         for root, _, files in os.walk(functions_directory):
             for file_name in files:
                 if file_name.endswith(file_type):
-                    item_paths.append((Path(root+"/"+file_name), Path(str(root.removeprefix(functions_directory)))))
+                    item_paths.append(Path(root+"/"+file_name))
         return item_paths
 
     @classmethod
@@ -68,10 +68,24 @@ class BaseResource:
     @classmethod
     def from_resource_pack_files(cls: type[T], root_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
+        assert issubclass(cls, BaseResource)
+        if any(f.name == "sub_directories" for f in fields(cls)):  # type: ignore[attr-defined]
+            return [
+                cls.from_dict(
+                    file_path.stem, json.load(file_path.open("r")),
+                    sub_directories=list(file_path.relative_to(root_path).parent.parts[1:]),  # type: ignore[attr-defined]
+                )
+                for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
+            ]
         return [
             cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[attr-defined]
-            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
+            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
         ]
+
+    @classmethod
+    def from_combined_files(cls: type[T], datapack_root_path: "Path", resource_pack_root_path: "Path") -> list[T]:
+        """Path should be the root of the pack"""
+        raise NotImplementedError
 
 
 def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
@@ -84,7 +98,7 @@ def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
         if field.default is not MISSING or field.default_factory is not MISSING
     }
 
-    # Exclude fields with `init=False` or `repr=False` and those that match defaults
+    # Exclude fields with `init=False` (normally class attributes like datapack_sub_directory) or `repr=False` and those that match defaults
     non_default_attrs = {
         key: value for key, value in self.__dict__.items()
         if key not in {field.name for field in fields(self) if not field.init or not field.repr}  # TODO: Why do we exclude repr=False again?

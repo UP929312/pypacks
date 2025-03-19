@@ -19,9 +19,11 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomItemRenderDefinition:
+class CustomItemRenderDefinition(BaseResource):
     # TODO: Flesh this out, there's lots more I haven't covered from:
     # https://minecraft.wiki/w/Model
+    # https://www.discord.com/channels/154777837382008833/1323240917792063489
+    # https://minecraft.wiki/w/Items_model_definition
     internal_name: str
     model: "ItemModel | str" = "item/iron_sword"  # or <namespace>:<model_name>
     hand_animation_on_swap: bool = True  # Whether the down-and-up animation should be played in first-person view when the item stack is changed. (default: true)
@@ -33,21 +35,18 @@ class CustomItemRenderDefinition:
         if isinstance(self.model, str):
             self.model = ModelItemModel(self.model)  # pyright: ignore
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         assert isinstance(self.model, ItemModel)
         return self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {})
 
-    def create_resource_pack_files(self, pack: "Pack") -> None:
-        # https://www.discord.com/channels/154777837382008833/1323240917792063489
-        # https://minecraft.wiki/w/Items_model_definition
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
-
-        # Item model definition
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(), file, indent=4)
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomItemRenderDefinition":
+        # TODO: Remove {'type': 'minecraft:model', 'model': {'type': 'minecraft:model', 'model': 'minecraft:item/iron_sword', 'tints': [{'type': 'minecraft:constant', 'value': [0.0, 0.0, 1.0]}]}}
+        return cls(
+            internal_name,
+            model=ItemModel.from_dict(data),  # ["model"]
+            hand_animation_on_swap=data.get("hand_animation_on_swap", True)
+        )
 
     def generate_give_command(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_item import CustomItem
@@ -65,16 +64,13 @@ class CustomItemRenderDefinition:
 
 
 @dataclass
-class CustomTexture:
+class CustomTexture(BaseResource):
     """A simple class which copies the textures from your source to the resource pack."""
     internal_name: str
     path_to_texture: Path | str
     sub_directories: list[str] = field(default_factory=list)
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="textures")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         path = Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/Path(*self.sub_directories)
@@ -107,12 +103,12 @@ class CustomModelDefinition(BaseResource):
         return {"parent": self.parent, "textures": layers}
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomModelDefinition":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomModelDefinition":
         return cls(
             internal_name,
             parent=data["parent"],
             model_type="item" if "item" in data["parent"] else "block",
-            sub_directories=[],  # TODO: Implement sub_directories here
+            sub_directories=sub_directories,
         )
 
 

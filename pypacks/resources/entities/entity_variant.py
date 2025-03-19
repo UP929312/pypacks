@@ -40,7 +40,7 @@ class GenericEntityVariant(BaseResource):
         # {'asset_id': 'pypacks_testing:entity/cat/sand_cat', 'spawn_conditions': [{'priority': 0}] }
         return cls(
             internal_name=internal_name,
-            texture_path="",  # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
+            texture_path=data["asset_id"].split(":")[1],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 
@@ -49,11 +49,6 @@ class GenericEntityVariant(BaseResource):
 
     def generate_summon_command(self, pack_namespace: str) -> str:
         return f"summon {self.entity_type} ~ ~ ~ {{\"variant\": \"{pack_namespace}:{self.internal_name}\"}}"
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Create and move the texture file

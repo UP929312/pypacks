@@ -30,6 +30,6 @@ class ChickenVariant(GenericEntityVariant):
         return cls(
             internal_name=internal_name,
             texture_path="",  # data["texture_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
-            model=data.get("model", "normal"),
+            model=data.get("model", "normal"),  # pyright: ignore (This keeps erroring for no reason, pyright is bad)
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )

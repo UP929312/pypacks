@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -14,10 +13,11 @@ if TYPE_CHECKING:
 
 @dataclass
 class CustomJukeboxSong(BaseResource):
-    """Create a CustomSound first, then set it's internal_name & audio_path to be the same as the sound's internal_name + ogg_path"""
+    """Create a CustomSound first, then set it's internal_name & audio_path to be the same as the sound's internal_name + ogg_path, e.g.
+    CustomJukeboxSong(custom_sound.internal_name, "My Song", custom_sound.ogg_path, 4, 5)"""
     internal_name: str
     description: str
-    ogg_path: str
+    ogg_path: "str | Path"
     comparator_output: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     length_in_seconds: float  # | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
 
@@ -42,14 +42,21 @@ class CustomJukeboxSong(BaseResource):
         return cls(
             internal_name,
             description=data["description"],
-            ogg_path="",  # data["ogg_path"],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
+            ogg_path=(data.get("sound_event", {}).get("sound_id") or data.get("sound_id", "UNKNOWN")).split(":")[-1],
             comparator_output=data["comparator_output"],
             length_in_seconds=data["length_in_seconds"],
         )
 
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
+    @classmethod
+    def from_combined_files(cls, datapack_root_path: "Path", resource_pack_root_path: "Path") -> list["CustomJukeboxSong"]:
+        jukebox_songs: list["CustomJukeboxSong"] = cls.from_datapack_files(datapack_root_path)  # pyright: ignore
+        for jukebox_song in jukebox_songs:
+            path = resource_pack_root_path/"sounds"/f"{jukebox_song.ogg_path}.ogg"
+            if path.exists():
+                jukebox_song.ogg_path = path
+            else:
+                raise FileNotFoundError(f"Could not find the ogg file for jukebox song {jukebox_song.internal_name} at {path}")
+        return jukebox_songs
 
     def generate_custom_item(self, pack: "Pack") -> "CustomItem":
         return CustomItem(

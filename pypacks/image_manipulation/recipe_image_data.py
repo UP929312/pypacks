@@ -66,7 +66,7 @@ def place_ingredients_on_image(
                 ingredient_image = ingredient_image.convert("RGBA").resize((16, 16), resample=Image.NEAREST)
                 base_image.paste(ingredient_image, coord_mapping[i], ingredient_image)
     # RESULT ============================================================
-    result: str | CustomItem = recipe.result if not isinstance(recipe, SmithingTrimRecipe) else recipe.resolve_ingredient_type(recipe.base_item)
+    result: "str | CustomItem" = recipe.result if not isinstance(recipe, SmithingTrimRecipe) else recipe.resolve_ingredient_type(recipe.base_item)
     result_texture_path = (
         resolve_default_item_image(result) if not isinstance(result, CustomItem) else (
             result.texture_path if result.texture_path is not None

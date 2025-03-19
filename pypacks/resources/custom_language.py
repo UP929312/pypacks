@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from dataclasses import dataclass, field
 
+from pypacks.resources.base_resource import BaseResource
+
 if TYPE_CHECKING:
     from pypacks.pack import Pack
 
@@ -110,13 +112,16 @@ class Translate:
 
 
 @dataclass
-class CustomLanguage:
+class CustomLanguage(BaseResource):
     """Custom language, used for translations"""
     # https://minecraft.wiki/w/Resource_pack#Language
     language_code: LanguageCode  # e.g. en_us
     translations: dict[str, str]
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="lang")
+
+    def __post_init__(self) -> None:
+        self.internal_name = self.language_code
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return self.translations
@@ -127,11 +132,6 @@ class CustomLanguage:
 
     def get_run_command(self, pack_namespace: str, translation_code: str) -> str:
         return f"tellraw @a {{\"translate\": \"{translation_code}\"}}"
-
-    def create_resource_pack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.language_code}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @staticmethod
     def propogate_to_all_similar_languages(pack: "Pack") -> None:

@@ -99,14 +99,14 @@ class MCFunction(BaseResource):
     def from_datapack_files(cls, root_path: "Path") -> list["MCFunction"]:
         """Path should be the root of the pack"""
         mcfunctions = []
-        for function_path_absolute, function_directory_path_relative in BaseResource.get_all_resource_paths(cls, root_path, ".mcfunction"):
+        for function_path_absolute in BaseResource.get_all_resource_paths(cls, root_path, ".mcfunction"):
             with open(function_path_absolute, "r") as file:
                 file_content = file.read()
                 mcfunctions.append(
                     cls.from_file_contents(
-                        Path(file.name).parts[-1].removesuffix(".mcfunction"),
+                        Path(file.name).stem,
                         file_content.split(HEADER_DIVIDER)[1] if HEADER_DIVIDER in file_content else file_content,
-                        sub_directories=str(function_directory_path_relative).split("\\")
+                        sub_directories=list(function_path_absolute.relative_to(root_path).parent.parts[3:]),
                     )
                 )
         return mcfunctions

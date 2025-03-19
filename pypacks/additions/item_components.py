@@ -43,6 +43,13 @@ class ArmorTrim:
             "material": self.material,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ArmorTrim":
+        return cls(
+            pattern=data["pattern"],
+            material=data["material"],
+        )
+
 
 Trim = ArmorTrim  # Alias for ArmorTrim
 
@@ -134,6 +141,14 @@ class Bee:
             "ticks_in_hive": self.ticks_in_hive,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Bee":
+        return cls(
+            entity_data=data["entity_data"],
+            min_ticks_in_hive=data.get("min_ticks_in_hive", 60),
+            ticks_in_hive=data.get("ticks_in_hive", 0),
+        )
+
 
 # ==========================================================================================
 
@@ -154,6 +169,17 @@ class DamageReduction:
             "factor": self.factor,
             "horizontal_blocking_angle": self.horizontal_blocking_angle if self.horizontal_blocking_angle != 90.0 else None,  # Defaults to 90.0
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DamageReduction":
+        # from pypacks.resources.custom_damage_type import CustomDamageType
+        # from pypacks.resources.custom_tag import CustomTag
+        return cls(
+            types=data["types"],
+            base=data.get("base", 0.0),
+            factor=data.get("factor", 0.5),
+            horizontal_blocking_angle=data.get("horizontal_blocking_angle", 90.0),
+        )
 
 
 @dataclass
@@ -184,6 +210,20 @@ class BlocksAttacks:
             "disable_sound": self.disable_sound.get_reference(pack_namespace) if isinstance(self.disable_sound, CustomSound) else self.disable_sound,
             "bypassed_by": self.bypassed_by.get_reference(pack_namespace) if isinstance(self.bypassed_by, CustomTag) else self.bypassed_by,
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BlocksAttacks":
+        return cls(
+            block_delay_seconds=data.get("block_delay_seconds", 3.0),
+            disable_cooldown_scale=data.get("disable_cooldown_scale", 1.0),
+            damage_reductions=[DamageReduction.from_dict(reduction) for reduction in data.get("damage_reductions", [])],
+            item_damage_threshold=data.get("item_damage", {}).get("threshold", 0.0),
+            item_damage_base=data.get("item_damage", {}).get("base", 0.0),
+            item_damage_factor=data.get("item_damage", {}).get("factor", 0.5),
+            block_sound=data.get("block_sound", "block.anvil.place"),
+            disable_sound=data.get("disable_sound"),
+            bypassed_by=data.get("bypassed_by"),
+        )
 
 
 # ==========================================================================================
@@ -201,7 +241,6 @@ class TropicalFishData:
         body_color_index = COLORS.index(self.body_color) if isinstance(self.body_color, str) else self.body_color
         pattern_color_index = COLORS.index(self.pattern_color) if isinstance(self.pattern_color, str) else self.pattern_color
         size_int = 0 if self.size == "small" else 1
-        # rint(f"Shape {size_int}, Pattern {self.pattern}, Base Color {body_color_index}, Pattern Color {pattern_color_index}")
         return (
             pattern_color_index * (2 ** 24) +
             body_color_index    * (2 ** 16) +  # noqa: E221
@@ -243,6 +282,22 @@ class BucketEntityData:
             "type": self.size if self.size is not None else None,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BucketEntityData":
+        return cls(
+            no_ai=data.get("NoAI", False),
+            silent=data.get("Silent", False),
+            no_gravity=data.get("NoGravity", False),
+            glowing=data.get("Glowing", False),
+            invulnerable=data.get("Invulnerable", False),
+            health=data.get("Health"),
+            age=data.get("Age"),
+            variant=data.get("Variant"),
+            hunting_cooldown=data.get("HuntingCooldown"),
+            bucket_variant_tag=data.get("BucketVariantTag"),
+            size=data.get("type"),
+        )
+
 
 # ==========================================================================================
 
@@ -264,6 +319,17 @@ class BundleContents:
             } if isinstance(item, CustomItem) and item.components.to_dict(pack_namespace) else {})
             for item, count in self.items.items()
         ]
+    
+    @classmethod
+    def from_dict(cls, data: list[dict[str, Any]]) -> "BundleContents":
+        raise NotImplementedError
+        # TODO: Need to combine item and components here
+        return cls(
+            items={
+                item["id"]: item["count"]
+                for item in data
+            },
+        )
 
 
 # ==========================================================================================
@@ -383,6 +449,14 @@ class ContainerContents:
             }
             for i, (item, count) in enumerate(self.items.items())
         ]
+
+    @classmethod
+    def from_dict(cls, data: list[dict[str, Any]]) -> "ContainerContents":
+        raise NotImplementedError
+        # TODO: Need to combine item and components here
+        # return cls(
+        #     items={
+        # )
 
 
 # ==========================================================================================
@@ -627,14 +701,14 @@ class JukeboxPlayable:
     song: "str | CustomJukeboxSong" = "pigstep"
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "JukeboxPlayable":
-        return cls(
-            song=data["song"],
-        )
+    def from_dict(cls, data: dict[str, Any] | str) -> "JukeboxPlayable":
+        if isinstance(data, dict):
+            return cls(song=data["song"])
+        return cls(data)
 
     def get_reference(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
-        return f"{pack_namespace}:{self.song.internal_name}" if isinstance(self.song, CustomJukeboxSong) else self.song
+        return self.song.get_reference(pack_namespace) if isinstance(self.song, CustomJukeboxSong) else self.song
 
 
 # ==========================================================================================
@@ -653,7 +727,7 @@ class LodestoneTracker:
     def to_dict(self) -> dict[str, Any]:
         return {
             "target": {
-                "pos": f"[I; {self.x}, {self.y}, {self.z}]",
+                "pos": f"[I; {self.x}, {self.y}, {self.z}]",  # TODO: Fix me!
                 "dimension": self.dimension,
             },
             "tracked": False if not self.tracked else None,  # Defaults to True
@@ -721,6 +795,14 @@ class MapData:
             "map_color": self.map_color if self.map_color is not None else None,
             "map_decorations": {hash(x): x.to_dict() for x in self.map_decorations} if self.map_decorations is not None else None,
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "MapData":
+        return cls(
+            map_id=data.get("map_id"),
+            map_color=data.get("map_color"),
+            map_decorations=[MapDecoration.from_dict(decoration) for decoration in data.get("map_decorations", {}).values()],
+        )
 
 
 # ==========================================================================================
@@ -915,6 +997,13 @@ class Weapon:
             "item_damage_per_attack": self.item_damage_per_attack if self.item_damage_per_attack != 1 else None,  # Defaults to 1
             "disable_blocking_for_seconds": self.disable_blocking_for_seconds if self.disable_blocking_for_seconds != 0 else None,  # Defaults to 0
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Weapon":
+        return cls(
+            item_damage_per_attack=data.get("item_damage_per_attack", 1),
+            disable_blocking_for_seconds=data.get("disable_blocking_for_seconds", 0),
+        )
 
 
 # ==========================================================================================
@@ -1128,7 +1217,7 @@ class Components:
             "glider":                     {} if self.glider else None,
             "unbreakable":                {} if self.unbreakable else None,
             "enchantable":                {"value": self.enchantable_at_level} if self.enchantable_at_level is not None else None,
-            "repairable":                 {"items": ", ".join(self.repaired_by)} if self.repaired_by else None,
+            "repairable":                 {"items": self.repaired_by} if self.repaired_by else None,
             "repair_cost":                self.repair_cost,
 
             "base_color":                 self.shield_base_color,
@@ -1148,7 +1237,7 @@ class Components:
             "note_block_sound":           self.note_block_sound.get_reference(pack_namespace) if isinstance(self.note_block_sound, CustomSound) else self.note_block_sound,
             "ominous_bottle_amplifier":   self.ominous_bottle_amplifier,
             "profile":                    self.player_head_username if self.player_head_username else profile,
-            "recipes":                   self.knowledge_book_recipes if self.knowledge_book_recipes else None,
+            "recipes":                    self.knowledge_book_recipes if self.knowledge_book_recipes else None,
             "suspicious_stew_effects":    [{"id": key, "duration": value} for key, value in self.suspicious_stew_effects.items()] if self.suspicious_stew_effects else None,
             "tooltip_style":              self.tooltip_style,
 
@@ -1186,6 +1275,71 @@ class Components:
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Components":
+        return cls(
+            durability=data.get("max_damage"),
+            lost_durability=data.get("damage"),
+            enchantment_glint_override=data.get("enchantment_glint_override", False),
+            glider=data.get("glider", False),
+            unbreakable=data.get("unbreakable", False),
+            enchantable_at_level=data.get("enchantable", {}).get("value"),
+
+            repaired_by=data.get("repairable", {}).get("items", []),
+            repair_cost=data.get("repair_cost"),
+
+            block_entity_data=data.get("block_entity_data", {}),
+            block_state=data.get("block_state", {}),
+            break_sound=data.get("break_sound"),
+            container_loot_table=data.get("container_loot", {}).get("loot_table"),
+            custom_head_texture=(data.get("profile", {}).get("properties", [{}])[0].get("value") if "properties" in data.get("profile", {}) else None),
+            damage_resistant_to=data.get("damage_resistant", {}).get("types"),
+            enchantments=data.get("enchantments", {}),
+            book_enchantments=data.get("stored_enchantments", {}),
+            debug_stick_state=data.get("debug_stick_state", {}),
+            dye_color=data.get("dyed_color"),
+            intangible_projectile=data.get("intangible_projectile", False),
+            knowledge_book_recipes=data.get("recipes", []),
+            loaded_projectiles=data.get("charged_projectiles", {}).get("id"),
+            note_block_sound=data.get("note_block_sound"),
+            ominous_bottle_amplifier=data.get("ominous_bottle_amplifier"),
+            player_head_username=data.get("profile"),
+            pot_decorations=data.get("pot_decorations", []),
+            shield_base_color=data.get("base_color"),
+            suspicious_stew_effects={x["id"]: x["duration"] for x in data.get("suspicious_stew_effects", [])},
+            tooltip_style=data.get("tooltip_style"),
+
+            armor_trim=ArmorTrim.from_dict(data["trim"]) if data.get("trim") else None,
+            attribute_modifiers=[AttributeModifier.from_dict(x) for x in data.get("attribute_modifiers", [])],
+            bees=[Bee.from_dict(x) for x in data.get("bees", [])],
+            banner_patterns=[BannerPattern.from_dict(x) for x in data.get("banner_patterns", [])],
+            blocks_attacks=BlocksAttacks.from_dict(data["blocks_attacks"]) if data.get("blocks_attacks") else None,
+            bucket_entity_data=BucketEntityData.from_dict(data["bucket_entity_data"]) if data.get("bucket_entity_data") else None,
+            bundle_contents=BundleContents.from_dict(data["bundle_contents"]) if data.get("bundle_contents") else None,
+            can_break=BlockPredicate.from_dict(data["can_break"]) if data.get("can_break") else None,
+            can_place_on=BlockPredicate.from_dict(data["can_place_on"]) if data.get("can_place_on") else None,
+            cooldown=Cooldown.from_dict(data["use_cooldown"]) if data.get("use_cooldown") else None,
+            consumable=Consumable.from_dict(data["consumable"]) if data.get("consumable") else None,
+            container_contents=ContainerContents.from_dict(data["container"]) if data.get("container") else None,
+            death_protection=DeathProtection.from_dict(data["death_protection"]) if data.get("death_protection") else None,
+            entity_data=EntityData.from_dict(data["entity_data"]) if data.get("entity_data") else None,
+            equippable=Equippable.from_dict(data["equippable"]) if data.get("equippable") else None,
+            firework_explosion=FireworkExplosion.from_dict(data["firework_explosion"]) if data.get("firework_explosion") else None,
+            firework=Firework.from_dict(data["fireworks"]) if data.get("fireworks") else None,
+            food=Food.from_dict(data["food"]) if data.get("food") else None,
+            instrument=Instrument.from_dict(data["instrument"]) if data.get("instrument") else None,
+            jukebox_playable=JukeboxPlayable.from_dict(data["jukebox_playable"]) if data.get("jukebox_playable") else None,
+            lodestone_tracker=LodestoneTracker.from_dict(data["lodestone_tracker"]) if data.get("lodestone_tracker") else None,
+            map_data=MapData.from_dict(data) if (data.get("map_color") or data.get("map_id") or data.get("map_decorations")) else None,
+            potion_contents=PotionContents.from_dict(data["potion_contents"]) if data.get("potion_contents") else None,
+            tool=Tool.from_dict(data["tool"]) if data.get("tool") else None,
+            tooltip_display=TooltipDisplay.from_dict(data["tooltip_display"]) if data.get("tooltip_display") else None,
+            use_remainder=UseRemainder.from_dict(data["use_remainder"]) if data.get("use_remainder") else None,
+            weapon=Weapon.from_dict(data["weapon"]) if data.get("weapon") else None,
+            written_book_content=WrittenBookContent.from_dict(data["written_book_content"]) if data.get("written_book_content") else None,
+            writable_book_content=WritableBookContent.from_dict(data["writable_book_content"]) if data.get("writable_book_content") else None,
+        )
 
 
 # custom_model_data - https://minecraft.wiki/w/Data_component_format#custom_model_data  # TODO: This

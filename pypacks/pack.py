@@ -9,19 +9,19 @@ from pypacks.additions.create_wall import create_wall
 from pypacks.additions.custom_chunk_scanner import CustomChunkScanner
 from pypacks.additions.custom_loop import CustomLoop
 from pypacks.additions.custom_ore_generation import CustomOreGeneration
-from pypacks.additions.raycasting import Raycast
+from pypacks.additions.raycasting import Raycast  # Needed to create the base raycast functions
 from pypacks.additions.reference_book_config import RefBookCategory
 
-from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_mcfunction import MCFunction
-from pypacks.resources.custom_model import CustomModelDefinition, CustomTexture
+from pypacks.resources.world_gen.world_gen_objects import WorldGenResources  # For default factory
 from pypacks.generate import generate_datapack, generate_resource_pack, generate_base_font
 
 
 if TYPE_CHECKING:
     from pypacks.additions.custom_block import CustomBlock
     from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+
     from pypacks.resources.entities import EntityVariant
     from pypacks.resources.custom_advancement import CustomAdvancement
     from pypacks.resources.custom_damage_type import CustomDamageType
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_recipe import Recipe
     from pypacks.resources.custom_sound import CustomSound
     from pypacks.resources.custom_tag import CustomTag
+    from pypacks.resources.custom_model import CustomModelDefinition, CustomTexture
 
     from pypacks.additions.custom_crafter import CustomCrafter
 
@@ -62,29 +63,29 @@ class Pack:
     on_load_function: "MCFunction | None" = None
 
     custom_advancements: list["CustomAdvancement"] = field(default_factory=list)
-    custom_blocks: list["CustomBlock"] = field(default_factory=list)
     custom_damage_types: list["CustomDamageType"] = field(default_factory=list)
     custom_dimensions: list["CustomDimension"] = field(default_factory=list)
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_entity_variants: list["EntityVariant"] = field(default_factory=list)
-    custom_items: list["CustomItem"] = field(default_factory=list)
     custom_fonts: list["CustomAutoAssignedFont"] = field(default_factory=list)
     custom_game_tests: list["CustomGameTest"] = field(default_factory=list)
     custom_test_environments: list["CustomTestEnvironment"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)
     custom_languages: list["CustomLanguage"] = field(default_factory=list)
     custom_loot_tables: list["CustomLootTable"] = field(default_factory=list)
+    custom_mcfunctions: list["MCFunction"] = field(default_factory=list)
     custom_paintings: list["CustomPainting"] = field(default_factory=list)
     custom_predicates: list["Predicate"] = field(default_factory=list)
     custom_recipes: list["Recipe"] = field(default_factory=list)
     custom_sounds: list["CustomSound"] = field(default_factory=list)
     custom_tags: list["CustomTag"] = field(default_factory=list)
-    custom_mcfunctions: list["MCFunction"] = field(default_factory=list)
+    custom_textures: list["CustomTexture"] = field(default_factory=list)
     custom_model_definitions: list["CustomModelDefinition"] = field(default_factory=list)
     custom_item_render_definitions: list["CustomItemRenderDefinition"] = field(default_factory=list)
-    custom_textures: list["CustomTexture"] = field(default_factory=list)
     world_gen_resources: "WorldGenResources" = field(default_factory=WorldGenResources)
 
+    custom_items: list["CustomItem"] = field(default_factory=list)
+    custom_blocks: list["CustomBlock"] = field(default_factory=list)
     custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
     custom_crafters: list["CustomCrafter"] = field(default_factory=list)
     custom_loops: list["CustomLoop"] = field(default_factory=list)
@@ -284,35 +285,49 @@ class Pack:
     def from_existing_pack(cls, datapack_path: "str | Path", resource_pack_path: "str | Path") -> "Pack":
         datapack_path = Path(datapack_path)
         resource_pack_path = Path(resource_pack_path)
-        # pack_namespace = path.stem
-        from pypacks.resources.entities import ALL_ENTITY_VARIANTS
         from pypacks.resources.custom_advancement import CustomAdvancement
         from pypacks.resources.custom_damage_type import CustomDamageType
         from pypacks.resources.custom_dimension import CustomDimension
         from pypacks.resources.custom_enchantment import CustomEnchantment
+        from pypacks.resources.entities import ALL_ENTITY_VARIANTS
         # from pypacks.resources.custom_font import CustomAutoAssignedFont
-        # from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
+        from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
-        # from pypacks.resources.custom_model import CustomModelDefinition, CustomTexture
+        from pypacks.resources.custom_language import CustomLanguage
+        from pypacks.resources.custom_loot_tables import CustomLootTable
+        from pypacks.resources.custom_model import CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
         from pypacks.resources.custom_painting import CustomPainting
         from pypacks.resources.custom_predicate import Predicate
-        # from pypacks.resources.custom_sound import CustomSound
+        from pypacks.resources.custom_recipe import Recipe
+        from pypacks.resources.custom_sound import CustomSound
         from pypacks.resources.custom_tag import CustomTag
-        # print(CustomTag.from_datapack_files(path))
-        entity_variants_2d = [x.from_datapack_files(datapack_path) for x in ALL_ENTITY_VARIANTS]
-        # print(CustomTexture.from_resource_pack_files(resource_pack_path))
+        # from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
+        # All WorldGenResources
+
+        entity_variants_2d = [x.from_datapack_files(datapack_path) for x in ALL_ENTITY_VARIANTS]  # TODO: Needs from_combined_files
+        # print(CustomLanguage.from_resource_pack_files(resource_pack_path))
+        print(Recipe.from_datapack_files(datapack_path))
         return Pack(
             name="", description="", namespace="a",
             custom_advancements=CustomAdvancement.from_datapack_files(datapack_path),
             custom_damage_types=CustomDamageType.from_datapack_files(datapack_path),
             custom_dimensions=CustomDimension.from_datapack_files(datapack_path),
-            custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
             custom_enchantments=CustomEnchantment.from_datapack_files(datapack_path),
-            custom_jukebox_songs=CustomJukeboxSong.from_datapack_files(datapack_path),
+            custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
+            # custom_fonts=CustomAutoAssignedFont.from_datapack_files(datapack_path),
+            custom_game_tests=CustomGameTest.from_datapack_files(datapack_path),
+            custom_test_environments=CustomTestEnvironment.from_datapack_files(datapack_path),
+            custom_jukebox_songs=CustomJukeboxSong.from_combined_files(datapack_path, resource_pack_path),
+            custom_languages=CustomLanguage.from_resource_pack_files(resource_pack_path),
+            custom_loot_tables=CustomLootTable.from_datapack_files(datapack_path),
             custom_mcfunctions=MCFunction.from_datapack_files(datapack_path),
-            custom_model_definitions=CustomModelDefinition.from_resource_pack_files(resource_pack_path),
-            custom_textures=CustomTexture.from_resource_pack_files(resource_pack_path),
-            custom_paintings=CustomPainting.from_datapack_files(datapack_path),
+            custom_paintings=CustomPainting.from_combined_files(datapack_path, resource_pack_path),
             custom_predicates=Predicate.from_datapack_files(datapack_path),
+            # custom_recipes=Recipe.from_datapack_files(datapack_path),
+            custom_sounds=CustomSound.from_resource_pack_files(resource_pack_path),
             custom_tags=CustomTag.from_datapack_files(datapack_path),
+            custom_textures=CustomTexture.from_resource_pack_files(resource_pack_path),
+            custom_model_definitions=CustomModelDefinition.from_datapack_files(resource_pack_path),
+            custom_item_render_definitions=CustomItemRenderDefinition.from_datapack_files(resource_pack_path),
+            # world_gen_resources=WorldGenResources.from_datapack_files(datapack_path),
         )

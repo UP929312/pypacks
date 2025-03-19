@@ -16,8 +16,9 @@ if TYPE_CHECKING:
 
 @dataclass
 class CustomPainting(BaseResource):
+    # https://minecraft.wiki/w/Painting_variant_definition
     internal_name: str
-    image_path: str
+    image_path: "str | Path"
     title: str | None = None
     author: str | None = None
     width_in_blocks: int = 1
@@ -43,7 +44,7 @@ class CustomPainting(BaseResource):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomPainting":
         return cls(
             internal_name,
-            "UNKNOWN",
+            data["asset_id"].split(":")[-1],
             title=data["title"]["text"] if data.get("title") else None,
             author=data["author"]["text"] if data.get("author") else None,
             width_in_blocks=data.get("width_in_blocks", 1),
@@ -65,6 +66,17 @@ class CustomPainting(BaseResource):
 
     def generate_give_command(self, pack: "Pack") -> str:
         return self.generate_custom_item(pack).generate_give_command(pack.namespace)
+
+    @classmethod
+    def from_combined_files(cls, root_datapack_path: "Path", root_resource_pack_path: "Path") -> list["CustomPainting"]:
+        paintings: list["CustomPainting"] = cls.from_datapack_files(root_datapack_path)  # pyright: ignore
+        for painting in paintings:
+            path = root_resource_pack_path/painting.resource_pack_subdirectory_name/f"{painting.image_path}.png"
+            if path.exists():
+                painting.image_path = path
+            else:
+                raise FileNotFoundError(f"Could not find the image file for painting {painting.internal_name} at {path}")
+        return paintings
 
 
 # Original paintings:

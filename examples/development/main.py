@@ -112,19 +112,19 @@ ruby_or_topaz_tag = CustomTag("ruby_or_topaz", [ruby, topaz], "item")
 # ============================================================================================================
 # region: Custom Recipes
 # Custom recipes
-cobble_recipe = ShapelessCraftingRecipe("cobblestone_recipe", ["minecraft:stone", "minecraft:stick"], "minecraft:cobblestone", 2)
-door_recipe = ShapelessCraftingRecipe("door_recipe", ["minecraft:stick", ["minecraft:oak_planks", "minecraft:spruce_planks"]], "minecraft:oak_door", 1)
-iron_helmet_recipe = ShapedCraftingRecipe("iron_helmet_recipe", ["iii", "   ", "iii"], {"i": "minecraft:iron_ingot"}, "minecraft:iron_helmet", 1)
+cobble_recipe = ShapelessCraftingRecipe("cobblestone_recipe", "minecraft:cobblestone", ["minecraft:stone", "minecraft:stick"], 2)
+door_recipe = ShapelessCraftingRecipe("door_recipe", "minecraft:oak_door", ["minecraft:stick", ["minecraft:oak_planks", "minecraft:spruce_planks"]])
+iron_helmet_recipe = ShapedCraftingRecipe("iron_helmet_recipe", "minecraft:iron_helmet", ["iii", "   ", "iii"], {"i": "minecraft:iron_ingot"})
 burnable_diamond_recipe = FurnaceRecipe("burnable_diamond_recipe", "minecraft:diamond", "minecraft:charcoal", 1, 40)
 smokable_redstone_recipe = SmokerRecipe("smokable_redstone_recipe", "minecraft:redstone", "minecraft:diamond", 100, 20)
 lapis_campfire_recipe = CampfireRecipe("lapis_campfire_recipe", "minecraft:lapis_lazuli", "minecraft:cooked_beef", 100, 20)
-ruby_recipe = ShapelessCraftingRecipe("ruby_recipe", ["minecraft:emerald", "minecraft:redstone"], ruby, recipe_category="equipment")
-ruby_furnace_recipe = FurnaceRecipe("ruby_furnace_recipe", "minecraft:emerald", ruby, 1, 40)
-moss_to_pale_recipe = StonecutterRecipe("moss_to_pale_recipe", "minecraft:moss_block", "minecraft:pale_moss_block", 1)
-ruby_stonecutter_recipe = StonecutterRecipe("ruby_stonecutter_recipe", "minecraft:redstone", ruby, 1)
-ruby_campfire_recipe = CampfireRecipe("ruby_campfire_recipe", "redstone", ruby, 100, 20)
-ruby_smithing_tranform_recipe = SmithingTransformRecipe("ruby_transform_recipe", "gold_ingot", "iron_ingot", "redstone", ruby)
-ruby_or_topaz_to_player_head = ShapelessCraftingRecipe("ruby_or_topaz_to_player_head", [ruby_or_topaz_tag], player_head)
+ruby_recipe = ShapelessCraftingRecipe("ruby_recipe", ruby, ["minecraft:emerald", "minecraft:redstone"], recipe_category="equipment")
+ruby_furnace_recipe = FurnaceRecipe("ruby_furnace_recipe", ruby, "minecraft:emerald", 1, 40)
+moss_to_pale_recipe = StonecutterRecipe("moss_to_pale_recipe", "minecraft:pale_moss_block", "minecraft:moss_block")
+ruby_stonecutter_recipe = StonecutterRecipe("ruby_stonecutter_recipe", ruby, "minecraft:redstone")
+ruby_campfire_recipe = CampfireRecipe("ruby_campfire_recipe", ruby, "redstone", 100, 20)
+ruby_smithing_tranform_recipe = SmithingTransformRecipe("ruby_transform_recipe", ruby, "gold_ingot", "iron_ingot", "redstone")
+ruby_or_topaz_to_player_head = ShapelessCraftingRecipe("ruby_or_topaz_to_player_head", player_head, [ruby_or_topaz_tag])
 
 recipes: list[Recipe] = [
     cobble_recipe, door_recipe, iron_helmet_recipe, burnable_diamond_recipe, smokable_redstone_recipe, lapis_campfire_recipe, ruby_recipe,
@@ -197,7 +197,14 @@ special_model = CustomItemRenderDefinition("special_model", SpecialItemModel(
     ShulkerBoxSpecialItemModelType(texture="minecraft:shulker_green", openness=0.3, orientation="up"),
     base="minecraft:block/copper_bulb"), showcase_item="acacia_sign",
 )
-custom_item_render_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model]
+fire_aspect_sword = CustomItemRenderDefinition(
+    "fire_aspect_sword", ConditionalItemModel(
+        ComponentConditional("enchantments", [{"enchantments": "minecraft:fire_aspect"}]),
+        true_model=ModelItemModel("minecraft:item/golden_sword"),
+        false_model=ModelItemModel("minecraft:item/diamond_sword"),
+    ), showcase_item="minecraft:iron_sword",
+)
+custom_item_render_definitions = [blue_sword, hold_model, empty_model, composite_model, hand_model, range_dispatch, bundle_model, special_model, fire_aspect_sword]
 # endregion
 # ============================================================================================================
 # region: Custom Enchants
@@ -264,18 +271,18 @@ my_custom_damage_type = CustomDamageType(
 # ============================================================================================================
 # region: Custom Crafter
 custom_crafter = CustomCrafter(
-    "my_custom_crafter", "My custom crafter", ShapedCraftingRecipe("custom_crafter_recipe", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}, "air"),
+    "my_custom_crafter", "My custom crafter", ShapedCraftingRecipe("custom_crafter_recipe", "air", ["C C", "C C", "CCC"], {"C": "minecraft:copper_ingot"}),
     recipes=[
-        CustomCrafterRecipe("topaz_recipe", [
+        CustomCrafterRecipe("topaz_recipe", topaz, [
             ruby,  "",  ruby,
             ruby,  "",  ruby,
             ruby, ruby, ruby,
-        ], topaz),
-        CustomCrafterRecipe("custom_crafting_for_base_chest", [
+        ]),
+        CustomCrafterRecipe("custom_crafting_for_base_chest", "minecraft:chest", [
             "#minecraft:planks", "#minecraft:planks", "#minecraft:planks",
             "#minecraft:planks", "",                  "#minecraft:planks",  # fmt: skip
             "#minecraft:planks", "#minecraft:planks", "#minecraft:planks"
-        ], "minecraft:chest"),
+        ]),
     ]
 )
 # endregion
@@ -320,6 +327,19 @@ entity_variants: list[EntityVariant] = [sand_pig, sand_cow, sand_chicken, sand_c
 # tick_render_definition = CustomItemRenderDefinition("tick", "minecraft:gui/sprites/container/beacon/confirm", showcase_item="iron_sword")
 # endregion
 # ============================================================================================================
+# region: Custom Tests
+crafting_environment = AllOfEnvironment(
+    "crafting_environment",
+    definitions=[
+        FunctionEnvironment("iron_block_crafting_recipe_environment"),
+    ],
+)
+iron_block_crafting_recipe = CustomGameTest(
+    "iron_block_crafting_recipe", crafting_environment, GameTestStructure("iron_block_crafting_structure", "structures/iron_block_crafting_recipe.nbt"),
+    max_ticks=20, setup_ticks=20,
+)
+# endregion
+# ============================================================================================================
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -344,6 +364,8 @@ datapack = Pack(
     # custom_loops=[every_sixty_seconds],
     custom_fonts=[ttf_font],
     custom_entity_variants=entity_variants,
+    custom_game_tests=[iron_block_crafting_recipe],
+    custom_test_environments=[crafting_environment],
     world_gen_resources=WorldGenResources(
         custom_structures=[bee_explosion_structure, my_little_house],
         custom_structure_sets=[custom_structure_set],

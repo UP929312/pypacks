@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any, TypeAlias, Sequence
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.custom_predicate import Predicate
 from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.custom_loot_tables.functions import LootTableFunction, SetCountFunction, SetComponentsFunction
@@ -124,7 +125,7 @@ class Pool:
         return cls(
             conditions=[Predicate.from_dict(internal_name, condition) for condition in data.get("conditions", [])],
             functions=[LootTableFunction.from_dict(function) for function in data.get("functions", [])],
-            rolls=int(data["rolls"]) if isinstance(data["rolls"], float) else NumberProvider.from_dict(data["rolls"]),
+            rolls=int(data["rolls"]) if isinstance(data["rolls"], (int, float)) else NumberProvider.from_dict(data["rolls"]),
             bonus_rolls=int(data.get("bonus_rolls", 0)),
             entries=[SingletonEntry.from_dict(entry) for entry in data["entries"]],
         )
@@ -169,7 +170,7 @@ LootTablePool: TypeAlias = "Pool | SingleItemPool | SimpleRangePool"
 
 
 @dataclass
-class CustomLootTable:
+class CustomLootTable(BaseResource):
     # https://minecraft.wiki/w/Loot_table
     internal_name: str
     pools: Sequence["LootTablePool"] = field(default_factory=list)
@@ -178,9 +179,6 @@ class CustomLootTable:
     loot_table_type: LootContextTypes = "generic"
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="loot_table")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return recursively_remove_nones_from_data(  # type: ignore[no-any-return]
@@ -193,37 +191,26 @@ class CustomLootTable:
         )
 
     @classmethod
-    def from_dict(cls, name: str, data: dict[str, Any]) -> "CustomLootTable":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomLootTable":
         return cls(
-            internal_name=name.replace("/", "_"),
+            internal_name,
             pools=[Pool.from_dict(pool) for pool in data.get("pools", [])],
             functions=[LootTableFunction.from_dict(function) for function in data.get("functions", [])],
             random_sequence=data.get("random_sequence"),
-            loot_table_type=data["type"].removeprefix("minecraft:"),
+            loot_table_type=data.get("type", "generic").removeprefix("minecraft:"),
         )
 
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
-
     def generate_give_command(self, pack: "Pack") -> str:
-        return f"loot give @p loot {pack.namespace}:{self.internal_name}"
+        return f"loot give @p loot {self.get_reference(pack.namespace)}"
 
 
 class SingleItemLootTable(CustomLootTable):
     """Simple Util class for a loot table with a single item."""
     def __init__(self, internal_name: str, item: "str | CustomItem") -> None:
-        # self.internal_name = internal_name
-        # self.item = item
         super().__init__(internal_name, pools=[SingleItemPool(item)])
 
 
 class SimpleRangeLootTable(CustomLootTable):
     """Simple Util class for a loot table with a single item with a simple range."""
     def __init__(self, internal_name: str, item: "str | CustomItem", min_count: int = 1, max_count: int = 1) -> None:
-        # self.internal_name = internal_name
-        # self.item = item
-        # self.min_count = min_count
-        # self.max_count = max_count
-
         super().__init__(internal_name, pools=[SimpleRangePool(item, min_count, max_count)])

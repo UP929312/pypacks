@@ -1,8 +1,8 @@
-import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from dataclasses import dataclass, field
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomGameTest:
+class CustomGameTest(BaseResource):
     """A test instance represents a test that can be run by the GameTest framework."""
     # https://minecraft.wiki/w/Test_instance_definition
     internal_name: str
@@ -21,7 +21,7 @@ class CustomGameTest:
     max_ticks: int  # A positive integer representing the maximum number of ticks allowed to pass before the test is considered timed out.
     setup_ticks: int = 0  # Represents a number of ticks to wait after placing the structure before starting the test. Must be a non-negative integer.
     required: bool = True  # Whether the test is considered required to pass for the full test suite to pass.
-    rotation: Literal["none", "clockwise_90", "180", "counterclockwise_90"] = "none"  # Optional rotation to apply to the test structure.
+    rotation: Literal["none", "clockwise_90", "180", "counterclockwise_90"] = "none"  # Rotation to apply to the test structure.
     manual_only: bool = False  # Set to true for tests that are not included as part of automated test runs.
     sky_access: bool = False  # Whether the test needs clear access to the sky. Tests are enclosed in barrier blocks. If set to true, the top is left open.
     max_attempts: int = 1  # Number of attempts to run the test.
@@ -36,9 +36,6 @@ class CustomGameTest:
             raise ValueError("A function must be provided for a function test.")
         if self.type != "function" and self.function is not None:
             raise ValueError("A function cannot be provided for a block-based test.")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.world_gen.structure import GameTestStructure
@@ -57,11 +54,11 @@ class CustomGameTest:
         })
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "CustomGameTest":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomGameTest":
         return cls(
-            internal_name=data["internal_name"],
+            internal_name,
             environment=data["environment"],
-            structure=data["structure"],
+            structure=data["structure"].split(":")[1],
             max_ticks=data["max_ticks"],
             setup_ticks=data.get("setup_ticks", 0),
             required=data.get("required", True),
@@ -78,34 +75,37 @@ class CustomGameTest:
         return f"test run {self.get_reference(pack_namespace)}"
 
     def create_datapack_files(self, pack: "Pack") -> None:
+        super().create_datapack_files(pack)
         from pypacks.resources.world_gen.structure import GameTestStructure
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
         if isinstance(self.structure, GameTestStructure):
             self.structure.create_datapack_files(pack)
 
+    # @classmethod
+    # def from_datapack_files(cls, root_path: "Path") -> list["CustomGameTest"]:
+    #     game_tests: list["CustomGameTest"] = super().from_datapack_files(root_path)  # type: ignore[assign]
+    #     for game_test in game_tests:
+    #         path: "Path" = root_path/"structure"/game_test.structure  # type: ignore[abc]
+    #         if path.exists():
+    #             game_test.structure = GameTestStructure(game_test.internal_name, path)
+    #         else:
+    #             raise FileNotFoundError(f"Structure file not found at {path}")
+    #     return game_tests
+
 
 @dataclass
-class CustomTestEnvironment:
+class CustomTestEnvironment(BaseResource):
     """Do not instantiate this class directly. Use one of the subclasses instead."""
     internal_name: str
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="test_environment")
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "CustomTestEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomTestEnvironment":
         cls_ = TEST_ENVIRONMENT_TO_CLASSES[data["type"]]
-        return cls_.from_dict(data)
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
+        return cls_.from_dict(internal_name, data)
 
 
 @dataclass
@@ -124,9 +124,9 @@ class AllOfEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "AllOfEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AllOfEnvironment":
         return cls(
-            internal_name=data["internal_name"],
+            internal_name,
             definitions=data["definitions"],
         )
 
@@ -153,9 +153,9 @@ class FunctionEnvironment(CustomTestEnvironment):
         })
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "FunctionEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "FunctionEnvironment":
         return cls(
-            internal_name=data["internal_name"],
+            internal_name,
             setup=data.get("setup"),
             teardown=data.get("teardown"),
         )
@@ -176,9 +176,9 @@ class GameRulesEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "GameRulesEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GameRulesEnvironment":
         return cls(
-            internal_name=data["internal_name"],
+            internal_name,
             bool_rules={rule["rule"]: rule["value"] for rule in data["bool_rules"]},
             int_rules={rule["rule"]: rule["value"] for rule in data["int_rules"]},
         )
@@ -197,9 +197,9 @@ class WeatherEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "WeatherEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WeatherEnvironment":
         return cls(
-            internal_name=data["internal_name"],
+            internal_name,
             weather=data["weather"],
         )
 
@@ -221,9 +221,9 @@ class TimeOfDayEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TimeOfDayEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TimeOfDayEnvironment":
         return cls(
-            internal_name=data["internal_name"],
+            internal_name,
             time=data["time"],
         )
 

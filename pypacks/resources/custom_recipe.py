@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from pypacks.pack import Pack
 
 from pypacks.image_manipulation.recipe_image_data import generate_recipe_image
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_tag import CustomTag
 from pypacks.scripts.repos.all_items import MinecraftItem
@@ -18,9 +19,11 @@ MinecraftOrCustomItem: TypeAlias = MinecraftItem | CustomItem
 
 
 @dataclass
-class GenericRecipe:
+class Recipe(BaseResource):
     internal_name: str
+    result: MinecraftOrCustomItem
 
+    recipe_block_name: str = field(init=False, repr=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, default="recipe")
 
     def generate_recipe_image(self) -> bytes:
@@ -29,10 +32,21 @@ class GenericRecipe:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "Recipe":
+        cls_ = RECIPE_TYPE_TO_CLASSES[data["type"]]
+        return cls_.from_dict(internal_name, data)
+
+    @staticmethod
+    def result_from_dict(internal_name: str, data: dict[str, Any]) -> "MinecraftOrCustomItem":
+        from pypacks.resources.custom_item import CustomItem
+        if "components" in data["result"]:
+            return CustomItem.from_dict(internal_name+"_item", data["result"]["id"], data["result"]["components"])
+        return data["result"]["id"]
+
     def create_datapack_files(self, pack: "Pack") -> None:
         if not isinstance(self, CustomCrafterRecipe):
-            with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-                json.dump(self.to_dict(pack.namespace), file, indent=4)
+            super().create_datapack_files(pack)
 
     @staticmethod
     def resolve_ingredient_type(data: "MinecraftItem | CustomTag | list[MinecraftItem] | CustomItem") -> "str | CustomItem":
@@ -47,9 +61,8 @@ class GenericRecipe:
 
 
 @dataclass
-class CustomCrafterRecipe(GenericRecipe):
-    ingredients: list[MinecraftOrCustomItem | Literal["minecraft:air", "air", ""] | CustomTag]
-    result: MinecraftOrCustomItem
+class CustomCrafterRecipe(Recipe):
+    ingredients: list["MinecraftOrCustomItem | Literal['minecraft:air', 'air', ''] | CustomTag"]
 
     recipe_block_name: str = field(init=False, repr=False, default="custom_crafter")  # "dispenser"
 
@@ -58,11 +71,9 @@ class CustomCrafterRecipe(GenericRecipe):
 
 
 @dataclass
-class ShapedCraftingRecipe(GenericRecipe):
-    internal_name: str
-    rows: list[str]
-    keys: dict[str, MinecraftItem | CustomTag | list[MinecraftItem]]  # e.g. {"I": "minecraft:iron_ingot", "S": "minecraft:stick"}
-    result: MinecraftOrCustomItem
+class ShapedCraftingRecipe(Recipe):
+    rows: list[str] = field(default_factory=lambda: ["III", " S ", "III"])
+    keys: dict[str, "MinecraftItem | CustomTag | list[MinecraftItem]"] = field(default_factory=lambda: {"I": "minecraft:iron_ingot", "S": "minecraft:stick"})
     amount: int = 1
     recipe_category: Literal["equipment", "building", "misc", "redstone"] = "misc"
 
@@ -96,31 +107,28 @@ class ShapedCraftingRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload, assignment]
         return data
 
-    # @classmethod  # TODO: Test
-    # def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapedCraftingRecipe":
-    #     from pypacks.resources.custom_item import CustomItem
-    #     rows = [data["pattern"][0]]
-    #     if len(data["pattern"]) > 1:
-    #         rows.append(data["pattern"][1])
-    #     if len(data["pattern"]) > 2:
-    #         rows.append(data["pattern"][2])
-    #     return cls(
-    #         internal_name,
-    #         rows=rows,
-    #         keys=data["keys"],
-    #         result=data["result"]["id"] if not data["result"].get("components") else CustomItem.from_dict(data["result"]),  # TODO: This won't work, we need to combine the id and components I suppose.
-    #         amount=data["result"]["count"],
-    #         recipe_category=data.get("recipe_category", "misc"),
-    #     )
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapedCraftingRecipe":
+        rows = [data["pattern"][0]]
+        if len(data["pattern"]) > 1:
+            rows.append(data["pattern"][1])
+        if len(data["pattern"]) > 2:
+            rows.append(data["pattern"][2])
+        return cls(
+            internal_name,
+            rows=rows,
+            keys=data["key"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            amount=data["result"].get("count", 1),
+            recipe_category=data.get("recipe_category", "misc"),
+        )
 
 
 @dataclass
-class ShapelessCraftingRecipe(GenericRecipe):
-    internal_name: str
-    ingredients: list[MinecraftItem | CustomTag | list[MinecraftItem]]
+class ShapelessCraftingRecipe(Recipe):
+    ingredients: list["MinecraftItem | CustomTag | list[MinecraftItem]"]
     # Ingredients can either be a list of Items (i.e. a flint and iron ingot makes a flint and steel), or a list of lists,
     # which allows you to put multiple items in, e.g. making a chest from all the types of wood.
-    result: MinecraftOrCustomItem
     amount: int = 1
     recipe_category: Literal["equipment", "building", "misc", "redstone"] = "misc"
 
@@ -143,13 +151,23 @@ class ShapelessCraftingRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload]
         return data
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapelessCraftingRecipe":
+        print(internal_name, data)
+        return cls(
+            internal_name,
+            ingredients=data["ingredients"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            amount=data["result"].get("count", 1),
+            recipe_category=data.get("recipe_category", "misc"),
+        )
+
 
 @dataclass
-class CraftingTransmuteRecipe(GenericRecipe):
-    internal_name: str
-    input_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    material_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftItem
+class CraftingTransmuteRecipe(Recipe):
+    result: "MinecraftItem"
+    input_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
+    material_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
     recipe_category: Literal["equipment", "building", "misc", "redstone"] = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
@@ -163,12 +181,20 @@ class CraftingTransmuteRecipe(GenericRecipe):
             "result": self.result,
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CraftingTransmuteRecipe":
+        return cls(
+            internal_name,
+            result=data["result"],
+            input_item=data["input"],
+            material_item=data["material"],
+            recipe_category=data.get("recipe_category", "misc"),
+        )
+
 
 @dataclass
-class BlastFurnaceRecipe(GenericRecipe):
-    internal_name: str
-    ingredient: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftOrCustomItem
+class BlastFurnaceRecipe(Recipe):
+    ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
     experience: int | None = 1
     cooking_time_ticks: int = 200
     recipe_category: Literal["blocks", "misc"] = "misc"
@@ -178,24 +204,33 @@ class BlastFurnaceRecipe(GenericRecipe):
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:blasting",
-            "category": self.recipe_category,
             "ingredient": self.ingredient.get_reference(pack_namespace) if isinstance(self.ingredient, CustomTag) else self.ingredient,
             "result": {
                 "id": str(self.result),
             },
             "experience": self.experience,
-            "cookingtime": self.cooking_time_ticks
+            "cookingtime": self.cooking_time_ticks,
+            "category": self.recipe_category,
         }
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BlastFurnaceRecipe":
+        return cls(
+            internal_name,
+            ingredient=data["ingredient"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            experience=data["experience"],
+            cooking_time_ticks=data["cookingtime"],
+            recipe_category=data.get("recipe_category", "misc"),
+        )
+
 
 @dataclass
-class CampfireRecipe(GenericRecipe):
-    internal_name: str
-    ingredient: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftOrCustomItem
+class CampfireRecipe(Recipe):
+    ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
     experience: int | None = 1
     cooking_time_ticks: int = 200
 
@@ -214,13 +249,21 @@ class CampfireRecipe(GenericRecipe):
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
+    
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CampfireRecipe":
+        return cls(
+            internal_name,
+            ingredient=data["ingredient"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            experience=data["experience"],
+            cooking_time_ticks=data["cookingtime"],
+        )
 
 
 @dataclass
-class FurnaceRecipe(GenericRecipe):
-    internal_name: str
-    ingredient: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftOrCustomItem
+class FurnaceRecipe(Recipe):
+    ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
     experience: int | None = 1
     cooking_time_ticks: int = 200
     recipe_category: Literal["food", "blocks", "misc"] = "misc"
@@ -242,14 +285,23 @@ class FurnaceRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "FurnaceRecipe":
+        return cls(
+            internal_name,
+            ingredient=data["ingredient"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            experience=data["experience"],
+            cooking_time_ticks=data["cookingtime"],
+            recipe_category=data.get("recipe_category", "misc"),
+        )
+
 
 @dataclass
-class SmithingTransformRecipe(GenericRecipe):
-    internal_name: str
-    template_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    base_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    addition_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftOrCustomItem
+class SmithingTransformRecipe(Recipe):
+    template_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
+    base_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
+    addition_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
@@ -267,15 +319,24 @@ class SmithingTransformRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmithingTransformRecipe":
+        return cls(
+            internal_name,
+            template_item=data["template"],
+            base_item=data["base"],
+            addition_item=data["addition"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),\
+        )
+
 
 @dataclass
-class SmithingTrimRecipe(GenericRecipe):
-    internal_name: str
-    template_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    base_item: MinecraftItem | CustomTag | list[MinecraftItem]
-    addition_item: MinecraftItem | CustomTag | list[MinecraftItem]
+class SmithingTrimRecipe(Recipe):
+    template_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
+    base_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
+    addition_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
 
-    result: MinecraftItem | CustomTag | list[MinecraftItem] = field(init=False, repr=False, default=None)  # type: ignore[assignment]
+    result: "MinecraftItem | CustomTag | list[MinecraftItem]" = field(init=False, repr=False)
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
     def __post_init__(self) -> None:
@@ -289,12 +350,18 @@ class SmithingTrimRecipe(GenericRecipe):
             "addition": self.addition_item.get_reference(pack_namespace) if isinstance(self.addition_item, CustomTag) else self.addition_item,
         }
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmithingTrimRecipe":
+        return cls(
+            internal_name,
+            template_item=data["template"],
+            base_item=data["base"],
+            addition_item=data["addition"],
+        )
 
 @dataclass
-class SmokerRecipe(GenericRecipe):
-    internal_name: str
-    ingredient: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftOrCustomItem
+class SmokerRecipe(Recipe):
+    ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
     experience: int | None = 1
     cooking_time_ticks: int = 200
 
@@ -315,12 +382,20 @@ class SmokerRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmokerRecipe":
+        return cls(
+            internal_name,
+            ingredient=data["ingredient"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            experience=data["experience"],
+            cooking_time_ticks=data["cookingtime"],
+        )
+
 
 @dataclass
-class StonecutterRecipe(GenericRecipe):
-    internal_name: str
-    ingredient: MinecraftItem | CustomTag | list[MinecraftItem]
-    result: MinecraftOrCustomItem
+class StonecutterRecipe(Recipe):
+    ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
     count: int = 1
 
     recipe_block_name: str = field(init=False, repr=False, default="stonecutter")
@@ -338,8 +413,17 @@ class StonecutterRecipe(GenericRecipe):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, call-overload]
         return data
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "StonecutterRecipe":
+        return cls(
+            internal_name,
+            ingredient=data["ingredient"],
+            result=cls.result_from_dict(f"{internal_name}_item", data),
+            count=data["result"].get("count", 1),
+        )
 
-RECIPE_TYPE_TO_CLASSES = {
+
+RECIPE_TYPE_TO_CLASSES: dict[str, type["Recipe"]] = {
     "minecraft:crafting_shaped": ShapedCraftingRecipe,
     "minecraft:crafting_shapeless": ShapelessCraftingRecipe,
     "minecraft:crafting_transmute": CraftingTransmuteRecipe,
@@ -351,12 +435,6 @@ RECIPE_TYPE_TO_CLASSES = {
     "minecraft:smoking": SmokerRecipe,
     "minecraft:stonecutting": StonecutterRecipe,
 }
-
-# This is a type hint for a recipe, it can be any of the recipe types
-Recipe: TypeAlias = (
-    CustomCrafterRecipe | ShapedCraftingRecipe | ShapelessCraftingRecipe | CraftingTransmuteRecipe | FurnaceRecipe | BlastFurnaceRecipe |
-    CampfireRecipe | SmithingTransformRecipe | SmithingTrimRecipe | SmokerRecipe | StonecutterRecipe
-)
 
 ALL_RECIPES_TYPES: list[Recipe] = [
     CustomCrafterRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,  # type: ignore[list-item]

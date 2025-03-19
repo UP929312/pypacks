@@ -424,10 +424,10 @@ class CarriedConditional(ConditionalBooleanPropertyType):
 class ComponentConditional(ConditionalBooleanPropertyType):
     """Uses component item sub predicates to match item components."""
     predicate: str  # "Predicate | str"  # TODO: Allow custom predicates, convert to dict, need pack_namespace in these to_dict functions
-    value: str
+    value: str | list[dict[str, str]]
     # https://minecraft.wiki/w/Items_model_definition#component
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, Any]:
         return {"property": "minecraft:component", "predicate": self.predicate, "value": self.value}
 
     @classmethod

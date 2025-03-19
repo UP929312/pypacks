@@ -34,6 +34,9 @@ class CustomTag(BaseResource):
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="tags")
 
+    def get_reference(self, pack_namespace: str) -> str:
+        return "#"+super().get_reference(pack_namespace)  # Cannot be removed, is prefix with "#"!
+
     def to_dict(self, pack_namespace: str) -> dict[str, bool | list[str]]:
         from pypacks.resources.custom_item import CustomItem
         from pypacks.utils import recursively_remove_nones_from_data
@@ -69,11 +72,11 @@ class CustomTag(BaseResource):
     def from_datapack_files(cls, root_path: "Path") -> list["CustomTag"]:
         """Path should be the root of the pack"""
         tags = []
-        for tag_path_absolute, _ in BaseResource.get_all_resource_paths(cls, root_path):
+        for tag_path_absolute in BaseResource.get_all_resource_paths(cls, root_path):
             with open(tag_path_absolute, "r") as file:
                 tags.append(
                     cls.from_dict(
-                        Path(tag_path_absolute).parts[-1].removesuffix(".json"),
+                        tag_path_absolute.stem,
                         tag_path_absolute.parts[-2],  # type: ignore[arg-type]
                         json.load(file),
                     )

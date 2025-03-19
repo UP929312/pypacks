@@ -27,13 +27,13 @@ class CustomDimension(BaseResource):
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension")
 
     def generate_teleport_command(self, pack_namespace: str) -> str:
-        return f"/execute in {pack_namespace}:{self.internal_name} run tp @s ~ ~ ~"
+        return f"/execute in {self.get_reference(pack_namespace)} run tp @s ~ ~ ~"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.world_gen.biome import CustomBiome
         return {
             "type": self.dimension_type.get_reference(pack_namespace) if isinstance(self.dimension_type, CustomDimensionType) else self.dimension_type,
-            # TODO: More inputs here
+            # TODO: More inputs here, we should probably type the Biome sources
             "generator": {
                 "type": "minecraft:noise",
                 "biome_source": {

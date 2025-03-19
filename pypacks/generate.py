@@ -39,7 +39,8 @@ def generate_resource_pack(pack: "Pack") -> None:
     # Create the sounds.json file.
     if pack.custom_sounds:
         with open(pack.resource_pack_path/"assets"/pack.namespace/"sounds.json", "w") as file:
-            json.dump({sound.internal_name: sound.create_sound_entry(pack.namespace) for sound in pack.custom_sounds}, file, indent=4)
+            # Mapping of sound internal name (Sound Event) to sounds
+            json.dump({sound.internal_name: sound.to_dict(pack.namespace) for sound in pack.custom_sounds}, file, indent=4)
     # ================================================================================================
 
 

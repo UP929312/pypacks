@@ -33,8 +33,8 @@ class CustomItem:
     texture_path: str | None = field(repr=False, default=None)
     item_model: "str | CustomItemRenderDefinition | None" = field(repr=False, default=None)
     custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
-    on_right_click: "str | MCFunction | Raycast | None" = None  # Command/Function/Raycast to call when the item is right clicked
-    on_item_drop: "str | MCFunction | None" = None  # Command/Function to call when the item is dropped
+    on_right_click: "str | MCFunction | Raycast | None" = field(repr=False, default=None)  # Command/Function/Raycast to call when the item is right clicked
+    on_item_drop: "str | MCFunction | None" = field(repr=False, default=None)  # Command/Function to call when the item is dropped
     components: "Components" = field(repr=False, default_factory=lambda: Components())
     ref_book_config: "RefBookConfig" = field(repr=False, default_factory=lambda: MISC_REF_BOOK_CONFIG)
 
@@ -105,7 +105,21 @@ class CustomItem:
 
     @classmethod
     def from_dict(cls, internal_name: str, base_item: MinecraftItem, data: dict[str, Any]) -> "CustomItem":
-        raise NotImplementedError
+        return cls(
+            internal_name,
+            base_item,
+            custom_name=data.get("custom_name"),
+            lore=data.get("lore", []),
+            max_stack_size=data.get("max_stack_size", 64),
+            rarity=data.get("rarity"),
+            texture_path=None,  # data.get("texture_path"),  # TODO: Look more into this
+            item_model=data.get("item_model"),
+            custom_data=data.get("custom_data", {}),
+            on_right_click=None,  # TODO: Look more into this
+            on_item_drop=None,  # TODO: Look more into this
+            components=Components.from_dict(data),
+            ref_book_config=MISC_REF_BOOK_CONFIG,
+        )
 
     @staticmethod
     def to_component_string(obj: dict[str, Any]) -> str:
