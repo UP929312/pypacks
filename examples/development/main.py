@@ -373,9 +373,3 @@ datapack = Pack(
     custom_ore_generations=[ruby_generation],
     config=Config(warn_about_tags_with_custom_items=False),
 ).generate_pack()
-
-a = Pack.from_existing_pack(
-    r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing",
-    r"C:\Users\Ben\AppData\Roaming\.minecraft\resourcepacks\PyPacks Testing\assets\pypacks_testing"
-)
-# print(a)

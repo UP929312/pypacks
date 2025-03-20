@@ -12,15 +12,32 @@ if TYPE_CHECKING:
 
 
 @dataclass
+class CustomFont:
+    internal_name: str
+    providers: list["BitMapFontChar | SpaceFontChar | TTFFontProvider | ReferenceFontProvider"]
+
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="font")
+
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}.json"
+
+    def to_dict(self, pack_namespace: str) -> list[dict[str, Any]]:
+        return [
+            provider.to_dict(pack_namespace)
+            for provider in self.providers
+        ]
+
+
+@dataclass
 class CustomAutoAssignedFont:
     """Adds a custom font to the resource pack. Not invokable manually, used internally (for now)"""
-    name: str
+    internal_name: str
     font_elements: list["BitMapFontChar | SpaceFontChar | TTFFontProvider | ReferenceFontProvider"]
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="font")
 
     def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.name}.json"
+        return f"{pack_namespace}:{self.internal_name}.json"
 
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999
@@ -33,7 +50,7 @@ class CustomAutoAssignedFont:
             for element in self.font_elements
         ]
 
-    # def from_dict(self, data: list[dict[str, Any]]) -> "CustomAutoAssignedFont":
+    # def from_dict(self, internal_name: str, data: list[dict[str, Any]]) -> "CustomAutoAssignedFont":
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         for font_element in self.font_elements:
@@ -41,7 +58,7 @@ class CustomAutoAssignedFont:
 
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
 
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
             file.write(json.dumps({"providers": self.to_dict(pack.namespace)}, indent=4).replace("\\\\", "\\"))  # Replace double backslashes with single backslashes
 
     def get_test_command(self, pack_namespace: str) -> str:
@@ -63,7 +80,6 @@ class TTFFontProvider:
     skip: list[str] = field(default_factory=list)  # A list of the characters to which this font has no assignment. If provided the strings are concatenated together and then act as if it were originally a string. This allows the same input as a bitmap provider's chars.
 
     def __post_init__(self) -> None:
-        self.file_type = "ttf"  # if str(self.font_path).endswith(".ttf") else "otf"
         assert str(self.font_path).endswith(".ttf"), "Font path must end with .ttf!"
         assert self.oversample > 0, "Oversample must be greater than 0"
 
@@ -76,7 +92,7 @@ class TTFFontProvider:
         # │   │   └── <name>.ttf/otf
         return {
             "type": "ttf",
-            "file": f"{pack_namespace}:{self.name}.{self.file_type}",
+            "file": f"{pack_namespace}:{self.name}.ttf",
             "oversample": self.oversample,
             "shift": [self.horizontal_shift, self.vertical_shift],
             "size": self.size,
@@ -85,7 +101,7 @@ class TTFFontProvider:
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"font", exist_ok=True)
-        shutil.copy(self.font_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"font"/f"{self.name}.{self.file_type}")
+        shutil.copy(self.font_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"font"/f"{self.name}.ttf")
 
 
 # =================================================================================================
@@ -124,14 +140,12 @@ class SpaceFontChar:
     """Show chosen characters as spaces."""
     name: str
     width: int = 1  # Defines how wide the space character is
+    # chars: list[str] = field(default_factory=lambda: [" "])  # A list of characters to be shown as spaces
 
     def to_dict(self, pack_namespace: str, chars: list[str]) -> dict[str, Any]:
         return {
             "type": "space",
-            "advances": {
-                char: self.width
-                for char in chars
-            }
+            "advances": {char: self.width for char in chars},
         }
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
@@ -141,7 +155,7 @@ class SpaceFontChar:
 @dataclass
 class ReferenceFontProvider:
     name: str
-    font: "str | CustomAutoAssignedFont"
+    font: "str | CustomAutoAssignedFont"  # | CustomFont 
 
     def to_dict(self, pack_namespace: str, _: list[str]) -> dict[str, Any]:
         return {

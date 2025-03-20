@@ -282,9 +282,11 @@ class Pack:
         generate_datapack(minecraft)
 
     @classmethod
-    def from_existing_pack(cls, datapack_path: "str | Path", resource_pack_path: "str | Path") -> "Pack":
+    def from_existing_pack(cls, datapack_namespace: str, resource_pack_namespace: str, datapack_path: "str | Path", resource_pack_path: "str | Path") -> "Pack":
         datapack_path = Path(datapack_path)
+        datapack_path_namespaced = datapack_path/"data"/datapack_namespace
         resource_pack_path = Path(resource_pack_path)
+        resource_pack_path_namespaced = resource_pack_path/"assets"/resource_pack_namespace
         from pypacks.resources.custom_advancement import CustomAdvancement
         from pypacks.resources.custom_damage_type import CustomDamageType
         from pypacks.resources.custom_dimension import CustomDimension
@@ -304,30 +306,30 @@ class Pack:
         # from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
         # All WorldGenResources
 
-        entity_variants_2d = [x.from_datapack_files(datapack_path) for x in ALL_ENTITY_VARIANTS]  # TODO: Needs from_combined_files
-        # print(CustomLanguage.from_resource_pack_files(resource_pack_path))
-        print(Recipe.from_datapack_files(datapack_path))
+        entity_variants_2d = [x.from_datapack_files(datapack_path_namespaced) for x in ALL_ENTITY_VARIANTS]  # TODO: Needs from_combined_files (generic and wolf)
+        # rint(CustomLanguage.from_resource_pack_files(resource_pack_path))
+        # rint(Recipe.from_datapack_files(datapack_path))
         return Pack(
-            name="", description="", namespace="a",
-            custom_advancements=CustomAdvancement.from_datapack_files(datapack_path),
-            custom_damage_types=CustomDamageType.from_datapack_files(datapack_path),
-            custom_dimensions=CustomDimension.from_datapack_files(datapack_path),
-            custom_enchantments=CustomEnchantment.from_datapack_files(datapack_path),
+            name=datapack_path.stem, description="", namespace=datapack_path_namespaced.stem,
+            custom_advancements=CustomAdvancement.from_datapack_files(datapack_path_namespaced),
+            custom_damage_types=CustomDamageType.from_datapack_files(datapack_path_namespaced),
+            custom_dimensions=CustomDimension.from_datapack_files(datapack_path_namespaced),
+            custom_enchantments=CustomEnchantment.from_datapack_files(datapack_path_namespaced),
             custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
             # custom_fonts=CustomAutoAssignedFont.from_datapack_files(datapack_path),
-            custom_game_tests=CustomGameTest.from_datapack_files(datapack_path),
-            custom_test_environments=CustomTestEnvironment.from_datapack_files(datapack_path),
-            custom_jukebox_songs=CustomJukeboxSong.from_combined_files(datapack_path, resource_pack_path),
-            custom_languages=CustomLanguage.from_resource_pack_files(resource_pack_path),
-            custom_loot_tables=CustomLootTable.from_datapack_files(datapack_path),
-            custom_mcfunctions=MCFunction.from_datapack_files(datapack_path),
-            custom_paintings=CustomPainting.from_combined_files(datapack_path, resource_pack_path),
-            custom_predicates=Predicate.from_datapack_files(datapack_path),
-            # custom_recipes=Recipe.from_datapack_files(datapack_path),
-            custom_sounds=CustomSound.from_resource_pack_files(resource_pack_path),
-            custom_tags=CustomTag.from_datapack_files(datapack_path),
-            custom_textures=CustomTexture.from_resource_pack_files(resource_pack_path),
-            custom_model_definitions=CustomModelDefinition.from_datapack_files(resource_pack_path),
-            custom_item_render_definitions=CustomItemRenderDefinition.from_datapack_files(resource_pack_path),
+            custom_game_tests=CustomGameTest.from_datapack_files(datapack_path_namespaced),
+            custom_test_environments=CustomTestEnvironment.from_datapack_files(datapack_path_namespaced),
+            custom_jukebox_songs=CustomJukeboxSong.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced),
+            custom_languages=CustomLanguage.from_resource_pack_files(resource_pack_path_namespaced),
+            custom_loot_tables=CustomLootTable.from_datapack_files(datapack_path_namespaced),
+            custom_mcfunctions=MCFunction.from_datapack_files(datapack_path_namespaced),
+            custom_paintings=CustomPainting.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced),
+            custom_predicates=Predicate.from_datapack_files(datapack_path_namespaced),
+            custom_recipes=Recipe.from_datapack_files(datapack_path_namespaced),
+            custom_sounds=CustomSound.from_resource_pack_files(resource_pack_path_namespaced),
+            custom_tags=CustomTag.from_datapack_files(datapack_path_namespaced),
+            custom_textures=CustomTexture.from_resource_pack_files(resource_pack_path_namespaced),
+            custom_model_definitions=CustomModelDefinition.from_datapack_files(resource_pack_path_namespaced),
+            custom_item_render_definitions=CustomItemRenderDefinition.from_datapack_files(resource_pack_path_namespaced),
             # world_gen_resources=WorldGenResources.from_datapack_files(datapack_path),
         )

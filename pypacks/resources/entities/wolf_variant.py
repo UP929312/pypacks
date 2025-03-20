@@ -48,9 +48,9 @@ class WolfVariant(BaseResource):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WolfVariant":
         return cls(
             internal_name=internal_name,
-            angry_texture_path=data["assets"]["angry"],
-            wild_texture_path=data["assets"]["wild"],
-            tame_texture_path=data["assets"]["tame"],
+            angry_texture_path=data["assets"]["angry"].split(":")[1],
+            wild_texture_path=data["assets"]["wild"].split(":")[1],
+            tame_texture_path=data["assets"]["tame"].split(":")[1],
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 

@@ -12,5 +12,5 @@ from pypacks.providers.int_provider import (  # noqa: F401, F403
     ConstantIntProvider, UniformIntProvider, BiasedToBottomIntProvider, ClampedIntProvider, ClampedNormalIntProvider, WeightedListIntProvider, IntProvider
 )
 from pypacks.providers.number_provider import (  # noqa: F401, F403
-    ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, NumberProvider,
+    ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreNumberProvider, StorageNumberProvider, NumberProvider,
 )

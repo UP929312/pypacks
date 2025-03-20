@@ -29,6 +29,7 @@ image_mapping |= {
     "shield": IMAGES_PATH/"minecraft_renders_override"/"shield.png",
     "decorated_pot": IMAGES_PATH/"minecraft_renders_override"/"decorated_pot.png",
     "chest": IMAGES_PATH/"minecraft_renders_override"/"chest.png",
+    "command_block": IMAGES_PATH/"minecraft_renders_override"/"command_block.png",
 }
 
 

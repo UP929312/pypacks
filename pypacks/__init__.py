@@ -22,7 +22,7 @@ from pypacks.providers.int_provider import (  # noqa: F401, F403
     ConstantIntProvider, UniformIntProvider, BiasedToBottomIntProvider, ClampedIntProvider, ClampedNormalIntProvider, WeightedListIntProvider, IntProvider
 )
 from pypacks.providers.number_provider import (  # noqa: F401, F403
-    ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreboardNumberProvider, StorageNumberProvider, NumberProvider,
+    ConstantNumberProvider, UniformNumberProvider, BinomialNumberProvider, ScoreNumberProvider, StorageNumberProvider, NumberProvider,
 )
 
 # =============================================================================
@@ -85,7 +85,7 @@ __all__ = [
     "ConstantFloatProvider", "UniformFloatProvider", "ClampedNormalFloatProvider", "TrapezoidFloatProvider", "FloatProvider",
     "ConstantHeightProvider", "UniformHeightProvider", "BiasedToBottomHeightProvider", "VeryBiasedToBottomHeightProvider", "HeightProvider",
     "IntProvider", "ConstantIntProvider", "UniformIntProvider", "BiasedToBottomIntProvider", "ClampedIntProvider", "ClampedNormalIntProvider", "WeightedListIntProvider",
-    "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreboardNumberProvider", "StorageNumberProvider", "NumberProvider",
+    "ConstantNumberProvider", "UniformNumberProvider", "BinomialNumberProvider", "ScoreNumberProvider", "StorageNumberProvider", "NumberProvider",
     # Resources
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType", "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound",
     "CustomAdvancement", "Criteria",

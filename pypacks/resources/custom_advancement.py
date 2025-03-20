@@ -35,7 +35,7 @@ class Criteria:
     def to_dict(self) -> dict[str, Any]:
         return {
             "trigger": self.trigger,
-            "conditions": self.conditions,
+            "conditions": self.conditions if self.conditions else None,
         }
 
     @classmethod
@@ -43,7 +43,7 @@ class Criteria:
         return cls(
             name=name,
             trigger=data["trigger"],
-            conditions=data["conditions"],
+            conditions=data.get("conditions", {}),
         )
 
 

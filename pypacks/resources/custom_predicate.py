@@ -27,12 +27,11 @@ class Predicate(BaseResource):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "Predicate":
+        if isinstance(data, list):
+            # This is a list of conditions, so it's an AllOfPredicate
+            return AllOfPredicate.from_dict(internal_name, {"terms": data})
         cls_ = PREDICATE_NAME_TO_CLASS[data["condition"].removeprefix("minecraft:")]
         return cls_.from_dict(internal_name, data)
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass
@@ -99,7 +98,7 @@ class DamageSourcePropertiesPredicate(Predicate):
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "DamageSourcePropertiesPredicate":
         from pypacks.resources.predicate.predicate_conditions import DamageTypeTag
-        return cls(internal_name, predicate=DamageTypeTag.from_dict(data["predicate"]))
+        return cls(internal_name, predicate=DamageTypeTag.from_dict(internal_name, data["predicate"]))
 
 
 @dataclass
@@ -136,7 +135,7 @@ class EntityPropertiesPredicate(Predicate):
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityPropertiesPredicate":
         from pypacks.resources.predicate.predicate_conditions import EntityCondition
-        return cls(internal_name, entity=data["entity"], predicate=EntityCondition.from_dict(data["predicate"]))
+        return cls(internal_name, entity=data["entity"], predicate=EntityCondition.from_dict(internal_name, data["predicate"]))
 
 
 @dataclass
@@ -210,7 +209,7 @@ class LocationCheckPredicate(Predicate):
         from pypacks.resources.predicate.predicate_conditions import LocationTag
         return cls(
             internal_name,
-            predicate=LocationTag.from_dict(data["predicate"]),
+            predicate=LocationTag.from_dict(internal_name, data["predicate"]),
             offset_x=data.get("offsetX", 0),
             offset_y=data.get("offsetY", 0),
             offset_z=data.get("offsetZ", 0),

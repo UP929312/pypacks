@@ -37,7 +37,7 @@ for item_name, data in all_data.items():
 
 lines += [f"{x.internal_name.upper()} = {repr(x)}" for x in instances]
 
-print(lines)
+# rint(lines)
 # output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\enchantment.py"
 # with open(output_path, "w") as file:
 #     file.write("\n".join(lines)+"\n")

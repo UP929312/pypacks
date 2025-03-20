@@ -40,7 +40,7 @@ class GenericEntityVariant(BaseResource):
         # {'asset_id': 'pypacks_testing:entity/cat/sand_cat', 'spawn_conditions': [{'priority': 0}] }
         return cls(
             internal_name=internal_name,
-            texture_path=data["asset_id"].split(":")[1],  # TODO: Have no path, can maybe find it out later? By crawling through the resource pack?
+            texture_path=data["asset_id"].split(":")[1],  # TODO: Expand this in .from_combined_files
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 

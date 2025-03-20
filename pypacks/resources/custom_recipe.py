@@ -153,7 +153,6 @@ class ShapelessCraftingRecipe(Recipe):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapelessCraftingRecipe":
-        print(internal_name, data)
         return cls(
             internal_name,
             ingredients=data["ingredients"],

@@ -55,17 +55,17 @@ class BinomialNumberProvider(NumberProvider):
 
 
 @dataclass
-class ScoreboardNumberProvider(NumberProvider):
+class ScoreNumberProvider(NumberProvider):
     target: str
     score: str
     scale: float | int = 1.0
 
     def to_dict(self) -> dict[str, Any]:
-        return {"type": "minecraft:scoreboard", "target": {"target": self.target}, "score": self.score, "scale": self.scale}
+        return {"type": "minecraft:score", "target": {"target": self.target}, "score": self.score, "scale": self.scale}
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ScoreboardNumberProvider":
-        return cls(target=data["target"]["target"], score=data["score"], scale=data.get("scale", 1.0))
+    def from_dict(cls, data: dict[str, Any]) -> "ScoreNumberProvider":
+        return cls(target=data["target"] if isinstance(data["target"], str) else data["target"]["target"], score=data["score"], scale=data.get("scale", 1.0))
 
 
 @dataclass
@@ -85,6 +85,6 @@ NUMBER_PROVIDER_NAME_TO_CLASS: dict[str, type[NumberProvider]] = {
     "minecraft:constant": ConstantNumberProvider,
     "minecraft:uniform": UniformNumberProvider,
     "minecraft:binomial": BinomialNumberProvider,
-    "minecraft:scoreboard": ScoreboardNumberProvider,
+    "minecraft:score": ScoreNumberProvider,
     "minecraft:storage": StorageNumberProvider,
 }
