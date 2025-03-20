@@ -1,9 +1,7 @@
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
-from pypacks.pack import Pack
+from pypacks.resources.base_resource import BaseResource
 from pypacks.providers.int_provider import IntProvider
 from pypacks.resources.custom_enchantment import CustomEnchantment
 
@@ -13,7 +11,7 @@ from pypacks.resources.custom_enchantment import CustomEnchantment
 
 
 @dataclass
-class EnchantmentProvider:
+class EnchantmentProvider(BaseResource):
     internal_name: str
     """BASE CLASS FOR ENCHANTMENT PROVIDERS, DON'T USE DIRECTLY"""
     # https://minecraft.wiki/w/Enchantment_provider
@@ -22,15 +20,15 @@ class EnchantmentProvider:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError("This method must be implemented by the subclass")
 
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentProvider":
+        cls_ = ENCHANTMENT_PROVIDER_NAME_TO_CLASSES[data["type"]]
+        return cls_(internal_name=internal_name, **data)
 
 
 @dataclass
 class SingleEnchantmentProvider(EnchantmentProvider):
     """Always returns the same enchantment"""
-    internal_name: str
     enchantment: "str | CustomEnchantment"  # One enchantment (a string ID) - the enchantment to return
     level: "int | IntProvider"  # The level of the enchantment
 
@@ -46,7 +44,6 @@ class SingleEnchantmentProvider(EnchantmentProvider):
 class EnchantmentsByCostProvider(EnchantmentProvider):
     """Returns random enchantments from a list of possible enchantments, using a configured cost. Similar to the cost of an enchanting table."""
     # https://minecraft.wiki/w/Enchantment_provider
-    internal_name: str
     enchantments: list["str | CustomEnchantment"]  # List of all possible enchantments
     cost: "int | IntProvider"  # The cost to use to determine the enchantments
 
@@ -65,7 +62,6 @@ class EnchantmentsByCostWithDifficultyProvider(EnchantmentProvider):
     - rand(a,b) refers to a random number between a and b.
     - local_difficulty_factor is: local_difficulty/2 - 1 clamped to a value between 0 and 1."""
     # https://minecraft.wiki/w/Enchantment_provider
-    internal_name: str
     enchantments: list["str | CustomEnchantment"]  # List of all possible enchantments
     min_cost: int  # Minimum 1 - The base cost at local difficulty below 2.
     max_cost_span: int  # Minimum 0 - Factor of the uniform randomization range for local difficulty.
@@ -81,3 +77,10 @@ class EnchantmentsByCostWithDifficultyProvider(EnchantmentProvider):
             "min_cost": self.min_cost,
             "max_cost_span": self.max_cost_span,
         }
+
+
+ENCHANTMENT_PROVIDER_NAME_TO_CLASSES: dict[str, type["EnchantmentProvider"]] = {
+    "single": SingleEnchantmentProvider,
+    "enchantments_by_cost": EnchantmentsByCostProvider,
+    "enchantments_by_cost_with_difficulty": EnchantmentsByCostWithDifficultyProvider,
+}

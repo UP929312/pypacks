@@ -210,7 +210,7 @@ class BlocksAttacks:
             "disable_sound": self.disable_sound.get_reference(pack_namespace) if isinstance(self.disable_sound, CustomSound) else self.disable_sound,
             "bypassed_by": self.bypassed_by.get_reference(pack_namespace) if isinstance(self.bypassed_by, CustomTag) else self.bypassed_by,
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "BlocksAttacks":
         return cls(
@@ -319,16 +319,11 @@ class BundleContents:
             } if isinstance(item, CustomItem) and item.components.to_dict(pack_namespace) else {})
             for item, count in self.items.items()
         ]
-    
+
     @classmethod
     def from_dict(cls, data: list[dict[str, Any]]) -> "BundleContents":
-        raise NotImplementedError
-        # TODO: Need to combine item and components here
         return cls(
-            items={
-                item["id"]: item["count"]
-                for item in data
-            },
+            [CustomItem.from_dict(data["id"]+"_custom_item", data["id"], item) for item in data]  # type: ignore[abc]
         )
 
 
@@ -795,7 +790,7 @@ class MapData:
             "map_color": self.map_color if self.map_color is not None else None,
             "map_decorations": {hash(x): x.to_dict() for x in self.map_decorations} if self.map_decorations is not None else None,
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "MapData":
         return cls(
@@ -1275,9 +1270,10 @@ class Components:
             "written_book_content":       self.written_book_content.to_dict() if self.written_book_content is not None else None,
             "writable_book_content":      self.writable_book_content.to_dict() if self.writable_book_content is not None else None,
         }  # fmt: skip
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Components":
+        from pypacks.resources.predicate.predicate_conditions import BlockPredicate
         return cls(
             durability=data.get("max_damage"),
             lost_durability=data.get("damage"),

@@ -1,18 +1,13 @@
 from dataclasses import dataclass, field
-import json
-import os
-from pathlib import Path
-from typing import Any, Literal, TYPE_CHECKING
+from typing import Any, Literal
 
 from pypacks.utils import recursively_remove_nones_from_data
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride
-
-if TYPE_CHECKING:
-    from pypacks.pack import Pack
 
 
 @dataclass
-class CustomBiome:
+class CustomBiome(BaseResource):
     # https://minecraft.wiki/w/Biome_definition
     internal_name: str
     has_precipitation: bool = True  # Determines whether or not the biome has precipitation (rain and snow)
@@ -37,10 +32,7 @@ class CustomBiome:
         assert self.creature_spawn_probability is None or (0.0 <= self.creature_spawn_probability <= 0.9999999), "creature_spawn_probability must be between 0.0 and 0.9999999 (inclusive)"
         assert self.features == FeatureGenerationSteps(), "Feature generation steps are not yet supported."
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "has_precipitation": self.has_precipitation,
             "temperature": self.temperature,
@@ -83,12 +75,6 @@ class CustomBiome:
             creature_spawn_probability=data.get("creature_spawn_probability"),
             spawners=[SpawnOverride.from_dict(spawner_data) for spawner_data in data["spawners"]]
         )
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        # We need to create the subdir if this is being created as part of a custom dimension:
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(), file, indent=4)
 
 
 class PlacedFeature:  # TODO: Type me

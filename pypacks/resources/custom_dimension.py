@@ -1,7 +1,4 @@
-import json
-import os
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.resources.base_resource import BaseResource
@@ -55,8 +52,7 @@ class CustomDimension(BaseResource):
 
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.world_gen.biome import CustomBiome
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
+        super().create_datapack_files(pack)  # Does the actual Dimension creation
         if isinstance(self.biome, CustomBiome):
             self.biome.create_datapack_files(pack)
         if isinstance(self.dimension_type, CustomDimensionType):
@@ -64,7 +60,7 @@ class CustomDimension(BaseResource):
 
 
 @dataclass
-class CustomDimensionType:
+class CustomDimensionType(BaseResource):
     """Defines properties of a dimension such as world height build limits, the ambient light, and more."""
     # https://minecraft.wiki/w/Dimension_type
     internal_name: str
@@ -88,9 +84,6 @@ class CustomDimensionType:
     effects: Literal["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"] = "minecraft:overworld"  # Determines the dimension effect used for this dimension. Setting to overworld makes the dimension have clouds, sun, stars and moon. Setting to the nether makes the dimension have thick fog blocking that sight, similar to the nether. Setting to the end makes the dimension have dark spotted sky similar to the end, ignoring the sky and fog color.
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension_type")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def __post_init__(self) -> None:
         assert 16 <= self.height <= 4064, f"Height must be between 16 and 4064, recieved {self.height}"
@@ -143,13 +136,6 @@ class CustomDimensionType:
             data["infiniburn"],
             data["effects"]
         )
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        # If created via the CustomDimension, the subdir might not exist
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
-
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 # ============================================================================================================

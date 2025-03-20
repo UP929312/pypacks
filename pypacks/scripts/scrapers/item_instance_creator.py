@@ -104,7 +104,7 @@ for painting in ALL_DEFAULT_PAINTINGS:
     lines.append(format_custom_item_name(painting_item.internal_name+"_PAINTING", "minecraft:painting", painting_item.components, 1, 'common'))
 # ====================================================================================================================
 output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\items.py"
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     file.write("\n".join(lines)+"\n\n")
     file.write(
         "DEFAULT_ITEMS = {\n" +

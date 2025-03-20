@@ -63,7 +63,6 @@ disable = [
     "abstract-method",
     "pointless-statement",
     "inconsistent-return-statements",
-    "unspecified-encoding",
     "wrong-import-order",
     "wildcard-import",
     "unused-wildcard-import",

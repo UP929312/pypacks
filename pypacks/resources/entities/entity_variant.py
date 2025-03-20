@@ -1,5 +1,4 @@
 import os
-import json
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -22,9 +21,6 @@ class GenericEntityVariant(BaseResource):
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="x_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/x")
     entity_type: str = field(init=False, repr=False, hash=False, default="x")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]

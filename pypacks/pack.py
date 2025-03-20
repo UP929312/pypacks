@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from pypacks.resources.custom_damage_type import CustomDamageType
     from pypacks.resources.custom_dimension import CustomDimension
     from pypacks.resources.custom_enchantment import CustomEnchantment
-    from pypacks.resources.custom_font import CustomAutoAssignedFont
+    from pypacks.resources.custom_font import CustomFont
     from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
     from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
     from pypacks.resources.custom_language import CustomLanguage
@@ -67,7 +67,7 @@ class Pack:
     custom_dimensions: list["CustomDimension"] = field(default_factory=list)
     custom_enchantments: list["CustomEnchantment"] = field(default_factory=list)
     custom_entity_variants: list["EntityVariant"] = field(default_factory=list)
-    custom_fonts: list["CustomAutoAssignedFont"] = field(default_factory=list)
+    custom_fonts: list["CustomFont"] = field(default_factory=list)
     custom_game_tests: list["CustomGameTest"] = field(default_factory=list)
     custom_test_environments: list["CustomTestEnvironment"] = field(default_factory=list)
     custom_jukebox_songs: list["CustomJukeboxSong"] = field(default_factory=list)

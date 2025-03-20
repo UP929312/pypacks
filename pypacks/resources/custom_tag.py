@@ -65,7 +65,7 @@ class CustomTag(BaseResource):
 
         path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name, self.tag_type, *self.sub_directories, f"{self.internal_name}.json")
         os.makedirs(path.parent, exist_ok=True)
-        with open(path, "w") as file:
+        with open(path, "w", encoding="utf-8") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @classmethod
@@ -73,7 +73,7 @@ class CustomTag(BaseResource):
         """Path should be the root of the pack"""
         tags = []
         for tag_path_absolute in BaseResource.get_all_resource_paths(cls, root_path):
-            with open(tag_path_absolute, "r") as file:
+            with open(tag_path_absolute, "r", encoding="utf-8") as file:
                 tags.append(
                     cls.from_dict(
                         tag_path_absolute.stem,

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from pypacks.additions.written_book_framework import FormattedWrittenBook, ElementPage, Icon
+from pypacks.resources.custom_font import BitMapFontChar, TTFFontProvider, ReferenceFontProvider
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -12,14 +13,12 @@ class FontTestingBook:
             ElementPage(
                 [
                     Icon(
-                        pack.font_mapping[icon.name],
-                        pack.namespace,
-                        indent_unicode_char=pack.font_mapping["1_pixel_indent"],
-                        include_formatting=False,
+                        unicode_char=(pack.font_mapping[icon.name] if isinstance(icon, BitMapFontChar) else icon.chars[0]),
+                        font_namespace=pack.namespace,
                     )
                 ]
             )
-            for icon in pack.custom_fonts[0].font_elements
+            for icon in [x for x in pack.custom_fonts[0].providers if not isinstance(x, (TTFFontProvider, ReferenceFontProvider))]
         ]
 
     def generate_give_command(self, pack: "Pack") -> str:

@@ -1,6 +1,4 @@
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Any
 
 from pypacks.resources.base_resource import BaseResource
@@ -8,7 +6,6 @@ from pypacks.providers.int_provider import IntRange
 from pypacks.providers.number_provider import NumberProvider
 
 if TYPE_CHECKING:
-    from pypacks.pack import Pack
     from pypacks.providers.enchantment_level_based_provider import EnchantmentLevelBasedProvider
     from pypacks.resources.custom_enchantment import CustomEnchantment
     from pypacks.resources.predicate.predicate_conditions import DamageTypeTag, EntityCondition, LocationTag, ItemCondition

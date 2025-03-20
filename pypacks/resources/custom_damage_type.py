@@ -52,7 +52,7 @@ class CustomDamageType(BaseResource):
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "message_id": f"{pack_namespace}:{self.internal_name}",
+            "message_id": self.get_reference(pack_namespace),
             "exhaustion": self.exhaustion,
             "scaling": self.scaling,
             "effects": self.effects,

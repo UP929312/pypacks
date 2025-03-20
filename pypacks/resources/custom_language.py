@@ -1,6 +1,3 @@
-import os
-import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from dataclasses import dataclass, field
 
@@ -127,7 +124,7 @@ class CustomLanguage(BaseResource):
         return self.translations
 
     @classmethod
-    def from_dict(cls, language_code: LanguageCode, data: dict[str, str]) -> "CustomLanguage":
+    def from_dict(cls, language_code: LanguageCode, data: dict[str, str]) -> "CustomLanguage":  # type: ignore[override]
         return cls(language_code, data)
 
     def get_run_command(self, pack_namespace: str, translation_code: str) -> str:

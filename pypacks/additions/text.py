@@ -21,9 +21,14 @@ class Text:
     underlined: bool = False
     strikethrough: bool = False
     obfuscated: bool = False
-    on_click: "OnClickChangePage | OnClickRunCommand | None" = None
+    on_click: "OnClickChangePage | OnClickRunCommand | OnClickCopyToClipboard | None" = None
     on_hover: "OnHoverShowText | OnHoverShowTextRaw | OnHoverShowItem | None" = None
     font: str = "minecraft:default"
+
+    def update_attributes(self, **kwargs: Any) -> "Text":
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        return self
 
     def to_dict(self) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
@@ -40,6 +45,9 @@ class Text:
         })
 
     get_json_data = to_dict
+
+    def __bool__(self) -> bool:
+        return bool(self.text)
 
     @classmethod
     def from_input(cls, data: "Text | dict[str, Any] | str") -> "Text":
@@ -91,7 +99,6 @@ class OnClickOpenURL:
 
     def to_dict(self) -> dict[str, Any]:
         return {"click_event": {"action": "open_url", "url": self.url}}
-
 
 
 @dataclass

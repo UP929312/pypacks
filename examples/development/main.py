@@ -305,7 +305,7 @@ custom_languages = CustomLanguage.from_all_translation_keys(
 # endregion
 # ============================================================================================================
 # region: Custom Fonts
-ttf_font = CustomAutoAssignedFont("ttf_font", [TTFFontProvider("ttf_font", "fonts/Monocraft.ttf", size=9)])
+ttf_font = CustomFont("ttf_font", [TTFFontProvider("ttf_font", "fonts/Monocraft.ttf", size=9)])
 # endregion
 # ============================================================================================================
 # region: Custom Ore Generation

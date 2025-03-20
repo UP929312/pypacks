@@ -40,7 +40,7 @@ from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionT
 from pypacks.resources.custom_enchantment import CustomEnchantment
 from pypacks.resources.custom_model import FacePaths, CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
 from pypacks.resources.custom_item import CustomItem
-from pypacks.resources.custom_font import CustomAutoAssignedFont, BitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
+from pypacks.resources.custom_font import CustomFont, BitMapFontChar, AutoAssignBitMapFontChar, SpaceFontChar, TTFFontProvider, ReferenceFontProvider
 from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
 from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
@@ -96,7 +96,7 @@ __all__ = [
     "WorldGenResources",
     "FacePaths", "CustomItemRenderDefinition", "CustomModelDefinition", "CustomTexture",
     "CustomItem",
-    "CustomAutoAssignedFont", "BitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
+    "CustomFont", "BitMapFontChar", "AutoAssignBitMapFontChar", "SpaceFontChar", "TTFFontProvider", "ReferenceFontProvider",
     "CustomLanguage",
     "CustomJukeboxSong",
     "MCFunction",

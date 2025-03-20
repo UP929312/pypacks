@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 from typing import Any
 
@@ -16,3 +17,14 @@ def recursively_remove_nones_from_data(obj: Any) -> Any:
 
 def chunk_list(lst: list[Any], size: int) -> list[list[Any]]:
     return [lst[i:i + size] for i in range(0, len(lst), size)]
+
+
+def format_written_book(string: str) -> str:
+    # Extract the JSON part (inside `written_book_content=...`)
+    prefix = 'written_book_content='
+    start = string.index(prefix) + len(prefix)
+    json_str = string[start:].rstrip(']')  # Remove trailing `]` if needed
+
+    # Parse JSON and pretty-print it
+    parsed_json = json.loads(json_str)
+    return string[:start]+json.dumps(parsed_json, indent=4).replace("\n", " \\\n")+"]"

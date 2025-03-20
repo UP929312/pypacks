@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from typing import Any, Literal, TYPE_CHECKING
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride
 from pypacks.utils import recursively_remove_nones_from_data
 
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class CustomStructure:
+class CustomStructure(BaseResource):
     """A structure is a large decoration, covering an area up to 256x256x256 block centered on the structure start.
     Structures often consist of multiple pieces that are fit together to form the overall structure.
     N.b. To generate in a world, a structure needs to be part of at least one structure set."""
@@ -36,9 +37,6 @@ class CustomStructure:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/structure")
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             **self.structure_type.to_dict(),
@@ -49,7 +47,7 @@ class CustomStructure:
         })
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "CustomStructure":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructure":
         return cls(
             data["internal_name"],
             JigsawStructureType(
@@ -65,13 +63,6 @@ class CustomStructure:
             data["terrain_adaptation"],
             [SpawnOverride.from_dict(spawn_override) for spawn_override in data["entity_spawn_overrides"]],
         )
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        # If created via the CustomStructureSet, the subdirs might not exist
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
-
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass
@@ -185,7 +176,7 @@ class SingleItemTemplatePool:
 
     def create_datapack_files(self, pack: "Pack") -> None:
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool", exist_ok=True)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             json.dump(self.to_dict(), file, indent=4)
 
 # ============================================================================================================

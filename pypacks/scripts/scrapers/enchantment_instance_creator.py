@@ -1,14 +1,8 @@
-import os
 from typing import Any
 
 import requests
 
-from pypacks.resources.base_resource import overridden_repr
 from pypacks.resources.custom_enchantment import CustomEnchantment
-
-
-for cls in [CustomEnchantment, ]:
-    cls.__repr__ = overridden_repr  # type: ignore[assignment]
 
 
 all_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/misode/mcmeta/refs/heads/summary/data/enchantment/data.min.json").json()
@@ -39,5 +33,5 @@ lines += [f"{x.internal_name.upper()} = {repr(x)}" for x in instances]
 
 # rint(lines)
 # output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\enchantment.py"
-# with open(output_path, "w") as file:
+# with open(output_path, "w", encoding="utf-8") as file:
 #     file.write("\n".join(lines)+"\n")

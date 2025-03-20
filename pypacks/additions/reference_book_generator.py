@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from pypacks.utils import format_written_book
 from pypacks.additions.written_book_framework import (
     ElementPage, GridPage, GridPageManager, Icon, RowManager, FormattedWrittenBook, RightAlignedIcon, ICONS_PER_PAGE,
 )
@@ -29,8 +30,7 @@ class GenericItemPage:
         return Icon(
             self.pack.font_mapping["information_icon"],
             self.pack.namespace,
-            self.pack.font_mapping["1_pixel_indent"],
-            right_indentation=3,
+            right_padding=3,
             on_hover=OnHoverShowText(more_info_text),
         )
 
@@ -46,8 +46,10 @@ class GenericItemPage:
     def generate_page(self) -> list["Text | Icon | RightAlignedIcon | Row | FilledRow"]:
         MORE_INFO_ICONS_PER_ROW = 5
         MORE_INFO_ICONS_TRAILING_NEW_LINES = 3
-        more_info_icon_rows = RowManager(self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.font_mapping["1_pixel_indent"],
-                                         self.pack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES).rows
+        more_info_icon_rows = RowManager(
+            self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES,
+            empty_icon=None,
+        )
         title = Text.from_input(self.title)
         title.color = "black"
         return [
@@ -55,13 +57,12 @@ class GenericItemPage:
             Text("\n"*2),
             self.generate_main_icon(),
             Text("\n"*4),
-            *more_info_icon_rows,
-            Text("\n"*(4-(len(more_info_icon_rows)))),
+            *more_info_icon_rows.rows,
+            Text("\n"*(2-(len(more_info_icon_rows.rows)))),
             RightAlignedIcon(
-                self.pack.font_mapping["satchel_icon"],
-                self.pack.font_mapping["1_pixel_indent"],
-                20,
+                unicode_char=self.pack.font_mapping["satchel_icon"],
                 font_namespace=self.pack.namespace,
+                char_width=20,
                 left_shift=3,
                 on_click=OnClickChangePage(self.back_button_page),
                 on_hover=OnHoverShowText("Go back to the categories page"),
@@ -78,12 +79,11 @@ class CustomItemPage(GenericItemPage):
         # ============================================================================================================
         if self.item.components.instrument is not None:
             play_sound_icon = Icon(
-                    self.pack.font_mapping["play_icon"],
-                    self.pack.namespace,
-                    self.pack.font_mapping["1_pixel_indent"],
-                    right_indentation=3,
-                    on_click=OnClickRunCommand(self.item.components.instrument.get_run_command(self.pack.namespace)),
-                    on_hover=OnHoverShowText(f"Play: {self.item.custom_name}"),
+                unicode_char=self.pack.font_mapping["play_icon"],
+                font_namespace=self.pack.namespace,
+                right_padding=3,
+                on_click=OnClickRunCommand(self.item.components.instrument.get_run_command(self.pack.namespace)),
+                on_hover=OnHoverShowText(f"Play: {self.item.custom_name}"),
             )
             info_icons.append(play_sound_icon)
         # ============================================================================================================
@@ -95,9 +95,8 @@ class CustomItemPage(GenericItemPage):
         recipe_icons = [
             Icon(
                 self.pack.font_mapping[f"{recipe.recipe_block_name}_icon"],
-                self.pack.namespace,
-                self.pack.font_mapping["1_pixel_indent"],
-                right_indentation=3,
+                font_namespace=self.pack.namespace,
+                right_padding=3,
                 on_hover=OnHoverShowTextRaw([
                     {"text": self.pack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], "font": f"{self.pack.namespace}:all_fonts"},
                     {"text": "\n"*6, "font": "minecraft:default"},
@@ -114,9 +113,8 @@ class CustomItemPage(GenericItemPage):
         from pypacks.resources.custom_item import CustomItem
         assert isinstance(self.item, CustomItem)
         return Icon(
-            self.pack.font_mapping[f"{self.item.internal_name}_icon"],
+            unicode_char=self.pack.font_mapping[f"{self.item.internal_name}_icon"],
             font_namespace=self.pack.namespace,
-            indent_unicode_char=self.pack.font_mapping["1_pixel_indent"],
             on_click=OnClickRunCommand(f"/function {self.pack.namespace}:give/{self.item.internal_name}"),
             on_hover=OnHoverShowItem(self.item, self.pack.namespace),
         )
@@ -128,9 +126,8 @@ class DimensionPage(GenericItemPage):
         from pypacks.resources.custom_dimension import CustomDimension
         assert isinstance(self.item, CustomDimension)
         return Icon(
-            self.pack.font_mapping.get(f"{self.item.internal_name}_icon") or self.pack.font_mapping["dimensions_icon"],
+            unicode_char=self.pack.font_mapping.get(f"{self.item.internal_name}_icon") or self.pack.font_mapping["dimensions_icon"],
             font_namespace=self.pack.namespace,
-            indent_unicode_char=self.pack.font_mapping["1_pixel_indent"],
             on_click=OnClickRunCommand(self.item.generate_teleport_command(self.pack.namespace)),
             on_hover=OnHoverShowText(f"Teleport to {self.item.internal_name.replace('_', ' ').title()}"),
         )
@@ -144,7 +141,7 @@ class ReferenceBook:
 
     def generate_cover_page(self, pack: "Pack") -> "ElementPage":
         title_starting_char_code = "➤".encode('unicode_escape').decode('ascii')
-        page_content = pack.font_mapping['1_pixel_indent']*LOGO_HORIZONTAL_SPACER + pack.font_mapping["logo_256_x_256"]
+        page_content = " "*LOGO_HORIZONTAL_SPACER + pack.font_mapping["logo_256_x_256"]
         return ElementPage([
             Text(f"{title_starting_char_code} {pack.name} Reference Book\n\n\n", color="black"),  # underlined=True,
             Text(page_content, font=f"{pack.namespace}:all_fonts", underlined=False, color="white"),
@@ -182,19 +179,16 @@ class ReferenceBook:
             title="Categories",
             icons=[
                 Icon(
-                    pack.font_mapping[f"{category.internal_name}_category_icon"],
-                    pack.namespace,
-                    indent_unicode_char=pack.font_mapping["1_pixel_indent"],
+                    unicode_char=pack.font_mapping[f"{category.internal_name}_category_icon"],
+                    font_namespace=pack.namespace,
                     on_hover=OnHoverShowText(f"Go to the `{category.name}` category"),
                     on_click=OnClickChangePage(CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number[category.name])
                 )
                 for category in pack.reference_book_categories
             ],
             empty_icon_unicode_char=pack.font_mapping["blank_icon"],
-            indent_unicode_char=pack.font_mapping["1_pixel_indent"],
             font_namespace=pack.namespace,
         ).pages
-
         # ==============================================================================================================================
         # Item list pages
         category_items_page_managers: list[GridPageManager] = [
@@ -203,9 +197,8 @@ class ReferenceBook:
                     title=f"{category.name.title()} items",
                     icons=[
                         Icon(
-                            pack.font_mapping[f"{item.internal_name}_icon"],
-                            pack.namespace,
-                            indent_unicode_char=pack.font_mapping["1_pixel_indent"],
+                            unicode_char=pack.font_mapping[f"{item.internal_name}_icon"],
+                            font_namespace=pack.namespace,
                             on_hover=OnHoverShowText(item.custom_name or item.base_item.removeprefix('minecraft:').title()),
                             on_click=OnClickChangePage(ITEM_PAGE_START+item_index),
                         )
@@ -213,7 +206,6 @@ class ReferenceBook:
                         if item.ref_book_config.category.name == category.name and not item.ref_book_config.hidden
                     ],
                     empty_icon_unicode_char=pack.font_mapping["blank_icon"],
-                    indent_unicode_char=pack.font_mapping["1_pixel_indent"],
                     font_namespace=pack.namespace,
                 )
                 if category.category_type == "item" else
@@ -221,16 +213,14 @@ class ReferenceBook:
                     title=f"{category.name.title()}",
                     icons=[
                         Icon(
-                            pack.font_mapping["dimensions_icon"],  # pack.font_mapping.get(f"{dimension.internal_name}_category_icon") or
-                            pack.namespace,
-                            indent_unicode_char=pack.font_mapping["1_pixel_indent"],
+                            unicode_char=pack.font_mapping["dimensions_icon"],  # pack.font_mapping.get(f"{dimension.internal_name}_category_icon") or
+                            font_namespace=pack.namespace,
                             on_hover=OnHoverShowText(dimension.internal_name.replace("_", " ").title()),
                             on_click=OnClickChangePage(ITEM_PAGE_START+dimension_index),
                         )
                         for dimension_index, dimension in enumerate(pack.custom_dimensions[:20], start=len(pack.custom_items))  # TODO: 20 for now
                     ],
                     empty_icon_unicode_char=pack.font_mapping["blank_icon"],
-                    indent_unicode_char=pack.font_mapping["1_pixel_indent"],
                     font_namespace=pack.namespace,
                 )
             )
@@ -241,11 +231,13 @@ class ReferenceBook:
         # ==============================================================================================================================
         # Item pages
         item_pages: list[ElementPage] = [
-            CustomItemPage(item.custom_name or item.base_item.removeprefix('minecraft:').title(), item, pack, CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number[item.ref_book_config.category.name])  # type: ignore[misc]
+            CustomItemPage(item.custom_name or item.base_item.removeprefix('minecraft:').title(), item, pack,
+                           CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number[item.ref_book_config.category.name])  # type: ignore[misc]
             for item in pack.custom_items
         ]
         dimension_pages: list[ElementPage] = [
-            DimensionPage(dimension.internal_name.replace('_', ' ').title(), dimension, pack, CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number["Dimensions"])  # type: ignore[misc]
+            DimensionPage(dimension.internal_name.replace('_', ' ').title(), dimension, pack,
+                          CATEGORY_ITEMS_STARTING_PAGE+category_to_page_number["Dimensions"])  # type: ignore[misc]
             for dimension in pack.custom_dimensions
         ]
         # ==============================================================================================================================
@@ -263,7 +255,7 @@ class ReferenceBook:
         ).generate_give_command(pack.namespace)
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w") as file:
-            file.write(f"\n# Give the book\n{self.generate_give_command(pack)}")
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w", encoding="utf-8") as file:
+            file.write(f"\n# Give the book\n{format_written_book(self.generate_give_command(pack))}")
 
 # =======================================================================================================================================

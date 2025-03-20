@@ -7,7 +7,7 @@ output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\
 
 all_entity_names = []
 for tag in os.listdir(input_path):
-    with open(input_path+f"\\{tag}") as file:
+    with open(input_path+f"\\{tag}", encoding="utf-8") as file:
         data = json.load(file)
     all_entity_names.extend([x for x in data["values"] if not x.startswith("#")])  # Remove all references to other tags
 
@@ -24,5 +24,5 @@ BASE = """from typing import Literal
 
 MinecraftEntity = Literal"""
 
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     file.write(BASE+json.dumps(list(sorted(set(all_entity_names))), indent=4)+"\n")

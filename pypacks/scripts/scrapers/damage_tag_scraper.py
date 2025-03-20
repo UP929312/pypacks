@@ -11,5 +11,5 @@ BASE = """from typing import Literal
 
 DamageTagsType = Literal"""
 
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     file.write(BASE+json.dumps(sorted(damage_tags), indent=4)+"\n")

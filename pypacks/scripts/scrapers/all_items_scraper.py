@@ -12,7 +12,7 @@ BASE = """from typing import Literal
 
 MinecraftItem = Literal"""
 
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     if ENABLED:
         combined = sorted([f"minecraft:{x}" for x in data])  # +sorted(data)
         file.write(BASE+json.dumps(combined, indent=4)+"\n")

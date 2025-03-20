@@ -379,7 +379,7 @@ class LocationTag:
         })
 
     @classmethod
-    def from_dict(cls, internal_name:str, data: dict[str, Any]) -> "LocationTag":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "LocationTag":
         return cls(
             biomes=[CustomBiome.from_dict(f"{internal_name}_biome", biome) if isinstance(biome, dict) else biome for biome in data.get("biomes", [])],
             block=BlockPredicate.from_dict(data["block"]) if data.get("block") else None,
@@ -391,7 +391,8 @@ class LocationTag:
             z_position=IntRange.from_dict(data["position"]["z"]) if isinstance(data.get("position"), dict) else data.get("position"),
             smokey=data.get("smokey", False),
             can_see_sky=data.get("can_see_sky", False),
-            structures=[CustomStructure.from_dict(structure) if isinstance(structure, dict) else structure for structure in data.get("structures", [])],
+            structures=[CustomStructure.from_dict(internal_name, structure) if isinstance(structure, dict) else structure
+                        for structure in data.get("structures", [])],
         )
 
 # ====================================================================================================================

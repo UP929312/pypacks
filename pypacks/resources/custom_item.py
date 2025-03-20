@@ -56,9 +56,6 @@ class CustomItem:
         self.use_right_click_cooldown = getattr(getattr(self.components, "cooldown", None), "seconds", None)
         Components.verify_compatible_components(self)
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
     def __str__(self) -> "str":
         return self.base_item  # This is used so we can cast CustomItem | str to string and always get a minecraft item
 
@@ -77,7 +74,7 @@ class CustomItem:
 
     def create_datapack_files(self, pack: "Pack") -> None:
         # Create the give command for use in books
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w") as file:
+        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w", encoding="utf-8") as file:
             file.write(self.generate_give_command(pack.namespace))
         # If they pass in a temporary raycast or MCFunction, create them like normal
         if isinstance(self.on_right_click, (BlockRaycast, EntityRaycast, MCFunction)):

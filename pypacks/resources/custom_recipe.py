@@ -1,33 +1,28 @@
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TypeAlias, Any, TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
+    from pypacks.scripts.repos.all_items import MinecraftItem
+    MinecraftOrCustomItem: TypeAlias = "MinecraftItem | CustomItem"
 
 from pypacks.image_manipulation.recipe_image_data import generate_recipe_image
 from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.custom_tag import CustomTag
-from pypacks.scripts.repos.all_items import MinecraftItem
-
-MinecraftOrCustomItem: TypeAlias = MinecraftItem | CustomItem
-# RecipeCategory = Literal["blocks", "building", "equipment", "food", "misc", "redstone"]
-
-# https://minecraft.wiki/w/Recipe
 
 
 @dataclass
 class Recipe(BaseResource):
+    # https://minecraft.wiki/w/Recipe
     internal_name: str
-    result: MinecraftOrCustomItem
+    result: "MinecraftOrCustomItem"
 
     recipe_block_name: str = field(init=False, repr=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, default="recipe")
 
     def generate_recipe_image(self) -> bytes:
-        return generate_recipe_image(self)  # type: ignore[arg-type]
+        return generate_recipe_image(self)
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
@@ -39,10 +34,9 @@ class Recipe(BaseResource):
 
     @staticmethod
     def result_from_dict(internal_name: str, data: dict[str, Any]) -> "MinecraftOrCustomItem":
-        from pypacks.resources.custom_item import CustomItem
         if "components" in data["result"]:
             return CustomItem.from_dict(internal_name+"_item", data["result"]["id"], data["result"]["components"])
-        return data["result"]["id"]
+        return data["result"]["id"]  # type: ignore[no-any-return]
 
     def create_datapack_files(self, pack: "Pack") -> None:
         if not isinstance(self, CustomCrafterRecipe):
@@ -248,7 +242,7 @@ class CampfireRecipe(Recipe):
         if isinstance(self.result, CustomItem):
             data["result"]["components"] = self.result.to_dict(pack_namespace)  # type: ignore[index, assignment, call-overload]
         return data
-    
+
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CampfireRecipe":
         return cls(
@@ -325,7 +319,7 @@ class SmithingTransformRecipe(Recipe):
             template_item=data["template"],
             base_item=data["base"],
             addition_item=data["addition"],
-            result=cls.result_from_dict(f"{internal_name}_item", data),\
+            result=cls.result_from_dict(f"{internal_name}_item", data),
         )
 
 
@@ -335,7 +329,7 @@ class SmithingTrimRecipe(Recipe):
     base_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
     addition_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
 
-    result: "MinecraftItem | CustomTag | list[MinecraftItem]" = field(init=False, repr=False)
+    result: "MinecraftItem | CustomTag | list[MinecraftItem]" = field(init=False, repr=False)  # type: ignore[assignment]
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
 
     def __post_init__(self) -> None:
@@ -357,6 +351,7 @@ class SmithingTrimRecipe(Recipe):
             base_item=data["base"],
             addition_item=data["addition"],
         )
+
 
 @dataclass
 class SmokerRecipe(Recipe):

@@ -5,7 +5,7 @@ def get_png_dimensions(file_path: str | None = None, image_bytes: bytes | None =
                        enforce_factor_of_two: bool = True) -> tuple[int, int]:
     """Returns (width, height) of the image"""
     if file_path is not None:
-        with open(file_path, 'rb') as file:
+        with open(file_path, 'rb', encoding="utf-8") as file:
             image_bytes = file.read()
 
     assert image_bytes is not None, "Must provide image bytes if not providing file_path"

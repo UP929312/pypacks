@@ -1,13 +1,10 @@
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Literal, Any, TYPE_CHECKING, TypeAlias
 
 from pypacks.resources.base_resource import BaseResource
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
-    from pypacks.pack import Pack
     from pypacks.scripts.repos.damage_types import DamageTypesType
     from pypacks.additions.item_components import PotionEffectType
     from pypacks.resources.custom_item import CustomItem
@@ -86,10 +83,6 @@ class CustomEnchantment(BaseResource):
             slots=data.get("slots", ["any"]),
             effects=effects,
         )
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def generate_custom_item(self, pack_namespace: str) -> "CustomItem":
         from pypacks.resources.custom_item import CustomItem

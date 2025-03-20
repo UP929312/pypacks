@@ -45,5 +45,5 @@ for loot_table_name, data in all_loot_table_data.items():
 lines += [f"{x.internal_name.upper()} = {repr(x)}" for x in loot_tables_instances]
 
 output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\loot_tables.py"
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     file.write("\n".join(lines)+"\n")

@@ -3,16 +3,9 @@ from typing import Any
 
 import requests
 
-from pypacks.resources.base_resource import overridden_repr
-from pypacks.resources.custom_dimension import CustomDimension, CustomDimensionType
-
-
-for cls in [CustomDimension, ]:
-    cls.__repr__ = overridden_repr  # type: ignore[assignment]
-
+from pypacks.resources.custom_dimension import CustomDimension
 
 all_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/misode/mcmeta/refs/heads/summary/data/dimension/data.min.json").json()
-
 
 lines = [
     "from pypacks.additions.item_components import PotionEffect",
@@ -42,5 +35,5 @@ for item_name, data in all_data.items():
 lines += [f"{x.internal_name.upper()} = {repr(x)}" for x in instances]
 
 output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\dimensions.py"
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     file.write("\n".join(lines)+"\n")

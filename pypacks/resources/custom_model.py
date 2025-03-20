@@ -103,7 +103,7 @@ class CustomModelDefinition(BaseResource):
         return {"parent": self.parent, "textures": layers}
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomModelDefinition":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomModelDefinition":  # type: ignore[override]
         return cls(
             internal_name,
             parent=data["parent"],
@@ -214,14 +214,14 @@ class AsymmetricCubeModel:
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
 
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             json.dump({
                 "variants": {
                     "": {"model": f"{pack.namespace}:block/{self.internal_name}"},
                 }
             }, file, indent=4)
 
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             axial_mapping = {
                 "up": "top",
                 "down": "bottom",
@@ -272,7 +272,7 @@ class SlabModel:
         # │               ├── <slab_name>_top.png
         # │               ├── <slab_name>_bottom.png
         # │               └── <slab_name>_side.png
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}_slab.json", "w") as file:
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}_slab.json", "w", encoding="utf-8") as file:
             json.dump({
                 # Create the blockstates file, pointing to the 3 different models
                 "variants": {
@@ -283,7 +283,7 @@ class SlabModel:
             }, file, indent=4)
 
         for suffix in ["slab", "slab_top"]:
-            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}_{suffix}.json", "w") as file:
+            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}_{suffix}.json", "w", encoding="utf-8") as file:
                 json.dump({
                     "parent": "minecraft:block/slab",
                     "textures": {

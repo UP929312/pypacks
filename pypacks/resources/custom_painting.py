@@ -33,7 +33,7 @@ class CustomPainting(BaseResource):
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "asset_id": f"{pack_namespace}:{self.internal_name}",
+            "asset_id": self.get_reference(pack_namespace),
             "width": self.width_in_blocks,
             "height": self.height_in_blocks,
             "title": {"color": "yellow", "text": self.title} if self.title is not None else None,

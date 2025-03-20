@@ -92,7 +92,7 @@ class MCFunction(BaseResource):
         # Can't use / here because of *self.sub_directories
         path = Path(pack.datapack_output_path, "data", pack.namespace, self.__class__.datapack_subdirectory_name,
                     *self.sub_directories, f"{self.internal_name}.mcfunction")
-        with open(path, "w") as file:
+        with open(path, "w", encoding="utf-8") as file:
             file.write(function_headers+commands_str)
 
     @classmethod
@@ -100,7 +100,7 @@ class MCFunction(BaseResource):
         """Path should be the root of the pack"""
         mcfunctions = []
         for function_path_absolute in BaseResource.get_all_resource_paths(cls, root_path, ".mcfunction"):
-            with open(function_path_absolute, "r") as file:
+            with open(function_path_absolute, "r", encoding="utf-8") as file:
                 file_content = file.read()
                 mcfunctions.append(
                     cls.from_file_contents(

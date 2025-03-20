@@ -35,7 +35,7 @@ class BaseResource:
         if hasattr(self, "sub_directories"):
             path = Path(path, *self.sub_directories)  # pyright: ignore
         os.makedirs(path, exist_ok=True)
-        with open(path/f"{self.internal_name}.json", "w") as file:
+        with open(path/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
@@ -43,7 +43,7 @@ class BaseResource:
         if hasattr(self, "sub_directories"):
             path = Path(path, *self.sub_directories)  # pyright: ignore
         os.makedirs(path, exist_ok=True)
-        with open(path/f"{self.internal_name}.json", "w") as file:
+        with open(path/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             json.dump(self.to_dict(pack.namespace), file, indent=4)
 
     @staticmethod
@@ -69,16 +69,16 @@ class BaseResource:
     def from_resource_pack_files(cls: type[T], root_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
         assert issubclass(cls, BaseResource)
-        if any(f.name == "sub_directories" for f in fields(cls)):  # type: ignore[attr-defined]
+        if any(f.name == "sub_directories" for f in fields(cls)):  # type: ignore[arg-type]
             return [
-                cls.from_dict(
+                cls.from_dict(  # type: ignore[misc, call-arg]
                     file_path.stem, json.load(file_path.open("r")),
-                    sub_directories=list(file_path.relative_to(root_path).parent.parts[1:]),  # type: ignore[attr-defined]
+                    sub_directories=list(file_path.relative_to(root_path).parent.parts[1:]),  # pyright: ignore
                 )
                 for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
             ]
         return [
-            cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[attr-defined]
+            cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[misc]
             for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
         ]
 
@@ -86,6 +86,9 @@ class BaseResource:
     def from_combined_files(cls: type[T], datapack_root_path: "Path", resource_pack_root_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
         raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return overridden_repr(self)
 
 
 def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]

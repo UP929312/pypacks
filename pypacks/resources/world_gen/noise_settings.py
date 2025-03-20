@@ -1,17 +1,12 @@
 from dataclasses import dataclass, field
-import json
-import os
-from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 from pypacks.utils import recursively_remove_nones_from_data
-
-if TYPE_CHECKING:
-    from pypacks.pack import Pack
+from pypacks.resources.base_resource import BaseResource
 
 
 @dataclass
-class CustomNoiseSettings:
+class CustomNoiseSettings(BaseResource):
     """Noise settings are for generating the shape of the terrain and noise caves, and what blocks the terrain is generated with"""
     # https://minecraft.wiki/w/Noise_settings
     internal_name: str
@@ -45,10 +40,7 @@ class CustomNoiseSettings:
         if self.noise_size_vertical < 0 or self.noise_size_vertical > 4:
             raise ValueError("noise_size_vertical must be between 0 and 4")
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
-
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "sea_level": self.sea_level,
             "disable_mob_generation": self.disable_mob_generation,
@@ -68,8 +60,4 @@ class CustomNoiseSettings:
             "surface_rule": self.surface_rule,
         })
 
-    def create_datapack_files(self, pack: "Pack") -> None:
-        # We need to create the subdir if this is being created as part of a custom dimension:
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(), file, indent=4)
+    # TODO: Need to add from_dict

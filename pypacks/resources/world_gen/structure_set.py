@@ -1,10 +1,8 @@
 from dataclasses import dataclass, field
-import json
-import os
-from pathlib import Path
 from typing import Any, Literal, TYPE_CHECKING
 
 from pypacks.utils import recursively_remove_nones_from_data
+from pypacks.resources.base_resource import BaseResource
 
 if TYPE_CHECKING:
     from pypacks.resources.world_gen.structure import CustomStructure
@@ -12,7 +10,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class CustomStructureSet:
+class CustomStructureSet(BaseResource):
     """A structure set is used to determine the position of structures in the world during world generation.
     Structure sets are not referenced in a dimension or biome.
     Instead, the existence of the resource is enough to make the structures generate.
@@ -28,9 +26,6 @@ class CustomStructureSet:
     placement_type: "RandomSpreadPlacementType | ConcentricRingsPlacementType" = field(default_factory=lambda: RandomSpreadPlacementType())
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/structure_set")
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"
 
     def __post_init__(self) -> None:
         if self.placement_salt < 0:
@@ -70,12 +65,10 @@ class CustomStructureSet:
 
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.world_gen.structure import CustomStructure
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name, exist_ok=True)
+        super().create_datapack_files(pack)
         for structure in self.structures:
             if isinstance(structure, CustomStructure):
                 structure.create_datapack_files(pack)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/self.__class__.datapack_subdirectory_name/f"{self.internal_name}.json", "w") as file:
-            json.dump(self.to_dict(pack.namespace), file, indent=4)
 
 
 @dataclass

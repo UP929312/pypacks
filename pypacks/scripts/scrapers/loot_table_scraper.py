@@ -18,7 +18,7 @@ BASE = """from typing import Literal
 
 LootTables = Literal"""
 
-with open(output_path, "w") as file:
+with open(output_path, "w", encoding="utf-8") as file:
     if ENABLED:
         file.write(BASE+json.dumps(sorted(loot_tables), indent=4)+"\n")
     else:
