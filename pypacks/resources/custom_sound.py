@@ -73,10 +73,10 @@ class CustomSound(BaseResource):
         shutil.copyfile(self.ogg_path, path/f"{self.internal_name}.ogg")
 
     @classmethod
-    def from_resource_pack_files(cls, root_path: Path) -> list["CustomSound"]:  # TODO: This isn't really the root path anymore
-        with open(root_path/"sounds.json", encoding="utf-8") as file:
+    def from_resource_pack_files(cls, assets_path: Path) -> list["CustomSound"]:
+        with open(assets_path/"sounds.json", encoding="utf-8") as file:
             sounds_raw: dict[str, Any] = json.load(file)
             sounds = [cls.from_dict(sound_event, sound_data) for sound_event, sound_data in sounds_raw.items()]
             for sound in sounds:
-                sound.ogg_path = root_path/"sounds"/sound.ogg_path
+                sound.ogg_path = assets_path/"sounds"/sound.ogg_path
             return sounds

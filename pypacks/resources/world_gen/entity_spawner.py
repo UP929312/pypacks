@@ -36,13 +36,15 @@ class SpawnOverride:
             spawn_overrides_dict[disable_spawn.mob_category] = disable_spawn.to_dict()
         return spawn_overrides_dict
 
-    def to_dict(self) -> dict[str, Any]:
+    def __post_init__(self) -> None:
         if self.max_count < self.min_count:
             raise ValueError("max_count must be greater than or equal to min_count")
         if self.min_count < 1:
             raise ValueError("min_count must be greater than 0")
         if self.max_count < 1:
             raise ValueError("max_count must be greater than 0")
+
+    def to_dict(self) -> dict[str, Any]:
         return {
             "type": self.entity_name,
             "minCount": self.min_count,
@@ -70,3 +72,11 @@ class DisableSpawnOverrideCategory:
             "bounding_box": self.bounding_box,
             "spawns": []
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DisableSpawnOverrideCategory":
+        raise NotImplementedError("Cannot create a DisableSpawnOverrideCategory from a dict (for now)")
+        # return cls(
+        #     mob_category=data["mob_category"],
+        #     bounding_box=data["bounding_box"]
+        # )

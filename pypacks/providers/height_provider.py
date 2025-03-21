@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Literal, TypeAlias
+from typing import Any, Literal
 
 
 VerticalAnchor = Literal["absolute", "above_bottom", "below_top"]
@@ -11,7 +11,19 @@ VerticalAnchor = Literal["absolute", "above_bottom", "below_top"]
 
 
 @dataclass(frozen=True)
-class ConstantHeightProvider:
+class HeightProvider:
+    """Used to specify a height."""
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        raise NotImplementedError
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "HeightProvider":
+        cls_ = HEIGHT_PROVIDER_NAME_TO_CLASSES[data["type"]]
+        return cls_.from_dict(data)
+
+
+@dataclass(frozen=True)
+class ConstantHeightProvider(HeightProvider):
     """Used to specify a constant height."""
     value: int
     vertical_anchor: VerticalAnchor = "absolute"
@@ -22,9 +34,17 @@ class ConstantHeightProvider:
             "value": {self.vertical_anchor: self.value},
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ConstantHeightProvider":
+        key, value = list(data["value"].items())[0]
+        return cls(
+            value=key,
+            vertical_anchor=value,
+        )
+
 
 @dataclass(frozen=True)
-class UniformHeightProvider:
+class UniformHeightProvider(HeightProvider):
     """Used to specify a random value in a uniform distribution"""
     min_inclusive: int = 64
     min_inclusive_anchor: VerticalAnchor = "absolute"
@@ -41,9 +61,20 @@ class UniformHeightProvider:
             "max_inclusive": {self.max_inclusive_anchor: self.max_inclusive},
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "UniformHeightProvider":
+        min_key, min_value = list(data["min_inclusive"].items())[0]
+        max_key, max_value = list(data["max_inclusive"].items())[0]
+        return cls(
+            min_inclusive=min_key,
+            min_inclusive_anchor=min_value,
+            max_inclusive=max_key,
+            max_inclusive_anchor=max_value,
+        )
+
 
 @dataclass(frozen=True)
-class BiasedToBottomHeightProvider:
+class BiasedToBottomHeightProvider(HeightProvider):
     """Used to specify a random value, biased towards the bottom"""
     min_inclusive: int = 64
     min_inclusive_anchor: VerticalAnchor = "absolute"
@@ -59,9 +90,21 @@ class BiasedToBottomHeightProvider:
             "inner": self.inner,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BiasedToBottomHeightProvider":
+        min_key, min_value = list(data["min_inclusive"].items())[0]
+        max_key, max_value = list(data["max_inclusive"].items())[0]
+        return cls(
+            min_inclusive=min_key,
+            min_inclusive_anchor=min_value,
+            max_inclusive=max_key,
+            max_inclusive_anchor=max_value,
+            inner=data["inner"],
+        )
+
 
 @dataclass(frozen=True)
-class VeryBiasedToBottomHeightProvider:
+class VeryBiasedToBottomHeightProvider(HeightProvider):
     """Used to specify a random value, biased towards the bottom"""
     min_inclusive: int = 64
     min_inclusive_anchor: VerticalAnchor = "absolute"
@@ -77,9 +120,21 @@ class VeryBiasedToBottomHeightProvider:
             "inner": self.inner,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "VeryBiasedToBottomHeightProvider":
+        min_key, min_value = list(data["min_inclusive"].items())[0]
+        max_key, max_value = list(data["max_inclusive"].items())[0]
+        return cls(
+            min_inclusive=min_key,
+            min_inclusive_anchor=min_value,
+            max_inclusive=max_key,
+            max_inclusive_anchor=max_value,
+            inner=data["inner"],
+        )
+
 
 @dataclass(frozen=True)
-class TrapezoidHeightProvider:
+class TrapezoidHeightProvider(HeightProvider):
     """Used to specify a random value, isosceles trapezoidal distribution"""
     min_inclusive: int = 64
     min_inclusive_anchor: VerticalAnchor = "absolute"
@@ -95,9 +150,21 @@ class TrapezoidHeightProvider:
             "plateau": self.plateau,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TrapezoidHeightProvider":
+        min_key, min_value = list(data["min_inclusive"].items())[0]
+        max_key, max_value = list(data["max_inclusive"].items())[0]
+        return cls(
+            min_inclusive=min_key,
+            min_inclusive_anchor=min_value,
+            max_inclusive=max_key,
+            max_inclusive_anchor=max_value,
+            plateau=data["plateau"],
+        )
+
 
 @dataclass(frozen=True)
-class WeightedListHeightProvider:
+class WeightedListHeightProvider(HeightProvider):
     """Used to specify a random value from a weighted list"""
     distributions: dict["HeightProvider", int] = field(default_factory=lambda: {ConstantHeightProvider(0): 1})
 
@@ -110,5 +177,21 @@ class WeightedListHeightProvider:
             ],
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "WeightedListHeightProvider":
+        return cls(
+            distributions={
+                HeightProvider.from_dict(d["data"]): d["weight"]
+                for d in data["distribution"]
+            }
+        )
 
-HeightProvider: TypeAlias = ConstantHeightProvider | UniformHeightProvider | BiasedToBottomHeightProvider | TrapezoidHeightProvider | WeightedListHeightProvider
+
+HEIGHT_PROVIDER_NAME_TO_CLASSES = {
+    "constant": ConstantHeightProvider,
+    "uniform": UniformHeightProvider,
+    "biased_to_bottom": BiasedToBottomHeightProvider,
+    "very_biased_to_bottom": VeryBiasedToBottomHeightProvider,
+    "trapezoid": TrapezoidHeightProvider,
+    "weighted_list": WeightedListHeightProvider,
+}

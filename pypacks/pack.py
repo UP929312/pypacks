@@ -292,7 +292,7 @@ class Pack:
         from pypacks.resources.custom_dimension import CustomDimension
         from pypacks.resources.custom_enchantment import CustomEnchantment
         from pypacks.resources.entities import ALL_ENTITY_VARIANTS
-        # from pypacks.resources.custom_font import CustomAutoAssignedFont
+        # from pypacks.resources.custom_font import CustomFont
         from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
         from pypacks.resources.custom_language import CustomLanguage
@@ -303,12 +303,13 @@ class Pack:
         from pypacks.resources.custom_recipe import Recipe
         from pypacks.resources.custom_sound import CustomSound
         from pypacks.resources.custom_tag import CustomTag
-        # from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
-        # All WorldGenResources
+        from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
 
         entity_variants_2d = [x.from_datapack_files(datapack_path_namespaced) for x in ALL_ENTITY_VARIANTS]  # TODO: Needs from_combined_files (generic and wolf)
         # rint(CustomLanguage.from_resource_pack_files(resource_pack_path))
-        # rint(Recipe.from_datapack_files(datapack_path))
+        # rint(WorldGenResources.from_datapack_files(datapack_path))
+        # TODO: Most of these use "root_path", but it should be "data_path" and "assets_path"...
+
         return Pack(
             name=datapack_path.stem, description="", namespace=datapack_path_namespaced.stem,
             custom_advancements=CustomAdvancement.from_datapack_files(datapack_path_namespaced),
@@ -316,7 +317,7 @@ class Pack:
             custom_dimensions=CustomDimension.from_datapack_files(datapack_path_namespaced),
             custom_enchantments=CustomEnchantment.from_datapack_files(datapack_path_namespaced),
             custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
-            # custom_fonts=CustomAutoAssignedFont.from_datapack_files(datapack_path),
+            # custom_fonts=CustomFont.from_datapack_files(datapack_path),  # TODO: Do!
             custom_game_tests=CustomGameTest.from_datapack_files(datapack_path_namespaced),
             custom_test_environments=CustomTestEnvironment.from_datapack_files(datapack_path_namespaced),
             custom_jukebox_songs=CustomJukeboxSong.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced),
@@ -331,5 +332,5 @@ class Pack:
             custom_textures=CustomTexture.from_resource_pack_files(resource_pack_path_namespaced),
             custom_model_definitions=CustomModelDefinition.from_datapack_files(resource_pack_path_namespaced),
             custom_item_render_definitions=CustomItemRenderDefinition.from_datapack_files(resource_pack_path_namespaced),
-            # world_gen_resources=WorldGenResources.from_datapack_files(datapack_path),
+            world_gen_resources=WorldGenResources.from_datapack_files(datapack_path),
         )

@@ -65,7 +65,7 @@ class CustomChunkScanner:
                 for x in [-16, 0, 16] for z in [-16, 0, 16] if (x, z) != (0, 0)
             ],
         ], ["custom_chunk_scanning"])
-        return CustomLoop("check_chunks_loop", 1 * 20, check_chunks)
+        return CustomLoop("check_chunks_loop", 1 * 20, [check_chunks])
 
     @staticmethod
     def generate_mark_and_call_function(pack_namespace: str) -> MCFunction:

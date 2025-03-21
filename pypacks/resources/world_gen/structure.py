@@ -7,6 +7,7 @@ from typing import Any, Literal, TYPE_CHECKING
 
 from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride
+from pypacks.providers.height_provider import ConstantHeightProvider, HeightProvider
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
@@ -39,7 +40,7 @@ class CustomStructure(BaseResource):
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            **self.structure_type.to_dict(),
+            **self.structure_type.to_dict(pack_namespace),
             "biomes": self.biomes_to_spawn_in,
             "step": self.generation_step,
             "terrain_adaptation": self.terrain_adaptation if self.terrain_adaptation != "none" else None,
@@ -48,20 +49,14 @@ class CustomStructure(BaseResource):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructure":
+        # TODO: This currently only works for Jigsaws
         return cls(
-            data["internal_name"],
-            JigsawStructureType(
-                data["structure_type"]["start_pool"],
-                size=data["structure_type"]["size"],
-                start_height=data["structure_type"]["start_height"]["absolute"],
-                project_start_to_heightmap=data["structure_type"]["project_start_to_heightmap"],
-                max_distance_from_center=data["structure_type"]["max_distance_from_center"],
-                apply_waterlogging=data["structure_type"]["liquid_settings"] == "apply_waterlogging",
-            ),
-            data["biomes_to_spawn_in"],
-            data["generation_step"],
+            internal_name,
+            JigsawStructureType.from_dict(data),
+            data["biomes"],
+            data["step"],
             data["terrain_adaptation"],
-            [SpawnOverride.from_dict(spawn_override) for spawn_override in data["entity_spawn_overrides"]],
+            [SpawnOverride.from_dict(spawn_override) for spawn_override in data["spawn_overrides"]],
         )
 
 
@@ -86,7 +81,6 @@ class SingleCustomStructure:
             structure_type=JigsawStructureType(
                 self.get_reference(pack_namespace),
                 size=1,
-                start_height=0,
                 project_start_to_heightmap="WORLD_SURFACE_WG",
             ),
             biomes_to_spawn_in=[biome.get_reference(pack_namespace) if isinstance(biome, CustomBiome) else biome for biome in self.biomes_to_spawn_in],
@@ -129,35 +123,52 @@ class SingleCustomStructure:
 class JigsawStructureType:
     start_pool: str
     size: int = 1  # The depth of jigsaw structures to generate.
-    start_height: int = 0
+    start_height: "HeightProvider" = field(default_factory=lambda: ConstantHeightProvider(0))
     project_start_to_heightmap: Literal["WORLD_SURFACE_WG", "WORLD_SURFACE", "OCEAN_FLOOR_WG", "OCEAN_FLOOR", "WORLD_SURFACE_WG", "WORLD_SURFACE", "OCEAN_FLOOR_WG", "OCEAN_FLOOR"] = "WORLD_SURFACE_WG"  # WG = Exclusively during World Gen
     max_distance_from_center: int = 80
     apply_waterlogging: bool = True
 
-    def to_dict(self) -> dict[str, Any]:
+    def __post_init__(self) -> None:
         assert 0 <= self.size <= 20, "Size must be between 0 and 20"
         assert 1 <= self.max_distance_from_center <= 128, "Max distance from center must be between 1 and 128"
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:jigsaw",
             "start_pool": self.start_pool,
             "size": self.size,
-            "start_height": {"absolute": self.start_height},  # TODO: Height provider
+            "start_height": self.start_height.to_dict(pack_namespace),
             "project_start_to_heightmap": self.project_start_to_heightmap,
             "max_distance_from_center": self.max_distance_from_center,
             "use_expansion_hack": False,
             "liquid_settings": "apply_waterlogging" if self.apply_waterlogging else "ignore_waterlogging",
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "JigsawStructureType":
+        return cls(
+            data["start_pool"],
+            data["size"],
+            HeightProvider.from_dict(data["start_height"]),
+            data["project_start_to_heightmap"],
+            data["max_distance_from_center"],
+            data["liquid_settings"] == "apply_waterlogging",
+        )
+
 
 @dataclass
-class SingleItemTemplatePool:
+class SingleItemTemplatePool(BaseResource):
     internal_name: str
     element_type: str
 
-    def to_dict(self) -> dict[str, Any]:
+    datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/template_pool")
+
+    def __post_init__(self) -> None:
         assert ":" in self.element_type, "Element type must be in the format 'namespace:element'"
         self.weight = 1
         assert 1 <= self.weight <= 150, "Weight must be between 1 and 150"
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "fallback": "minecraft:empty",
             "elements": [
@@ -174,16 +185,19 @@ class SingleItemTemplatePool:
             ]
         }
 
-    def create_datapack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool", exist_ok=True)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"worldgen/template_pool"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
-            json.dump(self.to_dict(), file, indent=4)
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SingleItemTemplatePool":
+        return cls(
+            internal_name,
+            data["elements"][0]["element"]["location"],
+        )
+
 
 # ============================================================================================================
 
 
 @dataclass
-class GameTestStructure:
+class GameTestStructure(BaseResource):
     internal_name: str
     path_to_structure_nbt: Path | str
 
@@ -192,13 +206,7 @@ class GameTestStructure:
     def create_datapack_files(self, pack: "Pack") -> None:
         structure = SingleCustomStructure(self.internal_name, self.path_to_structure_nbt)
         structure.create_datapack_files(pack)
-        # os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure", exist_ok=True)
-        # with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure"/f"{self.internal_name}.nbt", "wb") as file:
-        #     file.write(Path(self.path_to_structure_nbt).read_bytes())
 
     @classmethod
     def from_single_custom_structure(cls, single_custom_structure: SingleCustomStructure) -> "GameTestStructure":
         return cls(single_custom_structure.internal_name, single_custom_structure.path_to_nbt_file)
-
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}"

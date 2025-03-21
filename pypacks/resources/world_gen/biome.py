@@ -127,3 +127,12 @@ class MoodSound:
             "block_search_extent": self.block_search_extent,
             "offset": self.offset
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "MoodSound":
+        return cls(
+            data["sound"],
+            data.get("tick_delay", 6000),
+            data.get("block_search_extent", 8),
+            data.get("offset", 2)
+        )

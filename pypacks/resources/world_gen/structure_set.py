@@ -63,6 +63,19 @@ class CustomStructureSet(BaseResource):
             }
         })
 
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructureSet":
+        return cls(
+            internal_name,
+            {structure["structure"]: structure["weight"] for structure in data["structures"]},
+            data["placement"]["salt"],
+            data["placement"].get("frequency", 1.0),
+            data["placement"].get("frequency_reduction_method", "default"),
+            {data["placement"]["exclusion_zone"]["other_set"]: data["placement"]["exclusion_zone"]["chunk_count"]} if data["placement"].get("exclusion_zone") else {},
+            (data["placement"]["locate_offset"]["X"], data["placement"]["locate_offset"]["Y"], data["placement"]["locate_offset"]["Z"]) if data["placement"].get("locate_offset") else (0, 0, 0),
+            [RandomSpreadPlacementType, ConcentricRingsPlacementType]["spread_type" in data["placement"]].from_dict(data["placement"])
+        )
+
     def create_datapack_files(self, pack: "Pack") -> None:
         from pypacks.resources.world_gen.structure import CustomStructure
         super().create_datapack_files(pack)
@@ -96,6 +109,14 @@ class RandomSpreadPlacementType:
             "separation": self.separation
         }
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "RandomSpreadPlacementType":
+        return cls(
+            data.get("spread_type", "linear"),
+            data["spacing"],
+            data["separation"]
+        )
+
 
 @dataclass
 class ConcentricRingsPlacementType:
@@ -121,3 +142,12 @@ class ConcentricRingsPlacementType:
             "preferred_biomes": self.preferred_biomes,
             "spread": self.spread
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ConcentricRingsPlacementType":
+        return cls(
+            data["distance"],
+            data["count"],
+            data.get("preferred_biomes", []),
+            data["spread"]
+        )

@@ -532,16 +532,18 @@ class SetContentsFunction(LootTableFunction):
     content_type: str  # The block entity type to be written in BlockEntityTag.id.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        raise NotImplementedError("This function is not yet implemented.")  # TODO: Do this
-        # return {
-        #     "function": "minecraft:set_contents",
-        #     "entries": [x.to_dict(pack_namespace) for x in self.entries],  # TODO: This needs datapack (for some entries)...
-        #     "type": self.content_type,
-        # }
+        return {
+            "function": "minecraft:set_contents",
+            "entries": [x.to_dict(pack_namespace) for x in self.entries],
+            "type": self.content_type,
+        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "SetContentsFunction":
-        raise NotImplementedError("This function is not yet implemented.")
+        return cls(
+            entries=[SingletonEntry.from_dict(x) for x in data["entries"]],
+            content_type=data["type"],
+        )
 
 
 @dataclass

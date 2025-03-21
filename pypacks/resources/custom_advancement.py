@@ -6,6 +6,8 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.resources.custom_mcfunction import MCFunction
+    from pypacks.resources.custom_loot_tables import CustomLootTable
+    from pypacks.resources.custom_recipe import Recipe
 
 TriggerType = Literal[
     "minecraft:allay_drop_item_on_block", "minecraft:any_block_use", "minecraft:avoid_vibration", "minecraft:bee_nest_destroyed",
@@ -53,9 +55,8 @@ class CustomAdvancement(BaseResource):
     # https://minecraft.wiki/w/Advancement_definition
     internal_name: str
     criteria: list[Criteria]
-    # TODO: Rewarded loot should take a loot table, the rewarded recipes should take a recipe, and the rewarded function should take a function.
-    rewarded_loot: str | None = field(repr=False, default=None)  # The resource location of a loot table.
-    rewarded_recipes: str | None = field(repr=False, default=None)  # The resource location of a recipe.
+    rewarded_loot_tables: list["str | CustomLootTable"] = field(repr=False, default_factory=list)  # The resource location of a loot table.
+    rewarded_recipes: list["str | Recipe"] = field(repr=False, default_factory=list)  # The resource location of a recipe.
     rewarded_experience: int | None = field(repr=False, default=None)  # To give an amount of experience. Defaults to 0.
     rewarded_function: "str | MCFunction | None" = field(default=None)  # To run a function. Function tags are not allowed.
     hidden: bool = False
@@ -91,8 +92,8 @@ class CustomAdvancement(BaseResource):
             "requirements": [[x.name] for x in self.criteria],
             "rewards": {
                 "experience": self.rewarded_experience,
-                "recipes": self.rewarded_recipes,
-                "loot": self.rewarded_loot,
+                "recipes": [x.get_reference(pack_namespace) if isinstance(x, Recipe) else x for x in self.rewarded_recipes] or None,
+                "loot": [x.get_reference(pack_namespace) if isinstance(x, CustomLootTable) else x for x in self.rewarded_loot_tables] or None,
                 "function": self.rewarded_function.get_reference(pack_namespace) if isinstance(self.rewarded_function, MCFunction) else self.rewarded_function,
             },
             "sends_telemetry_event": True if self.send_telemetry_event else None,
@@ -103,8 +104,8 @@ class CustomAdvancement(BaseResource):
         return cls(
             internal_name,
             criteria=[Criteria.from_dict(key, value) for key, value in data["criteria"].items()],
-            rewarded_loot=data.get("rewarded_loot"),
-            rewarded_recipes=data.get("rewarded_recipes"),
+            rewarded_loot_tables=data.get("rewarded_loot") or [],
+            rewarded_recipes=data.get("rewarded_recipes") or [],
             rewarded_experience=data.get("rewarded_experience"),
             rewarded_function=data.get("rewarded_function"),
             hidden=data.get("hidden", False),

@@ -1,5 +1,5 @@
 import zipfile
-# import shutil
+import shutil
 
 import requests
 from pypacks import Pack
@@ -55,5 +55,5 @@ with open("generated_pack.py", "w", encoding="utf-8") as f:
     f.write(IMPORTS+"pack = "+str(pack)+"\n")
 
 # Delete the nested folders:
-# shutil.rmtree(existing_datapack)
-# shutil.rmtree(existing_resource_pack)
+shutil.rmtree(existing_datapack)
+shutil.rmtree(existing_resource_pack)

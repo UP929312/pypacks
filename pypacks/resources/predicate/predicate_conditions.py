@@ -383,7 +383,7 @@ class LocationTag:
         return cls(
             biomes=[CustomBiome.from_dict(f"{internal_name}_biome", biome) if isinstance(biome, dict) else biome for biome in data.get("biomes", [])],
             block=BlockPredicate.from_dict(data["block"]) if data.get("block") else None,
-            dimension=CustomDimension.from_dict("TODO: Add an internal name here", data["dimension"]) if isinstance(data.get("dimension"), dict) else data.get("dimension"),
+            dimension=CustomDimension.from_dict(f"{internal_name}_dimension", data["dimension"]) if isinstance(data.get("dimension"), dict) else data.get("dimension"),
             fluids=FluidPredicate.from_dict(data["fluid"]) if data.get("fluid") else None,
             light_level=IntRange.from_dict(data["light"]) if isinstance(data.get("light"), dict) else data.get("light"),
             x_position=IntRange.from_dict(data["position"]["x"]) if isinstance(data.get("position"), dict) else data.get("position"),
@@ -407,9 +407,8 @@ class ItemCondition:
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.providers.int_provider import UniformIntProvider
-        from pypacks.resources.custom_item import CustomItem
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "items": [item.get_reference(pack_namespace) if isinstance(item, CustomItem) else item for item in self.items],
+            "items": [str(item) for item in self.items],
             "count": self.count.to_dict() if isinstance(self.count, UniformIntProvider) else self.count,
             "components": self.components or None,
             "predicates": [predicate.to_dict(pack_namespace) for predicate in self.predicates]
@@ -420,7 +419,7 @@ class ItemCondition:
         from pypacks.providers.int_provider import UniformIntProvider
         return cls(
             items=data.get("items", []),
-            count=UniformIntProvider.from_dict(data["count"]) if isinstance(data.get("count"), UniformIntProvider) else data.get("count"),
+            count=UniformIntProvider.from_dict(data["count"]) if not isinstance(data.get("count"), (int, float)) else data.get("count"),
             components=data.get("components", {}),
             predicates=[Predicate.from_dict(internal_name, predicate) for predicate in data.get("predicates", [])],
         )

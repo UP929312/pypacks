@@ -1,5 +1,5 @@
 
-# type: ignore
+# type: ignore # noqa: F401
 from pypacks import Pack
 from pypacks.resources import *  # noqa: F403
 from pypacks.additions.item_components import *  # noqa: F403

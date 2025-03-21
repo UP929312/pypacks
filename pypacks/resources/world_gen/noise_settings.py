@@ -60,4 +60,22 @@ class CustomNoiseSettings(BaseResource):
             "surface_rule": self.surface_rule,
         })
 
-    # TODO: Need to add from_dict
+    @classmethod
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomNoiseSettings":
+        return cls(
+            internal_name=internal_name,
+            sea_level=data["sea_level"],
+            disable_mob_generation=data["disable_mob_generation"],
+            ore_veins_enabled=data["ore_veins_enabled"],
+            aquifers_enabled=data["aquifers_enabled"],
+            legacy_random_source=data["legacy_random_source"],
+            default_block=data["default_block"],
+            default_fluid=data["default_fluid"],
+            spawn_target=data["spawn_target"],
+            noise_min_y=data["noise"]["min_y"],
+            noise_height=data["noise"]["height"],
+            noise_size_horizontal=data["noise"]["size_horizontal"],
+            noise_size_vertical=data["noise"]["size_vertical"],
+            noise_router=data["router"],
+            surface_rule=data["surface_rule"],
+        )

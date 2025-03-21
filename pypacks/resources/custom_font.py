@@ -36,6 +36,14 @@ class CustomFont:
             for provider in self.providers
         ]
 
+    # @classmethod  # TODO: AAAA Work on this
+    # def from_dict(cls, internal_name: str, data: list[dict[str, Any]]) -> "CustomFont":
+    #     cls_ = cls(internal_name, [])
+    #     for provider in data:
+    #         font_type = provider["type"]
+    #         cls_.providers.append(FONT_TYPE_NAMES_TO_CLASSES[font_type](**provider))
+    #     return cls_
+
     def create_resource_pack_files(self, pack: "Pack") -> None:
         for provider in self.providers:
             provider.create_resource_pack_files(pack)
@@ -158,3 +166,11 @@ class ReferenceFontProvider:
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         pass
+
+
+FONT_TYPE_NAMES_TO_CLASSES = {
+    "ttf": TTFFontProvider,
+    "bitmap": BitMapFontChar,
+    "space": SpaceFontChar,
+    "reference": ReferenceFontProvider,
+}

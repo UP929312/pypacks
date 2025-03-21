@@ -7,7 +7,7 @@ Would love to have an entire pack.from_dict, or from_folder or something, would 
 
 Regex to enforce smithed in mcfunctions?
 
-Pack.from_existing_pack() needs to absort the minecraft namespace
+Pack.from_existing_pack() needs to absort the minecraft namespace's stuff, like tick and that kind of thing
 
 1. Custom fonts needs non-auto choosing chars
 2. Can generate a whole pack, but it's in the format of Pack(...), and I would quite like a formatter of __str__ that adds indentation and new lines.

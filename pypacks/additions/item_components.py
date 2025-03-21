@@ -447,11 +447,15 @@ class ContainerContents:
 
     @classmethod
     def from_dict(cls, data: list[dict[str, Any]]) -> "ContainerContents":
-        raise NotImplementedError
-        # TODO: Need to combine item and components here
-        # return cls(
-        #     items={
-        # )
+        return cls(
+            {
+                (
+                    CustomItem.from_dict(item["item"]+"_custom_item", item["item"]["id"], item["item"])
+                    if "components" in item["item"]
+                    else item["item"]["id"]
+                ): item["item"].get("count", 1)
+             for item in data}
+        )
 
 
 # ==========================================================================================
@@ -964,20 +968,17 @@ class UseRemainder:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.resources.custom_item import CustomItem
         return {
-            "id": self.item.base_item if isinstance(self.item, CustomItem) else self.item,
+            "id": str(self.item),
             "count": self.count,
         } | ({"components": self.item.to_dict(pack_namespace)} if isinstance(self.item, CustomItem) else {})
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "UseRemainder":
-        # TODO: I suppose if this is a custom item, it needs to be parsed as such
-        # Basically, add support to parse a custom item (or really just components) from a dict...
-        if "components" in data:
-            raise NotImplementedError("Parsing custom items from a dict is not yet supported")
         return cls(
-            item=data["id"],
+            item=data["id"] if "components" not in data else CustomItem.from_dict(data["id"]+"_custom_item", data["id"], data["components"]),
             count=data.get("count", 1),
         )
+        
 
 # ==========================================================================================
 
