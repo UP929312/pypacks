@@ -78,11 +78,11 @@ class CustomTexture(BaseResource):
         shutil.copyfile(self.path_to_texture, path/f"{self.internal_name}.png")
 
     @classmethod
-    def from_resource_pack_files(cls, root_path: "Path") -> list["CustomTexture"]:
+    def from_resource_pack_files(cls, assets_path: "Path") -> list["CustomTexture"]:
         """Path should be the root of the pack"""
         return [
-            cls(file_path.stem, file_path, sub_directories=file_path.parts[len(root_path.parts)+1:])  # type: ignore[arg-type]
-            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.png")
+            cls(file_path.stem, file_path, sub_directories=file_path.parts[len(assets_path.parts)+1:])  # type: ignore[arg-type]
+            for file_path in assets_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.png")
             if "textures/font" not in str(file_path)
         ]
 

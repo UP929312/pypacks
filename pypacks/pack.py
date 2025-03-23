@@ -1,3 +1,4 @@
+import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -52,7 +53,7 @@ class Pack:
     name: str
     description: str
     namespace: str
-    pack_icon_path: str | None = None
+    pack_icon_path: "str | Path | None" = None
     world_name: str | None = None
     datapack_output_path: str = ""
     resource_pack_path: str = ""
@@ -292,10 +293,11 @@ class Pack:
         from pypacks.resources.custom_dimension import CustomDimension
         from pypacks.resources.custom_enchantment import CustomEnchantment
         from pypacks.resources.entities import ALL_ENTITY_VARIANTS
-        # from pypacks.resources.custom_font import CustomFont
+        from pypacks.resources.custom_font import CustomFont
         from pypacks.resources.custom_game_test import CustomGameTest, CustomTestEnvironment
         from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
         from pypacks.resources.custom_language import CustomLanguage
+        # from pypacks.resources.custom_mcfunction import MCFunction
         from pypacks.resources.custom_loot_tables import CustomLootTable
         from pypacks.resources.custom_model import CustomItemRenderDefinition, CustomModelDefinition, CustomTexture
         from pypacks.resources.custom_painting import CustomPainting
@@ -305,19 +307,21 @@ class Pack:
         from pypacks.resources.custom_tag import CustomTag
         from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
 
-        entity_variants_2d = [x.from_datapack_files(datapack_path_namespaced) for x in ALL_ENTITY_VARIANTS]  # TODO: Needs from_combined_files (generic and wolf)
-        # rint(CustomLanguage.from_resource_pack_files(resource_pack_path))
-        # rint(WorldGenResources.from_datapack_files(datapack_path))
-        # TODO: Most of these use "root_path", but it should be "data_path" and "assets_path"...
+        entity_variants_2d: list[list[EntityVariant]] = [x.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced) for x in ALL_ENTITY_VARIANTS]  # type: ignore[assignment]
+        pack_icon_path = next((resource_pack_path/"pack.png" for _ in range(1)), None)  # Get or None
+        pack_description_path = next((resource_pack_path/"pack.mcmeta" for _ in range(1)), None)  # Get or None
+        description = json.loads(pack_description_path.read_text())["pack"].get("description", "") if pack_description_path else ""
 
+        # TODO: Things missing: Minecraft namespace stuff (maybe consider a second "Pack" object?) and addition content
         return Pack(
-            name=datapack_path.stem, description="", namespace=datapack_path_namespaced.stem,
+            name=datapack_path.stem, description=description, namespace=datapack_path_namespaced.stem,
+            pack_icon_path=pack_icon_path,
             custom_advancements=CustomAdvancement.from_datapack_files(datapack_path_namespaced),
             custom_damage_types=CustomDamageType.from_datapack_files(datapack_path_namespaced),
             custom_dimensions=CustomDimension.from_datapack_files(datapack_path_namespaced),
             custom_enchantments=CustomEnchantment.from_datapack_files(datapack_path_namespaced),
             custom_entity_variants=[x for sublist in entity_variants_2d for x in sublist if x],
-            # custom_fonts=CustomFont.from_datapack_files(datapack_path),  # TODO: Do!
+            custom_fonts=CustomFont.from_resource_pack_files(resource_pack_path_namespaced),
             custom_game_tests=CustomGameTest.from_datapack_files(datapack_path_namespaced),
             custom_test_environments=CustomTestEnvironment.from_datapack_files(datapack_path_namespaced),
             custom_jukebox_songs=CustomJukeboxSong.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced),
@@ -333,4 +337,5 @@ class Pack:
             custom_model_definitions=CustomModelDefinition.from_datapack_files(resource_pack_path_namespaced),
             custom_item_render_definitions=CustomItemRenderDefinition.from_datapack_files(resource_pack_path_namespaced),
             world_gen_resources=WorldGenResources.from_datapack_files(datapack_path),
+            config=Config.empty_config(),
         )

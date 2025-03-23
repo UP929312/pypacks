@@ -33,10 +33,9 @@ class GenericEntityVariant(BaseResource):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GenericEntityVariant":
-        # {'asset_id': 'pypacks_testing:entity/cat/sand_cat', 'spawn_conditions': [{'priority': 0}] }
         return cls(
             internal_name=internal_name,
-            texture_path=data["asset_id"].split(":")[1],  # TODO: Expand this in .from_combined_files
+            texture_path=data["asset_id"].split(":")[1]+".png",
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 
@@ -45,6 +44,13 @@ class GenericEntityVariant(BaseResource):
 
     def generate_summon_command(self, pack_namespace: str) -> str:
         return f"summon {self.entity_type} ~ ~ ~ {{\"variant\": \"{pack_namespace}:{self.internal_name}\"}}"
+
+    @classmethod
+    def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["GenericEntityVariant"]:
+        entity_variants = super().from_datapack_files(data_path)
+        for entity_variant in entity_variants:
+            entity_variant.texture_path = assets_path/"textures"/entity_variant.texture_path
+        return entity_variants  # type: ignore[abc]
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Create and move the texture file

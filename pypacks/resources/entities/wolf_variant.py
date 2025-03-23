@@ -17,9 +17,9 @@ if TYPE_CHECKING:
 @dataclass
 class WolfVariant(BaseResource):
     internal_name: str
-    angry_texture_path: str | Path  # A path to the texture for the angry wolf
     wild_texture_path: str | Path  # A path to the texture for the angry wolf
     tame_texture_path: str | Path  # A path to the texture for the angry wolf
+    angry_texture_path: str | Path  # A path to the texture for the angry wolf
     spawn_conditions: dict[int, "SpawnCondition | None"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="wolf_variant")
@@ -34,9 +34,9 @@ class WolfVariant(BaseResource):
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "assets": {
-                "angry":  f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}_angry",
                 "wild": f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}_wild",
                 "tame": f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}_tame",
+                "angry":  f"{pack_namespace}:entity/{self.entity_type}/{self.internal_name}_angry",
             },
             "spawn_conditions": [{
                 "priority": key,
@@ -48,15 +48,23 @@ class WolfVariant(BaseResource):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WolfVariant":
         return cls(
             internal_name=internal_name,
-            angry_texture_path=data["assets"]["angry"].split(":")[1],
-            wild_texture_path=data["assets"]["wild"].split(":")[1],
-            tame_texture_path=data["assets"]["tame"].split(":")[1],
+            wild_texture_path=data["assets"]["wild"].split(":")[1]+".png",
+            tame_texture_path=data["assets"]["tame"].split(":")[1]+".png",
+            angry_texture_path=data["assets"]["angry"].split(":")[1]+".png",
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )
 
+    @classmethod
+    def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["GenericEntityVariant"]:
+        entity_variants = super().from_datapack_files(data_path)
+        for entity_variant in entity_variants:
+            entity_variant.angry_texture_path = assets_path/"textures"/entity_variant.wild_texture_path
+            entity_variant.tame_texture_path = assets_path/"textures"/entity_variant.tame_texture_path
+            entity_variant.wild_texture_path = assets_path/"textures"/entity_variant.angry_texture_path
+        return entity_variants  # type: ignore[abc]
+
     generate_give_spawn_egg_command = GenericEntityVariant.generate_give_spawn_egg_command
     generate_summon_command = GenericEntityVariant.generate_summon_command
-    create_datapack_files = GenericEntityVariant.create_datapack_files
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Create and move the texture file

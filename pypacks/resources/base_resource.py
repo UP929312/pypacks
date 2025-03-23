@@ -58,28 +58,24 @@ class BaseResource:
         return item_paths
 
     @classmethod
-    def from_datapack_files(cls: type[T], root_path: "Path") -> list[T]:
+    def from_datapack_files(cls: type[T], data_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
         return [  # TODO: Change the **/ to **/data/namespace, etc.
-            cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[attr-defined]
-            for file_path in root_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
+            cls.from_dict(file_path.stem, json.loads(file_path.read_text()))  # type: ignore[attr-defined]
+            for file_path in data_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
         ]
 
     @classmethod
-    def from_resource_pack_files(cls: type[T], root_path: "Path") -> list[T]:
+    def from_resource_pack_files(cls: type[T], assets_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
         assert issubclass(cls, BaseResource)
-        if any(f.name == "sub_directories" for f in fields(cls)):  # type: ignore[arg-type]
-            return [
-                cls.from_dict(  # type: ignore[misc, call-arg]
-                    file_path.stem, json.load(file_path.open("r")),
-                    sub_directories=list(file_path.relative_to(root_path).parent.parts[1:]),  # pyright: ignore
-                )
-                for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
-            ]
+        has_sub_dirs = any(f.name == "sub_directories" for f in fields(cls))  # type: ignore[arg-type]
         return [
-            cls.from_dict(file_path.stem, json.load(file_path.open("r")))  # type: ignore[misc]
-            for file_path in root_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
+            cls.from_dict(  # type: ignore[misc, call-arg]
+                file_path.stem, json.loads(file_path.read_text()),
+                **({"sub_directories": list(file_path.relative_to(assets_path).parent.parts[1:])} if has_sub_dirs else {}),
+            )
+            for file_path in assets_path.glob(f"**/{cls.resource_pack_subdirectory_name}/**/*.json")
         ]
 
     @classmethod
@@ -90,6 +86,8 @@ class BaseResource:
     def __repr__(self) -> str:
         return overridden_repr(self)
 
+    def __str__(self) -> str:
+        return repr(self)
 
 def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
     """This function overrides the dataclasses "__repr__" function to only show non-default attributes, so when we create them, it doesn't

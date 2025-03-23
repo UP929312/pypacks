@@ -48,10 +48,10 @@ class CustomJukeboxSong(BaseResource):
         )
 
     @classmethod
-    def from_combined_files(cls, datapack_root_path: "Path", resource_pack_root_path: "Path") -> list["CustomJukeboxSong"]:
-        jukebox_songs: list["CustomJukeboxSong"] = cls.from_datapack_files(datapack_root_path)  # pyright: ignore
+    def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["CustomJukeboxSong"]:
+        jukebox_songs: list["CustomJukeboxSong"] = cls.from_datapack_files(data_path)  # pyright: ignore
         for jukebox_song in jukebox_songs:
-            path = resource_pack_root_path/"sounds"/f"{jukebox_song.ogg_path}.ogg"
+            path = assets_path/"sounds"/f"{jukebox_song.ogg_path}.ogg"
             if path.exists():
                 jukebox_song.ogg_path = path
             else:

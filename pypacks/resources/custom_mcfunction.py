@@ -56,11 +56,11 @@ class MCFunction(BaseResource):
         # Macros
         detected_macros = tuple(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
         # Detected functions
-        detected_functions = tuple(sorted(set(x.group(1) for pattern in FUNCTION_PATTERNS for x in re.finditer(pattern, commands_str))))
+        detected_functions = tuple(sorted(set(x.group(1) for pattern in FUNCTION_PATTERNS for x in re.finditer(pattern, commands_str.replace("$", "")))))
         # Variables required
         variables: list[tuple[str, str]] = []
         for pattern in VARIABLE_PAIR_PATTERNS:
-            for match in re.finditer(pattern, commands_str):
+            for match in re.finditer(pattern, commands_str.replace("$", "")):
                 variables.append((match.group(1), match.group(2)))  # Group 1, 2 (player, objective)
         detected_variables = tuple(sorted(set(variables), key=lambda x: (x[1], x[0])))  # Group by objective, then player
         # Combine
@@ -96,17 +96,17 @@ class MCFunction(BaseResource):
             file.write(function_headers+commands_str)
 
     @classmethod
-    def from_datapack_files(cls, root_path: "Path") -> list["MCFunction"]:
+    def from_datapack_files(cls, data_path: "Path") -> list["MCFunction"]:
         """Path should be the root of the pack"""
         mcfunctions = []
-        for function_path_absolute in BaseResource.get_all_resource_paths(cls, root_path, ".mcfunction"):
+        for function_path_absolute in BaseResource.get_all_resource_paths(cls, data_path, ".mcfunction"):
             with open(function_path_absolute, "r", encoding="utf-8") as file:
                 file_content = file.read()
                 mcfunctions.append(
                     cls.from_file_contents(
                         Path(file.name).stem,
                         file_content.split(HEADER_DIVIDER)[1] if HEADER_DIVIDER in file_content else file_content,
-                        sub_directories=list(function_path_absolute.relative_to(root_path).parent.parts[3:]),
+                        sub_directories=list(function_path_absolute.relative_to(data_path).parent.parts[3:]),
                     )
                 )
         return mcfunctions

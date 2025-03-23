@@ -68,10 +68,10 @@ class CustomPainting(BaseResource):
         return self.generate_custom_item(pack).generate_give_command(pack.namespace)
 
     @classmethod
-    def from_combined_files(cls, root_datapack_path: "Path", root_resource_pack_path: "Path") -> list["CustomPainting"]:
-        paintings: list["CustomPainting"] = cls.from_datapack_files(root_datapack_path)  # pyright: ignore
+    def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["CustomPainting"]:
+        paintings: list["CustomPainting"] = cls.from_datapack_files(data_path)  # pyright: ignore
         for painting in paintings:
-            path = root_resource_pack_path/painting.resource_pack_subdirectory_name/f"{painting.image_path}.png"
+            path = assets_path/painting.resource_pack_subdirectory_name/f"{painting.image_path}.png"
             if path.exists():
                 painting.image_path = path
             else:
