@@ -1,9 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import Any, Literal, TYPE_CHECKING
 
 from pypacks.utils import recursively_remove_nones_from_data
 from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.world_gen.entity_spawner import SpawnOverride
+
+if TYPE_CHECKING:
+    from pypacks.resources.world_gen.feature import PlacedFeature
 
 
 @dataclass
@@ -77,23 +80,19 @@ class CustomBiome(BaseResource):
         )
 
 
-class PlacedFeature:  # TODO: Type me
-    pass
-
-
 @dataclass
 class FeatureGenerationSteps:
-    raw_generation: list[str | PlacedFeature] = field(default_factory=list)  # Used by small end island features.
-    lakes: list[str | PlacedFeature] = field(default_factory=list)  # Used by lava lakes
-    local_modifications: list[str | PlacedFeature] = field(default_factory=list)  # Used for amethyst geodes and icebergs
-    underground_structures: list[str | PlacedFeature] = field(default_factory=list)  # Used for dungeons and overworld fossils
-    surface_structures: list[str | PlacedFeature] = field(default_factory=list)  # Used for desert wells and blue ice patches
-    strongholds: list[str | PlacedFeature] = field(default_factory=list)  # Not currently used in vanilla
-    underground_ores: list[str | PlacedFeature] = field(default_factory=list)  # Used for overworld ore blobs, overworld dirt/gravel/stone variant blobs, and sand/gravel/clay disks
-    underground_decoration: list[str | PlacedFeature] = field(default_factory=list)  # Used for infested block blobs, nether gravel and blackstone blobs, and all nether ore blobs
-    fluid_springs: list[str | PlacedFeature] = field(default_factory=list)  # Used for water and lava springs
-    vegetal_decoration: list[str | PlacedFeature] = field(default_factory=list)  # Used for trees, bamboo, cacti, kelp, and other ground and ocean vegetation
-    top_layer_modifications: list[str | PlacedFeature] = field(default_factory=list)  # Used for surface freezing
+    raw_generation: list["str | PlacedFeature"] = field(default_factory=list)  # Used by small end island features.
+    lakes: list["str | PlacedFeature"] = field(default_factory=list)  # Used by lava lakes
+    local_modifications: list["str | PlacedFeature"] = field(default_factory=list)  # Used for amethyst geodes and icebergs
+    underground_structures: list["str | PlacedFeature"] = field(default_factory=list)  # Used for dungeons and overworld fossils
+    surface_structures: list["str | PlacedFeature"] = field(default_factory=list)  # Used for desert wells and blue ice patches
+    strongholds: list["str | PlacedFeature"] = field(default_factory=list)  # Not currently used in vanilla
+    underground_ores: list["str | PlacedFeature"] = field(default_factory=list)  # Used for overworld ore blobs, overworld dirt/gravel/stone variant blobs, and sand/gravel/clay disks
+    underground_decoration: list["str | PlacedFeature"] = field(default_factory=list)  # Used for infested block blobs, nether gravel and blackstone blobs, and all nether ore blobs
+    fluid_springs: list["str | PlacedFeature"] = field(default_factory=list)  # Used for water and lava springs
+    vegetal_decoration: list["str | PlacedFeature"] = field(default_factory=list)  # Used for trees, bamboo, cacti, kelp, and other ground and ocean vegetation
+    top_layer_modifications: list["str | PlacedFeature"] = field(default_factory=list)  # Used for surface freezing
 
     def to_dict(self) -> dict[str, Any]:
         return {

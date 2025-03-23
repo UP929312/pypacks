@@ -7,6 +7,8 @@ Regex to enforce smithed in mcfunctions?
 
 Pack.from_existing_pack() needs to absort the minecraft namespace's stuff, like tick and that kind of thing
 
+REMOVING REPR from overriden_repr seems to have added back a lot of default fields... doh!
+
 We should rework from_combined_files, since it just does from_datapack_files, then finds an exact path and overrides an attribute.
 
 1. Can generate a whole pack, but it's in the format of Pack(...), and I would quite like a formatter of __str__ that adds indentation and new lines.
@@ -15,6 +17,8 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 ###################################################################################################
 
 Loadstone trackers is still broken
+
+On drop cooldown?
 
 # Should CustomTag.from_json() look and try to find the values? Same with structures and such!
 
@@ -37,8 +41,6 @@ pack.mcfunctions.append(), then filtered based on type? I'm not sure if we can f
 
 Entity varieties, when creating spawn eggs or spawning mobs
 I suppose we'd need to eventually add all the EntityData, geez
-
-For item pages in the reference book, have "used in"...
 
 # Could functions have more headers, we have required macros, what about things that call it perhaps? Functions it calls?
 # Would also like to do "calls function <x>" and "is called by <function y>"  # Detect it being called by a function tag

@@ -55,19 +55,20 @@ Trim = ArmorTrim  # Alias for ArmorTrim
 
 # ==========================================================================================
 
+AttributeType = Literal[
+    "armor", "armor_toughness", "attack_damage", "attack_knockback", "generic.attack_reach", "attack_speed", "flying_speed",
+    "follow_range", "knockback_resistance", "luck", "max_absorption", "max_health", "movement_speed", "scale", "step_height",
+    "jump_strength", "block_interaction_range", "entity_interaction_range", "spawn_reinforcements", "block_break_speed",
+    "gravity", "safe_fall_distance", "fall_damage_multiplier", "burning_time", "explosion_knockback_resistance", "mining_efficiency",
+    "movement_efficiency", "oxygen_bonus", "sneaking_speed", "submerged_mining_speed", "sweeping_damage_ratio", "tempt_range",
+    "water_movement_efficiency"
+]
 
 @dataclass
 class AttributeModifier:
     """Adds an attribute modifier.
     Warning, some only work when using the right equipment, e.g. mining efficiency only works with an axe on wood, or pickaxe on stone."""
-    attribute_type: Literal[
-        "armor", "armor_toughness", "attack_damage", "attack_knockback", "generic.attack_reach", "attack_speed", "flying_speed",
-        "follow_range", "knockback_resistance", "luck", "max_absorption", "max_health", "movement_speed", "scale", "step_height",
-        "jump_strength", "block_interaction_range", "entity_interaction_range", "spawn_reinforcements", "block_break_speed",
-        "gravity", "safe_fall_distance", "fall_damage_multiplier", "burning_time", "explosion_knockback_resistance", "mining_efficiency",
-        "movement_efficiency", "oxygen_bonus", "sneaking_speed", "submerged_mining_speed", "sweeping_damage_ratio", "tempt_range",
-        "water_movement_efficiency"
-    ]
+    attribute_type: AttributeType
     slot: Literal["any", "hand", "armor", "mainhand", "offhand", "head", "chest", "legs", "feet", "body"] = "any"
     amount: float | int = 1.0
     operation: Literal["add_value", "add_multiplied_base", "add_multiplied_total"] = "add_value"
@@ -656,7 +657,7 @@ class Instrument:
     """Used for the goat horn, can take a default minecraft sound or a custom sound"""
     # https://minecraft.wiki/w/Data_component_format#instrument
     # https://minecraft.wiki/w/Sounds.json#Sound_events
-    sound_id: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
+    sound: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
                                             "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
     description: str | None = None  # A string for the description of the sound.
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
@@ -671,14 +672,14 @@ class Instrument:
         return {
             "description": self.description,
             "range": self.instrument_range,
-            "sound_event": {"sound_id": self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id},
+            "sound_event": {"sound_id": self.sound.get_reference(pack_namespace) if isinstance(self.sound, CustomSound) else self.sound},
             "use_duration": self.use_duration,
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Instrument":
         return cls(
-            sound_id=data["sound_event"]["sound_id"],
+            sound=data["sound_event"]["sound_id"],
             description=data.get("description"),
             use_duration=data.get("use_duration", 5),
             instrument_range=data.get("range", 256),
@@ -686,10 +687,13 @@ class Instrument:
 
     def get_reference(self, pack_namespace: str) -> str:
         from pypacks.resources.custom_sound import CustomSound
-        return self.sound_id.get_reference(pack_namespace) if isinstance(self.sound_id, CustomSound) else self.sound_id
+        return self.sound.get_reference(pack_namespace) if isinstance(self.sound, CustomSound) else self.sound
 
     def get_run_command(self, pack_namespace: str) -> str:
-        return f"playsound {self.get_reference(pack_namespace)} @s ~ ~ ~ 1 1"
+        from pypacks.resources.custom_sound import CustomSound
+        if isinstance(self.sound, CustomSound):
+            return self.sound.get_run_command(pack_namespace)
+        return f"playsound {self.get_reference(pack_namespace)} ambient @s ~ ~ ~ 1 1"
 
 
 # ==========================================================================================
@@ -722,6 +726,9 @@ class LodestoneTracker:
     tracked: bool = True
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["compass"])
+
+    def __post_init__(self):
+        raise ValueError("LodestoneTracker is not yet implemented (strange formatting)")
 
     def to_dict(self) -> dict[str, Any]:
         return {

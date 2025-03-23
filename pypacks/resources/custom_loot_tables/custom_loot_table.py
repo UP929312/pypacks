@@ -92,6 +92,8 @@ class SingletonEntry:
             quality=data.get("quality", 0),
         )
 
+    __repr__ = BaseResource.__repr__
+
 
 # ================================================================================================================== #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~POOLS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -101,7 +103,7 @@ class SingletonEntry:
 @dataclass
 class Pool:
     # https://minecraft.wiki/w/Loot_table#Pool
-    conditions: Sequence["Predicate"] = field(default_factory=list)  # TODO: Fix the KilledByPlayerPredicate, but figure out why the type checker is crying
+    conditions: Sequence["Predicate"] = field(default_factory=list)
     functions: list[LootTableFunction] = field(default_factory=list)
     rolls: "int | NumberProvider" = 1
     bonus_rolls: int = 0
@@ -128,6 +130,7 @@ class Pool:
             entries=[SingletonEntry.from_dict(entry) for entry in data["entries"]],
         )
 
+    __repr__ = BaseResource.__repr__
 
 @dataclass
 class SimpleRangePool:

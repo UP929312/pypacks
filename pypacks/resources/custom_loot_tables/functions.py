@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING, Literal, TypedDict
 
+from pypacks.resources.base_resource import BaseResource
 from pypacks.additions.item_components import PotionEffect
 from pypacks.resources.custom_predicate import Predicate
 from pypacks.providers.number_provider import NumberProvider
@@ -20,6 +21,8 @@ class LootTableFunction:
     def from_dict(cls, data: dict[str, Any]) -> "LootTableFunction":
         cls_: type["LootTableFunction"] = FUNCTION_NAME_TO_FUNCTION[data["function"].removeprefix("minecraft:")]
         return cls_.from_dict(data)
+
+    __repr__ = BaseResource.__repr__
 
 
 @dataclass
@@ -721,13 +724,25 @@ class SetItemFunction(LootTableFunction):
         )
 
 
+BlockEntityType = Literal[
+    "minecraft:banner", "minecraft:barrel", "minecraft:beacon", "minecraft:bed", "minecraft:beehive", "minecraft:bell", "minecraft:blast_furnace",
+    "minecraft:brewing_stand", "minecraft:brushable_block", "minecraft:calibrated_sculk_sensor", "minecraft:campfire", "minecraft:chest",
+    "minecraft:chiseled_bookshelf", "minecraft:command_block", "minecraft:comparator", "minecraft:conduit", "minecraft:crafter",
+    "minecraft:creaking_heart", "minecraft:daylight_detector", "minecraft:decorated_pot", "minecraft:dispenser", "minecraft:dropper",
+    "minecraft:enchanting_table", "minecraft:end_gateway", "minecraft:end_portal", "minecraft:ender_chest", "minecraft:furnace",
+    "minecraft:hanging_sign", "minecraft:hopper", "minecraft:jigsaw", "minecraft:jukebox", "minecraft:lectern", "minecraft:mob_spawner",
+    "minecraft:piston", "minecraft:sculk_catalyst", "minecraft:sculk_sensor", "minecraft:sculk_shrieker", "minecraft:shulker_box",
+    "minecraft:sign", "minecraft:skull", "minecraft:smoker", "minecraft:structure_block", "minecraft:test_block", "minecraft:test_instance_block",
+    "minecraft:trapped_chest", "minecraft:trial_spawner", "minecraft:vault",
+]
+
+
 @dataclass
 class SetLootTableFunction(LootTableFunction):
     """Sets the loot table for a container block when placed and opened."""
-    # TODO: Test this, it's not used anywhere internally so \_('-')_/ - Maybe check against Misode?
     name: str  # Specifies the resource location of the loot table to be used.
-    seed: int | None = None  # Optional. Specifies the loot table seed. If absent or set to 0, the seed won't be put into the NBT, and a random seed is used when opening the continer.
-    block_entity_type: str = ""  # The block entity type to be written in BlockEntityTag.id.
+    seed: int | None = None  # Specifies the loot table seed. If absent, the seed won't be put into the NBT, and a random seed is used when opening the continer.
+    block_entity_type: BlockEntityType = "minecraft:banner"  # The block entity type to be written in BlockEntityTag.id.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         assert self.block_entity_type, "The block entity type must be provided."

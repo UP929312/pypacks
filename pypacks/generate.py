@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 EXTRA_ICON_BASE_PATH = IMAGES_PATH/"reference_book_icons"/"extra_icon_base.png"
+USED_IN_ICON_BASE_PATH = IMAGES_PATH/"reference_book_icons"/"used_in_icon_base.png"
 
 
 def generate_resource_pack(pack: "Pack") -> None:
@@ -84,6 +85,15 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
                 f"{recipe.recipe_block_name}_icon",
                 image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
                                        base_image_path=EXTRA_ICON_BASE_PATH),
+                height=18, y_offset=14,
+            )
+            for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]  # type: ignore[comparison-overlap]
+        ],
+        *[  # Custom recipe icons part 2 (different base), same code
+            AutoAssignBitMapFontChar(
+                f"{recipe.recipe_block_name}_used_in_icon",
+                image_bytes=add_border(image_bytes=Path(IMAGES_PATH, "recipe_icons", f"{recipe.recipe_block_name}.png").read_bytes(),
+                                       base_image_path=USED_IN_ICON_BASE_PATH),
                 height=18, y_offset=14,
             )
             for recipe in [recipe for recipe in ALL_RECIPES_TYPES if recipe in [type(x) for x in pack.custom_recipes]]  # type: ignore[comparison-overlap]

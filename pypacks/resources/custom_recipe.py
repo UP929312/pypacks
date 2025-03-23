@@ -18,6 +18,7 @@ class Recipe(BaseResource):
     internal_name: str
     result: "MinecraftOrCustomItem"
 
+    used_ingredients: list["str | CustomItem"] = field(init=False, repr=False, default_factory=list)  # Used for recipe generation, set by __post_init__
     recipe_block_name: str = field(init=False, repr=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, default="recipe")
 
@@ -61,6 +62,7 @@ class CustomCrafterRecipe(Recipe):
     recipe_block_name: str = field(init=False, repr=False, default="custom_crafter")  # "dispenser"
 
     def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(x) for x in self.ingredients]
         assert 0 < len(self.ingredients) <= 9, "Ingredients must be a list of 1-9 items"
 
 
@@ -84,6 +86,7 @@ class ShapedCraftingRecipe(Recipe):
             *[self.keys.get(x, "minecraft:air") for x in (list(row_2) if row_2 is not None else ["", "", ""])],
             *[self.keys.get(x, "minecraft:air") for x in (list(row_3) if row_3 is not None else ["", "", ""])],
         ]
+        self.used_ingredients = [self.resolve_ingredient_type(x) for x in self.enumeratable_list]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
@@ -165,6 +168,9 @@ class CraftingTransmuteRecipe(Recipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="crafting_table_transmute")
 
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(x) for x in [self.input_item, self.material_item]]
+
     def to_dict(self, pack_namespace: str) -> dict[str, str | list[str]]:
         return {
             "type": "minecraft:crafting_transmute",
@@ -193,6 +199,9 @@ class BlastFurnaceRecipe(Recipe):
     recipe_category: Literal["blocks", "misc"] = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="blast_furnace")
+
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(self.ingredient)]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
@@ -229,6 +238,9 @@ class CampfireRecipe(Recipe):
 
     recipe_block_name: str = field(init=False, repr=False, default="campfire")
 
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(self.ingredient)]
+
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
             "type": "minecraft:campfire_cooking",
@@ -262,6 +274,9 @@ class FurnaceRecipe(Recipe):
     recipe_category: Literal["food", "blocks", "misc"] = "misc"
 
     recipe_block_name: str = field(init=False, repr=False, default="furnace")
+
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(self.ingredient)]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
@@ -297,6 +312,9 @@ class SmithingTransformRecipe(Recipe):
     addition_item: "MinecraftItem | CustomTag | list[MinecraftItem]"
 
     recipe_block_name: str = field(init=False, repr=False, default="smithing_table")
+
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(x) for x in [self.template_item, self.base_item, self.addition_item]]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
@@ -334,6 +352,7 @@ class SmithingTrimRecipe(Recipe):
 
     def __post_init__(self) -> None:
         self.result = self.base_item
+        self.used_ingredients = [self.resolve_ingredient_type(x) for x in [self.template_item, self.base_item, self.addition_item]]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
@@ -360,6 +379,9 @@ class SmokerRecipe(Recipe):
     cooking_time_ticks: int = 200
 
     recipe_block_name: str = field(init=False, repr=False, default="smoker")
+
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(self.ingredient)]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {
@@ -393,6 +415,9 @@ class StonecutterRecipe(Recipe):
     count: int = 1
 
     recipe_block_name: str = field(init=False, repr=False, default="stonecutter")
+
+    def __post_init__(self) -> None:
+        self.used_ingredients = [self.resolve_ingredient_type(self.ingredient)]
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         data = {

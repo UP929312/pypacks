@@ -41,10 +41,9 @@ class CustomItemRenderDefinition(BaseResource):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomItemRenderDefinition":
-        # TODO: Remove {'type': 'minecraft:model', 'model': {'type': 'minecraft:model', 'model': 'minecraft:item/iron_sword', 'tints': [{'type': 'minecraft:constant', 'value': [0.0, 0.0, 1.0]}]}}
         return cls(
             internal_name,
-            model=ItemModel.from_dict(data),  # ["model"]
+            model=ItemModel.from_dict(data),
             hand_animation_on_swap=data.get("hand_animation_on_swap", True)
         )
 

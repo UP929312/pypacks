@@ -99,10 +99,10 @@ def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
         if field.default is not MISSING or field.default_factory is not MISSING
     }
 
-    # Exclude fields with `init=False` (normally class attributes like datapack_sub_directory) or `repr=False` and those that match defaults
+    # Exclude fields with `init=False` (normally class attributes like datapack_sub_directory) and those that match defaults
     non_default_attrs = {
         key: value for key, value in self.__dict__.items()
-        if key not in {field.name for field in fields(self) if not field.init or not field.repr}  # TODO: Why do we exclude repr=False again?
+        if key not in {field.name for field in fields(self) if not field.init}  # TODO: Why do we exclude repr=False again?   or not field.repr
         and (key not in default_values or default_values[key] != value)
     }
 

@@ -87,12 +87,13 @@ class CustomItemPage(GenericItemPage):
             )
             info_icons.append(play_sound_icon)
         # ============================================================================================================
-        recipes = [
+        # Custom recipes where this item is the result
+        recipe_results = [
             x for x in self.pack.custom_recipes
             if not isinstance(x, SmithingTrimRecipe)
             and (x.result.internal_name if isinstance(x.result, CustomItem) else x.result) == self.item.internal_name
         ]
-        recipe_icons = [
+        recipe_result_icons = [
             Icon(
                 self.pack.font_mapping[f"{recipe.recipe_block_name}_icon"],
                 font_namespace=self.pack.namespace,
@@ -102,10 +103,31 @@ class CustomItemPage(GenericItemPage):
                     {"text": "\n"*6, "font": "minecraft:default"},
                 ]),
             )
-            for recipe in recipes
+            for recipe in recipe_results
             if self.pack.font_mapping.get(f"{recipe.recipe_block_name}_icon")
         ]
-        info_icons.extend(recipe_icons)
+        info_icons.extend(recipe_result_icons)
+        # ===================================
+        # Custom Recipes where this item is used in the recipe
+        recipe_used_in = [
+            x for x in self.pack.custom_recipes
+            if not isinstance(x, SmithingTrimRecipe)
+            and any([ingredient.internal_name == self.item.internal_name if isinstance(ingredient, CustomItem) else False for ingredient in x.used_ingredients])
+        ]
+        recipe_used_in_icons = [
+            Icon(
+                self.pack.font_mapping[f"{recipe.recipe_block_name}_used_in_icon"],
+                font_namespace=self.pack.namespace,
+                right_padding=3,
+                on_hover=OnHoverShowTextRaw([
+                    {"text": self.pack.font_mapping[f"custom_recipe_for_{recipe.internal_name}_icon"], "font": f"{self.pack.namespace}:all_fonts"},
+                    {"text": "\n"*6, "font": "minecraft:default"},
+                ]),
+            )
+            for recipe in recipe_used_in
+            if self.pack.font_mapping.get(f"{recipe.recipe_block_name}_used_in_icon")
+        ]
+        info_icons.extend(recipe_used_in_icons)
         # ============================================================================================================
         return info_icons
 

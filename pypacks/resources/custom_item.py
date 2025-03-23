@@ -112,7 +112,7 @@ class CustomItem:
             texture_path=None,  # data.get("texture_path"),  # TODO: Look more into this
             item_model=data.get("item_model"),
             custom_data=data.get("custom_data", {}),
-            on_right_click=None,  # TODO: Look more into this
+            on_right_click=None,  # TODO: Look more into this, maybe only support pypacks on_right_click?
             on_item_drop=None,  # TODO: Look more into this
             components=Components.from_dict(data),
             ref_book_config=MISC_REF_BOOK_CONFIG,

@@ -34,7 +34,7 @@ musical_horn = CustomItem("musical_horn", "minecraft:goat_horn", "Musical Horn",
 rick_roll_horn = CustomItem("never_going_to_give_you_up", "minecraft:goat_horn", "Rick Roll", components=Components(instrument=Instrument(custom_sound, "Rick Roll", 5, 256)), ref_book_config=RefBookConfig(category=usable_category))
 written_book = CustomItem("already_written_in_book", "minecraft:written_book", "Written Book", components=Components(written_book_content=WrittenBookContent("Hello, World!", "Author", [[{"text": "abc\n"}, {"text": "def"}]])),)
 writable_book = CustomItem("writable_book", "minecraft:writable_book", "Writable Book", components=Components(writable_book_content=WritableBookContent(["Hello world"])))
-lodestone_tracker = CustomItem("lodestone_tracker", "minecraft:compass", components=Components(lodestone_tracker=LodestoneTracker(126, 68, -41)))
+# lodestone_tracker = CustomItem("lodestone_tracker", "minecraft:compass", components=Components(lodestone_tracker=LodestoneTracker(126, 68, -41)))
 speedy_porkchop = CustomItem("speedy_porkchop", "minecraft:porkchop", "Fast hand, extreme axe", components=Components(tool=Tool(2, 0, [ToolRule("#mineable/axe", 10)])))
 unbreakable_axe = CustomItem("unbreakable_axe", "minecraft:stone_axe", "Unbreakable Axe", components=Components(unbreakable=True), ref_book_config=RefBookConfig(category=weapons_category))
 player_head = CustomItem("custom_player_head_skin", "minecraft:player_head", "My Skin", components=Components(player_head_username="Skezza"))
@@ -379,4 +379,3 @@ datapack = Pack(
 #     r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing",
 #     r"C:\Users\Ben\AppData\Roaming\.minecraft\resourcepacks\PyPacks Testing"
 # )
-# print(a.world_gen_resources)
