@@ -1,4 +1,4 @@
-# Coming soon
+# Pypacks
 
 ## Project overview
 
@@ -19,6 +19,7 @@ On top of that, you don't have to worry about having to upgrade your whole pack 
 you just need to re-run the code to get the new content, just like magic!
 
 ![Custom Blocks](pypacks/assets/images/readme_images/custom_blocks.png)
+![Custom Crafting](pypacks/assets/images/readme_images/custom_crafting.png)
 ![Custom Crafter](pypacks/assets/images/readme_images/custom_crafter.png)
 
 ## Installation
