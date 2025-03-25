@@ -9,6 +9,7 @@ It automatically produces a large amount of content for you, such as loot tables
 and no more researching the wiki/docs, just straight working content creation.
 
 ![Reference Book](pypacks/assets/images/readme_images/reference_book_front_page.png)
+![Python Code](pypacks/assets/images/readme_images/pypacks_custom_painting.png)
 
 ## Features
 
