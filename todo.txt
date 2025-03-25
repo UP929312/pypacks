@@ -16,6 +16,8 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 2. Also, need to also keep the images and such, can't just delete them
 ###################################################################################################
 
+Custom Entity Variants should have their own spawn egg?
+
 Loadstone trackers is still broken
 
 On drop cooldown?

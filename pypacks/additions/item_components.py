@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
+from pypacks.resources.base_resource import BaseResource
+
 
 if TYPE_CHECKING:
     from pypacks.additions.constants import ColorType
@@ -854,6 +856,7 @@ class PotionEffect:
             show_icon=data.get("show_icon", True),
         )
 
+    __repr__ = BaseResource.__repr__
 
 # ==========================================================================================
 

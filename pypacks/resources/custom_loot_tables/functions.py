@@ -187,14 +187,14 @@ class EnchantRandomlyFunction(LootTableFunction):
         } | ({
             "options": self.options,
         } if self.options is not None else {}) | ({
-            "onlyCompatible": self.only_compatible,
+            "only_compatible": self.only_compatible,
         } if not self.only_compatible else {})
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "EnchantRandomlyFunction":
         return cls(
             options=data.get("options"),
-            only_compatible=data.get("onlyCompatible", True),
+            only_compatible=data.get("only_compatible", True),
         )
 
 
@@ -569,6 +569,8 @@ class SetCountFunction(LootTableFunction):
             add=data.get("add", False),
         )
 
+    __repr__ = BaseResource.__repr__
+
 
 @dataclass
 class SetCustomDataFunction(LootTableFunction):
@@ -625,6 +627,8 @@ class SetDamageFunction(LootTableFunction):
             damage=NumberProvider.from_dict(data["damage"]),
             add=data.get("add", False),
         )
+
+    __repr__ = BaseResource.__repr__
 
 
 @dataclass
