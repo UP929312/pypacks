@@ -92,7 +92,6 @@ Sometimes event-type advancements get "stuck" and need to be revoked. Perhaps we
 # Onjoin event would be cool, and on-leave for players (single player wouldn't work though, annoyingly)
 
 # Naturally occuring ore veins need some more randomness, they have a random size, need a random "rotation"
-https://github.com/Stoupy51/SmartOreGeneration/blob/main/build/datapack/data/smart_ore_generation/function/v1.7.1/technical/generate/start.mcfunction
 
 # Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
 
@@ -139,7 +138,6 @@ Continue work on custom enchantments
 Translations should hold a fallback, including custom damage types
 
 Following smithed convention?  https://docs.smithed.dev/conventions/namespacing/
-# https://github.com/Stoupy51/python_datapack/blob/main/src/python_datapack/datapack/recipes.py#L78
 
 https://www.reddit.com/r/MinecraftCommands/comments/1i1plzs/recipe_click_detection/
 
