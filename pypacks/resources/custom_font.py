@@ -57,7 +57,7 @@ class CustomFont(BaseResource):
             file.write(json.dumps(self.to_dict(pack.namespace), indent=4).replace("\\\\", "\\"))
 
     def get_test_command(self, pack_namespace: str) -> str:
-        return f"tellraw @p {{\"text\": \"Hello World!\", \"font\": \"{self.get_reference(pack_namespace)}\"}}"
+        return f"tellraw @s {{\"text\": \"Hello World!\", \"font\": \"{self.get_reference(pack_namespace)}\"}}"
 
 
 # =================================================================================================

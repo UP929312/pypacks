@@ -10,13 +10,13 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 
 # Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
 
+Custom Entity Variants should have their own spawn egg in the ref book?
+
 ###################################################################################################
 
 Pack.from_existing_pack() needs to absort the minecraft namespace's stuff, like tick and that kind of thing
 
 Regex to enforce smithed in mcfunctions?
-
-Custom Entity Variants should have their own spawn egg?
 
 Loadstone trackers is still broken
 

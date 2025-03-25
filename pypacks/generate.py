@@ -73,7 +73,7 @@ def generate_base_font(pack: "Pack") -> "CustomFont":
             for category in pack.reference_book_categories
         ],
         *[  # Custom items
-            AutoAssignBitMapFontChar(f"{item.internal_name}_icon", image_bytes=add_border(Path(item.path).read_bytes()), height=20, y_offset=10)
+            AutoAssignBitMapFontChar(f"{item.internal_name}_icon", image_bytes=add_border(Path(item.path_to_item_texture).read_bytes()), height=20, y_offset=10)
             for item in pack.custom_items
         ],
         *[  # Custom recipes

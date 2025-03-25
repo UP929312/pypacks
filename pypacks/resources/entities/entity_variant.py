@@ -10,6 +10,7 @@ from pypacks.resources.base_resource import BaseResource
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.resources.entities.spawn_conditions import SpawnCondition
+    # from pypacks.resources.custom_item import CustomItem
 
 
 @dataclass
@@ -56,3 +57,11 @@ class GenericEntityVariant(BaseResource):
         # Create and move the texture file
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
         shutil.copyfile(self.texture_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")
+
+    # def generate_custom_item(self, pack: "Pack") -> "CustomItem":  # Need to type variants!
+    #     from pypacks.resources.custom_item import CustomItem
+    #     return CustomItem(
+    #         self.internal_name.replace("_", " ").title()+" Spawn Egg",
+    #         f"minecraft:{self.entity_type}_spawn_egg",
+    #         ###
+    #     )

@@ -74,4 +74,4 @@ class CustomDamageType(BaseResource):
         return f"tellraw @a [{{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}\", \"with\": [\"Player\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.item\", \"with\": [\"Victim\", \"Attacker\", \"Item\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.player\", \"with\": [\"Victim\", \"Attacker\"]}}]"
 
     def generate_damage_command(self, pack_namespace: str, amount: int = 1) -> str:
-        return f"damage @p {amount} {pack_namespace}:{self.internal_name}"
+        return f"damage @ {amount} {pack_namespace}:{self.internal_name}"

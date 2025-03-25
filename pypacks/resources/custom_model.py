@@ -112,7 +112,7 @@ class CustomModelDefinition(BaseResource):
 
 
 @dataclass
-class CustomItemTexture:
+class CustomItemTexture(BaseResource):
     """A simple util class which creates the necessary files for a custom item texture (textures, models, render definitions)."""
     internal_name: str
     path_to_texture: Path | str

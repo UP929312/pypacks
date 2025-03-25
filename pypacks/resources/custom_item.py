@@ -32,13 +32,13 @@ class CustomItem:
     rarity: Literal["common", "uncommon", "rare", "epic"] | None = field(repr=False, default=None)
     texture_path: str | None = field(repr=False, default=None)
     item_model: "str | CustomItemRenderDefinition | None" = field(repr=False, default=None)
-    custom_data: dict[str, Any] = field(repr=False, default_factory=dict)  # Is populated in post_init if it's none
+    custom_data: dict[str, Any] = field(repr=False, default_factory=dict)
     on_right_click: "str | MCFunction | Raycast | None" = field(repr=False, default=None)  # Command/Function/Raycast to call when the item is right clicked
     on_item_drop: "str | MCFunction | None" = field(repr=False, default=None)  # Command/Function to call when the item is dropped
     components: "Components" = field(repr=False, default_factory=lambda: Components())
     ref_book_config: "RefBookConfig" = field(repr=False, default_factory=lambda: MISC_REF_BOOK_CONFIG)
 
-    is_block: bool = field(init=False, repr=False, default=False)
+    is_block: bool = field(init=False, repr=False, hash=False, default=False)
     datapack_subdirectory_name: None = field(init=False, repr=False, hash=False, default=None)
 
     def __post_init__(self) -> None:
@@ -49,9 +49,10 @@ class CustomItem:
             self.custom_data["on_drop_command"] = self.on_item_drop
 
         # TODO: Rework this, instead, just make a custom item model here instead...
-        # from pypacks.resources.custom_model import ModelItemModel
-        # custom_item_model = CustomItemModelDefinition(self.internal_name, ModelItemModel(path), self.base_item)
-        self.path: str | Path = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
+        # from pypacks.resources.custom_model import CustomItemRenderDefinition, ModelItemModel
+        # custom_item_model = CustomItemRenderDefinition(self.internal_name, ModelItemModel(self.texture_path), self.base_item)
+        self.path_to_item_texture = self.texture_path if self.texture_path is not None else resolve_default_item_image(self.base_item)
+        self.custom_item_texture = CustomItemTexture(self.internal_name, self.path_to_item_texture) if self.texture_path is not None else None
 
         self.use_right_click_cooldown = getattr(getattr(self.components, "cooldown", None), "seconds", None)
         Components.verify_compatible_components(self)
@@ -65,8 +66,8 @@ class CustomItem:
     def create_resource_pack_files(self, pack: "Pack") -> None:
         from pypacks.resources.custom_model import CustomTexture
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
-        if self.texture_path is not None and not self.is_block:
-            CustomItemTexture(self.internal_name, self.path).create_resource_pack_files(pack)  # TODO: Move the custom texture to __post__init__? Then we can remove the refernce below
+        if self.custom_item_texture is not None and not self.is_block:
+            self.custom_item_texture.create_resource_pack_files(pack)
         if self.item_model is not None and isinstance(self.item_model, CustomItemRenderDefinition):
             self.item_model.create_resource_pack_files(pack)
         if self.components and self.components.equippable is not None and isinstance(self.components.equippable.camera_overlay, CustomTexture):
@@ -86,8 +87,8 @@ class CustomItem:
         # TODO: Clean this up
         if self.item_model:
             item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemRenderDefinition) else self.item_model
-        else:
-            item_model = f"{pack_namespace}:{self.internal_name}" if self.texture_path is not None else self.texture_path  # TODO: Remove this reference
+        if self.custom_item_texture:
+            item_model = self.custom_item_texture.get_reference(pack_namespace) if self.custom_item_texture is not None else self.texture_path
         if isinstance(self.on_item_drop, MCFunction):  # TODO: Somehow improve this?
             self.custom_data["on_drop_command"] = self.on_item_drop.get_run_command(pack_namespace)
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
@@ -140,7 +141,7 @@ class CustomItem:
             raise ValueError("You can't have both on_right_click and block_interaction_range!")
         self.components.consumable = Consumable(consume_seconds=1_000_000, animation="none", consuming_sound=None, has_consume_particles=False)
         self.components.food = Food(nutrition=0, saturation=0, can_always_eat=True)
-        self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}
+        self.custom_data |= {f"custom_right_click_for_{self.internal_name}": True}  # self.on_right_click.get_run_command()
         # Make sure we can't interact with blocks (e.g. place blocks or spawn eggs)
         self.components.attribute_modifiers.append(AttributeModifier(attribute_type="block_interaction_range", slot="mainhand", amount=-1000, operation="add_value"))
         if self.components.tooltip_display is None:

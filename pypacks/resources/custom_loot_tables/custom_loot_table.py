@@ -203,7 +203,7 @@ class CustomLootTable(BaseResource):
         )
 
     def generate_give_command(self, pack: "Pack") -> str:
-        return f"loot give @p loot {self.get_reference(pack.namespace)}"
+        return f"loot give @s loot {self.get_reference(pack.namespace)}"
 
 
 class SingleItemLootTable(CustomLootTable):
