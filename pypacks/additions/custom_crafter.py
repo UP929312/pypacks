@@ -69,9 +69,9 @@ class CustomCrafter:
         on_tick_block_management = [
             # Manages placing and breaking of the block (we use double because Python/JSON convert Python floats to Java doubles in Custom item, so won't make the same item)
             "# Custom crafter block management (placing/breaking of the block):",
-            f"execute at @e[type=item_display, tag={tag_name}, tag=placing] run setblock ~ ~ ~ dropper[facing=up]{{CustomName:'\"{self.crafter_name}\"'}}",
+            f"execute at @e[type=item_display, tag={tag_name}, tag=placing] run setblock ~ ~ ~ dropper[facing=up]{{CustomName: '{self.crafter_name}'}}",
             f"tag @e[type=item_display, tag={tag_name}, tag=placing] remove placing",
-            f"execute as @e[type=item_display, tag={tag_name}] at @s unless block ~ ~ ~ dropper[facing=up] run data modify entity @e[type=item,distance=..1,nbt={{Item:{{id:\"minecraft:dropper\"}}}},limit=1] Item set value {{id:\"minecraft:bat_spawn_egg\",count:1,components:{{\"custom_name\":'\"{self.crafter_name}\"',\"minecraft:entity_data\":{{id:\"minecraft:item_display\",Tags:[\"{tag_name}\",\"placing\"],Rotation:[0d,0d],brightness:{{sky:10,block:10}},transformation:{{left_rotation:[0d,0d,0d,1d],right_rotation:[0d,0d,0d,1d],translation:[0d,0.5d,0d],scale:[1.01d,1.01d,1.01d]}},item:{{id:\"minecraft:crafting_table\",count:1}}}}}}}}",
+            f"execute as @e[type=item_display, tag={tag_name}] at @s unless block ~ ~ ~ dropper[facing=up] run data modify entity @e[type=item,distance=..1,nbt={{Item:{{id:\"minecraft:dropper\"}}}},limit=1] Item set value {{id:\"minecraft:bat_spawn_egg\",count:1,components:{{\"custom_name\":'{self.crafter_name}',\"minecraft:entity_data\":{{id:\"minecraft:item_display\",Tags:[\"{tag_name}\",\"placing\"],Rotation:[0d,0d],brightness:{{sky:10,block:10}},transformation:{{left_rotation:[0d,0d,0d,1d],right_rotation:[0d,0d,0d,1d],translation:[0d,0.5d,0d],scale:[1.01d,1.01d,1.01d]}},item:{{id:\"minecraft:crafting_table\",count:1}}}}}}}}",
             f"execute as @e[type=item_display, tag={tag_name}] at @s unless block ~ ~ ~ dropper[facing=up] run kill @s",
         ]
         # ========================================================================================
