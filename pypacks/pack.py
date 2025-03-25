@@ -267,6 +267,7 @@ class Pack:
         return self
 
     def generate_minecraft_pack(self) -> None:
+        # Creates both the on load and on tick functions, with the on_load_function and internall created ones.
         from pypacks.resources.custom_tag import CustomTag
         tags = [
             CustomTag("tick", [
@@ -305,9 +306,8 @@ class Pack:
         from pypacks.resources.custom_recipe import Recipe
         from pypacks.resources.custom_sound import CustomSound
         from pypacks.resources.custom_tag import CustomTag
-        from pypacks.resources.world_gen.world_gen_objects import WorldGenResources
 
-        entity_variants_2d: list[list[EntityVariant]] = [x.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced) for x in ALL_ENTITY_VARIANTS]  # type: ignore[assignment]
+        entity_variants_2d: list[list[EntityVariant]] = [x.from_combined_files(datapack_path_namespaced, resource_pack_path_namespaced) for x in ALL_ENTITY_VARIANTS]  # type: ignore[misc]
         pack_icon_path = next((resource_pack_path/"pack.png" for _ in range(1)), None)  # Get or None
         pack_description_path = next((resource_pack_path/"pack.mcmeta" for _ in range(1)), None)  # Get or None
         description = json.loads(pack_description_path.read_text())["pack"].get("description", "") if pack_description_path else ""

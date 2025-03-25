@@ -76,10 +76,11 @@ class CustomEnchantment(BaseResource):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomEnchantment":
         effects: list["EnchantValueEffect | AttributeEffect | EnchantmentEntityEffect"] = []  # TODO: Do this
         for effect_name, effect_data in data.get("effects", []).items():
-            try:
-                effect_type_instance = resolve_effect_type({effect_name: effect_data})
-            except:
-                print(effect_name, effect_data)
+            effect_type_instance = resolve_effect_type({effect_name: effect_data})
+            # try:
+            #     effect_type_instance = resolve_effect_type({effect_name: effect_data})
+            # except:
+            #     print(effect_name, effect_data)
             effects.append(effect_type_instance)
         return cls(
             internal_name,
@@ -140,9 +141,9 @@ class EnchantValueEffect:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "EnchantValueEffect":
         key, value = list(data.items())[0]
-        print(key, value)
+        # rint(key, value)
         return cls(
-            component_id=key,  # type: ignore[abc]
+            component_id=key,  # type: ignore[arg-type]
             value_effect=ValueEffect.from_dict(value[0]["effect"]),
             requirements=value[0]["requirements"],
             enchanted=value[0].get("enchanted", "victim"),
@@ -334,7 +335,7 @@ class EnchantmentEntityEffect(EntityEffect):
         from pypacks.resources.custom_predicate import Predicate
         key, value = list(data.items())[0]
         return cls(
-            component_id=key,  # type: ignore[abc]
+            component_id=key,  # type: ignore[arg-type]
             entity_effect=EntityEffect.from_dict(value[0]["effect"]),
             requirements=Predicate.from_dict("TODO: UNKNOWN", value[0]["requirements"]) if value[0]["requirements"] is not None else None,
             enchanted=value[0]["enchanted"],
@@ -551,6 +552,7 @@ class ReplaceBlockEntityEffect(EntityEffect):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ReplaceBlockEntityEffect":
+        from pypacks.resources.custom_predicate import Predicate
         return cls(
             block_state=data["block_state"],
             offset=tuple(data["offset"]),
@@ -583,6 +585,7 @@ class ReplaceDiskEntityEffect(EntityEffect):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ReplaceDiskEntityEffect":
+        from pypacks.resources.custom_predicate import Predicate
         return cls(
             block_state=data["block_state"],
             offset=tuple(data["offset"]),
@@ -737,16 +740,16 @@ ENTITY_EFFECT_NAME_TO_CLASSES: dict[str, type["EntityEffect"]] = {
 # endregion
 # ====================================================================================================================
 
+
 def resolve_effect_type(data: dict[str, Any]) -> "EnchantValueEffect | AttributeEffect | EnchantmentEntityEffect":
     component_id = list(data.keys())[0]
-    print(data)
+    # print(data)
     value = list(data.values())[0][0]
     if component_id.removeprefix("minecraft:") == "attributes":
-        print("Found an AttributeEffect")
+        # print("Found an AttributeEffect")
         return AttributeEffect.from_dict(value)
-    elif list(data.keys())[0] in list(ValueEffectComponentIdType.__args__):
-        print("Found an EnchantValueEffect")
+    elif list(data.keys())[0] in list(ValueEffectComponentIdType.__args__):  # type: ignore[attr-defined]
+        # print("Found an EnchantValueEffect")
         return EnchantValueEffect.from_dict(data)
-    else:
-        print("Found an EnchantmentEntityEffect")
-        return EnchantmentEntityEffect.from_dict(data)
+    # print("Found an EnchantmentEntityEffect")
+    return EnchantmentEntityEffect.from_dict(data)

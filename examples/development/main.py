@@ -83,6 +83,7 @@ on_drop_copper_ingot = CustomItem("on_drop_copper_ingot", "minecraft:copper_ingo
 custom_shield = CustomItem("custom_shield", "minecraft:gray_dye", "Custom Shield", components=Components(blocks_attacks=BlocksAttacks(damage_reductions=[DamageReduction(["mob_attack", "arrow"])])))
 custom_weapon = CustomItem("custom_weapon", "minecraft:diamond_sword", "Custom Weapon", components=Components(weapon=Weapon()))
 overlay = CustomItem("custom_overlay", "minecraft:stone", "Custom Overlay", components=Components(equippable=Equippable(camera_overlay=CustomTexture("overlay", "images/overlay.png"))))
+unplacable_boat = CustomItem("unplacable_boat", "minecraft:oak_boat", "Unplacable Boat", components=Components(attribute_modifiers=[AttributeModifier("block_interaction_range", amount=-1000), AttributeModifier("entity_interaction_range", amount=-1000)]))
 
 # invalid_component = CustomItem("invalid_component", "minecraft:sword", "Invalid Component", components=Components(map_data=MapData(map_id=1)))
 # fish_bucket222 = CustomItem("minecraft:tropical_fish_bucket", "fish_bucket", "Fish Bucket", components=Components.from_list([BucketEntityData(bucket_variant_tag=TropicalFishData(size="large", pattern=1, body_color="light_blue", pattern_color="yellow"))]), ref_book_config=RefBookConfig(category=usable_category))
@@ -102,7 +103,7 @@ custom_items = [
     eating_teleports, eating_gives_you_speed_and_teleports, eating_plays_rick_roll, colorful_shield, bee_nest,
     bundle, filled_barrel, custom_potion, decorated_pot, death_protection_star, dyed_helmet, trimmed_leggings,
     suspicious_stew, spider_spawner, upper_slab, fish_bucket, loot_table_chest, on_drop_gold_ingot,
-    on_drop_copper_ingot, custom_shield, custom_weapon, overlay,
+    on_drop_copper_ingot, custom_shield, custom_weapon, overlay, unplacable_boat,
 ]
 # endregion
 # ============================================================================================================

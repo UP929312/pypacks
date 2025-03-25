@@ -112,7 +112,7 @@ class CustomItemPage(GenericItemPage):
         recipe_used_in = [
             x for x in self.pack.custom_recipes
             if not isinstance(x, SmithingTrimRecipe)
-            and any([ingredient.internal_name == self.item.internal_name if isinstance(ingredient, CustomItem) else False for ingredient in x.used_ingredients])
+            and any(ingredient.internal_name == self.item.internal_name if isinstance(ingredient, CustomItem) else False for ingredient in x.used_ingredients)
         ]
         recipe_used_in_icons = [
             Icon(

@@ -47,10 +47,10 @@ class GenericEntityVariant(BaseResource):
 
     @classmethod
     def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["GenericEntityVariant"]:
-        entity_variants = super().from_datapack_files(data_path)
+        entity_variants: list["GenericEntityVariant"] = super().from_datapack_files(data_path)  # pyright: ignore
         for entity_variant in entity_variants:
             entity_variant.texture_path = assets_path/"textures"/entity_variant.texture_path
-        return entity_variants  # type: ignore[abc]
+        return entity_variants
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Create and move the texture file

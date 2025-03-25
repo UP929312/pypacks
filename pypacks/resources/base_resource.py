@@ -71,7 +71,7 @@ class BaseResource:
         assert issubclass(cls, BaseResource)
         has_sub_dirs = any(f.name == "sub_directories" for f in fields(cls))  # type: ignore[arg-type]
         return [
-            cls.from_dict(  # type: ignore[misc, call-arg]
+            cls.from_dict(  # type: ignore[misc]
                 file_path.stem, json.loads(file_path.read_text()),
                 **({"sub_directories": list(file_path.relative_to(assets_path).parent.parts[1:])} if has_sub_dirs else {}),
             )
@@ -88,6 +88,7 @@ class BaseResource:
 
     def __str__(self) -> str:
         return repr(self)
+
 
 def overridden_repr(self) -> str:  # type: ignore[no-untyped-def]
     """This function overrides the dataclasses "__repr__" function to only show non-default attributes, so when we create them, it doesn't

@@ -106,44 +106,6 @@ SPAWN_EGGS = [
     "minecraft:zombified_piglin_spawn_egg",
 ]
 
-
-INEDIBLE_ITEMS = [
-    *SPAWN_EGGS,
-
-    "minecraft:oak_boat",
-    "minecraft:spruce_boat",
-    "minecraft:birch_boat",
-    "minecraft:jungle_boat",
-    "minecraft:acacia_boat",
-    "minecraft:dark_oak_boat",
-    "minecraft:mangrove_boat",
-    "minecraft:cherry_boat",
-    "minecraft:pale_oak_boat",
-
-    "minecraft:oak_chest_boat",
-    "minecraft:spruce_chest_boat",
-    "minecraft:birch_chest_boat",
-    "minecraft:jungle_chest_boat",
-    "minecraft:acacia_chest_boat",
-    "minecraft:dark_oak_chest_boat",
-    "minecraft:mangrove_chest_boat",
-    "minecraft:cherry_chest_boat",
-    "minecraft:pale_oak_chest_boat",
-
-    "minecraft:egg",
-    "minecraft:ender_pearl",
-    "minecraft:snowball",
-    "minecraft:trident",
-
-    "minecraft:boat",
-    "minecraft:crossbow",
-    "minecraft:bow",
-    "minecraft:goat_horn",
-    "minecraft:experience_bottle",
-    "minecraft:firework_rocket",
-]
-
-
 THROWABLE_ITEMS = [
     "minecraft:snowball",
     "minecraft:egg",
@@ -155,6 +117,20 @@ THROWABLE_ITEMS = [
     "minecraft:trident",
     "minecraft:experience_bottle",
 ]
+
+# Potions?
+
+INEDIBLE_ITEMS = [
+    *SPAWN_EGGS,
+    *THROWABLE_ITEMS,
+    "minecraft:crossbow",
+    "minecraft:bow",
+    "minecraft:goat_horn",
+    "minecraft:firework_rocket",
+]
+
+
+
 
 # A lot more
 

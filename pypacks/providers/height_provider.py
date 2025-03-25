@@ -187,7 +187,7 @@ class WeightedListHeightProvider(HeightProvider):
         )
 
 
-HEIGHT_PROVIDER_NAME_TO_CLASSES = {
+HEIGHT_PROVIDER_NAME_TO_CLASSES: dict[str, type["HeightProvider"]] = {
     "constant": ConstantHeightProvider,
     "uniform": UniformHeightProvider,
     "biased_to_bottom": BiasedToBottomHeightProvider,

@@ -22,7 +22,7 @@ class CustomNoise(BaseResource):
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen/noise")
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "firstOctave": self.first_octave,
             "amplitudes": self.amplitudes,

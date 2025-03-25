@@ -30,6 +30,8 @@ class Config:
     @classmethod
     def empty_config(cls) -> "Config":
         """Returns an empty configuration object."""
-        return cls(generate_reference_book=False, enable_language_propogation=False, warn_about_tags_with_custom_items=False,
-                   generate_create_wall_command=False, warn_about_non_marked_macro_line=False, auto_generate_mcfunction_headers=False,
-                   default_language="en_us")
+        return cls(
+            generate_reference_book=False, enable_language_propogation=False, warn_about_tags_with_custom_items=False,
+            generate_create_wall_command=False, warn_about_non_marked_macro_line=False, auto_generate_mcfunction_headers=False,
+            default_language="en_us",
+        )

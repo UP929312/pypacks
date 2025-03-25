@@ -65,6 +65,7 @@ class CustomStructureSet(BaseResource):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructureSet":
+        placement_type_class = RandomSpreadPlacementType if "spread_type" in data["placement"] else ConcentricRingsPlacementType
         return cls(
             internal_name,
             {structure["structure"]: structure["weight"] for structure in data["structures"]},
@@ -73,7 +74,7 @@ class CustomStructureSet(BaseResource):
             data["placement"].get("frequency_reduction_method", "default"),
             {data["placement"]["exclusion_zone"]["other_set"]: data["placement"]["exclusion_zone"]["chunk_count"]} if data["placement"].get("exclusion_zone") else {},
             (data["placement"]["locate_offset"]["X"], data["placement"]["locate_offset"]["Y"], data["placement"]["locate_offset"]["Z"]) if data["placement"].get("locate_offset") else (0, 0, 0),
-            [RandomSpreadPlacementType, ConcentricRingsPlacementType]["spread_type" in data["placement"]].from_dict(data["placement"])
+            placement_type_class.from_dict(data["placement"])
         )
 
     def create_datapack_files(self, pack: "Pack") -> None:

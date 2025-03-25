@@ -6,8 +6,10 @@ from typing import Any
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"
 
+MAX_INT = 2147483647
 
 def recursively_remove_nones_from_data(obj: Any) -> Any:
+    """Recursively goes through dicts and lists and removes keys/values which are None."""
     if isinstance(obj, list):
         return [recursively_remove_nones_from_data(x) for x in obj if x is not None]
     if isinstance(obj, dict):
@@ -16,6 +18,7 @@ def recursively_remove_nones_from_data(obj: Any) -> Any:
 
 
 def chunk_list(lst: list[Any], size: int) -> list[list[Any]]:
+    """Chunks a list into smaller lists of size `size`."""
     return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 

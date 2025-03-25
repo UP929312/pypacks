@@ -66,6 +66,7 @@ AttributeType = Literal[
     "water_movement_efficiency"
 ]
 
+
 @dataclass
 class AttributeModifier:
     """Adds an attribute modifier.
@@ -326,7 +327,7 @@ class BundleContents:
     @classmethod
     def from_dict(cls, data: list[dict[str, Any]]) -> "BundleContents":
         return cls(
-            [CustomItem.from_dict(data["id"]+"_custom_item", data["id"], item) for item in data]  # type: ignore[abc]
+            [CustomItem.from_dict(data["id"]+"_custom_item", data["id"], item) for item in data]  # type: ignore[call-overload, arg-type]
         )
 
 
@@ -457,7 +458,8 @@ class ContainerContents:
                     if "components" in item["item"]
                     else item["item"]["id"]
                 ): item["item"].get("count", 1)
-             for item in data}
+                for item in data
+            }
         )
 
 
@@ -660,7 +662,7 @@ class Instrument:
     # https://minecraft.wiki/w/Data_component_format#instrument
     # https://minecraft.wiki/w/Sounds.json#Sound_events
     sound: "str | CustomSound" | Literal["ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
-                                            "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
+                                         "admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"]
     description: str | None = None  # A string for the description of the sound.
     use_duration: int = 5  # A non-negative integer for how long the use duration is.
     instrument_range: int = 256  # A non-negative float for the range of the sound (normal horns are 256).
@@ -729,7 +731,7 @@ class LodestoneTracker:
 
     allowed_items: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: ["compass"])
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         raise ValueError("LodestoneTracker is not yet implemented (strange formatting)")
 
     def to_dict(self) -> dict[str, Any]:
@@ -988,7 +990,7 @@ class UseRemainder:
             item=data["id"] if "components" not in data else CustomItem.from_dict(data["id"]+"_custom_item", data["id"], data["components"]),
             count=data.get("count", 1),
         )
-        
+
 
 # ==========================================================================================
 

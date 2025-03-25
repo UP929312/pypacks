@@ -149,7 +149,7 @@ class BitMapFontChar:
         )
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font", exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font", exist_ok=True)  # TODO: Another textures/<x> attribute?
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"font"/f"{self.name}.png", "wb") as file:
             file.write(self.image_bytes)
 

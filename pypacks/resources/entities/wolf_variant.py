@@ -55,13 +55,13 @@ class WolfVariant(BaseResource):
         )
 
     @classmethod
-    def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["GenericEntityVariant"]:
-        entity_variants = super().from_datapack_files(data_path)
+    def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["WolfVariant"]:
+        entity_variants: list["WolfVariant"] = super().from_datapack_files(data_path)  # pyright: ignore
         for entity_variant in entity_variants:
             entity_variant.angry_texture_path = assets_path/"textures"/entity_variant.wild_texture_path
             entity_variant.tame_texture_path = assets_path/"textures"/entity_variant.tame_texture_path
             entity_variant.wild_texture_path = assets_path/"textures"/entity_variant.angry_texture_path
-        return entity_variants  # type: ignore[abc]
+        return entity_variants
 
     generate_give_spawn_egg_command = GenericEntityVariant.generate_give_spawn_egg_command
     generate_summon_command = GenericEntityVariant.generate_summon_command

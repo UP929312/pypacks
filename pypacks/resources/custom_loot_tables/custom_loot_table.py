@@ -132,6 +132,7 @@ class Pool:
 
     __repr__ = BaseResource.__repr__
 
+
 @dataclass
 class SimpleRangePool:
     item: "str | CustomItem"

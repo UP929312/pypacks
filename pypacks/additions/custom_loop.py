@@ -37,7 +37,8 @@ class CustomLoop:
                 self.commands[0].create_datapack_files(pack)
             return
         # If they pass in multiple commands, we make a proxy function which gets called instead.
-        combined_mcfunction = MCFunction(f"{self.internal_name}_combined_loop",
+        combined_mcfunction = MCFunction(
+            f"{self.internal_name}_combined_loop",
             [x.get_run_command(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands],
         )
         return combined_mcfunction.create_datapack_files(pack)
