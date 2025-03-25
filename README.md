@@ -8,6 +8,8 @@ One of it's greatest features is the ability to abstract away common but difficu
 It automatically produces a large amount of content for you, such as loot tables, advancements, recipes, and more, with simple to use interfaces,
 and no more researching the wiki/docs, just straight working content creation.
 
+![Reference Book](pypacks/assets/images/readme_images/reference_book_front_page.png)
+
 ## Features
 
 On top of existing features, such as adding a new item model or entity variant, it also has a lot of features you'd have to otherwise do yourself.
@@ -15,6 +17,9 @@ For example, a custom block feature, which also can generate naturally like ores
 Finally (as I could name more features all day long), there's the reference book, which allows the users to easily see what you have made!
 On top of that, you don't have to worry about having to upgrade your whole pack when a new version of Minecraft comes out, as it's all abstracted away, and
 you just need to re-run the code to get the new content, just like magic!
+
+![Custom Blocks](pypacks/assets/images/readme_images/custom_blocks.png)
+![Custom Crafter](pypacks/assets/images/readme_images/custom_crafter.png)
 
 ## Installation
 
@@ -34,6 +39,8 @@ I'm dedicating lots of time to this, so I'm sure I'll add your features/bug fixe
 ## Showcase
 
 Made something cool with this? Send me a message and I'll include it here!
+
+![Custom Painting](pypacks/assets/images/readme_images/custom_painting.png)
 
 ## Future plans
 
