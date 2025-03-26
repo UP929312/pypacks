@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass, field
 import os
+import shutil
 from pathlib import Path
 from typing import Any, Literal, TYPE_CHECKING
 
@@ -97,8 +98,7 @@ class SingleCustomStructure:
         single_item_template_pool.create_datapack_files(pack)
 
         os.makedirs(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure", exist_ok=True)
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"structure"/f"{self.internal_name}.nbt", "wb") as file:
-            file.write(Path(self.path_to_nbt_file).read_bytes())
+        shutil.copyfile(self.path_to_nbt_file, Path(pack.datapack_output_path)/"data"/pack.namespace/"structure"/f"{self.internal_name}.nbt")
 
     def generate_custom_item(self, pack_namespace: str) -> "CustomItem":
         from pypacks.additions.raycasting import BlockRaycast

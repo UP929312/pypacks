@@ -20,7 +20,7 @@ class GenericEntityVariant(BaseResource):
     spawn_conditions: dict[int, "SpawnCondition | None"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="x_variant")
-    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/x")
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="textures/entity/x")
     entity_type: str = field(init=False, repr=False, hash=False, default="x")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -55,8 +55,8 @@ class GenericEntityVariant(BaseResource):
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Create and move the texture file
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
-        shutil.copyfile(self.texture_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
+        shutil.copyfile(self.texture_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")
 
     # def generate_custom_item(self, pack: "Pack") -> "CustomItem":  # Need to type variants!
     #     from pypacks.resources.custom_item import CustomItem

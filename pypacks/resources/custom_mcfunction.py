@@ -51,8 +51,8 @@ class MCFunction(BaseResource):
                 if "$(" in line and not line.startswith("$"):
                     print(f"Warning, {self.internal_name}.mcfunction has lines without macro prefix: `{line}`")
 
-    def generate_headers(self, pack_namespace: str) -> str:
-        commands_str = "\n".join([x.get_reference(pack_namespace) if isinstance(x, MCFunction) else x for x in self.commands])
+    def generate_headers(self, pack: "Pack") -> str:
+        commands_str = "\n".join([x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands])
         # Macros
         detected_macros = tuple(sorted(set(re.findall(MACRO_PATTERN, commands_str))))
         # Detected functions
@@ -65,6 +65,7 @@ class MCFunction(BaseResource):
         detected_variables = tuple(sorted(set(variables), key=lambda x: (x[1], x[0])))  # Group by objective, then player
         # Combine
         pairings = {
+            pack.config.default_mcfunction_header: pack.config.default_mcfunction_header,
             detected_macros:    MACRO_MESSAGE+"\n".join([f"# - {x}" for x in detected_macros]),  # fmt: skip
             detected_functions: FUNCTION_MESSAGE+'\n'.join([f'# - {x}' for x in detected_functions]),
             detected_variables: VARIABLE_MESSAGE+'\n'.join([f'# - Player: {x[0]}, Objective: {x[1]}' for x in detected_variables]),
@@ -85,7 +86,7 @@ class MCFunction(BaseResource):
         if (not commands_str.strip()) and not self.create_if_empty:
             return
         self.do_function_checks(pack)
-        function_headers = self.generate_headers(pack.namespace) if pack.config.auto_generate_mcfunction_headers else ""
+        function_headers = self.generate_headers(pack) if pack.config.auto_generate_mcfunction_headers else ""
         # Incase you embed mcfunctions:
         for mcfunction in [x for x in self.commands if isinstance(x, MCFunction)]:
             mcfunction.create_datapack_files(pack)

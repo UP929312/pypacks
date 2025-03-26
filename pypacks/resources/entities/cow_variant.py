@@ -30,6 +30,6 @@ class CowVariant(GenericEntityVariant):
         return cls(
             internal_name=internal_name,
             texture_path=data["asset_id"].split(":")[1]+".png",
-            model=data.get("model", "normal"),
+            model=data.get("model", "normal"),  # pyright: ignore
             spawn_conditions={condition["priority"]: condition.get("condition") for condition in data["spawn_conditions"]},
         )

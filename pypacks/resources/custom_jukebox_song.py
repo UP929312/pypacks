@@ -22,6 +22,7 @@ class CustomJukeboxSong(BaseResource):
     length_in_seconds: float  # | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="jukebox_song")
+    # resource_pack_subdirectory_name: str = field(init=False, repr=False, default="sounds")
 
     # def __post_init__(self) -> None:
     #     if True:#if self.length_in_seconds is None:
@@ -55,7 +56,7 @@ class CustomJukeboxSong(BaseResource):
             if path.exists():
                 jukebox_song.ogg_path = path
             else:
-                raise FileNotFoundError(f"Could not find the ogg file for jukebox song {jukebox_song.internal_name} at {path}")
+                raise FileNotFoundError(f"Could not find the ogg file for {cls.__name__} {jukebox_song.internal_name} at {path}")
         return jukebox_songs
 
     def generate_custom_item(self, pack: "Pack") -> "CustomItem":

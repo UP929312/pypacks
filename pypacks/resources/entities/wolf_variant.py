@@ -23,7 +23,7 @@ class WolfVariant(BaseResource):
     spawn_conditions: dict[int, "SpawnCondition | None"] = field(default_factory=dict)  # Mapping of priorty to spawn condition
 
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="wolf_variant")
-    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="entity/wolf")
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="textures/entity/wolf")
     entity_type: str = field(init=False, repr=False, hash=False, default="wolf")
 
     def __post_init__(self) -> None:
@@ -68,7 +68,7 @@ class WolfVariant(BaseResource):
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Create and move the texture file
-        entity_wolf_subdir = Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/self.__class__.resource_pack_subdirectory_name
+        entity_wolf_subdir = Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name
         os.makedirs(entity_wolf_subdir, exist_ok=True)
         for texture_path, state in zip([self.angry_texture_path, self.wild_texture_path, self.tame_texture_path], ["angry", "wild", "tame"]):
             shutil.copyfile(texture_path, entity_wolf_subdir/f"{self.internal_name}_{state}.png")

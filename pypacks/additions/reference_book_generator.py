@@ -277,7 +277,7 @@ class ReferenceBook:
         ).generate_give_command(pack.namespace)
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give_reference_book.mcfunction", "w", encoding="utf-8") as file:
-            file.write(f"\n# Give the book\n{format_written_book(self.generate_give_command(pack))}")
+        from pypacks.resources.custom_mcfunction import MCFunction
+        MCFunction("give_reference_book", ["# Give the book", format_written_book(self.generate_give_command(pack))]).create_datapack_files(pack)
 
 # =======================================================================================================================================

@@ -75,8 +75,7 @@ class CustomItem:
 
     def create_datapack_files(self, pack: "Pack") -> None:
         # Create the give command for use in books
-        with open(Path(pack.datapack_output_path)/"data"/pack.namespace/"function"/"give"/f"{self.internal_name}.mcfunction", "w", encoding="utf-8") as file:
-            file.write(self.generate_give_command(pack.namespace))
+        MCFunction(self.internal_name, [self.generate_give_command(pack.namespace)], ["give"]).create_datapack_files(pack)
         # If they pass in a temporary raycast or MCFunction, create them like normal
         if isinstance(self.on_right_click, (BlockRaycast, EntityRaycast, MCFunction)):
             self.on_right_click.create_datapack_files(pack)
@@ -87,7 +86,7 @@ class CustomItem:
         # TODO: Clean this up
         if self.item_model:
             item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemRenderDefinition) else self.item_model
-        if self.custom_item_texture:
+        else:
             item_model = self.custom_item_texture.get_reference(pack_namespace) if self.custom_item_texture is not None else self.texture_path
         if isinstance(self.on_item_drop, MCFunction):  # TODO: Somehow improve this?
             self.custom_data["on_drop_command"] = self.on_item_drop.get_run_command(pack_namespace)

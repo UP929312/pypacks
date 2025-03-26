@@ -143,12 +143,12 @@ class CustomItemTexture(BaseResource):
 class FacePaths:
     """This is used when rendering a simple symmetric block won't work"""
     # If a face is None, it will use the front texture
-    front: str
-    back: str | None
-    top: str | None
-    bottom: str | None
-    left: str | None
-    right: str | None
+    front: "str | Path"
+    back: "str | Path | None"
+    top: "str | Path | None"
+    bottom: "str | Path | None"
+    left: "str | Path | None"
+    right: "str | Path | None"
     horizontally_rotatable: bool = False
     vertically_rotatable: bool = False
 
@@ -244,8 +244,7 @@ class AsymmetricCubeModel:
         for face in ["top", "bottom", "front", "back", "left", "right"]:
             if getattr(self.face_paths, face) is not None:
                 path = Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item"/f"{self.internal_name}_{face}.png"
-                with open(path, "wb") as file:
-                    file.write(Path(getattr(self.face_paths, face)).read_bytes())
+                shutil.copyfile(getattr(self.face_paths, face), path)
 
 
 @dataclass

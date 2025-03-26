@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from pypacks.additions.reference_book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES_TYPES
 from pypacks.resources.custom_font import CustomFont, AutoAssignBitMapFontChar, SpaceFontChar
+from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_item import CustomItem
 from pypacks.utils import IMAGES_PATH
 from pypacks.image_manipulation.border_generation import add_border
@@ -116,8 +117,8 @@ def generate_datapack(pack: "Pack") -> None:
     # Give commands
     if pack.custom_items:
         os.makedirs(pack.datapack_output_path/"data"/pack.namespace/"function"/"give", exist_ok=True)
-        with open(pack.datapack_output_path/"data"/pack.namespace/"function"/"give_all.mcfunction", "w", encoding="utf-8") as file:
-            file.write("\n".join([custom_item.generate_give_command(pack.namespace) for custom_item in pack.custom_items]))
+        give_all = MCFunction("give_all", [custom_item.generate_give_command(pack.namespace) for custom_item in pack.custom_items])
+        give_all.create_datapack_files(pack)
         # And give the book
         if pack.config.generate_reference_book:
             ReferenceBook(pack.custom_items).create_datapack_files(pack)

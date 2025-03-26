@@ -122,7 +122,7 @@ class CustomBlock:
             f"tag @s add {pack_namespace}.custom_block.{self.internal_name}",
 
             # Make it _slightly_ bigger than the block, so it hides the original (only a tiny bit bigger), to stop z-fighting too.
-            "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",  # TODO: This isn't right for slabs I think?
+            "data modify entity @s transformation.scale set value [1.002f, 1.002f, 1.002f]",  # Even slabs and stairs need the model at this scale
             "data modify entity @s brightness set value {block: 15, sky: 15}",
 
             # For item displays, container.0 is just the item it is displaying.
