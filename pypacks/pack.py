@@ -169,8 +169,7 @@ class Pack:
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
-            if block.block_item is not None:
-                self.custom_items.append(block.block_item)  # The custom item
+            self.custom_items.append(block.block_item)  # type: ignore[union-attr]  # The custom item
             if block.loot_table is not None:
                 self.custom_loot_tables.append(block.loot_table)  # When breaking the block
             self.custom_mcfunctions.append(block.generate_place_function(self.namespace))  # Function for placing the block (not by raycast)

@@ -136,7 +136,7 @@ recipes: list[Recipe] = [
 # region: Custom Blocks
 ruby_ore = CustomItem("ruby_ore", "minecraft:redstone_ore", "Ruby Ore", texture_path="images/ruby_ore.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
 ruby_ore_block = CustomBlock.from_item(ruby_ore, drops=ruby)
-# ruby_ore_slab = ruby_ore_block.create_slab("stone_slab")
+ruby_ore_slab = ruby_ore_block.create_slab("stone_slab")
 
 topaz_ore = CustomItem("topaz_ore", "minecraft:gold_ore", "Topaz Ore", texture_path="images/topaz_ore.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
 topaz_ore_block = CustomBlock.from_item(topaz_ore, drops=SimpleRangeLootTable("topaz_ore_drops", topaz, 1, 4))
@@ -149,7 +149,7 @@ debug_block_item = CustomItem("debug_block", "sponge", "Debug Block", texture_pa
 faces_strings = ["front", "back", "top", "bottom", "left", "right"]
 debug_block = CustomBlock.from_item(debug_block_item, block_texture=FacePaths(**{item: f"images/debug_block/{item}.png" for item in faces_strings}, horizontally_rotatable=True, vertically_rotatable=True))
 
-custom_blocks = [ruby_ore_block, topaz_ore_block, chocolate_block, debug_block, ]  # ruby_ore_slab
+custom_blocks = [ruby_ore_block, topaz_ore_block, chocolate_block, debug_block, ruby_ore_slab]
 # endregion
 # ============================================================================================================
 # region: Custom Loot Tables

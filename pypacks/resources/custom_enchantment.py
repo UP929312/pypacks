@@ -80,7 +80,7 @@ class CustomEnchantment(BaseResource):
             # try:
             #     effect_type_instance = resolve_effect_type({effect_name: effect_data})
             # except:
-            #     print(effect_name, effect_data)
+            #     rint(effect_name, effect_data)
             effects.append(effect_type_instance)
         return cls(
             internal_name,
@@ -743,13 +743,13 @@ ENTITY_EFFECT_NAME_TO_CLASSES: dict[str, type["EntityEffect"]] = {
 
 def resolve_effect_type(data: dict[str, Any]) -> "EnchantValueEffect | AttributeEffect | EnchantmentEntityEffect":
     component_id = list(data.keys())[0]
-    # print(data)
+    # rint(data)
     value = list(data.values())[0][0]
     if component_id.removeprefix("minecraft:") == "attributes":
-        # print("Found an AttributeEffect")
+        # rint("Found an AttributeEffect")
         return AttributeEffect.from_dict(value)
     elif list(data.keys())[0] in list(ValueEffectComponentIdType.__args__):  # type: ignore[attr-defined]
-        # print("Found an EnchantValueEffect")
+        # rint("Found an EnchantValueEffect")
         return EnchantValueEffect.from_dict(data)
-    # print("Found an EnchantmentEntityEffect")
+    # rint("Found an EnchantmentEntityEffect")
     return EnchantmentEntityEffect.from_dict(data)

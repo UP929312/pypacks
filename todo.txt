@@ -12,6 +12,8 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 
 Custom Entity Variants should have their own spawn egg in the ref book?
 
+############### Does custom blocks need names?
+
 ###################################################################################################
 
 Pack.from_existing_pack() needs to absort the minecraft namespace's stuff, like tick and that kind of thing
@@ -221,7 +223,7 @@ interaction entity for detecting right click on blocks! If we ever add custom in
 
 Automatic animal breeding
 
-A tag for all non-right-clickable items, like bow, where we can't add right-click functionality
+A tag/list for all non-right-clickable items, like bow, where we can't add right-click functionality
 
 # Like the survival tweaks, would be nice if we could tweak the original items.
 The python code for that datapack would be so clean... We'd need to recreate every vanilla item/tool first, maybe do it anyway?

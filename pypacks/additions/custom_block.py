@@ -1,9 +1,8 @@
-# from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from pypacks.resources.custom_advancement import Criteria, CustomAdvancement
-from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel  # , SlabModel
+from pypacks.resources.custom_model import FacePaths, AsymmetricCubeModel, SymmetricCubeModel, SlabModel
 from pypacks.resources.custom_loot_tables.custom_loot_table import CustomLootTable, SingleItemPool
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.additions.raycasting import BlockRaycast
@@ -24,8 +23,8 @@ class CustomBlock:
     internal_name: str
     name: "str | Text | dict[str, Any]"
     base_block: str
-    block_texture: "str | FacePaths"
-    drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
+    block_texture: "str | FacePaths" = field(repr=False)
+    drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = field(repr=False, default="self")
     # silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 
@@ -55,7 +54,9 @@ class CustomBlock:
             self.loot_table = self.drops
 
     @classmethod
-    def from_item(cls, item: "CustomItem", block_texture: "str | FacePaths | None" = None, drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self") -> "CustomBlock":
+    def from_item(
+        cls, item: "CustomItem", block_texture: "str | FacePaths | None" = None, drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self",
+    ) -> "CustomBlock":
         """Used to create a new custom block."""
         assert item.custom_name is not None and item.texture_path is not None
         item.is_block = True
@@ -112,7 +113,7 @@ class CustomBlock:
 
     def generate_functions(self, pack_namespace: str) -> tuple["MCFunction", ...]:
         """Generates the spawn function, and destroy"""
-        assert isinstance(self.block_texture, FacePaths)
+        assert isinstance(self.block_texture, FacePaths)  # Overridden in __post_init__
         # These are in reverse order (pretty much), so we can reference them in the next function.
         # ============================================================================================================
         # Has to be secondary so we have @s set correctly.
@@ -192,29 +193,30 @@ class CustomBlock:
 
     def create_slab(self, slab_block: "Slabs") -> "CustomBlock":
         """Adds a slab version of the block."""
+        # TODO: Here
         raise NotImplementedError
-        # assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
-        # # custom_item = CustomItem(slab_block, self.internal_name+"_slab", self.name+" Slab",
-        # #                          lore=self.block_item.lore)
-        # # =========================
-        # # TODO: Just reconstruct a new item/block here?...
-        # new_slab_block: "CustomBlock" = deepcopy(self)
-        # new_slab_block.internal_name = f"{self.internal_name}_slab"
-        # new_slab_block.base_block = "minecraft:"+slab_block
-        # # new_slab_block.drops = "self"
-        # # =========================
-        # slab_item: "CustomItem" = deepcopy(self.block_item)
-        # slab_item.base_item = "minecraft:"+slab_block
-        # slab_item.model_object = SlabModel(self.internal_name, self.model_object.texture_path)
-        # slab_item.internal_name = f"{self.internal_name}_slab"
-        # slab_item.custom_name = f"{self.name} Slab"
-        # slab_item.is_block = True
-        # # =========================
-        # new_slab_block.drops = slab_item
-        # new_slab_block.set_or_create_loot_table()
-
-        # new_slab_block.block_item = slab_item
-        # return new_slab_block
+        assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
+        assert self.block_item is not None, "Slabs can only be added to blocks with a block item."
+        # =========================
+        from pypacks.additions.text import Text
+        from pypacks.resources.custom_item import CustomItem
+        slab_model = SlabModel(f"{self.internal_name}_slab", self.model_object.texture_path)
+        slab_item = CustomItem(
+            f"{self.internal_name}_slab", base_item=f"minecraft:{slab_block}", custom_name=Text.from_input(self.name).text+" Slab",
+            lore=self.block_item.lore, custom_data={f"custom_right_click_for_{self.internal_name}_slab": True},
+            item_model=slab_model,  # type: ignore[abc]
+            ref_book_config=self.block_item.ref_book_config,
+        )
+        slab_item.texture_path = self.model_object.texture_path  # type: ignore[abc]
+        slab_item.is_block = True
+        # =========================
+        new_slab_block = CustomBlock(
+            f"{self.internal_name}_slab", name="", base_block=f"minecraft:{slab_block}", block_texture=self.block_texture, drops=slab_item
+        )
+        new_slab_block.block_item = slab_item
+        new_slab_block.model_object = slab_model  # type: ignore[abc]  # We have to do this or the regular block that gets created will override things
+        new_slab_block.set_or_create_loot_table()
+        return new_slab_block
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         self.model_object.create_resource_pack_files(pack)

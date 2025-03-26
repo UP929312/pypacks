@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
@@ -8,7 +7,7 @@ from pypacks.additions.item_components import Components, AttributeModifier, Con
 from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 from pypacks.additions.text import Text
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
-from pypacks.resources.custom_model import CustomItemTexture
+from pypacks.resources.custom_model import CustomItemTexture, SlabModel
 from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.resources.custom_model import CustomItemRenderDefinition
 from pypacks.image_manipulation.built_in_resolving import resolve_default_item_image
@@ -68,7 +67,7 @@ class CustomItem:
         # If it has a custom texture, create it, but not if it's a block (that gets done by the custom block code)
         if self.custom_item_texture is not None and not self.is_block:
             self.custom_item_texture.create_resource_pack_files(pack)
-        if self.item_model is not None and isinstance(self.item_model, CustomItemRenderDefinition):
+        if self.item_model is not None and isinstance(self.item_model, (SlabModel, CustomItemRenderDefinition)):
             self.item_model.create_resource_pack_files(pack)
         if self.components and self.components.equippable is not None and isinstance(self.components.equippable.camera_overlay, CustomTexture):
             self.components.equippable.camera_overlay.create_resource_pack_files(pack)
@@ -85,7 +84,7 @@ class CustomItem:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         # TODO: Clean this up
         if self.item_model:
-            item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, CustomItemRenderDefinition) else self.item_model
+            item_model: str | None = self.item_model.get_reference(pack_namespace) if isinstance(self.item_model, (SlabModel, CustomItemRenderDefinition)) else self.item_model
         else:
             item_model = self.custom_item_texture.get_reference(pack_namespace) if self.custom_item_texture is not None else self.texture_path
         if isinstance(self.on_item_drop, MCFunction):  # TODO: Somehow improve this?
@@ -164,7 +163,7 @@ class CustomItem:
     def create_right_click_revoke_advancement_function(self, pack_namespace: str) -> MCFunction:
         revoke_and_call_mcfunction = MCFunction(
             self.internal_name, [
-                f"advancement revoke @s only {pack_namespace}:custom_right_click_for_{self.internal_name}",
+                f"advancement revoke @s only {self.generate_right_click_advancement(pack_namespace).get_reference(pack_namespace)}",
             ], ["right_click"]
         )
         run_code = self.on_right_click.get_run_command(pack_namespace) if isinstance(self.on_right_click, (MCFunction, BlockRaycast, EntityRaycast)) else self.on_right_click

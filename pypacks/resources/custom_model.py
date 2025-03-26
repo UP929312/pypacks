@@ -167,7 +167,7 @@ class FacePaths:
 class SymmetricCubeModel:
     """SymmetricCubeModel is a model that has the same textures for each face."""
     internal_name: str
-    texture_path: str
+    texture_path: "str | Path"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
@@ -203,15 +203,14 @@ class AsymmetricCubeModel:
         # │       ├── models/
         # │       │   └── item/
         # │       │       └── <custom_block>.json
-        # │       ├── items/
+        # │       ├── items/  (Handled by CustomItemRenderDefinition)
         # │       │   └── <custom_block>.json
-        # │       └── textures/
+        # │       └── textures/ (Handled by CustomTexture)
         # │           └── item/
         # │               └── <custom_block>_<top&bottom&front&back&left&right>.png
 
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)  # Blockstates
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item", exist_ok=True)
 
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             json.dump({
@@ -243,14 +242,13 @@ class AsymmetricCubeModel:
 
         for face in ["top", "bottom", "front", "back", "left", "right"]:
             if getattr(self.face_paths, face) is not None:
-                path = Path(pack.resource_pack_path)/"assets"/pack.namespace/"textures"/"item"/f"{self.internal_name}_{face}.png"
-                shutil.copyfile(getattr(self.face_paths, face), path)
+                CustomTexture(f"{self.internal_name}_{face}", getattr(self.face_paths, face), sub_directories=["item"]).create_resource_pack_files(pack)
 
 
 @dataclass
-class SlabModel:
-    internal_name: str
-    texture_path: str
+class SlabModel(BaseResource):
+    internal_name: str  # including the "_slab" suffix
+    texture_path: "str | Path"
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
@@ -258,40 +256,43 @@ class SlabModel:
         # │   └── <namespace>/
         # │       ├── blockstates/
         # │       │   └── <slab_name>.json
+        # │       ├── items/    (Handled by CustomItemRenderDefinition)
+        # │       │   └── <slab_name>.json
         # │       ├── models/
-        # │       │   ├── block/
-        # │       │   │   ├── <slab_name>.json
-        # │       │   │   ├── <slab_name>_top.json
-        # │       │   │   └── <slab_name>_bottom.json
         # │       │   └── item/
-        # │       │       └── <slab_name>.json
-        # │       └── textures/
+        # │       │       ├── <slab_name>.json
+        # │       │       └── <slab_name>_top.json
+        # │       └── textures/    (Handled by CustomBlock)
         # │           └── block/
         # │               ├── <slab_name>_top.png
         # │               ├── <slab_name>_bottom.png
         # │               └── <slab_name>_side.png
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}_slab.json", "w", encoding="utf-8") as file:
+
+        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates", exist_ok=True)
+        # Blockstates
+        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             json.dump({
                 # Create the blockstates file, pointing to the 3 different models
                 "variants": {
-                    "type=bottom": {"model": f"{pack.namespace}:item/{self.internal_name}_slab"},
-                    "type=top":    {"model": f"{pack.namespace}:item/{self.internal_name}_slab_top"},
-                    "type=double": {"model": f"{pack.namespace}:item/{self.internal_name}"},
+                    "type=bottom": {"model": f"{pack.namespace}:item/{self.internal_name}"},
+                    "type=top":    {"model": f"{pack.namespace}:item/{self.internal_name}_top"},  # fmt: skip
+                    "type=double": {"model": f"{pack.namespace}:item/{self.internal_name.removeprefix('_slab)')}"},
                 }
             }, file, indent=4)
 
-        for suffix in ["slab", "slab_top"]:
-            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}_{suffix}.json", "w", encoding="utf-8") as file:
+        CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
+
+        # Models/Item
+        for suffix in ["", "_top"]:
+            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}{suffix}.json", "w", encoding="utf-8") as file:
                 json.dump({
                     "parent": "minecraft:block/slab",
                     "textures": {
-                        "bottom": f"{pack.namespace}:item/{self.internal_name}",
-                        "side": f"{pack.namespace}:item/{self.internal_name}",
-                        "top": f"{pack.namespace}:item/{self.internal_name}",
-                    }
-                }, file, indent=4)
-
-        CustomItemRenderDefinition(internal_name=f"{self.internal_name}_slab", model=f"{pack.namespace}:item/{self.internal_name}_slab").create_resource_pack_files(pack)
+                        "bottom": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                        "side": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                        "top": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                }
+            }, file, indent=4)
 
     # def add_variants(self, pack: "Pack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
