@@ -90,23 +90,33 @@ class CustomTexture(BaseResource):
 class CustomModelDefinition(BaseResource):
     """A class which maps the textures to the model in <namespace>/models/<subdirectories>/<internal_name>.json"""
     internal_name: str
+    layers: dict[str, Any]
     parent: str = "minecraft:item/generated"
-    model_type: Literal["item", "block"] = "item"  # Doesn't dictate where it goes, just the type of model
+    particle: str | None = None
     sub_directories: list[str] = field(default_factory=list)
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="models")
 
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:  # TODO: Have .from_block and .from_item methods, make this much more generic
-        layer_type = "layer0" if "item" in self.parent else "all"
-        layers = {layer_type: f"{pack_namespace}:{self.model_type}/{self.internal_name}"}  # TODO: Probably allow a layer *value*
-        return {"parent": self.parent, "textures": layers}
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return {"parent": self.parent, "textures": self.layers | ({"particle": self.particle} if self.particle is not None else {})}
+
+    @classmethod
+    def from_block_data(cls, pack_namespace: str, internal_name: str, parent: str, sub_directories: list[str]) -> "CustomModelDefinition":
+        """Warning, this uses item/ for the block, not block/ which make cause unexpected behavior."""
+        layers = {"all": f"{pack_namespace}:item/{internal_name}"}
+        return cls(internal_name, layers=layers, parent=parent, sub_directories=sub_directories)
+
+    @classmethod
+    def from_item_data(cls, pack_namespace: str, internal_name: str, parent: str, sub_directories: list[str]) -> "CustomModelDefinition":
+        layers = {"layer0": f"{pack_namespace}:item/{internal_name}"}
+        return cls(internal_name, layers=layers, parent=parent, sub_directories=sub_directories)
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomModelDefinition":  # type: ignore[override]
         return cls(
             internal_name,
+            layers=data["textures"],
             parent=data["parent"],
-            model_type="item" if "item" in data["parent"] else "block",
             sub_directories=sub_directories,
         )
 
@@ -156,7 +166,7 @@ class CustomItemTexture(BaseResource):
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
         CustomTexture(self.internal_name, self.path_to_texture, sub_directories=["item"]).create_resource_pack_files(pack)
-        CustomModelDefinition(self.internal_name, parent="minecraft:item/generated", model_type="item", sub_directories=["item"]).create_resource_pack_files(pack)
+        CustomModelDefinition.from_item_data(pack.namespace, self.internal_name, parent="minecraft:item/generated", sub_directories=["item"]).create_resource_pack_files(pack)
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
 
@@ -202,7 +212,7 @@ class SymmetricCubeModel:
         # │       └── textures/
         # │           └── item/
         # │               └── <internal_name>.png   # The texture for the item
-        CustomModelDefinition(self.internal_name, parent="minecraft:block/cube_all", model_type="item", sub_directories=["item"]).create_resource_pack_files(pack)
+        CustomModelDefinition.from_block_data(pack.namespace, self.internal_name, parent="minecraft:block/cube_all", sub_directories=["item"]).create_resource_pack_files(pack)
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
         CustomTexture(self.internal_name, self.texture_path, sub_directories=["item"]).create_resource_pack_files(pack)
 
@@ -220,35 +230,28 @@ class AsymmetricCubeModel:
         # │       ├── blockstates/    (Handled by CustomBlockState)
         # │       │   └── <custom_block>.json
         # │       ├── models/
-        # │       │   └── item/
-        # │       │       └── <custom_block>.json
-        # │       ├── items/  (Handled by CustomItemRenderDefinition)
+        # │       │   └── item/    (Handled by CustomModelDefinition)
+        # │       │       └── <custom_block>_<top&bottom&front&back&left&right>.json
+        # │       ├── items/    (Handled by CustomItemRenderDefinition)
         # │       │   └── <custom_block>.json
-        # │       └── textures/ (Handled by CustomTexture)
+        # │       └── textures/    (Handled by CustomTexture)
         # │           └── item/
         # │               └── <custom_block>_<top&bottom&front&back&left&right>.png
 
         CustomBlockState(self.internal_name, variants={"": f"{pack.namespace}:block/{self.internal_name}"}).create_resource_pack_files(pack)
 
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
-            axial_mapping = {
-                "up": "top",
-                "down": "bottom",
-                "north": "front",
-                "south": "back",
-                "east": "left",
-                "west": "right",
-            }
-            json.dump({
-                "parent": "block/cube",
-                "textures": {
-                    direction: f"{pack.namespace}:item/{self.internal_name}_{face}"
-                    for direction, face in axial_mapping.items()
-                } | {
-                    "particle": f"{pack.namespace}:item/{self.internal_name}_front"  # This just stops errors in the logs
-                }
-            }, file, indent=4)
+        mapping = {
+            "up": "top",
+            "down": "bottom",
+            "north": "front",
+            "south": "back",
+            "east": "left",
+            "west": "right",
+        }
+        CustomModelDefinition(
+            self.internal_name, layers={direction: f"{pack.namespace}:item/{self.internal_name}_{face}" for direction, face in mapping.items()},
+            parent="block/cube", particle=f"{pack.namespace}:item/{self.internal_name}_front", sub_directories=["item"]
+        ).create_resource_pack_files(pack)
 
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
@@ -272,7 +275,7 @@ class SlabModel(BaseResource):
         # │       ├── items/    (Handled by CustomItemRenderDefinition)
         # │       │   └── <slab_name>.json
         # │       │
-        # │       ├── models/
+        # │       ├── models/  (Handled by CustomModelDefinition)
         # │       │   └── item/
         # │       │       ├── <slab_name>.json
         # │       │       └── <slab_name>_top.json
@@ -293,18 +296,14 @@ class SlabModel(BaseResource):
 
         # Models/Item
         for suffix in ["", "_top"]:
-            # TODO: Make this use the CustomModelDefinition class (somehow need to do the whole "is_block": "cube/all" logic someplace else?)
-            with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}{suffix}.json", "w", encoding="utf-8") as file:
-                json.dump(
-                    {
-                        "parent": "minecraft:block/slab",
-                        "textures": {
-                            "bottom": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
-                            "side": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
-                            "top": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
-                        }
-                    }, file, indent=4,
-                )
+            CustomModelDefinition(f"{self.internal_name}{suffix}", layers={
+                    "bottom": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                    "side": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                    "top": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                },
+                parent="minecraft:block/slab",
+                sub_directories=["item"]
+            ).create_resource_pack_files(pack)
 
     # def add_variants(self, pack: "Pack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
