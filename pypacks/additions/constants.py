@@ -130,8 +130,6 @@ INEDIBLE_ITEMS = [
 ]
 
 
-
-
 # A lot more
 
 MobCapCategories = Literal[

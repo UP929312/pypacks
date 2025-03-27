@@ -96,7 +96,7 @@ class CustomModelDefinition(BaseResource):
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="models")
 
-    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:  # TODO: Have .from_block and .from_item methods, make this much more generic
         layer_type = "layer0" if "item" in self.parent else "all"
         layers = {layer_type: f"{pack_namespace}:{self.model_type}/{self.internal_name}"}  # TODO: Probably allow a layer *value*
         return {"parent": self.parent, "textures": layers}
@@ -109,6 +109,27 @@ class CustomModelDefinition(BaseResource):
             model_type="item" if "item" in data["parent"] else "block",
             sub_directories=sub_directories,
         )
+
+
+@dataclass
+class CustomBlockState(BaseResource):
+    """A class which creates the blockstate file for a custom block."""
+    # Requires the following file structure:
+    # ├── assets/
+    # │   └── <namespace>/
+    # │       └── blockstates/
+    internal_name: str
+    variants: dict[str, str] = field(default_factory=dict)
+
+    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="blockstates")
+
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        return {
+            "variants": {
+                variant: {"model": f"{pack_namespace}:{model}"}
+                for variant, model in self.variants.items()
+            }
+        }
 
 
 @dataclass
@@ -192,13 +213,11 @@ class AsymmetricCubeModel:
     internal_name: str
     face_paths: "FacePaths"
 
-    resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="blockstates")
-
     def create_resource_pack_files(self, pack: "Pack") -> None:
         # Requires the following file structure:
         # ├── assets/
         # │   └── <pack namespace>/
-        # │       ├── blockstates/
+        # │       ├── blockstates/    (Handled by CustomBlockState)
         # │       │   └── <custom_block>.json
         # │       ├── models/
         # │       │   └── item/
@@ -209,16 +228,9 @@ class AsymmetricCubeModel:
         # │           └── item/
         # │               └── <custom_block>_<top&bottom&front&back&left&right>.png
 
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)  # Blockstates
+        CustomBlockState(self.internal_name, variants={"": f"{pack.namespace}:block/{self.internal_name}"}).create_resource_pack_files(pack)
+
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item", exist_ok=True)
-
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
-            json.dump({
-                "variants": {
-                    "": {"model": f"{pack.namespace}:block/{self.internal_name}"},
-                }
-            }, file, indent=4)
-
         with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
             axial_mapping = {
                 "up": "top",
@@ -254,52 +266,50 @@ class SlabModel(BaseResource):
         # Requires the following file structure:
         # ├── assets/
         # │   └── <namespace>/
-        # │       ├── blockstates/
+        # │       ├── blockstates/    (Handled by CustomBlockState)
         # │       │   └── <slab_name>.json
+        # │       │
         # │       ├── items/    (Handled by CustomItemRenderDefinition)
         # │       │   └── <slab_name>.json
+        # │       │
         # │       ├── models/
         # │       │   └── item/
         # │       │       ├── <slab_name>.json
         # │       │       └── <slab_name>_top.json
-        # │       └── textures/    (Handled by CustomBlock)
+        # │       │
+        # │       └── textures/    (Handled by parent CustomBlock)
         # │           └── block/
         # │               ├── <slab_name>_top.png
         # │               ├── <slab_name>_bottom.png
         # │               └── <slab_name>_side.png
 
-        os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates", exist_ok=True)
-        # Blockstates
-        with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"blockstates"/f"{self.internal_name}.json", "w", encoding="utf-8") as file:
-            json.dump({
-                # Create the blockstates file, pointing to the 3 different models
-                "variants": {
-                    "type=bottom": {"model": f"{pack.namespace}:item/{self.internal_name}"},
-                    "type=top":    {"model": f"{pack.namespace}:item/{self.internal_name}_top"},  # fmt: skip
-                    "type=double": {"model": f"{pack.namespace}:item/{self.internal_name.removeprefix('_slab)')}"},
-                }
-            }, file, indent=4)
+        CustomBlockState(self.internal_name, variants={
+            "type=bottom": f"item/{self.internal_name}",
+            "type=top": f"item/{self.internal_name}_top",
+            "type=double": f"item/{self.internal_name.removeprefix('_slab')}",
+        }).create_resource_pack_files(pack)
 
         CustomItemRenderDefinition(internal_name=self.internal_name, model=f"{pack.namespace}:item/{self.internal_name}").create_resource_pack_files(pack)
 
         # Models/Item
         for suffix in ["", "_top"]:
+            # TODO: Make this use the CustomModelDefinition class (somehow need to do the whole "is_block": "cube/all" logic someplace else?)
             with open(Path(pack.resource_pack_path)/"assets"/pack.namespace/"models"/"item"/f"{self.internal_name}{suffix}.json", "w", encoding="utf-8") as file:
-                json.dump({
-                    "parent": "minecraft:block/slab",
-                    "textures": {
-                        "bottom": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
-                        "side": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
-                        "top": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
-                }
-            }, file, indent=4)
+                json.dump(
+                    {
+                        "parent": "minecraft:block/slab",
+                        "textures": {
+                            "bottom": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                            "side": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                            "top": f"{pack.namespace}:item/{self.internal_name.removesuffix('_slab')}",  # Point to the regular texture
+                        }
+                    }, file, indent=4,
+                )
 
     # def add_variants(self, pack: "Pack", stairs: bool = False, slabs: bool = False,) -> None:
         # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
-        # Fences are too much work (maybe?)
-        # Walls aren't wood, but are also like fences
-        # Doors and trapdoors need to flip and that's annoying to do
+        # Fences are too much work (maybe?), same with walls (even though they're not wood)
+        # Doors, trapdoors and fencegates need to flip and that's annoying to do/detect
         # Pressure plates are basically buttons that also need to react
-        # Fencegates are doors, so they're out.
         # Boat/boat chest??? Should be able to re-skin an entity?
         # Signs and hanging signs are editable, so probably not them (for now)

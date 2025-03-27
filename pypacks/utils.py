@@ -8,6 +8,7 @@ IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"
 
 MAX_INT = 2147483647
 
+
 def recursively_remove_nones_from_data(obj: Any) -> Any:
     """Recursively goes through dicts and lists and removes keys/values which are None."""
     if isinstance(obj, list):

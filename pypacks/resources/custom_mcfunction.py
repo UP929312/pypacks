@@ -65,7 +65,7 @@ class MCFunction(BaseResource):
         detected_variables = tuple(sorted(set(variables), key=lambda x: (x[1], x[0])))  # Group by objective, then player
         # Combine
         pairings = {
-            pack.config.default_mcfunction_header: pack.config.default_mcfunction_header,
+            bool(pack.config.default_mcfunction_header): pack.config.default_mcfunction_header or "",
             detected_macros:    MACRO_MESSAGE+"\n".join([f"# - {x}" for x in detected_macros]),  # fmt: skip
             detected_functions: FUNCTION_MESSAGE+'\n'.join([f'# - {x}' for x in detected_functions]),
             detected_variables: VARIABLE_MESSAGE+'\n'.join([f'# - Player: {x[0]}, Objective: {x[1]}' for x in detected_variables]),

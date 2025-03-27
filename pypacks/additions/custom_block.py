@@ -204,17 +204,17 @@ class CustomBlock:
         slab_item = CustomItem(
             f"{self.internal_name}_slab", base_item=f"minecraft:{slab_block}", custom_name=Text.from_input(self.name).text+" Slab",
             lore=self.block_item.lore, custom_data={f"custom_right_click_for_{self.internal_name}_slab": True},
-            item_model=slab_model,  # type: ignore[abc]
+            item_model=slab_model,  # type: ignore[arg-type]
             ref_book_config=self.block_item.ref_book_config,
         )
-        slab_item.texture_path = self.model_object.texture_path  # type: ignore[abc]
+        slab_item.texture_path = self.model_object.texture_path  # type: ignore[assignment]
         slab_item.is_block = True
         # =========================
         new_slab_block = CustomBlock(
             f"{self.internal_name}_slab", name="", base_block=f"minecraft:{slab_block}", block_texture=self.block_texture, drops=slab_item
         )
         new_slab_block.block_item = slab_item
-        new_slab_block.model_object = slab_model  # type: ignore[abc]  # We have to do this or the regular block that gets created will override things
+        new_slab_block.model_object = slab_model  # type: ignore[assignment]  # We have to do this or the regular block that gets created will override things
         new_slab_block.set_or_create_loot_table()
         return new_slab_block
 
