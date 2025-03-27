@@ -12,6 +12,8 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 
 Custom Entity Variants should have their own spawn egg in the ref book?
 
+"undo_world_gen", deletes custom dimensions and does level.dat changes too?
+
 ############### Does custom blocks need names?
 
 ###################################################################################################
@@ -195,15 +197,15 @@ List:
 - Custom blocks, silk touch
 
 # Problems with slabs
-- Z fighting
 - Placing upper/double slabs is a problem...
+- Placing through other slabs, perhaps change the condition to say like "execute unless @e[distance=..1, type=item_display]
 
 For slabs and stairs and such, maybe just have "children" of the block, then we can store it in the block, the ref book can reference that
 and also it can be created more easily, then the add_slab code will be adding it to the children
 
 Placing slabs through other slabs causes issues, hopefully it's rare though? Since the raycast doesn't check if it's already
 In a custom slab.
-They should appear in the reference book under the item page though...
+They should appear in the reference book under the regular full block item page though...
 
 When placing custom blocks vertically, don't rotate them also, check if they're vertically rotatable and if they're vertical
 

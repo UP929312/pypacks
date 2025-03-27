@@ -149,7 +149,7 @@ class CustomBlock:
         )
         # Spawn the item display, then call the setup on it directly.
         spawn_item_display = MCFunction(f"setup_item_display_{self.internal_name}", [
-            f"execute align xyz positioned ~.5 ~.5 ~.5 summon item_display at @s run {execute_as_item_display.get_run_command(pack_namespace)}",
+            f"execute align xyz positioned ~.5 ~.5002 ~.5 summon item_display at @s run {execute_as_item_display.get_run_command(pack_namespace)}",
             ],
             ["custom_blocks", "setup_item_display"],
         )
@@ -194,7 +194,7 @@ class CustomBlock:
     def create_slab(self, slab_block: "Slabs") -> "CustomBlock":
         """Adds a slab version of the block."""
         # TODO: Here
-        raise NotImplementedError
+        # raise NotImplementedError
         assert isinstance(self.model_object, SymmetricCubeModel), "Slabs can only be added to symmetric cube blocks."
         assert self.block_item is not None, "Slabs can only be added to blocks with a block item."
         # =========================
