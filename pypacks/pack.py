@@ -177,11 +177,12 @@ class Pack:
             self.custom_mcfunctions.append(block.generate_place_function(self.namespace))  # Function for placing the block (not by raycast)
             self.custom_advancements.append(block.create_advancement(self.namespace))  # Advancement for placing the block
             self.custom_mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
-            self.custom_predicates.append(block.create_silk_touch_predicate())
 
         if self.custom_blocks:
             self.custom_mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
             self.custom_mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
+            self.custom_predicates.append(self.custom_blocks[0].create_silk_touch_predicate())
+
         # ==================================================================================
         # Adding all the paintings', jukebox's and enchanted books' items to the list
         for painting in self.custom_paintings:

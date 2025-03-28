@@ -41,13 +41,14 @@ class CustomBlock:
         elif self.block_texture.block_type == "asymmetric_cube":
             self.model_object = AsymmetricCubeModel(self.internal_name, self.block_texture)
 
-    def create_silk_touch_predicate(self) -> "Predicate":
+    @staticmethod
+    def create_silk_touch_predicate() -> "Predicate":
         from pypacks.resources.predicate.predicates import EntityPropertiesPredicate
         from pypacks.resources.predicate.predicate_conditions import EntityCondition
         from pypacks.resources.predicate.predicate_conditions import ItemCondition
         from pypacks.resources.predicate.data_component_predicate import EnchantmentComponentPredicate
         return EntityPropertiesPredicate(
-            f"{self.internal_name}_silk_touch",
+            "silk_touch_check",
             "this",
             predicate=EntityCondition(
                 equipment={"mainhand": ItemCondition(predicates=[EnchantmentComponentPredicate(enchantments=["minecraft:silk_touch"])])}
