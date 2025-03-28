@@ -22,7 +22,6 @@ class CustomBlock:
     passed in (e.g. rotatable logs). Setting drops to "self" will make the block drop itself when broken,
     and setting it to None will make it drop nothing."""
     internal_name: str
-    name: "str | Text | dict[str, Any]"
     base_block: str
     block_texture: "str | FacePaths" = field(repr=False)
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = field(repr=False, default="self")
@@ -90,7 +89,7 @@ class CustomBlock:
         """Used to create a new custom block."""
         assert item.custom_name is not None and item.texture_path is not None
         item.is_block = True
-        class_ = cls(item.internal_name, item.custom_name, item.base_item, block_texture or item.texture_path, drops=regular_drops, silk_touch_drops=silk_touch_drops)
+        class_ = cls(item.internal_name, item.base_item, block_texture or item.texture_path, drops=regular_drops, silk_touch_drops=silk_touch_drops)
         class_.block_item = item
         class_.block_item.custom_data[f"custom_right_click_for_{class_.internal_name}"] = True
         class_.set_or_create_loot_table()
@@ -250,7 +249,7 @@ class CustomBlock:
         from pypacks.resources.custom_item import CustomItem
         slab_model = SlabModel(f"{self.internal_name}_slab", self.model_object.texture_path)
         slab_item = CustomItem(
-            f"{self.internal_name}_slab", base_item=f"minecraft:{slab_block}", custom_name=Text.from_input(self.name).text+" Slab",
+            f"{self.internal_name}_slab", base_item=f"minecraft:{slab_block}", custom_name=Text.from_input(self.block_item.custom_name or "Unknown").text+" Slab",
             lore=self.block_item.lore, custom_data={f"custom_right_click_for_{self.internal_name}_slab": True},
             components=self.block_item.components, item_model=slab_model,  # type: ignore[arg-type]
             ref_book_config=self.block_item.ref_book_config,
@@ -259,7 +258,7 @@ class CustomBlock:
         slab_item.is_block = True
         # =========================
         new_slab_block = CustomBlock(
-            f"{self.internal_name}_slab", name="", base_block=f"minecraft:{slab_block}", block_texture=self.block_texture, drops=slab_item
+            f"{self.internal_name}_slab", base_block=f"minecraft:{slab_block}", block_texture=self.block_texture, drops=slab_item
         )
         new_slab_block.block_item = slab_item
         new_slab_block.model_object = slab_model  # type: ignore[assignment]  # We have to do this or the regular block that gets created will override things

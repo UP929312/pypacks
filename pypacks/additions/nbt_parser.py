@@ -2,25 +2,37 @@
 import struct
 import gzip
 from io import BufferedReader, BytesIO
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
 @dataclass
 class Structure:
     size: tuple[int, int, int]
-    blocks: list[dict[str, Any]]
-    entities: list[dict[str, Any]]
-    data_version: int
+    blocks: list["Block"]
+    palette: list[dict[str, Any]] = field(repr=False)  # The palette is a list of dictionaries, each containing the block name and properties.
+    entities: list[dict[str, Any]] = field(repr=False)
+    data_version: int = field(repr=False)
 
     @classmethod
     def from_nbt(cls, nbt: dict[str, Any]) -> "Structure":
+        # Blocks  # [{'pos': [0, 1, 1], 'state': 0}, {'pos': [0, 0, 1], 'state': 1}, {'pos': [0, 0, 2], 'state': 1}, {'pos': [0, 1, 2], 'state': 1}, {'pos': [0, 3, 0], 'state': 1}, {'pos': [0, 3, 1], 'state': 1}, {'pos': [0, 3, 2], 'state': 1}, {'nbt': {'mode': 'start', 'powered': 0, 'id': 'minecraft:test_block', 'message': ''}, 'pos': [0, 0, 0], 'state': 2}, {'nbt': {'crafting_ticks_remaining': 0, 'triggered': 0, 'disabled_slots': [], 'Items': [{'count': 1, 'Slot': 0, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 1, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 2, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 3, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 4, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 5, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 6, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 7, 'id': 'minecraft:iron_ingot'}, {'count': 1, 'Slot': 8, 'id': 'minecraft:iron_ingot'}], 'id': 'minecraft:crafter'}, 'pos': [0, 1, 0], 'state': 3}, {'nbt': {'Items': [], 'id': 'minecraft:chest'}, 'pos': [0, 2, 0], 'state': 4}, {'nbt': {'id': 'minecraft:comparator', 'OutputSignal': 0}, 'pos': [0, 2, 1], 'state': 5}, {'nbt': {'mode': 'accept', 'powered': 0, 'id': 'minecraft:test_block', 'message': ''}, 'pos': [0, 2, 2], 'state': 6}]
         nbt = nbt['']
+        palette = nbt["palette"]  # [{'Name': 'minecraft:stone_bricks'}, {'Name': 'minecraft:air'}, {'Properties': {'mode': 'start'}, 'Name': 'minecraft:test_block'}, {'Properties': {'orientation': 'up_west', 'triggered': 'false', 'crafting': 'false'}, 'Name': 'minecraft:crafter'}, {'Properties': {'waterlogged': 'false', 'facing': 'east', 'type': 'single'}, 'Name': 'minecraft:chest'}, {'Properties': {'mode': 'compare', 'powered': 'false', 'facing': 'north'}, 'Name': 'minecraft:comparator'}, {'Properties': {'mode': 'accept'}, 'Name': 'minecraft:test_block'}]
         size = tuple(nbt['size'])
         blocks = nbt['blocks']
         entities = nbt['entities']
         data_version = nbt['DataVersion']
-        return cls(size, blocks, entities, data_version)
+        block_instances = [Block(block.get("Name", "air"), tuple(block["pos"]), block.get("nbt", {}), block.get("properties", {})) for block in blocks]
+        return cls(size, block_instances, [], entities, data_version)  # palette
+
+
+@dataclass
+class Block:
+    block_type: str
+    block_pos: tuple[int, int, int]
+    block_nbt: dict[str, Any]
+    block_properties: dict[str, Any]
 
 
 class NBTParser:
@@ -49,67 +61,36 @@ class NBTParser:
         return {self.read_string(): self.read_tag(tag_type)}
 
     def read_tag(self, tag_type: int) -> Any:
-        # mapping = {
-        #     self.TAG_BYTE: self.read_byte(),
-        #     self.TAG_SHORT: self.read_short(),
-        #     self.TAG_INT: self.read_int(),
-        #     self.TAG_LONG: self.read_long(),
-        #     self.TAG_FLOAT: self.read_float(),
-        #     self.TAG_DOUBLE: self.read_double(),
-        #     self.TAG_BYTE_ARRAY: self.read_byte_array(),
-        #     self.TAG_STRING: self.read_string(),
-        #     self.TAG_LIST: self.read_list(),
-        #     self.TAG_COMPOUND: self.read_compound(),
-        #     self.TAG_INT_ARRAY: self.read_int_array(),
-        #     self.TAG_LONG_ARRAY: self.read_long_array(),
-        # }
-        # if tag_type not in mapping:
-        #     raise ValueError(f"Unknown tag type {tag_type}")
-        # return mapping[tag_type]
+        mapping = {
+            self.TAG_BYTE: lambda: self.read_byte(),
+            self.TAG_SHORT: lambda: self.read_short(),
+            self.TAG_INT: lambda: self.read_int(),
+            self.TAG_LONG: lambda: self.read_long(),
+            self.TAG_FLOAT: lambda: struct.unpack('>f', self.stream.read(4))[0],
+            self.TAG_DOUBLE: lambda: struct.unpack('>d', self.stream.read(8))[0],
+            self.TAG_BYTE_ARRAY: lambda: self.read_byte_array(),
+            self.TAG_STRING: lambda: self.read_string(),
+            self.TAG_LIST: lambda: self.read_list(),
+            self.TAG_COMPOUND: lambda: self.read_compound(),
+            self.TAG_INT_ARRAY: lambda: self.read_int_array(),
+            self.TAG_LONG_ARRAY: lambda: self.read_long_array(),
+        }
+        if tag_type not in mapping:
+            raise ValueError(f"Unknown tag type {tag_type}")
+        else:
+            return mapping[tag_type]()
 
-        if tag_type == self.TAG_BYTE:
-            return self.read_byte()
-        if tag_type == self.TAG_SHORT:
-            return self.read_short()
-        if tag_type == self.TAG_INT:
-            return self.read_int()
-        if tag_type == self.TAG_LONG:
-            return self.read_long()
-        if tag_type == self.TAG_FLOAT:
-            return self.read_float()
-        if tag_type == self.TAG_DOUBLE:
-            return self.read_double()
-        if tag_type == self.TAG_BYTE_ARRAY:
-            return self.read_byte_array()
-        if tag_type == self.TAG_STRING:
-            return self.read_string()
-        if tag_type == self.TAG_LIST:
-            return self.read_list()
-        if tag_type == self.TAG_COMPOUND:
-            return self.read_compound()
-        if tag_type == self.TAG_INT_ARRAY:
-            return self.read_int_array()
-        if tag_type == self.TAG_LONG_ARRAY:
-            return self.read_long_array()
-        raise ValueError(f"Unknown tag type {tag_type}")
-
-    def read_byte(self) -> int:
+    def read_byte(self) -> int:  # Refed multiple times
         return struct.unpack('>b', self.stream.read(1))[0]  # type: ignore[no-any-return]
 
-    def read_short(self) -> int:
+    def read_short(self) -> int:  # Refed multiple times
         return struct.unpack('>h', self.stream.read(2))[0]  # type: ignore[no-any-return]
 
-    def read_int(self) -> int:
+    def read_int(self) -> int:  # Refed multiple times
         return struct.unpack('>i', self.stream.read(4))[0]  # type: ignore[no-any-return]
 
-    def read_long(self) -> float:
+    def read_long(self) -> float:  # Refed multiple times
         return struct.unpack('>q', self.stream.read(8))[0]  # type: ignore[no-any-return]
-
-    def read_float(self) -> float:
-        return struct.unpack('>f', self.stream.read(4))[0]  # type: ignore[no-any-return]
-
-    def read_double(self) -> float:
-        return struct.unpack('>d', self.stream.read(8))[0]  # type: ignore[no-any-return]
 
     def read_byte_array(self) -> list[int]:
         length = self.read_int()
@@ -150,6 +131,6 @@ class NBTParser:
 
 # Example usage:
 data = NBTParser.from_file(r"C:\Users\Ben\Desktop\pypacks\examples\development\structures\iron_block_crafting_recipe.nbt")
-print(data.output)
+# rint(data.output)
 structure = Structure.from_nbt(data.output)
 # rint(structure)

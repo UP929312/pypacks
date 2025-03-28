@@ -2,6 +2,8 @@ mypy . --strict && flake8 --ignore=E501,E126,E121,W503,W504,PBP,E226,E241,F405,E
 
 We should rework from_combined_files, since it just does from_datapack_files, then finds an exact path and overrides an attribute.
 
+item events, e.g. on right_click, on drop, on craft, on left, on sprint
+
 1. Can generate a whole pack, but it's in the format of Pack(...), and I would quite like a formatter of __str__ that adds indentation and new lines.
     (maybe like Pack.to_python())
 2. Also, need to also keep the images and such, can't just delete them
@@ -14,9 +16,7 @@ Custom Entity Variants should have their own spawn egg in the ref book?
 
 For custom blocks that drop their own item with our without silk touch, don't make two loot tables, point them both to the same.
 
-"undo_world_gen", deletes custom dimensions and does level.dat changes too?
-
-############### Does custom blocks need names?
+############### "undo_world_gen", deletes custom dimensions from level.dat, as well as disables all datapacks (for now), then deletes the worldgen folders?
 
 3d pathfinding from A to B (two coords), maybe with blocks it can traverse
 
