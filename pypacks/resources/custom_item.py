@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pypacks.additions.reference_book_config import MISC_REF_BOOK_CONFIG
 from pypacks.additions.item_components import Components, AttributeModifier, Consumable, Food, TooltipDisplay
-from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
+from pypacks.additions.raycasting import Raycast
 from pypacks.additions.text import Text
 from pypacks.resources.custom_advancement import CustomAdvancement, Criteria
 from pypacks.resources.custom_model import CustomItemTexture, SlabModel
@@ -76,9 +76,9 @@ class CustomItem:
         # Create the give command for use in books
         MCFunction(self.internal_name, [self.generate_give_command(pack.namespace)], ["give"]).create_datapack_files(pack)
         # If they pass in a temporary raycast or MCFunction, create them like normal
-        if isinstance(self.on_right_click, (BlockRaycast, EntityRaycast, MCFunction)):
+        if isinstance(self.on_right_click, (Raycast, MCFunction)):
             self.on_right_click.create_datapack_files(pack)
-        if isinstance(self.on_item_drop, (BlockRaycast, EntityRaycast, MCFunction)):
+        if isinstance(self.on_item_drop, (Raycast, MCFunction)):
             self.on_item_drop.create_datapack_files(pack)
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -166,7 +166,7 @@ class CustomItem:
                 f"advancement revoke @s only {self.generate_right_click_advancement(pack_namespace).get_reference(pack_namespace)}",
             ], ["right_click"]
         )
-        run_code = self.on_right_click.get_run_command(pack_namespace) if isinstance(self.on_right_click, (MCFunction, BlockRaycast, EntityRaycast)) else self.on_right_click
+        run_code = self.on_right_click.get_run_command(pack_namespace) if isinstance(self.on_right_click, (MCFunction, Raycast)) else self.on_right_click
         if self.use_right_click_cooldown is not None:
             action_bar_command = f'title @s actionbar {{"text": "Cooldown: ", "color": "red", "extra": [{{"score": {{"name": "@s", "objective": "{self.internal_name}_cooldown"}}}}, {{"text": " ticks"}}]}}'
             revoke_and_call_mcfunction.commands.extend([

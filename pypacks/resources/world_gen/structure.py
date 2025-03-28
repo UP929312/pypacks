@@ -106,7 +106,7 @@ class SingleCustomStructure:
         from pypacks.additions.item_components import Components, Cooldown
         from pypacks.additions.reference_book_config import DEV_ITEMS_REF_BOOK_CONFIG
         block_raycast = BlockRaycast(
-            self.internal_name+"_structure_placer_raycast",
+            f"{self.internal_name}_structure_placer_raycast",
             on_block_hit_command=f"place template {self.get_reference(pack_namespace)} ~ ~1 ~",
             no_blocks_hit_command="say Oops, something went wrong!",
             max_distance_in_blocks=20,

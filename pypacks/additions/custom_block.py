@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.additions.text import Text
     from pypacks.additions.constants import Slabs
+    from pypacks.resources.custom_predicate import Predicate
     from pypacks.resources.custom_item import CustomItem
 
 
@@ -26,6 +27,7 @@ class CustomBlock:
     block_texture: "str | FacePaths" = field(repr=False)
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = field(repr=False, default="self")
     # silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
+    # fortune_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 
     block_item: "CustomItem | None" = field(init=False, repr=False, hash=False, default=None)  # Used by datapack to create the custom icons
@@ -39,19 +41,33 @@ class CustomBlock:
         elif self.block_texture.block_type == "asymmetric_cube":
             self.model_object = AsymmetricCubeModel(self.internal_name, self.block_texture)
 
+    def create_silk_touch_predicate(self) -> "Predicate":
+        from pypacks.resources.custom_predicate import EntityPropertiesPredicate
+        from pypacks.resources.predicate.predicate_conditions import EntityCondition
+        from pypacks.resources.custom_predicate import EntityPropertiesPredicate
+        from pypacks.resources.predicate.predicate_conditions import ItemCondition
+        from pypacks.resources.predicate.data_component_predicate import EnchantmentComponentPredicate
+        return EntityPropertiesPredicate(
+            f"{self.internal_name}_silk_touch",
+            "this",
+            predicate=EntityCondition(
+                equipment={"mainhand": ItemCondition(predicates=[EnchantmentComponentPredicate(enchantments=["minecraft:silk_touch"])])}
+            ),
+        )
+
     def set_or_create_loot_table(self) -> None:
         """Takes a CustomItem, item type, CustomLootTable, or None, and sets the loot_table attribute to a CustomLootTable object."""
         from pypacks.resources.custom_item import CustomItem
-        self.loot_table = None
+        self.regular_loot_table = None
         if self.drops == "self":
             if self.block_item is not None:
-                self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.block_item)])
+                self.regular_loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.block_item)])
             else:
                 raise ValueError("If drops is set to 'self', then block_item must be set.")
         elif isinstance(self.drops, (CustomItem, str)):
-            self.loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.drops)])
+            self.regular_loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.drops)])
         elif isinstance(self.drops, CustomLootTable):
-            self.loot_table = self.drops
+            self.regular_loot_table = self.drops
 
     @classmethod
     def from_item(
@@ -170,17 +186,24 @@ class CustomBlock:
             ["custom_blocks", "revoke_and_run"],
         )
         # ============================================================================================================
-        on_destroy_no_silk_touch_function = MCFunction(f"on_destroy_no_silk_touch_{self.internal_name}", [
+        spawn_loot_function = MCFunction(f"spawn_loot_{self.internal_name}", ([
+            # This will be created if the loot table is None but with a comment instead of any logic
+            f"execute if entity @p[gamemode=!creative] run loot spawn ~ ~ ~ loot {self.regular_loot_table.get_reference(pack_namespace)}",
+        ] if self.regular_loot_table is not None else ["# Doesn't drop loot"]), ["custom_blocks", "on_destroy"])
+        # ======
+        on_destroy_no_silk_touch_function = MCFunction(
+            f"on_destroy_no_silk_touch_{self.internal_name}", [
+                # @s is the item display itself, ~ ~ ~ is the center of the block
                 "kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
                 "kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
-                "kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
-                f"loot spawn ~ ~ ~ loot {self.loot_table.get_reference(pack_namespace)}" if self.loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
+                # "kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
+                spawn_loot_function.get_run_command(pack_namespace) if self.regular_loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
                 "kill @s"  # Kill the item display
             ],
             ["custom_blocks", "on_destroy"],
         )
         # ============================================================================================================
-        return execute_as_item_display, spawn_item_display, deploy_raycast_function, revoke_and_run_mcfunction, on_destroy_no_silk_touch_function
+        return execute_as_item_display, spawn_item_display, deploy_raycast_function, revoke_and_run_mcfunction, spawn_loot_function, on_destroy_no_silk_touch_function
 
     @staticmethod
     def on_tick_function(pack: "Pack") -> "MCFunction":
@@ -204,7 +227,7 @@ class CustomBlock:
         slab_item = CustomItem(
             f"{self.internal_name}_slab", base_item=f"minecraft:{slab_block}", custom_name=Text.from_input(self.name).text+" Slab",
             lore=self.block_item.lore, custom_data={f"custom_right_click_for_{self.internal_name}_slab": True},
-            item_model=slab_model,  # type: ignore[arg-type]
+            components=self.block_item.components, item_model=slab_model,  # type: ignore[arg-type]
             ref_book_config=self.block_item.ref_book_config,
         )
         slab_item.texture_path = self.model_object.texture_path  # type: ignore[assignment]

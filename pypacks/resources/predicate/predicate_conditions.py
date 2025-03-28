@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
+from pypacks.resources.predicate.data_component_predicate import DataComponentPredicate
 from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
@@ -169,15 +170,15 @@ class EntityCondition:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.additions.item_components import PotionEffect
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "type": self.entity_type if isinstance(self.entity_type, list) else self.entity_type.get_reference(pack_namespace),  # For tags
+            "type": (self.entity_type if isinstance(self.entity_type, list) else self.entity_type.get_reference(pack_namespace)) or None,  # For tags
             "distance": self.distance.to_dict() if self.distance else None,
-            "effects": [effect.to_dict() if isinstance(effect, PotionEffect) else effect for effect in self.effects],
+            "effects": [effect.to_dict() if isinstance(effect, PotionEffect) else effect for effect in self.effects] or None,
             "equipment": {slot: item.to_dict(pack_namespace) for slot, item in self.equipment.items()},
             "flags": self.flags.to_dict() if self.flags else None,
             "location": self.location.to_dict(pack_namespace) if self.location else None,
             "nbt": self.nbt,
             "passenger": self.passenger.to_dict(pack_namespace) if self.passenger else None,
-            "slots": {slot: item.to_dict(pack_namespace) for slot, item in self.slots.items()},
+            "slots": {slot: item.to_dict(pack_namespace) for slot, item in self.slots.items()} or None,
             "stepping_on": self.stepping_on.to_dict(pack_namespace) if self.stepping_on else None,
             "movement_affected_by": self.movement_affected_by.to_dict(pack_namespace) if self.movement_affected_by else None,
             "team": self.team,
@@ -185,7 +186,7 @@ class EntityCondition:
             "vehicle": self.vehicle.to_dict(pack_namespace) if self.vehicle else None,
             "movement": self.movement.to_dict() if self.movement else None,
             "periodic_tick": self.periodic_tick,
-            "type_specific": self.type_specific,
+            "type_specific": self.type_specific or None,
         })
 
     @classmethod
@@ -403,15 +404,15 @@ class ItemCondition:
     items: list["str | CustomItem"] = field(default_factory=list)  # Tests if the type of item in the item stack matches any of the listed values.
     count: "int | UniformIntProvider | None" = None  # Tests the number of items in this item stack. Use an integer provider for an allowed range
     components: dict[str, Any] = field(default_factory=dict)  # Matches exact item component values. Each key in this object corresponds to a component to test, with its value as the desired data to compare.
-    predicates: list["Predicate"] = field(default_factory=list)  # Matches item sub-predicates.
+    predicates: list["DataComponentPredicate"] = field(default_factory=list)  # Matches item sub-predicates.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         from pypacks.providers.int_provider import UniformIntProvider
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
-            "items": [str(item) for item in self.items],
+            "items": [str(item) for item in self.items] or None,
             "count": self.count.to_dict() if isinstance(self.count, UniformIntProvider) else self.count,
             "components": self.components or None,
-            "predicates": [predicate.to_dict(pack_namespace) for predicate in self.predicates]
+            "predicates": {key: value for key, value in [tuple(predicate.to_dict(pack_namespace).items())[0] for predicate in self.predicates]}
         })
 
     @classmethod
@@ -421,7 +422,7 @@ class ItemCondition:
             items=data.get("items", []),
             count=UniformIntProvider.from_dict(data["count"]) if not isinstance(data.get("count"), (int, float)) else data.get("count"),
             components=data.get("components", {}),
-            predicates=[Predicate.from_dict(internal_name, predicate) for predicate in data.get("predicates", [])],
+            predicates=[DataComponentPredicate.from_dict(internal_name, {key: value}) for key, value in data.get("predicates", {}).items()],
         )
 
 

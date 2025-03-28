@@ -16,6 +16,8 @@ Custom Entity Variants should have their own spawn egg in the ref book?
 
 ############### Does custom blocks need names?
 
+3d pathfinding from A to B (two coords), maybe with blocks it can traverse
+
 ###################################################################################################
 
 Pack.from_existing_pack() needs to absort the minecraft namespace's stuff, like tick and that kind of thing
@@ -108,7 +110,7 @@ execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!
 # For structures and other resources, sub directory support
 
 # Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
-# execute if entity @s[gamemode=!creative]
+# Creative block breaking checks the closest player, which is fine for now, but should be revisited
 
 Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
 
@@ -193,8 +195,7 @@ python -m pip install -e .
 
 List:
 - Custom blocks - Slab experiments (80% done)
-- Custom blocks, no drops in creative
-- Custom blocks, silk touch
+- Custom blocks, silk touch & fortune
 
 # Problems with slabs
 - Placing upper/double slabs is a problem...

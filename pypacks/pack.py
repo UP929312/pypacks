@@ -21,7 +21,6 @@ from pypacks.generate import generate_datapack, generate_resource_pack, generate
 
 if TYPE_CHECKING:
     from pypacks.additions.custom_block import CustomBlock
-    from pypacks.additions.raycasting import BlockRaycast, EntityRaycast
 
     from pypacks.resources.entities import EntityVariant
     from pypacks.resources.custom_advancement import CustomAdvancement
@@ -87,7 +86,7 @@ class Pack:
 
     custom_items: list["CustomItem"] = field(default_factory=list)
     custom_blocks: list["CustomBlock"] = field(default_factory=list)
-    custom_raycasts: list["BlockRaycast | EntityRaycast"] = field(default_factory=list)
+    custom_raycasts: list["Raycast"] = field(default_factory=list)
     custom_crafters: list["CustomCrafter"] = field(default_factory=list)
     custom_loops: list["CustomLoop"] = field(default_factory=list)
     custom_ore_generations: list["CustomOreGeneration"] = field(default_factory=list)
@@ -169,9 +168,10 @@ class Pack:
         # ==================================================================================
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
-            self.custom_items.append(block.block_item)  # type: ignore[arg-type]  # The custom item
-            if block.loot_table is not None:
-                self.custom_loot_tables.append(block.loot_table)  # When breaking the block
+            if block.block_item is not None:  # Custom blocks without being created from items?
+                self.custom_items.append(block.block_item)  # type: ignore[arg-type]  # The custom item
+            if block.regular_loot_table is not None:
+                self.custom_loot_tables.append(block.regular_loot_table)  # When breaking the block
             self.custom_mcfunctions.append(block.generate_place_function(self.namespace))  # Function for placing the block (not by raycast)
             self.custom_advancements.append(block.create_advancement(self.namespace))  # Advancement for placing the block
             self.custom_mcfunctions.extend(block.generate_functions(self.namespace))  # Raycasting functions
@@ -179,6 +179,7 @@ class Pack:
         if self.custom_blocks:
             self.custom_mcfunctions.append(self.custom_blocks[0].on_tick_function(self))
             self.custom_mcfunctions.append(self.custom_blocks[0].generate_detect_rotation_function())
+            self.custom_predicates.append(self.custom_blocks[0].create_silk_touch_predicate())
         # ==================================================================================
         # Adding all the paintings', jukebox's and enchanted books' items to the list
         for painting in self.custom_paintings:

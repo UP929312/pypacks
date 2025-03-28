@@ -67,6 +67,9 @@ from pypacks.resources.custom_predicate import (
     RandomChanceWithEnchantedBonusPredicate, ReferencePredicate, SurvivesExplosionPredicate, TableBonusPredicate, TimeCheckPredicate, ValueCheckPredicate,
     WeatherCheckPredicate,
 )
+from pypacks.resources.predicate.data_component_predicate import (
+    DataComponentPredicate, EnchantmentComponentPredicate,
+)
 from pypacks.resources.predicate.predicate_conditions import (
     DamageTypeTag, EntityDistance, EntityFlags, MovementCheck, EntityCondition, BlockPredicate, FluidPredicate, LocationTag, ItemCondition,
 )
@@ -112,6 +115,9 @@ __all__ = [
     # Entities
     "BiomeSpawnCondition", "StructureSpawnCondition", "MoonBrightnessSpawnCondition", "EntityVariant",
     "CatVariant", "ChickenVariant", "CowVariant", "FrogVariant", "PigVariant", "WolfVariant",
+
+    # Data Component Predicates
+    "DataComponentPredicate", "EnchantmentComponentPredicate",
 
     # Predicate Conditions
     "AllOfPredicate", "AnyOfPredicate", "BlockStatePropertyPredicate", "DamageSourcePropertiesPredicate", "EnchantmentActiveCheckPredicate",
