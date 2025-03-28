@@ -205,6 +205,9 @@ class CustomLootTable(BaseResource):
     def generate_give_command(self, pack: "Pack") -> str:
         return f"loot give @s loot {self.get_reference(pack.namespace)}"
 
+    def get_spawn_command(self, pack_namespace: str) -> str:
+        return f"loot spawn ~ ~ ~ loot {self.get_reference(pack_namespace)}"
+
 
 class SingleItemLootTable(CustomLootTable):
     """Simple Util class for a loot table with a single item."""

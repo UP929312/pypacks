@@ -60,8 +60,10 @@ from pypacks.resources.custom_language import CustomLanguage
 from pypacks.resources.custom_mcfunction import MCFunction
 
 from pypacks.resources.custom_painting import CustomPainting
-from pypacks.resources.custom_predicate import (
-    Predicate,
+
+# Predicates
+from pypacks.resources.custom_predicate import Predicate
+from pypacks.resources.predicate.predicates import (
     AllOfPredicate, AnyOfPredicate, BlockStatePropertyPredicate, DamageSourcePropertiesPredicate, EnchantmentActiveCheckPredicate, EntityPropertiesPredicate,
     EntityScoresPredicate, InvertedPredicate, KilledByPlayerPredicate, LocationCheckPredicate, MatchToolPredicate, RandomChancePredicate,
     RandomChanceWithEnchantedBonusPredicate, ReferencePredicate, SurvivesExplosionPredicate, TableBonusPredicate, TimeCheckPredicate, ValueCheckPredicate,
@@ -73,6 +75,8 @@ from pypacks.resources.predicate.data_component_predicate import (
 from pypacks.resources.predicate.predicate_conditions import (
     DamageTypeTag, EntityDistance, EntityFlags, MovementCheck, EntityCondition, BlockPredicate, FluidPredicate, LocationTag, ItemCondition,
 )
+# =============================================================================
+
 from pypacks.resources.custom_recipe import (
     Recipe, CustomCrafterRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, CraftingTransmuteRecipe, FurnaceRecipe, BlastFurnaceRecipe,
     CampfireRecipe, SmithingTransformRecipe, SmithingTrimRecipe, SmokerRecipe, StonecutterRecipe
@@ -116,20 +120,25 @@ __all__ = [
     "BiomeSpawnCondition", "StructureSpawnCondition", "MoonBrightnessSpawnCondition", "EntityVariant",
     "CatVariant", "ChickenVariant", "CowVariant", "FrogVariant", "PigVariant", "WolfVariant",
 
+    # Predicates ================================================================
     # Data Component Predicates
     "DataComponentPredicate", "EnchantmentComponentPredicate",
 
-    # Predicate Conditions
+    # Predicate conditions
+    "DamageTypeTag", "EntityDistance", "EntityFlags", "MovementCheck", "EntityCondition", "BlockPredicate", "FluidPredicate", "LocationTag", "ItemCondition",
+
+    # Predicate types
     "AllOfPredicate", "AnyOfPredicate", "BlockStatePropertyPredicate", "DamageSourcePropertiesPredicate", "EnchantmentActiveCheckPredicate",
     "EntityPropertiesPredicate", "EntityScoresPredicate", "InvertedPredicate", "KilledByPlayerPredicate",
     "LocationCheckPredicate", "MatchToolPredicate", "RandomChancePredicate", "RandomChanceWithEnchantedBonusPredicate",
     "ReferencePredicate", "SurvivesExplosionPredicate", "TableBonusPredicate", "TimeCheckPredicate", "ValueCheckPredicate",
     "WeatherCheckPredicate",
-    "DamageTypeTag", "EntityDistance", "EntityFlags", "MovementCheck", "EntityCondition", "BlockPredicate", "FluidPredicate", "LocationTag", "ItemCondition",
+    # Predicates ================================================================
 
-    # World Gen
+    # World Gen =================================================================
     "CustomStructure", "JigsawStructureType", "SingleCustomStructure", "CustomStructureSet", "RandomSpreadPlacementType", "ConcentricRingsPlacementType",
     "SpawnOverride", "DisableSpawnOverrideCategory", "CustomBiome", "MoodSound", "GameTestStructure", "WorldGenResources",
+    # World Gen =================================================================
 
     # More
     "CustomAdvancement", "Criteria",

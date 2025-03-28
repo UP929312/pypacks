@@ -26,7 +26,7 @@ class CustomBlock:
     base_block: str
     block_texture: "str | FacePaths" = field(repr=False)
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = field(repr=False, default="self")
-    # silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
+    silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # fortune_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 
@@ -42,9 +42,8 @@ class CustomBlock:
             self.model_object = AsymmetricCubeModel(self.internal_name, self.block_texture)
 
     def create_silk_touch_predicate(self) -> "Predicate":
-        from pypacks.resources.custom_predicate import EntityPropertiesPredicate
+        from pypacks.resources.predicate.predicates import EntityPropertiesPredicate
         from pypacks.resources.predicate.predicate_conditions import EntityCondition
-        from pypacks.resources.custom_predicate import EntityPropertiesPredicate
         from pypacks.resources.predicate.predicate_conditions import ItemCondition
         from pypacks.resources.predicate.data_component_predicate import EnchantmentComponentPredicate
         return EntityPropertiesPredicate(
@@ -61,22 +60,36 @@ class CustomBlock:
         self.regular_loot_table = None
         if self.drops == "self":
             if self.block_item is not None:
-                self.regular_loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.block_item)])
+                self.regular_loot_table = CustomLootTable(f"{self.internal_name}_block_regular_drop_loot_table", pools=[SingleItemPool(self.block_item)])
             else:
                 raise ValueError("If drops is set to 'self', then block_item must be set.")
         elif isinstance(self.drops, (CustomItem, str)):
-            self.regular_loot_table = CustomLootTable(f"{self.internal_name}_block_drop_loot_table", pools=[SingleItemPool(self.drops)])
+            self.regular_loot_table = CustomLootTable(f"{self.internal_name}_block_regular_drop_loot_table", pools=[SingleItemPool(self.drops)])
         elif isinstance(self.drops, CustomLootTable):
             self.regular_loot_table = self.drops
 
+        # TODO: DUPLICATED, CLEANUP SOON
+        self.silk_touch_loot_table = None
+        if self.silk_touch_drops == "self":
+            if self.block_item is not None:
+                self.silk_touch_loot_table = CustomLootTable(f"{self.internal_name}_block_silk_touch_drop_loot_table", pools=[SingleItemPool(self.block_item)])
+            else:
+                raise ValueError("If silk_touch_loot_table is set to 'self', then block_item must be set.")
+        elif isinstance(self.silk_touch_drops, (CustomItem, str)):
+            self.silk_touch_loot_table = CustomLootTable(f"{self.internal_name}_block_silk_touch__drop_loot_table", pools=[SingleItemPool(self.silk_touch_drops)])
+        elif isinstance(self.silk_touch_drops, CustomLootTable):
+            self.silk_touch_loot_table = self.silk_touch_drops
+
     @classmethod
     def from_item(
-        cls, item: "CustomItem", block_texture: "str | FacePaths | None" = None, drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self",
+        cls, item: "CustomItem", block_texture: "str | FacePaths | None" = None,
+        regular_drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self",
+        silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | None" = "self",
     ) -> "CustomBlock":
         """Used to create a new custom block."""
         assert item.custom_name is not None and item.texture_path is not None
         item.is_block = True
-        class_ = cls(item.internal_name, item.custom_name, item.base_item, block_texture or item.texture_path, drops=drops)
+        class_ = cls(item.internal_name, item.custom_name, item.base_item, block_texture or item.texture_path, drops=regular_drops, silk_touch_drops=silk_touch_drops)
         class_.block_item = item
         class_.block_item.custom_data[f"custom_right_click_for_{class_.internal_name}"] = True
         class_.set_or_create_loot_table()
@@ -186,10 +199,21 @@ class CustomBlock:
             ["custom_blocks", "revoke_and_run"],
         )
         # ============================================================================================================
-        spawn_loot_function = MCFunction(f"spawn_loot_{self.internal_name}", ([
-            # This will be created if the loot table is None but with a comment instead of any logic
-            f"execute if entity @p[gamemode=!creative] run loot spawn ~ ~ ~ loot {self.regular_loot_table.get_reference(pack_namespace)}",
-        ] if self.regular_loot_table is not None else ["# Doesn't drop loot"]), ["custom_blocks", "on_destroy"])
+        silk_touch_predicate = self.create_silk_touch_predicate().get_reference(pack_namespace)
+        regular_loot_table = self.regular_loot_table.get_spawn_command(pack_namespace) if self.regular_loot_table is not None else None
+        silk_touch_loot_table = self.silk_touch_loot_table.get_spawn_command(pack_namespace) if self.silk_touch_loot_table is not None else None
+        commands = [
+            f"execute as @p if entity @p[gamemode=creative] run return fail",
+            # Case 1: No silk touch, regular loot (return regular loot), e.g. dirt drops dirt without silk touch
+            f"execute as @p unless predicate {silk_touch_predicate} run {regular_loot_table}" if self.regular_loot_table is not None else "# Doesn't drop non-silk touch loot.",
+            # Case 2: No silk touch, no regular loot (return nothing)  e.g. glass_block drops nothing without silk touch
+            # Case 3: Silk touch, silk touch loot (return silk touch loot)  e.g. glass_block drops glass_block with silk touch
+            f"execute as @p if predicate {silk_touch_predicate} run {silk_touch_loot_table}" if self.silk_touch_loot_table is not None else "# Doesn't drop purely silk touch loot.",
+            # Case 4: Silk touch, regular loot, no silk touch (return regular loot)  # e.g. cobblestone drops cobblestone with silk touch
+            f"execute as @p if predicate {silk_touch_predicate} run {regular_loot_table}" if self.regular_loot_table is not None and self.silk_touch_loot_table is None else "# N/A",
+            # Case 5: Silk touch, no regular loot, no silk touch (return nothing)  # e.g. monster spawner drops nothing, even with silk touch
+        ]
+        spawn_loot_function = MCFunction(f"spawn_loot_{self.internal_name}", commands, sub_directories=["custom_blocks", "spawn_loot"])  # type: ignore[arg-type]
         # ======
         on_destroy_no_silk_touch_function = MCFunction(
             f"on_destroy_no_silk_touch_{self.internal_name}", [
@@ -197,7 +221,7 @@ class CustomBlock:
                 "kill @e[type=experience_orb, distance=..0.5]",  # Kill all xp orbs dropped
                 "kill @e[type=item, distance=..0.5]",  # Kill all naturally dropped items
                 # "kill @e[type=interaction, distance=..0.1]",  # Kill all interaction entities (if any)
-                spawn_loot_function.get_run_command(pack_namespace) if self.regular_loot_table is not None else "# Doesn't drop loot",  # Spawn the loot
+                spawn_loot_function.get_run_command(pack_namespace),  # Spawn the loot
                 "kill @s"  # Kill the item display
             ],
             ["custom_blocks", "on_destroy"],

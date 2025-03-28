@@ -12,6 +12,8 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 
 Custom Entity Variants should have their own spawn egg in the ref book?
 
+For custom blocks that drop their own item with our without silk touch, don't make two loot tables, point them both to the same.
+
 "undo_world_gen", deletes custom dimensions and does level.dat changes too?
 
 ############### Does custom blocks need names?
@@ -109,7 +111,7 @@ execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!
 
 # For structures and other resources, sub directory support
 
-# Silk touch and fortune for custom blocks (set a variable on break before calling the loot table, which will set a variable and then the loot table can proceed)
+# Fortune for custom blocks
 # Creative block breaking checks the closest player, which is fine for now, but should be revisited
 
 Store the hit location of the raycast in some variable, like this: https://docs.mcbookshelf.dev/en/latest/modules/raycast.html
@@ -195,7 +197,7 @@ python -m pip install -e .
 
 List:
 - Custom blocks - Slab experiments (80% done)
-- Custom blocks, silk touch & fortune
+- Custom blocks, Fortune
 
 # Problems with slabs
 - Placing upper/double slabs is a problem...

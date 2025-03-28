@@ -135,19 +135,25 @@ recipes: list[Recipe] = [
 # ============================================================================================================
 # region: Custom Blocks
 ruby_ore = CustomItem("ruby_ore", "minecraft:redstone_ore", "Ruby Ore", texture_path="images/ruby_ore.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
-ruby_ore_block = CustomBlock.from_item(ruby_ore, drops=ruby)
+ruby_ore_block = CustomBlock.from_item(ruby_ore, regular_drops=ruby, silk_touch_drops="self")
 ruby_ore_slab = ruby_ore_block.create_slab("stone_slab")
 
 topaz_ore = CustomItem("topaz_ore", "minecraft:gold_ore", "Topaz Ore", texture_path="images/topaz_ore.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
-topaz_ore_block = CustomBlock.from_item(topaz_ore, drops=SimpleRangeLootTable("topaz_ore_drops", topaz, 1, 4))
+topaz_ore_block = CustomBlock.from_item(topaz_ore, regular_drops=SimpleRangeLootTable("topaz_ore_drops", topaz, 1, 4), silk_touch_drops="self")
 
 chocolate_block_item = CustomItem("chocolate_block", "dark_oak_log", "Chocolate Block", texture_path="images/chocolate_block/top_side.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
 faces = {"front": "side_side", "back": "side_side", "top": "top_side", "bottom": "top_side", "left": "long_side", "right": "long_side"}
-chocolate_block = CustomBlock.from_item(chocolate_block_item, block_texture=FacePaths(**{key: f"images/chocolate_block/{value}.png" for key, value in faces.items()}, horizontally_rotatable=True, vertically_rotatable=False))
+chocolate_block = CustomBlock.from_item(
+    chocolate_block_item, block_texture=FacePaths(**{key: f"images/chocolate_block/{value}.png" for key, value in faces.items()}, horizontally_rotatable=True, vertically_rotatable=False),
+    regular_drops=None, silk_touch_drops=None,
+)
 
 debug_block_item = CustomItem("debug_block", "sponge", "Debug Block", texture_path="images/debug_block/front.png", ref_book_config=RefBookConfig(category=CUSTOM_BLOCKS_REF_BOOK_CATEGORY))
 faces_strings = ["front", "back", "top", "bottom", "left", "right"]
-debug_block = CustomBlock.from_item(debug_block_item, block_texture=FacePaths(**{item: f"images/debug_block/{item}.png" for item in faces_strings}, horizontally_rotatable=True, vertically_rotatable=True))
+debug_block = CustomBlock.from_item(
+    debug_block_item, block_texture=FacePaths(**{item: f"images/debug_block/{item}.png" for item in faces_strings}, horizontally_rotatable=True, vertically_rotatable=True),
+    regular_drops=None, silk_touch_drops="self",
+)
 
 custom_blocks = [ruby_ore_block, topaz_ore_block, chocolate_block, debug_block, ruby_ore_slab]
 # endregion
