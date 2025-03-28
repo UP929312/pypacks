@@ -169,7 +169,7 @@ class Pack:
         # Adding all the blocks' items to the list
         for block in self.custom_blocks:
             if block.block_item is not None:  # Custom blocks without being created from items?
-                self.custom_items.append(block.block_item)  # type: ignore[arg-type]  # The custom item
+                self.custom_items.append(block.block_item)  # The custom item
             if block.regular_loot_table is not None:
                 self.custom_loot_tables.append(block.regular_loot_table)  # When breaking the block
             if block.silk_touch_loot_table is not None:

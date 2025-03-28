@@ -49,32 +49,49 @@ class NBTParser:
         return {self.read_string(): self.read_tag(tag_type)}
 
     def read_tag(self, tag_type: int) -> Any:
+        # mapping = {
+        #     self.TAG_BYTE: self.read_byte(),
+        #     self.TAG_SHORT: self.read_short(),
+        #     self.TAG_INT: self.read_int(),
+        #     self.TAG_LONG: self.read_long(),
+        #     self.TAG_FLOAT: self.read_float(),
+        #     self.TAG_DOUBLE: self.read_double(),
+        #     self.TAG_BYTE_ARRAY: self.read_byte_array(),
+        #     self.TAG_STRING: self.read_string(),
+        #     self.TAG_LIST: self.read_list(),
+        #     self.TAG_COMPOUND: self.read_compound(),
+        #     self.TAG_INT_ARRAY: self.read_int_array(),
+        #     self.TAG_LONG_ARRAY: self.read_long_array(),
+        # }
+        # if tag_type not in mapping:
+        #     raise ValueError(f"Unknown tag type {tag_type}")
+        # return mapping[tag_type]
+
         if tag_type == self.TAG_BYTE:
             return self.read_byte()
-        elif tag_type == self.TAG_SHORT:
+        if tag_type == self.TAG_SHORT:
             return self.read_short()
-        elif tag_type == self.TAG_INT:
+        if tag_type == self.TAG_INT:
             return self.read_int()
-        elif tag_type == self.TAG_LONG:
+        if tag_type == self.TAG_LONG:
             return self.read_long()
-        elif tag_type == self.TAG_FLOAT:
+        if tag_type == self.TAG_FLOAT:
             return self.read_float()
-        elif tag_type == self.TAG_DOUBLE:
+        if tag_type == self.TAG_DOUBLE:
             return self.read_double()
-        elif tag_type == self.TAG_BYTE_ARRAY:
+        if tag_type == self.TAG_BYTE_ARRAY:
             return self.read_byte_array()
-        elif tag_type == self.TAG_STRING:
+        if tag_type == self.TAG_STRING:
             return self.read_string()
-        elif tag_type == self.TAG_LIST:
+        if tag_type == self.TAG_LIST:
             return self.read_list()
-        elif tag_type == self.TAG_COMPOUND:
+        if tag_type == self.TAG_COMPOUND:
             return self.read_compound()
-        elif tag_type == self.TAG_INT_ARRAY:
+        if tag_type == self.TAG_INT_ARRAY:
             return self.read_int_array()
-        elif tag_type == self.TAG_LONG_ARRAY:
+        if tag_type == self.TAG_LONG_ARRAY:
             return self.read_long_array()
-        else:
-            raise ValueError(f"Unknown tag type {tag_type}")
+        raise ValueError(f"Unknown tag type {tag_type}")
 
     def read_byte(self) -> int:
         return struct.unpack('>b', self.stream.read(1))[0]  # type: ignore[no-any-return]
@@ -133,6 +150,6 @@ class NBTParser:
 
 # Example usage:
 data = NBTParser.from_file(r"C:\Users\Ben\Desktop\pypacks\examples\development\structures\iron_block_crafting_recipe.nbt")
-# rint(data)
+print(data.output)
 structure = Structure.from_nbt(data.output)
 # rint(structure)

@@ -1,9 +1,8 @@
 import os
-import json
 import shutil
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 from pypacks.resources.base_resource import BaseResource
 from pypacks.resources.item_model_definition import ModelItemModel, ItemModel

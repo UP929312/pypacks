@@ -748,7 +748,7 @@ def resolve_effect_type(data: dict[str, Any]) -> "EnchantValueEffect | Attribute
     if component_id.removeprefix("minecraft:") == "attributes":
         # rint("Found an AttributeEffect")
         return AttributeEffect.from_dict(value)
-    elif list(data.keys())[0] in list(ValueEffectComponentIdType.__args__):  # type: ignore[attr-defined]
+    if list(data.keys())[0] in list(ValueEffectComponentIdType.__args__):  # type: ignore[attr-defined]
         # rint("Found an EnchantValueEffect")
         return EnchantValueEffect.from_dict(data)
     # rint("Found an EnchantmentEntityEffect")

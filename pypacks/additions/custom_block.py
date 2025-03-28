@@ -204,7 +204,7 @@ class CustomBlock:
         regular_loot_table = self.regular_loot_table.get_spawn_command(pack_namespace) if self.regular_loot_table is not None else None
         silk_touch_loot_table = self.silk_touch_loot_table.get_spawn_command(pack_namespace) if self.silk_touch_loot_table is not None else None
         commands = [
-            f"execute as @p if entity @p[gamemode=creative] run return fail",
+            "execute as @p if entity @p[gamemode=creative] run return fail",
             # Case 1: No silk touch, regular loot (return regular loot), e.g. dirt drops dirt without silk touch
             f"execute as @p unless predicate {silk_touch_predicate} run {regular_loot_table}" if self.regular_loot_table is not None else "# Doesn't drop non-silk touch loot.",
             # Case 2: No silk touch, no regular loot (return nothing)  e.g. glass_block drops nothing without silk touch

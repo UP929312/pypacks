@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
     from pypacks.providers.int_provider import UniformIntProvider
     from pypacks.resources.custom_item import CustomItem
-    from pypacks.resources.custom_predicate import Predicate
 
 FluidType = Literal["minecraft:water", "minecraft:flowing_water", "minecraft:lava", "minecraft:flowing_lava"]
 

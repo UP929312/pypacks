@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 @dataclass
 class DataComponentPredicate:
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        raise NotImplemented
-     
+        raise NotImplementedError
+
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "DataComponentPredicate":
         key = list(data.keys())[0]
@@ -43,9 +43,7 @@ class DataComponentPredicate:
 #                     "name": self.name
 #                 }
 #             }
-            
 #         })
-
 
 
 @dataclass
@@ -55,7 +53,7 @@ class EnchantmentComponentPredicate(DataComponentPredicate):
     levels: "IntRange | int | None" = None
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
-        return recursively_remove_nones_from_data({
+        return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "minecraft:enchantments": [
                 {
                     "enchantments": self.enchantments,
@@ -68,10 +66,10 @@ class EnchantmentComponentPredicate(DataComponentPredicate):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentComponentPredicate":
         return cls(
             enchantments=data["enchantments"],
-            levels=IntRange.from_dict(data["levels"]) if "min" in data.get("levels", {})  else data.get("levels")
+            levels=IntRange.from_dict(data["levels"]) if "min" in data.get("levels", {}) else data.get("levels")
         )
 
 
-DATA_COMPONENT_PREDICATE_NAME_TO_CLASSES = {
+DATA_COMPONENT_PREDICATE_NAME_TO_CLASSES: dict[str, type["DataComponentPredicate"]] = {
     "minecraft:enchantments": EnchantmentComponentPredicate
 }

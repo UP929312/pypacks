@@ -8,7 +8,7 @@ from pypacks.resources.custom_loot_tables.functions import (
 )
 from pypacks.resources.custom_tag import CustomTag
 from pypacks.resources.predicate.predicate_conditions import DamageTypeTag, LocationTag, EntityCondition
-from pypacks.resources.custom_predicate import KilledByPlayerPredicate, EntityPropertiesPredicate, RandomChancePredicate, DamageSourcePropertiesPredicate, RandomChanceWithEnchantedBonusPredicate, LocationCheckPredicate, InvertedPredicate
+from pypacks.resources.predicate.predicates import KilledByPlayerPredicate, EntityPropertiesPredicate, RandomChancePredicate, DamageSourcePropertiesPredicate, RandomChanceWithEnchantedBonusPredicate, LocationCheckPredicate, InvertedPredicate
 
 
 ARCHAEOLOGY_DESERT_PYRAMID = CustomLootTable(internal_name='archaeology_desert_pyramid', pools=[Pool(entries=[SingletonEntry(item='minecraft:archer_pottery_sherd'), SingletonEntry(item='minecraft:miner_pottery_sherd'), SingletonEntry(item='minecraft:prize_pottery_sherd'), SingletonEntry(item='minecraft:skull_pottery_sherd'), SingletonEntry(item='minecraft:diamond'), SingletonEntry(item='minecraft:tnt'), SingletonEntry(item='minecraft:gunpowder'), SingletonEntry(item='minecraft:emerald')])], functions=[], random_sequence='minecraft:archaeology/desert_pyramid', loot_table_type='archaeology')

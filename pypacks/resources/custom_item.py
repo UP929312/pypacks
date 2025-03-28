@@ -17,7 +17,6 @@ from pypacks.scripts.repos.all_items import MinecraftItem
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
-    from pypacks.additions.raycasting import Raycast
     from pypacks.additions.reference_book_config import RefBookConfig
 
 
