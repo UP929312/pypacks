@@ -8,9 +8,8 @@ from pypacks.resources.custom_mcfunction import MCFunction
 from pypacks.additions.raycasting import BlockRaycast
 
 if TYPE_CHECKING:
-    from typing import Literal, Any
+    from typing import Literal
     from pypacks.pack import Pack
-    from pypacks.additions.text import Text
     from pypacks.additions.constants import Slabs
     from pypacks.resources.custom_predicate import Predicate
     from pypacks.resources.custom_item import CustomItem

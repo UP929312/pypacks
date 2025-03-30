@@ -8,15 +8,20 @@ item events, e.g. on right_click, on drop, on craft, on left, on sprint
     (maybe like Pack.to_python())
 2. Also, need to also keep the images and such, can't just delete them
 
+Need to add the rest of data component predicates
+
 # Naturally occuring ore veins need some more randomness, they have a random size, need a random "rotation"
 
 # Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
+
+https://github.com/SpyglassMC/vanilla-mcdoc/blob/f35464d757a4c9786e0d804ac6c0146371dd45c1/java/world/component/predicate.mcdoc#L64
+# Auto generate classes from that ^ Hmmmm
 
 Custom Entity Variants should have their own spawn egg in the ref book?
 
 For custom blocks that drop their own item with our without silk touch, don't make two loot tables, point them both to the same.
 
-############### "undo_world_gen", deletes custom dimensions from level.dat, as well as disables all datapacks (for now), then deletes the worldgen folders?
+############### "undo_world_gen", Works for everything except from updating level.dat, writing nbt fies is really hard
 
 3d pathfinding from A to B (two coords), maybe with blocks it can traverse
 

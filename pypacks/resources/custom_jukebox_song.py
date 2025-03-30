@@ -42,8 +42,8 @@ class CustomJukeboxSong(BaseResource):
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomJukeboxSong":
         return cls(
             internal_name,
-            description=data["description"],
-            ogg_path=(data.get("sound_event", {}).get("sound_id") or data.get("sound_id", "UNKNOWN")).split(":")[-1],
+            description=data["description"] if isinstance(data["description"], str) else data["description"].get("translate", "UNKNOWN:UNKNOWN"),
+            ogg_path=(data["sound_event"] if isinstance(data.get("sound_event"), str) else data.get("sound_event", {}).get("sound_id", "UKNOWN:UKNOWN")).split(":")[-1],
             comparator_output=data["comparator_output"],
             length_in_seconds=data["length_in_seconds"],
         )

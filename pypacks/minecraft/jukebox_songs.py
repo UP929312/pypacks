@@ -1,0 +1,22 @@
+from pypacks.resources.custom_jukebox_song import CustomJukeboxSong
+
+
+ELEVEN = CustomJukeboxSong(internal_name='11', description='jukebox_song.minecraft.11', ogg_path='music_disc.11', comparator_output=11, length_in_seconds=71.0)
+THIRTEEN = CustomJukeboxSong(internal_name='13', description='jukebox_song.minecraft.13', ogg_path='music_disc.13', comparator_output=1, length_in_seconds=178.0)
+FIVE = CustomJukeboxSong(internal_name='5', description='jukebox_song.minecraft.5', ogg_path='music_disc.5', comparator_output=15, length_in_seconds=178.0)
+BLOCKS = CustomJukeboxSong(internal_name='blocks', description='jukebox_song.minecraft.blocks', ogg_path='music_disc.blocks', comparator_output=3, length_in_seconds=345.0)
+CAT = CustomJukeboxSong(internal_name='cat', description='jukebox_song.minecraft.cat', ogg_path='music_disc.cat', comparator_output=2, length_in_seconds=185.0)
+CHIRP = CustomJukeboxSong(internal_name='chirp', description='jukebox_song.minecraft.chirp', ogg_path='music_disc.chirp', comparator_output=4, length_in_seconds=185.0)
+CREATOR = CustomJukeboxSong(internal_name='creator', description='jukebox_song.minecraft.creator', ogg_path='music_disc.creator', comparator_output=12, length_in_seconds=176.0)
+CREATOR_MUSIC_BOX = CustomJukeboxSong(internal_name='creator_music_box', description='jukebox_song.minecraft.creator_music_box', ogg_path='music_disc.creator_music_box', comparator_output=11, length_in_seconds=73.0)
+FAR = CustomJukeboxSong(internal_name='far', description='jukebox_song.minecraft.far', ogg_path='music_disc.far', comparator_output=5, length_in_seconds=174.0)
+MALL = CustomJukeboxSong(internal_name='mall', description='jukebox_song.minecraft.mall', ogg_path='music_disc.mall', comparator_output=6, length_in_seconds=197.0)
+MELLOHI = CustomJukeboxSong(internal_name='mellohi', description='jukebox_song.minecraft.mellohi', ogg_path='music_disc.mellohi', comparator_output=7, length_in_seconds=96.0)
+OTHERSIDE = CustomJukeboxSong(internal_name='otherside', description='jukebox_song.minecraft.otherside', ogg_path='music_disc.otherside', comparator_output=14, length_in_seconds=195.0)
+PIGSTEP = CustomJukeboxSong(internal_name='pigstep', description='jukebox_song.minecraft.pigstep', ogg_path='music_disc.pigstep', comparator_output=13, length_in_seconds=149.0)
+PRECIPICE = CustomJukeboxSong(internal_name='precipice', description='jukebox_song.minecraft.precipice', ogg_path='music_disc.precipice', comparator_output=13, length_in_seconds=299.0)
+RELIC = CustomJukeboxSong(internal_name='relic', description='jukebox_song.minecraft.relic', ogg_path='music_disc.relic', comparator_output=14, length_in_seconds=218.0)
+STAL = CustomJukeboxSong(internal_name='stal', description='jukebox_song.minecraft.stal', ogg_path='music_disc.stal', comparator_output=8, length_in_seconds=150.0)
+STRAD = CustomJukeboxSong(internal_name='strad', description='jukebox_song.minecraft.strad', ogg_path='music_disc.strad', comparator_output=9, length_in_seconds=188.0)
+WAIT = CustomJukeboxSong(internal_name='wait', description='jukebox_song.minecraft.wait', ogg_path='music_disc.wait', comparator_output=12, length_in_seconds=238.0)
+WARD = CustomJukeboxSong(internal_name='ward', description='jukebox_song.minecraft.ward', ogg_path='music_disc.ward', comparator_output=10, length_in_seconds=251.0)

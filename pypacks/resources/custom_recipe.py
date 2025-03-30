@@ -171,20 +171,20 @@ class CraftingTransmuteRecipe(Recipe):
     def __post_init__(self) -> None:
         self.used_ingredients = [self.resolve_ingredient_type(x) for x in [self.input_item, self.material_item]]
 
-    def to_dict(self, pack_namespace: str) -> dict[str, str | list[str]]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:crafting_transmute",
             "category": self.recipe_category,
             "input": self.input_item.get_reference(pack_namespace) if isinstance(self.input_item, CustomTag) else self.input_item,
             "material": self.material_item.get_reference(pack_namespace) if isinstance(self.material_item, CustomTag) else self.material_item,
-            "result": self.result,
+            "result": {"id": self.result},
         }
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CraftingTransmuteRecipe":
         return cls(
             internal_name,
-            result=data["result"],
+            result=data["result"].get("id") or data["result"],
             input_item=data["input"],
             material_item=data["material"],
             recipe_category=data.get("recipe_category", "misc"),
@@ -194,7 +194,7 @@ class CraftingTransmuteRecipe(Recipe):
 @dataclass
 class BlastFurnaceRecipe(Recipe):
     ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
-    experience: int | None = 1
+    experience: int = 1
     cooking_time_ticks: int = 200
     recipe_category: Literal["blocks", "misc"] = "misc"
 
@@ -224,7 +224,7 @@ class BlastFurnaceRecipe(Recipe):
             internal_name,
             ingredient=data["ingredient"],
             result=cls.result_from_dict(f"{internal_name}_item", data),
-            experience=data["experience"],
+            experience=int(data["experience"]),
             cooking_time_ticks=data["cookingtime"],
             recipe_category=data.get("recipe_category", "misc"),
         )
@@ -233,7 +233,7 @@ class BlastFurnaceRecipe(Recipe):
 @dataclass
 class CampfireRecipe(Recipe):
     ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
-    experience: int | None = 1
+    experience: int = 1
     cooking_time_ticks: int = 200
 
     recipe_block_name: str = field(init=False, repr=False, default="campfire")
@@ -261,7 +261,7 @@ class CampfireRecipe(Recipe):
             internal_name,
             ingredient=data["ingredient"],
             result=cls.result_from_dict(f"{internal_name}_item", data),
-            experience=data["experience"],
+            experience=int(data["experience"]),
             cooking_time_ticks=data["cookingtime"],
         )
 
@@ -269,7 +269,7 @@ class CampfireRecipe(Recipe):
 @dataclass
 class FurnaceRecipe(Recipe):
     ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
-    experience: int | None = 1
+    experience: int = 1
     cooking_time_ticks: int = 200
     recipe_category: Literal["food", "blocks", "misc"] = "misc"
 
@@ -299,7 +299,7 @@ class FurnaceRecipe(Recipe):
             internal_name,
             ingredient=data["ingredient"],
             result=cls.result_from_dict(f"{internal_name}_item", data),
-            experience=data["experience"],
+            experience=int(data["experience"]),
             cooking_time_ticks=data["cookingtime"],
             recipe_category=data.get("recipe_category", "misc"),
         )
@@ -375,7 +375,7 @@ class SmithingTrimRecipe(Recipe):
 @dataclass
 class SmokerRecipe(Recipe):
     ingredient: "MinecraftItem | CustomTag | list[MinecraftItem]"
-    experience: int | None = 1
+    experience: int = 1
     cooking_time_ticks: int = 200
 
     recipe_block_name: str = field(init=False, repr=False, default="smoker")
@@ -404,7 +404,7 @@ class SmokerRecipe(Recipe):
             internal_name,
             ingredient=data["ingredient"],
             result=cls.result_from_dict(f"{internal_name}_item", data),
-            experience=data["experience"],
+            experience=int(data["experience"]),
             cooking_time_ticks=data["cookingtime"],
         )
 

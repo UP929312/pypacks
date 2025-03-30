@@ -75,3 +75,5 @@ class CustomDamageType(BaseResource):
 
     def generate_damage_command(self, pack_namespace: str, amount: int = 1) -> str:
         return f"damage @ {amount} {pack_namespace}:{self.internal_name}"
+
+    __repr__ = BaseResource.__repr__

@@ -45,10 +45,10 @@ class CustomPainting(BaseResource):
         return cls(
             internal_name,
             data["asset_id"].split(":")[-1],
-            title=data["title"]["text"] if data.get("title") else None,
-            author=data["author"]["text"] if data.get("author") else None,
-            width_in_blocks=data.get("width_in_blocks", 1),
-            height_in_blocks=data.get("height_in_blocks", 1),
+            title=data.get("title", {}).get("text") or data.get("title", {}).get("translate", "UNKNOWN"),
+            author=data.get("author", {}).get("text") or data.get("author", {}).get("translate", "UNKNOWN"),
+            width_in_blocks=data.get("width", 1),
+            height_in_blocks=data.get("height", 1),
         )
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
