@@ -347,6 +347,7 @@ iron_block_crafting_recipe = CustomGameTest(
 )
 # endregion
 # ============================================================================================================
+
 datapack = Pack(
     name="PyPacks Testing", description="A cool datapack", namespace="pypacks_testing",
     pack_icon_path="pack_icon.png", world_name="PyPacksWorld",
@@ -386,3 +387,6 @@ datapack = Pack(
 #     r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing",
 #     r"C:\Users\Ben\AppData\Roaming\.minecraft\resourcepacks\PyPacks Testing"
 # )
+
+# from pypacks.utils import cleanup_experimental_warning
+# cleanup_experimental_warning(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld")

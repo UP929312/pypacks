@@ -24,7 +24,7 @@ class CustomBlock:
     base_block: str
     block_texture: "str | FacePaths" = field(repr=False)
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = field(repr=False, default="self")
-    silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
+    silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"  # Literal['same_as_regular'] | 
     # fortune_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 
@@ -74,6 +74,8 @@ class CustomBlock:
                 self.silk_touch_loot_table = CustomLootTable(f"{self.internal_name}_block_silk_touch_drop_loot_table", pools=[SingleItemPool(self.block_item)])
             else:
                 raise ValueError("If silk_touch_loot_table is set to 'self', then block_item must be set.")
+        # elif self.silk_touch_drops == "same_as_regular":
+        #     self.silk_touch_loot_table = self.regular_loot_table
         elif isinstance(self.silk_touch_drops, (CustomItem, str)):
             self.silk_touch_loot_table = CustomLootTable(f"{self.internal_name}_block_silk_touch__drop_loot_table", pools=[SingleItemPool(self.silk_touch_drops)])
         elif isinstance(self.silk_touch_drops, CustomLootTable):

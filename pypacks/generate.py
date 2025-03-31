@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pypacks.additions.constants import EXPERIMENTAL_FEATURES
 from pypacks.additions.reference_book_generator import ReferenceBook
 from pypacks.resources.custom_recipe import SmithingTrimRecipe, ALL_RECIPES_TYPES
 from pypacks.resources.custom_font import CustomFont, AutoAssignBitMapFontChar, SpaceFontChar
@@ -138,6 +139,9 @@ def generate_datapack(pack: "Pack") -> None:
         pack.custom_loops + pack.custom_chunk_scanners + pack.custom_ore_generations + pack.custom_entity_variants +
         pack.custom_test_environments + pack.custom_game_tests
     ):
+        if pack.config.prevent_warning_issuing_resources and item.datapack_subdirectory_name in EXPERIMENTAL_FEATURES:
+            print(f"Warning: {item.datapack_subdirectory_name} is an experimental feature. Skipping. (Set in config settings under prevent_warning_issuing_resources)")
+            continue
         if item.datapack_subdirectory_name is not None:  # Custom items don't have a subdirectory
             os.makedirs(pack.datapack_output_path/"data"/pack.namespace/item.datapack_subdirectory_name, exist_ok=True)
         if hasattr(item, "sub_directories"):

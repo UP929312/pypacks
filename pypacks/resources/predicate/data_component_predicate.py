@@ -33,7 +33,7 @@ class DataComponentPredicate:
         if isinstance(value, str):
             return value
         if isinstance(value, list):
-            return [x.get_reference(pack_namespace) if hasattr(x, "get_reference") else x for x in value]  # type: ignore[no-untyped-call]
+            return [x.get_reference(pack_namespace) if hasattr(x, "get_reference") else x for x in value]
         return None
 
 

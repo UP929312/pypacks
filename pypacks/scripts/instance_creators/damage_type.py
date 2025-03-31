@@ -8,7 +8,6 @@ from pypacks.resources.custom_damage_type import CustomDamageType
 
 all_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/misode/mcmeta/refs/heads/summary/data/damage_type/data.min.json").json()
 output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\minecraft\\damage_types.py"
-# TODO: 
 
 lines = [
     "from pypacks.resources.custom_damage_type import CustomDamageType",

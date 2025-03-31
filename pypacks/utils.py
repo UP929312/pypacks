@@ -1,12 +1,14 @@
 import os
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
 PYPACKS_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/pypacks"
 IMAGES_PATH = Path(PYPACKS_ROOT)/"assets"/"images"
 
-MAX_INT = 2147483647
+MAX_INT = 2_147_483_648
+MAX_FLOAT = 3.402823466E+38
 
 
 def recursively_remove_nones_from_data(obj: Any) -> Any:
@@ -32,3 +34,27 @@ def format_written_book(string: str) -> str:
     # Parse JSON and pretty-print it
     parsed_json = json.loads(json_str)
     return string[:start]+json.dumps(parsed_json, indent=4).replace("\n", " \\\n")+"]"
+
+
+def cleanup_experimental_warning(save_path: "str | Path") -> None:
+    """Removes the experimental warning from a save file that is caused by level.dat & experimental features.
+    WARNING: This alters the save file and removes multiple folders and files!"""
+    save_path = Path(save_path)
+    # Delete the level.dat references to custom dimensions
+    from pypacks.additions.nbt_parser import NBTParser
+    parser = NBTParser.from_file(save_path/"level.dat")
+    data = parser.output
+    non_default_dimensions = [x for x in data[""]["Data"]["WorldGenSettings"]["dimensions"] if x not in ["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"]]
+    for dimension in non_default_dimensions:
+        print(f"Contains custom dimension: {dimension}, needs to be removed!")
+        del data[""]["Data"]["WorldGenSettings"]["dimensions"][dimension]
+    # Make sure the player's dimension is set to the overworld
+    data[""]["Data"]["Player"]["Dimension"] = "minecraft:overworld"
+    parser.to_file(save_path/"level.dat")
+    # Delete the custom dimensions and dimension types folder (and worldgen folder)
+    from pypacks.additions.constants import EXPERIMENTAL_FEATURES
+    for datapack in os.listdir(save_path/"datapacks"):
+        for namespace in os.listdir(save_path/"datapacks"/datapack/"data"):
+            # print(save_path/"datapacks"/datapack/"data"/namespace/"dimension")
+            for directory in EXPERIMENTAL_FEATURES:
+                shutil.rmtree(save_path/"datapacks"/datapack/"data"/namespace/directory, ignore_errors=True)

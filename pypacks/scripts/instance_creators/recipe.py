@@ -16,11 +16,13 @@ lines = [
     "",
 ]
 
+
 def parse_recipe_data(item_name: str, data: dict[str, Any]) -> "Recipe | None":
     try:
         return Recipe.from_dict(item_name, data)
     except KeyError:
         return None
+
 
 instances = [parse_recipe_data(item_name, data) for item_name, data in all_data.items()]
 lines += [f"{x.internal_name.upper()} = {repr(x)}" for x in instances if x is not None]
