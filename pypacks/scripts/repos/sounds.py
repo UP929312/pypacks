@@ -1,4 +1,5 @@
 MinecraftSound = str
+
 """from typing import Literal
 
 MinecraftSound = Literal[

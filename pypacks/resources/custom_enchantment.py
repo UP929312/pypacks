@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from pypacks.additions.item_components import AttributeType, PotionEffectType
     from pypacks.scripts.repos.damage_types import DamageTypesType
     from pypacks.scripts.repos.particles import ParticleTypes
+    from pypacks.scripts.repos.sounds import MinecraftSound
     from pypacks.resources.custom_item import CustomItem
     from pypacks.resources.custom_mcfunction import MCFunction
     from pypacks.resources.custom_predicate import Predicate
@@ -509,7 +510,7 @@ class IgniteEntityEffect(EntityEffect):
 class PlaySoundEntityEffect(EntityEffect):
     """Plays a sound"""
     # https://minecraft.wiki/w/Enchantment_definition#play_sound
-    sound: str  # The sound to play   # TODO: Depending on the amount of sounds, type this
+    sound: "str | MinecraftSound"  # The sound to play
     volume: float = 1.0  # Volume of the sound
     pitch: float = 1.0  # Pitch of the sound
 
