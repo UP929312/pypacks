@@ -36,7 +36,7 @@ image_mapping |= {
 def resolve_default_item_image(base_item: str) -> "Path":
     if base_item.removeprefix('minecraft:') in image_mapping:
         return image_mapping[base_item.removeprefix('minecraft:')]
-    # https://github.com/edayot/renders/tree/1.21.4-renders/resourcepack/assets/minecraft/textures/render/items
+    # https://github.com/edayot/renders/tree/1.21.5-renders/resourcepack/assets/minecraft/textures/render/items
     # Most of these come from that link ^
     path = IMAGES_PATH/"minecraft_renders_cache"/"items"/f"{base_item.removeprefix('minecraft:')}.png"
     if path.exists():

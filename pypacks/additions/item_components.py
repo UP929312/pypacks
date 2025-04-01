@@ -528,7 +528,8 @@ class EntityData:
 
 @dataclass
 class Equippable:
-    slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand"] = "mainhand"  # The slot to put the item on
+    # https://minecraft.wiki/w/Data_component_format#equippable
+    slot: Literal["head", "chest", "legs", "feet", "body", "mainhand", "offhand", "saddle"] = "mainhand"  # The slot to put the item on
     equip_sound: "str | CustomSound" = "item.armor.equip_generic"  # Sound event to play when the item is equipped
     dispensable: bool = True  # Whether the item can be dispensed by using a dispenser. Defaults to True.
     swappable: bool = True  # Whether the item can be equipped into the relevant slot by right-clicking.

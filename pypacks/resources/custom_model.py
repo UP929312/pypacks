@@ -36,7 +36,7 @@ class CustomItemRenderDefinition(BaseResource):
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         assert isinstance(self.model, ItemModel)
-        return self.model.to_dict() | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {})
+        return self.model.to_dict(pack_namespace) | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {})
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomItemRenderDefinition":
@@ -305,7 +305,7 @@ class SlabModel(BaseResource):
             ).create_resource_pack_files(pack)
 
     # def add_variants(self, pack: "Pack", stairs: bool = False, slabs: bool = False,) -> None:
-        # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.4\1.21.4\assets\minecraft\models\block
+        # C:\Users\%USERNAME%\AppData\Roaming\.minecraft\versions\1.21.5\1.21.5\assets\minecraft\models\block
         # Fences are too much work (maybe?), same with walls (even though they're not wood)
         # Doors, trapdoors and fencegates need to flip and that's annoying to do/detect
         # Pressure plates are basically buttons that also need to react

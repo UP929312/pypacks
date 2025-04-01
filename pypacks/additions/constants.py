@@ -234,7 +234,7 @@ NON_EXPERIMENTAL_FEATURES = [
 EXPERIMENTAL_FEATURES = [
     # Hosts three lists (one for world gen experimental, one for all the world gen subdirs, and one for experimental features) which show a warning when loaded in the game
     # Taken from: https://minecraft.wiki/w/Data_pack#Usage
-    *["dimension", "dimension_type"], 
+    *["dimension", "dimension_type"],
     *["worldgen/biome", "worldgen/configured_carver", "worldgen/configured_feature", "worldgen/density_function", "worldgen/flat_level_generator_preset", "worldgen/multi_noise_biome_source_parameter_list", "worldgen/noise", "worldgen/noise_settings", "worldgen/placed_feature", "worldgen/processor_list", "worldgen/structure", "worldgen/structure_set", "worldgen/template_pool", "worldgen/world_preset"],
     *["cat_variant", "chicken_variant", "cow_variant", "damage_type", "enchantment", "frog_variant", "jukebox_song", "painting_variant", "pig_variant", "test_environment", "test_instance", "wolf_variant"],
 ]

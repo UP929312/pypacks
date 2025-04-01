@@ -2,9 +2,11 @@
 import struct
 import gzip
 from io import BufferedReader, BufferedWriter, BytesIO
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass
@@ -187,7 +189,7 @@ class NBTParser:
             self.write_tag(tag_type, val)
         self.write_byte(self.TAG_END)  # End of compound
 
-    def write_int_array(self,value: list[int]) -> None:
+    def write_int_array(self, value: list[int]) -> None:
         self.write_int(len(value))
         if not all(isinstance(i, int) for i in value):
             raise TypeError(f"write_int_array expected a list of ints, but got {value.__class__.__name__}: {value}")
@@ -223,7 +225,7 @@ class NBTParser:
             if not value:
                 return NBTParser.TAG_LIST  # Empty lists default to TAG_LIST
             first_item = value[0]
-            
+
             if isinstance(first_item, dict):
                 return NBTParser.TAG_LIST  # List of compounds
             if isinstance(first_item, int):
@@ -257,7 +259,7 @@ class NBTParser:
 
         """Write an NBT tag based on its type using the tag_writers mapping."""
         if tag_type in tag_writers:
-            tag_writers[tag_type](value)
+            tag_writers[tag_type](value)  # type: ignore[operator]
         else:
             raise ValueError(f"Unknown tag type {tag_type}")
 

@@ -4,7 +4,6 @@ from typing import Any
 
 import requests
 
-# from pypacks.resources.custom_item import CustomItem
 from pypacks.resources.base_resource import overridden_repr
 from pypacks.resources.custom_painting import CustomPainting
 from pypacks.additions.item_components import (
@@ -27,12 +26,11 @@ for cls in [AttributeModifier, Cooldown, Components, Consumable, CustomPainting,
 def is_not_normal_item(data: dict[str, Any]) -> bool:
     """Filters out items that aren't interesting, like stone blocks, interesting items have one or more of these attributes."""
     special_attributes = [
-        "minecraft:damage_resistant", "minecraft:jukebox_playable", "minecraft:consumable", "minecraft:food", "minecraft:use_cooldown",
-        "minecraft:use_remainder", "minecraft:death_protection", "minecraft:damage", "minecraft:max_damage", "minecraft:glider",
-        "minecraft:tool", "minecraft:equippable", "minecraft:repairable",
+        "minecraft:attribute_modifiers", "minecraft:damage_resistant", "minecraft:jukebox_playable", "minecraft:consumable", "minecraft:food",
+        "minecraft:use_cooldown", "minecraft:use_remainder", "minecraft:death_protection", "minecraft:damage", "minecraft:max_damage",
+        "minecraft:glider", "minecraft:tool", "minecraft:equippable", "minecraft:repairable",
     ]
     return bool(
-        data.get("minecraft:attribute_modifiers", {}).get("modifiers") or
         data.get("minecraft:enchantments", {}).get("levels") or
         any(data.get(attr) for attr in special_attributes)
     )
@@ -48,7 +46,7 @@ def format_custom_item_name(item: str, base_item: str, components: Components, m
     ).replace(", )", ")")
 
 
-all_item_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/misode/mcmeta/1.21.4-summary/item_components/data.min.json").json()
+all_item_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/misode/mcmeta/1.21.5-summary/item_components/data.min.json").json()
 
 lines = [
     "from pypacks.resources.custom_item import CustomItem",
@@ -61,7 +59,7 @@ lines = [
 items = []
 for item, data in all_item_data.items():
     if is_not_normal_item(data):
-        attribute_modifiers = [AttributeModifier.from_dict(modifier) for modifier in data.get("minecraft:attribute_modifiers", {}).get("modifiers")]
+        attribute_modifiers = [AttributeModifier.from_dict(modifier) for modifier in data.get("minecraft:attribute_modifiers", [])]
         tool = Tool.from_dict(data["minecraft:tool"]) if data.get("minecraft:tool") else None
         equippable = Equippable.from_dict(data["minecraft:equippable"]) if data.get("minecraft:equippable") else None
         damage_resistance = data["minecraft:damage_resistant"]["types"] if data.get("minecraft:damage_resistant") else None

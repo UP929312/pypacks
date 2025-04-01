@@ -6,6 +6,7 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.scripts.repos.models import MinecraftModels
+    from pypacks.resources.custom_predicate import Predicate
 
 
 def check_color(color: tuple[float, float, float]) -> None:
@@ -15,7 +16,8 @@ def check_color(color: tuple[float, float, float]) -> None:
 
 
 class ItemModel:
-    def to_dict(self) -> dict[str, Any]:
+    """Parent item model, don't instantiate yourself!"""
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -33,14 +35,14 @@ class ModelItemModel(ItemModel):
     item_model_name: "str | MinecraftModels"  # Specifies the path to the model file of the item, in form of a Namespaced ID.
     tints: list["Tint"] = field(default_factory=list)  # Optional. List of tint components to apply to the model.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:model",
             "model": {
                 "type": "minecraft:model",
                 "model": self.item_model_name,
             } | ({
-                "tints": [tint.to_dict() for tint in self.tints],
+                "tints": [tint.to_dict(pack_namespace) for tint in self.tints],
             } if self.tints else {}),
         }
 
@@ -54,7 +56,7 @@ class ModelItemModel(ItemModel):
 
 # ==== Tints
 class Tint:
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -68,7 +70,7 @@ class ConstantTint(Tint):
     """Return a constant RGB color."""
     color: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:constant",
             "value": list(self.color),
@@ -89,7 +91,7 @@ class DyeTint(Tint):
     def __post_init__(self) -> None:
         check_color(self.default)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:dye",
             "default": list(self.default),
@@ -112,7 +114,7 @@ class GrassTint(Tint):
         assert 0 <= self.temperature <= 1.0, "Temperature must be between 0 and 1"
         assert 0 <= self.downfall <= 1.0, "Downfall must be between 0 and 1"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:grass",
             "temperature": self.temperature,
@@ -135,7 +137,7 @@ class FireworkTint(Tint):
     def __post_init__(self) -> None:
         check_color(self.default)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:firework",
             "default": list(self.default),
@@ -161,7 +163,7 @@ class PotionTint(Tint):
     def __post_init__(self) -> None:
         check_color(self.default)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:potion",
             "default": list(self.default),
@@ -182,7 +184,7 @@ class MapColorTint(Tint):
     def __post_init__(self) -> None:
         check_color(self.default)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:map_color",
             "default": list(self.default),
@@ -203,7 +205,7 @@ class TeamTint(Tint):
     def __post_init__(self) -> None:
         check_color(self.default)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:team",
             "default": list(self.default),
@@ -222,7 +224,7 @@ class CustomModelDataTint(Tint):
     index: int = 0  # Optional. Index for field in colors. Default: 0.
     default: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         check_color(self.default)
         return {
             "type": "minecraft:custom_model_data",
@@ -261,13 +263,13 @@ class CompositeItemModel(ItemModel):
     # https://minecraft.wiki/w/Items_model_definition#composite
     models: list["str | ItemModel"]  # List of Item model objects to render.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "model": {
                 "type": "minecraft:composite",
                 "models": [
                     (
-                        model.to_dict()["model"] if isinstance(model, ItemModel) else
+                        model.to_dict(pack_namespace)["model"] if isinstance(model, ItemModel) else
                         {
                             "type": "minecraft:model",
                             "model": model,
@@ -297,16 +299,16 @@ class ConditionalItemModel(ItemModel):
     true_model: "str | ItemModel"  # The Item model object when the property is true.
     false_model: "str | ItemModel"  # The Item model object when the property is false.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "model": {
                 "type": "minecraft:condition",
-                **self.property_to_satisfy.to_dict(),
-                "on_true": self.true_model.to_dict()["model"] if isinstance(self.true_model, ItemModel) else ({
+                **self.property_to_satisfy.to_dict(pack_namespace),
+                "on_true": self.true_model.to_dict(pack_namespace)["model"] if isinstance(self.true_model, ItemModel) else ({
                     "type": "model",
                     "model": self.true_model,
                 }),
-                "on_false": self.false_model.to_dict()["model"] if isinstance(self.false_model, ItemModel) else ({
+                "on_false": self.false_model.to_dict(pack_namespace)["model"] if isinstance(self.false_model, ItemModel) else ({
                     "type": "model",
                     "model": self.false_model,
                 }),
@@ -324,7 +326,7 @@ class ConditionalItemModel(ItemModel):
 
 
 class ConditionalBooleanPropertyType:
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -335,7 +337,7 @@ class ConditionalBooleanPropertyType:
 
 class UsingItemConditional(ConditionalBooleanPropertyType):
     """Return true if player is currently using this item."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:using_item"}
 
     @classmethod
@@ -345,7 +347,7 @@ class UsingItemConditional(ConditionalBooleanPropertyType):
 
 class BrokenConditional(ConditionalBooleanPropertyType):
     """Return true if the item is damageable and has only one use remaining before breaking."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:broken"}
 
     @classmethod
@@ -355,7 +357,7 @@ class BrokenConditional(ConditionalBooleanPropertyType):
 
 class DamagedConditional(ConditionalBooleanPropertyType):
     """Return true if the item is damageable and has been used at least once."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:damaged"}
 
     @classmethod
@@ -369,7 +371,7 @@ class HasComponentConditional(ConditionalBooleanPropertyType):
     component: str  # Component name.
     ignore_default: bool = False   # Optional. If default component value should be handled as "no component". Default: false.
 
-    def to_dict(self) -> dict[str, str | bool]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str | bool]:
         return {"property": "minecraft:has_component", "component": self.component, "ignore_default": self.ignore_default}
 
     @classmethod
@@ -382,7 +384,7 @@ class HasComponentConditional(ConditionalBooleanPropertyType):
 
 class FishingRodCastConditional(ConditionalBooleanPropertyType):
     """Return true if there is a fishing bobber attached to currently used fishing rod."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:fishing_rod/cast"}
 
     @classmethod
@@ -392,7 +394,7 @@ class FishingRodCastConditional(ConditionalBooleanPropertyType):
 
 class BundleHasSelectedItemConditional(ConditionalBooleanPropertyType):
     """Return true if bundle is "open", i.e. it has selected item visible in GUI."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:bundle_has_selected_item"}
 
     @classmethod
@@ -402,7 +404,7 @@ class BundleHasSelectedItemConditional(ConditionalBooleanPropertyType):
 
 class SelectedConditional(ConditionalBooleanPropertyType):
     """Return true if item is selected on a hotbar."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:selected"}
 
     @classmethod
@@ -412,7 +414,7 @@ class SelectedConditional(ConditionalBooleanPropertyType):
 
 class CarriedConditional(ConditionalBooleanPropertyType):
     """Return true if item is carried between slots in GUI (in the cursor)"""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:carried"}
 
     @classmethod
@@ -423,12 +425,16 @@ class CarriedConditional(ConditionalBooleanPropertyType):
 @dataclass
 class ComponentConditional(ConditionalBooleanPropertyType):
     """Uses component item sub predicates to match item components."""
-    predicate: str  # "Predicate | str"  # TODO: Allow custom predicates, convert to dict, need pack_namespace in these to_dict functions
+    predicate: "str | Predicate"
     value: str | list[dict[str, str]]
     # https://minecraft.wiki/w/Items_model_definition#component
 
-    def to_dict(self) -> dict[str, Any]:
-        return {"property": "minecraft:component", "predicate": self.predicate, "value": self.value}
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_predicate import Predicate
+        return {
+            "property": "minecraft:component",
+            "predicate": self.predicate.to_dict(pack_namespace) if isinstance(self.predicate, Predicate) else self.predicate,
+            "value": self.value}
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ComponentConditional":
@@ -442,7 +448,7 @@ class ExtendedViewConditional(ConditionalBooleanPropertyType):
     """Return true if player has requested extended details by holding shift key down.
     Only works when item is displayed in UI.
     Note: not a keybind, can't be rebound."""
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:extended_view"}
 
     @classmethod
@@ -462,7 +468,7 @@ class KeyDownConditional(ConditionalBooleanPropertyType):
         "key.spectatorOutlines", "key.screenshot", "key.smoothCamera", "key.fullscreen", "key.togglePerspective",
     ]
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:key_down", "keybind": self.key}
 
     @classmethod
@@ -477,7 +483,7 @@ class ViewEntityConditional(ConditionalBooleanPropertyType):
     When spectating, return true if context entity is the spectated entity.
     If context entity is not present, will return false."""
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:view_entity"}
 
     @classmethod
@@ -490,7 +496,7 @@ class CustomModelDataConditional(ConditionalBooleanPropertyType):
     """Return value from flags list in minecraft:custom_model_data component."""
     index: int = 0  # Optional. Index for field in flags. Default: 0.
 
-    def to_dict(self) -> dict[str, str | int]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str | int]:
         return {"property": "minecraft:custom_model_data", "index": self.index}
 
     @classmethod
@@ -531,15 +537,15 @@ class SelectItemModel(ItemModel):
     ])  # List of cases to match.
     fallback_model: "str | ItemModel | None" = None  # The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "model": {
                 "type": "minecraft:select",
-                **self.property_to_satisfy.to_dict(),
-                "cases": [case.to_dict() for case in self.cases],
+                **self.property_to_satisfy.to_dict(pack_namespace),
+                "cases": [case.to_dict(pack_namespace) for case in self.cases],
             } | (
                 {
-                    "fallback": (self.fallback_model.to_dict()["model"] if isinstance(self.fallback_model, ItemModel) else {
+                    "fallback": (self.fallback_model.to_dict(pack_namespace)["model"] if isinstance(self.fallback_model, ItemModel) else {
                         "type": "minecraft:model",
                         "model": self.fallback_model,
                     })
@@ -549,7 +555,7 @@ class SelectItemModel(ItemModel):
 
 
 class SelectProperty:
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -564,10 +570,10 @@ class SelectCase:
     when: str | list[str]
     model: "str | ItemModel"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "when": self.when,
-            "model": self.model.to_dict() if isinstance(self.model, ItemModel) else {
+            "model": self.model.to_dict(pack_namespace) if isinstance(self.model, ItemModel) else {
                 "type": "minecraft:model",
                 "model": self.model,
             },
@@ -586,7 +592,7 @@ class MainHandSelectProperty(SelectProperty):
     # https://minecraft.wiki/w/Items_model_definition#main_hand
     # Values: "left", "right"
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:main_hand"}
 
     @classmethod
@@ -599,7 +605,7 @@ class ChargeTypeSelectProperty(SelectProperty):
     # https://minecraft.wiki/w/Items_model_definition#charge_type
     # Values: "none", "rocket", "arrow"
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:charge_type"}
 
     @classmethod
@@ -612,7 +618,7 @@ class TrimMaterialSelectProperty(SelectProperty):
     # https://minecraft.wiki/w/Items_model_definition#trim_material
     # Values: Namespaced ID trim material.
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:trim_material"}
 
     @classmethod
@@ -627,7 +633,7 @@ class BlockStateSelectProperty(SelectProperty):
     # Values: Block state.
     block_state_property: str
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:block_state", "block_state_property": self.block_state_property}
 
     @classmethod
@@ -642,7 +648,7 @@ class DisplayContextSelectProperty(SelectProperty):
     # https://minecraft.wiki/w/Items_model_definition#trim_material
     # Values: `none`, `thirdperson_lefthand`, `thirdperson_righthand`, `firstperson_lefthand`, `firstperson_righthand`, `head`, `gui`, `ground`, `fixed`
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:display_context"}
 
     @classmethod
@@ -666,7 +672,7 @@ class LocalTimeSelectProperty(SelectProperty):
     # yyyy-MM-dd: 4-digit year number, then 2-digit month number, then 2-digit day of month number, all zero-padded if needed, separated by -.
     # HH:mm:ss: current time (hours, minutes, seconds), 24-hour cycle, all zero-padded to 2 digits of needed, separated by :.
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {
             "property": "minecraft:local_time"
         } | ({
@@ -691,7 +697,7 @@ class ContextDimensionSelectProperty(SelectProperty):
     # https://minecraft.wiki/w/Items_model_definition#context_dimension
     # Values: Namespaced dimension ID.
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:context_dimension"}
 
     @classmethod
@@ -704,7 +710,7 @@ class ContextEntityTypeSelectProperty(SelectProperty):
     # https://minecraft.wiki/w/Items_model_definition#context_entity_type
     # Values: Namespaced entity type ID.
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:context_entity_type"}
 
     @classmethod
@@ -719,7 +725,7 @@ class CustomModelDataSelectProperty(SelectProperty):
     # Values: Any string.
     index: int = 0
 
-    def to_dict(self) -> dict[str, str | int]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str | int]:
         return {"property": "minecraft:custom_model_data", "index": self.index}
 
     @classmethod
@@ -737,7 +743,7 @@ class ComponentSelectProperty(SelectProperty):
     # Values: Depends on the target component type.
     component: str  # Namespaced ID of the component type.
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {"property": "minecraft:component", "component": self.component}
 
     @classmethod
@@ -774,19 +780,19 @@ class RangeDispatchItemModel(ItemModel):
     entries: dict[int | float, "str | ItemModel"] = field(default_factory=dict)  # A mapping of threshold to item model name.
     fallback_model: "str | ItemModel | None" = None  # The Item model object if no valid entry was found. Optional, but will render a "missing" error model instead.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "model": {
                 "type": "minecraft:range_dispatch",
-                **self.property_to_satisfy.to_dict(),
+                **self.property_to_satisfy.to_dict(pack_namespace),
                 "scale": self.scale,
                 "entries": [
-                    {"threshold": threshold, "model": (model.to_dict()["model"] if isinstance(model, ItemModel) else {"type": "minecraft:model", "model": model})}
+                    {"threshold": threshold, "model": (model.to_dict(pack_namespace)["model"] if isinstance(model, ItemModel) else {"type": "minecraft:model", "model": model})}
                     for threshold, model in self.entries.items()
                 ],
             } | (
                 {
-                    "fallback": (self.fallback_model.to_dict()["model"] if isinstance(self.fallback_model, ItemModel) else {
+                    "fallback": (self.fallback_model.to_dict(pack_namespace)["model"] if isinstance(self.fallback_model, ItemModel) else {
                         "type": "minecraft:model",
                         "model": self.fallback_model,
                     })
@@ -805,7 +811,7 @@ class RangeDispatchItemModel(ItemModel):
 
 
 class RangeDispatchPropertyType:
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -820,7 +826,7 @@ class BundleFullnessRangeDispatchProperty(RangeDispatchPropertyType):
     # Return weight of minecraft:bundle_contents component or 0 if not present.
     # Values: 0-64 (Maybe?)
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {
             "property": "minecraft:bundle/fullness",
         }
@@ -845,7 +851,7 @@ class CompassRangeDispatchProperty(RangeDispatchPropertyType):
     target: Literal["spawn", "lodestone", "recovery", "none"] = "none"
     wobble: bool = True  # If True, value will oscillate for some time around target before settling.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "property": "minecraft:compass",
             "target": self.target,
@@ -865,7 +871,7 @@ class CooldownRangeDispatchProperty(RangeDispatchPropertyType):
     """Return remaining cooldown for item, scaled between 0.0 to 1.0."""
     # Values: 0.0-1.0
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {
             "property": "minecraft:cooldown",
         }
@@ -881,7 +887,7 @@ class CountRangeDispatchProperty(RangeDispatchPropertyType):
     # Values: 0-64 | 0-1/0-16 (things that stack less) | 0.0-1.0 (if normalized)
     normalize: bool = True  # If True, return count divided by minecraft:max_stack_size component, clamped to 0.0 to 1.0. If False, return count clamped to 0 to minecraft:max_stack_size.
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {
             "property": "minecraft:count",
         }
@@ -896,7 +902,7 @@ class CrossbowPullRangeDispatchProperty(RangeDispatchPropertyType):
     """Return crossbow pull."""
     # Values: Unknown
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self, pack_namespace: str) -> dict[str, str]:
         return {
             "property": "minecraft:crossbow/pull",
         }
@@ -912,7 +918,7 @@ class DamageRangeDispatchProperty(RangeDispatchPropertyType):
     # Values: 0 | 0-max damage | 0-1.0 (if normalized)
     normalize: bool = True
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "property": "minecraft:damage",
             "normalize": self.normalize,
@@ -930,7 +936,7 @@ class TimeRangeDispatchProperty(RangeDispatchPropertyType):
     source: Literal["daytime", "moon_phase", "random"] = "daytime"
     wobble: bool = True  # If True, value will oscillate for some time around target before settling
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "property": "minecraft:time",
             "source": self.source,
@@ -952,7 +958,7 @@ class UseCycleRangeDispatchProperty(RangeDispatchPropertyType):
 
     period: float = 1.0  # Must be positive.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "property": "minecraft:use_cycle",
             "period": self.period,
@@ -972,7 +978,7 @@ class CustomModelDataRangeDispatchProperty(RangeDispatchPropertyType):
 
     index: int = 0  # Index for field in floats
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "property": "minecraft:custom_model_data",
             "index": self.index,
@@ -1005,7 +1011,7 @@ RANGE_DISPATCH_PROPERTY_NAME_TO_CLASSES: dict[str, type[RangeDispatchPropertyTyp
 class EmptyItemModel(ItemModel):
     """Does not render anything."""
     # https://minecraft.wiki/w/Items_model_definition#empty
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {"model": {"type": "minecraft:empty"}}
 
     @classmethod
@@ -1021,7 +1027,7 @@ class EmptyItemModel(ItemModel):
 class BundleSelectedItemModel(ItemModel):
     """Render the selected stack in minecraft:bundle_contents component, if present, otherwise does nothing."""
     # https://minecraft.wiki/w/Items_model_definition#bundle/selected_item
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {"model": {"type": "minecraft:bundle/selected_item"}}
 
     @classmethod
@@ -1041,11 +1047,11 @@ class SpecialItemModel(ItemModel):
     model_type: "SpecialItemModelType"
     base: str  # Namespaced ID of model in models directory, to providing transformations, particle texture and GUI light.  # TODO: Support CustomModel here?
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "model": {
                 "type": "minecraft:special",
-                "model": self.model_type.to_dict(),
+                "model": self.model_type.to_dict(pack_namespace),
                 "base": self.base,
             }
         }
@@ -1060,7 +1066,7 @@ class SpecialItemModel(ItemModel):
 
 @dataclass
 class SpecialItemModelType:
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -1075,7 +1081,7 @@ class BannerSpecialItemModelType(SpecialItemModelType):
     # https://minecraft.wiki/w/Items_model_definition#banner
     color: "MinecraftColor"  # Color of the banner base, one of 16 predefined colors.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:banner",
             "color": self.color.name,
@@ -1094,7 +1100,7 @@ class BedSpecialItemModelType(SpecialItemModelType):
     # https://minecraft.wiki/w/Items_model_definition#bed
     texture: str  # Namespaced ID for the texture in the beds texture atlas without the .png suffix. By default this includes textures in textures/entity/bed/, without the prefix.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:bed",
             "texture": self.texture,
@@ -1114,7 +1120,7 @@ class ChestSpecialItemModelType(SpecialItemModelType):
     texture: str  # Namespaced ID for the texture in the chests texture atlas without the .png suffix. By default this includes textures in textures/entity/chest/, without the prefix.
     openness: float = 0.0  # Render the chest in the specified open state, between 0.0 (fully closed) to 1.0 (fully open). Default: 0.0.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:chest",
             "texture": self.texture,
@@ -1133,7 +1139,7 @@ class ChestSpecialItemModelType(SpecialItemModelType):
 class ConduitSpecialItemModelType(SpecialItemModelType):
     """Render conduit."""
     # https://minecraft.wiki/w/Items_model_definition#conduit
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:conduit",
         }
@@ -1147,7 +1153,7 @@ class ConduitSpecialItemModelType(SpecialItemModelType):
 class DecoratedPotSpecialItemModelType(SpecialItemModelType):
     """Render a decorated pot. Uses values from minecraft:pot_decorations component."""
     # https://minecraft.wiki/w/Items_model_definition#decorated_pot
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:decorated_pot",
         }
@@ -1168,7 +1174,7 @@ class HeadSpecialItemModelType(SpecialItemModelType):
     # The dragon animation is 10 units long. Mouth fully closed at -2.5 and fully open at 2.5
     # The piglin ears wiggle out of sync. The left ear period is 8.3333 and right ear period is 10.0
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return recursively_remove_nones_from_data({  # type: ignore[no-any-return]
             "type": "minecraft:head",
             "kind": self.kind,
@@ -1189,7 +1195,7 @@ class HeadSpecialItemModelType(SpecialItemModelType):
 class ShieldSpecialItemModelType(SpecialItemModelType):
     """Render a shield. Uses patterns from minecraft:banner_patterns component and color from minecraft:base_color component."""
     # https://minecraft.wiki/w/Items_model_definition#shield
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:shield",
         }
@@ -1207,7 +1213,7 @@ class ShulkerBoxSpecialItemModelType(SpecialItemModelType):
     openness: float = 0.0  # Render the shulker box in the specified open state, between 0.0 (fully closed) to 1.0 (fully open). Default: 0.0.
     orientation: Literal["up", "down", "north", "south", "west", "east"] = "up"  # Orientation for rendering. Default: up.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:shulker_box",
             "texture": self.texture,
@@ -1231,7 +1237,7 @@ class StandingSignSpecialItemModelType(SpecialItemModelType):
     wood_type: Literal["oak", "spruce", "birch", "acacia", "cherry", "jungle", "dark_oak", "pale_oak", "mangrove", "bamboo", "crimson", "warped"] = "oak"
     texture: str | None = None  # Namespaced ID for the texture in the signs texture atlas without the .png suffix. By default this includes textures in textures/entity/signs/, without the prefix. If present, wood_type field is ignored.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:standing_sign",
             "wood_type": self.wood_type,
@@ -1253,7 +1259,7 @@ class HangingSignSpecialItemModelType(SpecialItemModelType):
     wood_type: Literal["oak", "spruce", "birch", "acacia", "cherry", "jungle", "dark_oak", "pale_oak", "mangrove", "bamboo", "crimson", "warped"] = "oak"
     texture: str | None = None  # Namespaced ID for the texture in the signs texture atlas without the .png suffix. By default this includes textures in textures/entity/signs/, without the prefix. If present, wood_type field is ignored.
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:hanging_sign",
             "wood_type": self.wood_type,
@@ -1272,7 +1278,7 @@ class HangingSignSpecialItemModelType(SpecialItemModelType):
 class TridentSpecialItemModelType(SpecialItemModelType):
     """Render a trident."""
     # https://minecraft.wiki/w/Items_model_definition#trident
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "type": "minecraft:trident",
         }

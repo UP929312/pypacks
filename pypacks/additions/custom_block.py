@@ -24,7 +24,7 @@ class CustomBlock:
     base_block: str
     block_texture: "str | FacePaths" = field(repr=False)
     drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = field(repr=False, default="self")
-    silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"  # Literal['same_as_regular'] | 
+    silk_touch_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"  # Literal['same_as_regular'] |
     # fortune_drops: "Literal['self'] | CustomItem | CustomLootTable | str | None" = "self"
     # on_right_click: str | None = None  # For things like inventories, custom furnaces, etc?
 

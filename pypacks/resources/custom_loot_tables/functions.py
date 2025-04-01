@@ -313,7 +313,7 @@ class FilteredFunction(LootTableFunction):
     item_filter: dict[str, Any]  # A predicate to test against the item stack.
     modifier: dict[str, Any]  # Functions to apply to matching items.
 
-    # TODO: Look into this... REALLY
+    # TODO: Look into this...
     # All possible conditions for items:
     #     items: (Optional) One or more item(s) (an  ID, or a  tag with #, or an  array containing  IDs). Tests if the type of item in the item stack matches any of the listed values.
     #     count: (Optional) Tests the number of items in this item stack. Use an integer to test for a single value.

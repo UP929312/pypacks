@@ -4,6 +4,8 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 
 item events, e.g. on right_click, on drop, on craft, on left, on sprint
 
+# For structures and other resources, sub directory support
+
 1. Can generate a whole pack, but it's in the format of Pack(...), and I would quite like a formatter of __str__ that adds indentation and new lines.
     (maybe like Pack.to_python())
 2. Also, need to also keep the images and such, can't just delete them
@@ -12,20 +14,17 @@ Need to add the rest of data component predicates
 
 # Naturally occuring ore veins need some more randomness, they have a random size, need a random "rotation"
 
-# Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
-
 https://github.com/SpyglassMC/vanilla-mcdoc/blob/f35464d757a4c9786e0d804ac6c0146371dd45c1/java/world/component/predicate.mcdoc#L64
 # Auto generate classes from that ^ Hmmmm
 
-Custom Entity Variants should have their own spawn egg in the ref book?
-
 For custom blocks that drop their own item with our without silk touch, don't make two loot tables, point them both to the same.
 
-############### "undo_world_gen", Works for everything except from updating level.dat, writing nbt fies is really hard
+###################################################################################################
+Custom Entity Variants should have their own spawn egg in the ref book? Need entity data first
 
 3d pathfinding from A to B (two coords), maybe with blocks it can traverse
 
-###################################################################################################
+# Optimise right clicks to all use one advancement, and instead put the command/function call in it's data, then call the generic run func with a data get
 
 Pack.from_existing_pack() needs to absort the minecraft namespace's stuff, like tick and that kind of thing
 
@@ -36,8 +35,6 @@ Loadstone trackers is still broken
 On drop cooldown?
 
 # Should CustomTag.from_json() look and try to find the values? Same with structures and such!
-
-Support for custom mcfunction header, e.g. copyright, links, etc?
 
 https://github.com/Articdive/ArticData/blob/1.20.4/1_20_4_potions.json
 
@@ -92,8 +89,6 @@ Type Predicates ):
   }
 }
 
-World gen stuff is why I'm getting the warning... add a config option for this
-
 # pypacks_testing:clear_console
 
 # https://minecraft.wiki/w/Entity_format#Navigation
@@ -113,8 +108,6 @@ execute if score #hit temp matches 0 positioned ~-0.05 ~-0.05 ~-0.05 as @e[tag=!
 
 # Add the workstation name on custom recipes
 # Allow custom icons to have subdirs, so the textures/font isn't filled with element - Difficult as they all get populated at once
-
-# For structures and other resources, sub directory support
 
 # Fortune for custom blocks
 # Creative block breaking checks the closest player, which is fine for now, but should be revisited

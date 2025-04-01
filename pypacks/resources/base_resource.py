@@ -60,7 +60,7 @@ class BaseResource:
     @classmethod
     def from_datapack_files(cls: type[T], data_path: "Path") -> list[T]:
         """Path should be the root of the pack"""
-        return [  # TODO: Change the **/ to **/data/namespace, etc.
+        return [
             cls.from_dict(file_path.stem, json.loads(file_path.read_text()))  # type: ignore[attr-defined]
             for file_path in data_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
         ]
