@@ -1,7 +1,7 @@
 import os
 
 VERSION = "25w09a"
-input_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\versions\\{VERSION}\\{VERSION}\\"
+input_path = f"C:/Users/{os.environ['USERNAME']}/AppData/Roaming/.minecraft/versions/{VERSION}/{VERSION}/"
 print("Searching for input in", input_path)
 
 

@@ -8,6 +8,7 @@ from pypacks.providers.number_provider import NumberProvider
 
 if TYPE_CHECKING:
     from pypacks.resources.custom_loot_tables.custom_loot_table import SingletonEntry
+    from pypacks.resources.predicate.predicate_conditions import ItemCondition
     from pypacks.additions.item_components import AttributeModifier, FireworkExplosion, MapDecorationType, BannerPattern
 
 
@@ -310,26 +311,14 @@ class FillPlayerHeadFunction(LootTableFunction):
 @dataclass
 class FilteredFunction(LootTableFunction):
     """Applies another function only to items that match item predicate."""
-    item_filter: dict[str, Any]  # A predicate to test against the item stack.
-    modifier: dict[str, Any]  # Functions to apply to matching items.
-
-    # TODO: Look into this...
-    # All possible conditions for items:
-    #     items: (Optional) One or more item(s) (an  ID, or a  tag with #, or an  array containing  IDs). Tests if the type of item in the item stack matches any of the listed values.
-    #     count: (Optional) Tests the number of items in this item stack. Use an integer to test for a single value.
-    #     count: (Optional) Another format.
-    #     max: (Optional) The maximum value.
-    #     min: (Optional) The minimum value.
-    #     components: (Optional) Matches exact item component values. Each key in this object corresponds to a component to test, with its value as the desired data to compare.
-    #         See data component format.
-    #     predicates: (Optional) Matches item sub-predicates.
-    #         See item sub-predicate.
+    item_filter: "ItemCondition"  # A predicate to test against the item stack.
+    modifier: list["Predicate"]  # Functions to apply to matching items.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         return {
             "function": "minecraft:filtered",
-            "item_filter": self.item_filter,
-            "modifier": self.modifier,
+            "item_filter": self.item_filter.to_dict(pack_namespace),
+            "modifier": [x.to_dict(pack_namespace) for x in self.modifier],
         }
 
     @classmethod

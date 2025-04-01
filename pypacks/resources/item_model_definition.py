@@ -6,6 +6,7 @@ from pypacks.utils import recursively_remove_nones_from_data
 
 if TYPE_CHECKING:
     from pypacks.scripts.repos.models import MinecraftModels
+    from pypacks.resources.custom_model import CustomModelDefinition
     from pypacks.resources.custom_predicate import Predicate
 
 
@@ -1045,14 +1046,15 @@ class SpecialItemModel(ItemModel):
     """Render a special model."""
     # https://minecraft.wiki/w/Items_model_definition#special_model_types
     model_type: "SpecialItemModelType"
-    base: str  # Namespaced ID of model in models directory, to providing transformations, particle texture and GUI light.  # TODO: Support CustomModel here?
+    base: "str | CustomModelDefinition"  # Namespaced ID of model in models directory, to providing transformations, particle texture and GUI light.
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
+        from pypacks.resources.custom_model import CustomModelDefinition
         return {
             "model": {
                 "type": "minecraft:special",
                 "model": self.model_type.to_dict(pack_namespace),
-                "base": self.base,
+                "base": self.base.get_reference(pack_namespace) if isinstance(self.base, CustomModelDefinition) else self.base,
             }
         }
 

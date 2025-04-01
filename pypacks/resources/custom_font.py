@@ -20,9 +20,6 @@ class CustomFont(BaseResource):
 
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="font")
 
-    def get_reference(self, pack_namespace: str) -> str:
-        return f"{pack_namespace}:{self.internal_name}.json"  # TODO: Is this correct?
-
     def get_mapping(self) -> dict[str, str]:
         # Returns a mapping of element name to it's char | Generate \uE000 - \uE999 for BitMapFontChars
         # This is so players can use images using pack.font_mapping["my_image"] rather than manually giving them random

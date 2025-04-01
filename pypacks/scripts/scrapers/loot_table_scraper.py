@@ -3,8 +3,8 @@ import json
 
 VERSION = "1.21.5"
 ENABLED = False
-input_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\versions\\{VERSION}\\{VERSION}\\data\\minecraft\\loot_table"
-output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\scripts\\repos\\loot_tables.py"
+input_path = f"C:/Users/{os.environ['USERNAME']}/AppData/Roaming/.minecraft/versions/{VERSION}/{VERSION}/data/minecraft\\loot_table"
+output_path = f"C:/Users/{os.environ['USERNAME']}/Desktop/pypacks/pypacks/scripts/repos/loot_tables.py"
 
 loot_tables = []
 
@@ -22,4 +22,4 @@ with open(output_path, "w", encoding="utf-8") as file:
     if ENABLED:
         file.write(BASE+json.dumps(sorted(loot_tables), indent=4)+"\n")
     else:
-        file.write("LootTables = str\n")
+        file.write("LootTables = str\n\n"+'"""'+BASE+json.dumps(sorted(loot_tables), indent=4)+"\n"+'"""')

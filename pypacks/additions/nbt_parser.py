@@ -241,6 +241,7 @@ class NBTParser:
         raise ValueError(f"Unknown type {type(value)} for value {value}")
 
     def write_tag(self, tag_type: int, value: Any) -> None:
+        """Write an NBT tag based on its type using the tag_writers mapping."""
         # rint(f"Writing tag: {tag_type}, Value: {value} ({type(value).__name__})")
         tag_writers = {
             self.TAG_BYTE: self.write_byte,
@@ -257,7 +258,6 @@ class NBTParser:
             self.TAG_LONG_ARRAY: self.write_long_array,
         }
 
-        """Write an NBT tag based on its type using the tag_writers mapping."""
         if tag_type in tag_writers:
             tag_writers[tag_type](value)  # type: ignore[operator]
         else:

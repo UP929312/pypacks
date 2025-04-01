@@ -2,8 +2,8 @@ import os
 import json
 
 VERSION = "1.21.5"
-input_path = f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Roaming\\.minecraft\\versions\\{VERSION}\\{VERSION}\\data\\minecraft\\damage_type"
-output_path = f"C:\\Users\\{os.environ['USERNAME']}\\Desktop\\pypacks\\pypacks\\scripts\\repos\\damage_types.py"
+input_path = f"C:/Users/{os.environ['USERNAME']}/AppData/Roaming/.minecraft/versions/{VERSION}/{VERSION}/data/minecraft\\damage_type"
+output_path = f"C:/Users/{os.environ['USERNAME']}/Desktop/pypacks/pypacks/scripts/repos/damage_types.py"
 
 damage_types = [x.removesuffix(".json") for x in os.listdir(input_path)]
 

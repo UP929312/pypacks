@@ -6,6 +6,8 @@ item events, e.g. on right_click, on drop, on craft, on left, on sprint
 
 # For structures and other resources, sub directory support
 
+add metadata to each resource "is_experimental" = True
+
 1. Can generate a whole pack, but it's in the format of Pack(...), and I would quite like a formatter of __str__ that adds indentation and new lines.
     (maybe like Pack.to_python())
 2. Also, need to also keep the images and such, can't just delete them
