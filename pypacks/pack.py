@@ -186,9 +186,9 @@ class Pack:
         # ==================================================================================
         # Adding all the paintings', jukebox's and enchanted books' items to the list
         for painting in self.custom_paintings:
-            self.custom_items.append(painting.generate_custom_item(self))
+            self.custom_items.append(painting.generate_custom_item(self.namespace))
         for song in self.custom_jukebox_songs:
-            self.custom_items.append(song.generate_custom_item(self))
+            self.custom_items.append(song.generate_custom_item(self.namespace))
         for enchantment in self.custom_enchantments:
             self.custom_items.append(enchantment.generate_custom_item(self.namespace))
         # ==================================================================================

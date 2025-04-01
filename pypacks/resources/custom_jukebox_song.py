@@ -59,7 +59,7 @@ class CustomJukeboxSong(BaseResource):
                 raise FileNotFoundError(f"Could not find the ogg file for {cls.__name__} {jukebox_song.internal_name} at {path}")
         return jukebox_songs
 
-    def generate_custom_item(self, pack: "Pack") -> "CustomItem":
+    def generate_custom_item(self, pack_namespace: str) -> "CustomItem":
         return CustomItem(
             self.internal_name,
             "minecraft:music_disc_cat",
@@ -67,8 +67,8 @@ class CustomJukeboxSong(BaseResource):
             components=Components(jukebox_playable=JukeboxPlayable(self))
         )
 
-    def generate_give_command(self, pack: "Pack") -> str:
-        return self.generate_custom_item(pack).generate_give_command(pack.namespace)
+    def generate_give_command(self, pack_namespace: str) -> str:
+        return self.generate_custom_item(pack_namespace).generate_give_command(pack_namespace)
 
     def generate_play_command(self, pack: "Pack") -> str:
         return f"playsound {self.get_reference(pack.namespace)} master @s ~ ~ ~ 1 1"

@@ -55,17 +55,17 @@ class CustomPainting(BaseResource):
         os.makedirs(Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name, exist_ok=True)
         shutil.copyfile(self.image_path, Path(pack.resource_pack_path)/"assets"/pack.namespace/self.__class__.resource_pack_subdirectory_name/f"{self.internal_name}.png")
 
-    def generate_custom_item(self, pack: "Pack") -> "CustomItem":
+    def generate_custom_item(self, pack_namespace: str) -> "CustomItem":
         return CustomItem(
             self.internal_name,
             "minecraft:painting",
             self.title or self.internal_name,
-            components=Components(entity_data=EntityData({"id": "minecraft:painting", "variant": f"{pack.namespace}:{self.internal_name}"})),
+            components=Components(entity_data=EntityData({"id": "minecraft:painting", "variant": self.get_reference(pack_namespace)})),
             ref_book_config=PAINTING_REF_BOOK_CONFIG
         )
 
     def generate_give_command(self, pack: "Pack") -> str:
-        return self.generate_custom_item(pack).generate_give_command(pack.namespace)
+        return self.generate_custom_item(pack.namespace).generate_give_command(pack.namespace)
 
     @classmethod
     def from_combined_files(cls, data_path: "Path", assets_path: "Path") -> list["CustomPainting"]:
