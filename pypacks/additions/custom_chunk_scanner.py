@@ -17,16 +17,14 @@ class CustomChunkScanner:
     internal_name: str
     function_to_run: "MCFunction"
 
+    is_enabled: bool = field(init=False, repr=False, hash=False, default=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default=None)  # type: ignore[assignment]
 
     def create_datapack_files(self, pack: "Pack") -> None:
-        return CustomTag(
-            "chunk_scanner_functions",
-            [
+        return CustomTag("chunk_scanner_functions", [
                 chunk_scanner.function_to_run.get_reference(pack.namespace)
                 for chunk_scanner in pack.custom_chunk_scanners
-            ],
-            "function",
+            ], "function",
         ).create_datapack_files(pack)
 
     @staticmethod
@@ -35,7 +33,7 @@ class CustomChunkScanner:
         checked_function = CustomChunkScanner.generate_mark_and_call_function(pack_namespace).get_reference(pack_namespace)
 
         check_chunks = MCFunction("check_chunks_loop", [
-            "return fail",
+            "return fail" if not CustomChunkScanner.is_enabled else "",  # We do this to temporarily disable this
             # First, we get the players position:
             "execute as @a run execute store result score x_coord coords run data get entity @s Pos[0] 1",  # Stores their x into obj "coords" | player "x_coord"
             "execute as @a run execute store result score z_coord coords run data get entity @s Pos[2] 1",  # Stores their z into obj "coords" | player "z_coord"
@@ -49,7 +47,7 @@ class CustomChunkScanner:
             "scoreboard players operation chunk_edge_z coords = z_coord coords",
             "scoreboard players operation chunk_edge_z coords -= chunk_offset_z coords",  # This is the z coord of the corner of their chunk
             "",
-            "scoreboard players set y inputs 100",  # TODO: change to -64 or 0 or something
+            "scoreboard players set y inputs 0",
             "",
             *[
                 # Thirdly, with the chunk corner, we want to try in the 8 adjacent chunk corners

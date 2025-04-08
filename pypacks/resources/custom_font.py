@@ -37,7 +37,7 @@ class CustomFont(BaseResource):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomFont":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomFont":  # type: ignore[override]
         return cls(
             internal_name,
             [FONT_TYPE_NAMES_TO_CLASSES[provider["type"]].from_dict(internal_name+"_font", provider) for provider in data["providers"]],

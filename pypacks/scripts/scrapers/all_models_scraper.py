@@ -19,4 +19,4 @@ with open(output_path, "w", encoding="utf-8") as file:
     if ENABLED:
         file.write(BASE+json.dumps(sorted(block_models), indent=4)+"\n")
     else:
-        file.write("MinecraftModels = str\n\n"+'"""'+BASE+json.dumps(sorted(block_models), indent=4)+"\n"+'"""')
+        file.write("MinecraftModels = str\n\n"+'"""'+BASE+json.dumps(sorted(block_models), indent=4)+"\n"+'"""\n')

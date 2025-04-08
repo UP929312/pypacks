@@ -16,6 +16,10 @@ class WorldGenResources:
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="worldgen")
 
+    @property
+    def resources(self) -> tuple[list["CustomBiome"], list["CustomStructure | SingleCustomStructure"], list["CustomStructureSet"]]:
+        return self.custom_biomes, self.custom_structures, self.custom_structure_sets
+
     @classmethod
     def from_datapack_files(cls, data_path: "Path") -> "WorldGenResources":
         from pypacks.resources.world_gen.biome import CustomBiome

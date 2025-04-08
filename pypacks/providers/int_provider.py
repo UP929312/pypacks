@@ -9,7 +9,7 @@ class IntProvider:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "IntProvider":
-        cls_: type["IntProvider"] = INT_PROVIDER_NAME_TO_CLASS[data["type"]]
+        cls_: type["IntProvider"] = INT_PROVIDER_NAME_TO_CLASS[data["type"].removeprefix("minecraft:")]
         return cls_.from_dict(data)
 
 

@@ -23,7 +23,7 @@ class AllOfPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AllOfPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AllOfPredicate":  # type: ignore[override]
         return cls(internal_name, terms=[Predicate.from_dict(internal_name, term) for term in data["terms"]])
 
 
@@ -39,7 +39,7 @@ class AnyOfPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AnyOfPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AnyOfPredicate":  # type: ignore[override]
         return cls(internal_name, terms=[Predicate.from_dict(internal_name, term) for term in data["terms"]])
 
 
@@ -57,7 +57,7 @@ class BlockStatePropertyPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BlockStatePropertyPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BlockStatePropertyPredicate":  # type: ignore[override]
         return cls(internal_name, block=data["block"], properties=data.get("properties"))
 
 
@@ -73,7 +73,7 @@ class DamageSourcePropertiesPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "DamageSourcePropertiesPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "DamageSourcePropertiesPredicate":  # type: ignore[override]
         from pypacks.resources.predicate.predicate_conditions import DamageTypeTag
         return cls(internal_name, predicate=DamageTypeTag.from_dict(internal_name, data["predicate"]))
 
@@ -92,7 +92,7 @@ class EnchantmentActiveCheckPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentActiveCheckPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentActiveCheckPredicate":  # type: ignore[override]
         return cls(internal_name, active=data["active"])
 
 
@@ -110,7 +110,7 @@ class EntityPropertiesPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityPropertiesPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityPropertiesPredicate":  # type: ignore[override]
         from pypacks.resources.predicate.predicate_conditions import EntityCondition
         return cls(internal_name, entity=data["entity"], predicate=EntityCondition.from_dict(internal_name, data["predicate"]))
 
@@ -129,7 +129,7 @@ class EntityScoresPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityScoresPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EntityScoresPredicate":  # type: ignore[override]
         return cls(internal_name, entity=data["entity"], scores={key: IntRange.from_dict(value) for key, value in data["scores"].items()})
 
 
@@ -145,7 +145,7 @@ class InvertedPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "InvertedPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "InvertedPredicate":  # type: ignore[override]
         return cls(internal_name, term=Predicate.from_dict(internal_name, data["term"]))
 
 
@@ -160,7 +160,7 @@ class KilledByPlayerPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "KilledByPlayerPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "KilledByPlayerPredicate":  # type: ignore[override]
         return cls(internal_name)
 
 
@@ -182,7 +182,7 @@ class LocationCheckPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "LocationCheckPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "LocationCheckPredicate":  # type: ignore[override]
         from pypacks.resources.predicate.predicate_conditions import LocationTag
         return cls(
             internal_name,
@@ -205,7 +205,7 @@ class MatchToolPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "MatchToolPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "MatchToolPredicate":  # type: ignore[override]
         return cls(internal_name, predicate=data["predicate"])
 
 
@@ -224,7 +224,7 @@ class RandomChancePredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "RandomChancePredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "RandomChancePredicate":  # type: ignore[override]
         return cls(
             internal_name,
             chance=data["chance"] if isinstance(data["chance"], float) else NumberProvider.from_dict(data["chance"]),
@@ -249,7 +249,7 @@ class RandomChanceWithEnchantedBonusPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "RandomChanceWithEnchantedBonusPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "RandomChanceWithEnchantedBonusPredicate":  # type: ignore[override]
         from pypacks.providers.enchantment_level_based_provider import EnchantmentLevelBasedProvider
         return cls(
             internal_name,
@@ -271,7 +271,7 @@ class ReferencePredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ReferencePredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ReferencePredicate":  # type: ignore[override]
         return cls(internal_name, name=data["name"])
 
 
@@ -285,7 +285,7 @@ class SurvivesExplosionPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SurvivesExplosionPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SurvivesExplosionPredicate":  # type: ignore[override]
         return cls(internal_name)
 
 
@@ -305,7 +305,7 @@ class TableBonusPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TableBonusPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TableBonusPredicate":  # type: ignore[override]
         return cls(internal_name, enchantment=data["enchantment"], chances=data["chances"])
 
 
@@ -322,7 +322,7 @@ class TimeCheckPredicate(Predicate):
         } | {"period": self.period} if self.period is not None else {}
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TimeCheckPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TimeCheckPredicate":  # type: ignore[override]
         return cls(
             internal_name,
             number_provider=data["value"] if isinstance(data["value"], int) else NumberProvider.from_dict(data["value"]),
@@ -342,7 +342,7 @@ class ValueCheckPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ValueCheckPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ValueCheckPredicate":  # type: ignore[override]
         return cls(
             internal_name,
             value=data["value"] if isinstance(data["value"], int) else NumberProvider.from_dict(data["value"]),
@@ -363,7 +363,7 @@ class WeatherCheckPredicate(Predicate):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WeatherCheckPredicate":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WeatherCheckPredicate":  # type: ignore[override]
         return cls(
             internal_name,
             raining=data.get("raining", False),

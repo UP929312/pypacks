@@ -106,9 +106,7 @@ class Pack:
         self.resource_pack_format_version = 55
 
         # Don't love this, but oh well (for the future, when I add more world gen stuff)
-        self.custom_structures = self.world_gen_resources.custom_structures
-        self.custom_structure_sets = self.world_gen_resources.custom_structure_sets
-        self.custom_biomes = self.world_gen_resources.custom_biomes
+        self.custom_structures, self.custom_structure_sets, self.custom_biomes = self.world_gen_resources.resources
 
         assert self.namespace.islower(), "Namespace must be all lowercase"
         assert all(x in "abcdefghijklmnopqrstuvwxyz0123456789_-." for x in self.namespace), "Namespace must only contain letters, numbers, _, -, and ."
@@ -135,17 +133,17 @@ class Pack:
         # ==================================================================================
         # Custom Structure places (needs to be before on_right_click)
         for structure in [x for x in self.custom_structures if hasattr(x, "is_simple_resource")]:
-            self.custom_items.append(structure.generate_custom_item(self.namespace))  # type: ignore[union-attr]
+            self.custom_items.append(structure.generate_custom_item(self.namespace))  # type: ignore[attr-defined]
         # =================================================================================
         # Custom loops, chunk scanners, and ore generations
         for custom_ore_generation in self.custom_ore_generations:
             self.custom_chunk_scanners.append(custom_ore_generation.create_chunk_scanner(self.namespace))
             self.custom_mcfunctions.append(custom_ore_generation.create_generate_ore_function(self.namespace))
             self.custom_mcfunctions.extend(custom_ore_generation.create_ore_vein_function(self.namespace))  # This runs multiple times, which is fine...
-        if self.custom_chunk_scanners:
+        if self.custom_chunk_scanners:  # or self.custom_ore_generations:
             self.custom_mcfunctions.append(CustomChunkScanner.generate_mark_and_call_function(self.namespace))
             self.custom_loops.append(CustomChunkScanner.generate_check_chunk_loop(self.namespace))
-        if self.custom_loops or self.custom_ore_generations:  # Has to go after the chunk scanner
+        if self.custom_loops or self.custom_ore_generations:  # Has to go after the chunk scanner or self.custom_chunk_scanners:
             self.custom_mcfunctions.append(CustomLoop.generate_loop_manager_function(self.custom_loops, self.namespace))
         # ==================================================================================
         # Custom right click on items (and drops)
@@ -247,7 +245,7 @@ class Pack:
         if not self.internal_tick_mcfunction.is_empty:
             self.custom_mcfunctions.append(self.internal_tick_mcfunction)
         # ==================================================================================
-        if self.custom_items and self.config.generate_create_wall_command:
+        if self.custom_items and self.config.generate_create_wall_command:  # if self.custom_items has to be last, as many things add to it
             self.custom_mcfunctions.append(create_wall(self.custom_items, self.namespace))
         if self.config.generate_reference_book:
             self.custom_items = sorted(self.custom_items, key=lambda x: self.reference_book_categories.index(x.ref_book_config.category))
@@ -282,6 +280,7 @@ class Pack:
                 self.on_load_function.get_reference(self.namespace) if self.on_load_function is not None else None,  # type: ignore[list-item]
             ], tag_type="function"),
         ]
+        # TODO: Only create namespace if we have tags?
         minecraft = Pack("Minecraft", "", "minecraft", datapack_output_path=self.datapack_output_path,
                          custom_tags=tags, config=Config(generate_create_wall_command=False, generate_reference_book=False))
         generate_datapack(minecraft)

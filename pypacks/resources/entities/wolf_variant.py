@@ -45,7 +45,7 @@ class WolfVariant(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WolfVariant":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WolfVariant":  # type: ignore[override]
         return cls(
             internal_name=internal_name,
             wild_texture_path=data["assets"]["wild"].split(":")[1]+".png",

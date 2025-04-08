@@ -17,4 +17,4 @@ with open(output_path, "w", encoding="utf-8") as file:
         combined = sorted([f"minecraft:{x}" for x in data])  # +sorted(data)
         file.write(BASE+json.dumps(combined, indent=4)+"\n")
     else:
-        file.write("MinecraftItem = str\n\n"+'"""'+BASE+json.dumps(sorted(data), indent=4)+"\n"+'"""')
+        file.write("MinecraftItem = str\n\n"+'"""'+BASE+json.dumps(sorted(data), indent=4)+"\n"+'"""\n')

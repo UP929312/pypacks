@@ -4,7 +4,10 @@ We should rework from_combined_files, since it just does from_datapack_files, th
 
 item events, e.g. on right_click, on drop, on craft, on left, on sprint
 
-# For structures and other resources, sub directory support
+# For all the things that have "create_datapack_files" just call custom resources, return them instead? Infra_1, depends upon?
+Don't think we even need to, things only mutate items, so we can just do the final item mutation after everything else.
+
+# For remaining resources, sub directory support
 
 add metadata to each resource "is_experimental" = True
 
@@ -13,8 +16,6 @@ add metadata to each resource "is_experimental" = True
 2. Also, need to also keep the images and such, can't just delete them
 
 Need to add the rest of data component predicates
-
-# Naturally occuring ore veins need some more randomness, they have a random size, need a random "rotation"
 
 https://github.com/SpyglassMC/vanilla-mcdoc/blob/f35464d757a4c9786e0d804ac6c0146371dd45c1/java/world/component/predicate.mcdoc#L64
 # Auto generate classes from that ^ Hmmmm

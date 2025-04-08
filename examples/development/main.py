@@ -382,11 +382,11 @@ datapack = Pack(
     config=Config(warn_about_tags_with_custom_items=False),
 ).generate_pack()
 
-# a = Pack.from_existing_pack(
-#     "pypacks_testing", "pypacks_testing",
-#     r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing",
-#     r"C:\Users\Ben\AppData\Roaming\.minecraft\resourcepacks\PyPacks Testing"
-# )
+a = Pack.from_existing_pack(
+    "pypacks_testing", "pypacks_testing",
+    r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld\datapacks\PyPacks Testing",
+    r"C:\Users\Ben\AppData\Roaming\.minecraft\resourcepacks\PyPacks Testing"
+)
 
 # from pypacks.utils import cleanup_experimental_warning
 # cleanup_experimental_warning(r"C:\Users\Ben\AppData\Roaming\.minecraft\saves\PyPacksWorld")

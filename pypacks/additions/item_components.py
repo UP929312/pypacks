@@ -387,7 +387,7 @@ class Consumable:
 
     consume_seconds: float = 1.6  # How long it takes to consume the item in seconds
     animation: Literal["none", "eat", "drink", "block", "bow", "spear", "crossbow", "spyglass", "toot_horn", "brush", "bundle"] = "none"  # The animation to play when consuming the item
-    consuming_sound: "str | CustomSound | None" = "entity.generic.eat"  # The sound to play when consuming the item
+    consuming_sound: "str | CustomSound | None" = None  # The sound to play when consuming the item
     has_consume_particles: bool = True  # Whether to show particles when consuming the item
 
     on_consume_effects: list["PotionEffect"] = field(default_factory=list)  # A list of status effects to apply when consuming the item
@@ -399,7 +399,8 @@ class Consumable:
         base_dict = {
             "consume_seconds": self.consume_seconds,
             "animation": self.animation,
-            "sound": {"sound_id": self.consuming_sound.get_reference(pack_namespace) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound} if self.consuming_sound is not None else None,
+            # "sound": {"sound_id": self.consuming_sound.get_reference(pack_namespace) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound} if self.consuming_sound is not None else None,
+            "sound": self.consuming_sound.get_reference(pack_namespace) if isinstance(self.consuming_sound, CustomSound) else self.consuming_sound,
             "has_consume_particles": False if not self.has_consume_particles else None,  # Defaults to True
         }
         if not self.on_consume_effects and not self.on_consume_remove_effects and self.on_consume_teleport_diameter == 0:
@@ -414,7 +415,7 @@ class Consumable:
         return cls(
             consume_seconds=data.get("consume_seconds", 1.6),
             animation=data.get("animation", "none"),
-            consuming_sound=data.get("sound", "entity.generic.eat"),
+            consuming_sound=data.get("sound"),  # , "entity.generic.eat"
             has_consume_particles=data.get("has_consume_particles", True),
             on_consume_effects=consume_effects.apply_affects if consume_effects else [],
             on_consume_remove_effects=consume_effects.remove_affects if consume_effects else [],
@@ -546,7 +547,7 @@ class Equippable:
             "dispensable": False if not self.dispensable else None,  # Defaults to True
             "swappable": False if not self.swappable else None,  # Defaults to True
             "damage_on_hurt": False if not self.damage_on_hurt else None,  # Defaults to True
-            "entities_which_can_wear": self.entities_which_can_wear if self.entities_which_can_wear != "all" else None,  # Defaults to "all"
+            "allowed_entities": self.entities_which_can_wear if self.entities_which_can_wear != "all" else None,  # Defaults to "all"
             "equip_on_interaction": False if not self.equip_on_interaction else None,  # Defaults to True
             "camera_overlay": self.camera_overlay.get_reference(pack_namespace) if isinstance(self.camera_overlay, CustomTexture) else self.camera_overlay,  # Defaults to None
         }
@@ -559,7 +560,7 @@ class Equippable:
             dispensable=data.get("dispensable", True),
             swappable=data.get("swappable", True),
             damage_on_hurt=data.get("damage_on_hurt", True),
-            entities_which_can_wear=data.get("entities_which_can_wear", "all"),
+            entities_which_can_wear=data.get("allowed_entities", "all"),
             camera_overlay=data.get("camera_overlay"),
         )
 
@@ -1108,13 +1109,13 @@ ComponentType: TypeAlias = (
 @dataclass
 class Components:
     durability: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#max_damage  <-- Tools only
-    lost_durability: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage  <-- Tools only
+    lost_durability: int = field(default=0, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage  <-- Tools only
     enchantment_glint_override: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantment_glint_override
     glider: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#glider
     unbreakable: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#unbreakable
     enchantable_at_level: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#enchantable
     # survives_in_lava: bool = field(default=False, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#damage_resistant & https://minecraft.wiki/w/Tag#Damage_type_tags
-    repaired_by: list[str] = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
+    repaired_by: list[str] | str = field(default_factory=list, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repairable  List of string or #tags
     repair_cost: int | None = field(default=None, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#repair_cost  <-- Tools only?
 
     block_entity_data: dict[str, Any] = field(default_factory=dict, kw_only=True)  # https://minecraft.wiki/w/Data_component_format#block_entity_data  <-- Block entities only
@@ -1221,7 +1222,7 @@ class Components:
         profile = {"properties": [{"name": "textures", "value": self.custom_head_texture}]} if self.custom_head_texture else None
         return {
             "max_damage":                 self.durability,
-            "damage":                     self.lost_durability,
+            "damage":                     self.lost_durability or None,
             "enchantment_glint_override": True if self.enchantment_glint_override else None,
             "glider":                     {} if self.glider else None,
             "unbreakable":                {} if self.unbreakable else None,
@@ -1288,69 +1289,71 @@ class Components:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Components":
         from pypacks.resources.predicate.predicate_conditions import BlockPredicate
+        data_no_minecraft = {k.removeprefix("minecraft:"): v for k, v in data.items()}
         return cls(
-            durability=data.get("max_damage"),
-            lost_durability=data.get("damage"),
-            enchantment_glint_override=data.get("enchantment_glint_override", False),
-            glider=data.get("glider", False),
-            unbreakable=data.get("unbreakable", False),
-            enchantable_at_level=data.get("enchantable", {}).get("value"),
+            durability=data_no_minecraft.get("max_damage"),
+            lost_durability=data_no_minecraft.get("damage") or 0,
+            enchantment_glint_override=data_no_minecraft.get("enchantment_glint_override", False),
+            glider=data_no_minecraft.get("glider", False)=={},
+            unbreakable=data_no_minecraft.get("unbreakable", False),
+            enchantable_at_level=data_no_minecraft.get("enchantable", {}).get("value"),
 
-            repaired_by=data.get("repairable", {}).get("items", []),
-            repair_cost=data.get("repair_cost"),
+            repaired_by=data_no_minecraft.get("repairable", {}).get("items", []),
+            repair_cost=data_no_minecraft.get("repair_cost") or None,
 
-            block_entity_data=data.get("block_entity_data", {}),
-            block_state=data.get("block_state", {}),
-            break_sound=data.get("break_sound"),
-            container_loot_table=data.get("container_loot", {}).get("loot_table"),
-            custom_head_texture=(data.get("profile", {}).get("properties", [{}])[0].get("value") if "properties" in data.get("profile", {}) else None),
-            damage_resistant_to=data.get("damage_resistant", {}).get("types"),
-            enchantments=data.get("enchantments", {}),
-            book_enchantments=data.get("stored_enchantments", {}),
-            debug_stick_state=data.get("debug_stick_state", {}),
-            dye_color=data.get("dyed_color"),
-            intangible_projectile=data.get("intangible_projectile", False),
-            knowledge_book_recipes=data.get("recipes", []),
-            loaded_projectiles=data.get("charged_projectiles", {}).get("id"),
-            note_block_sound=data.get("note_block_sound"),
-            ominous_bottle_amplifier=data.get("ominous_bottle_amplifier"),
-            player_head_username=data.get("profile"),
-            pot_decorations=data.get("pot_decorations", []),
-            shield_base_color=data.get("base_color"),
-            suspicious_stew_effects={x["id"]: x["duration"] for x in data.get("suspicious_stew_effects", [])},
-            tooltip_style=data.get("tooltip_style"),
+            block_entity_data=data_no_minecraft.get("block_entity_data", {}),
+            block_state=data_no_minecraft.get("block_state", {}),
+            break_sound=data_no_minecraft.get("break_sound"),
+            container_loot_table=data_no_minecraft.get("container_loot", {}).get("loot_table"),
+            custom_head_texture=(data_no_minecraft.get("profile", {}).get("properties", [{}])[0].get("value") if "properties" in data_no_minecraft.get("profile", {}) else None),
+            damage_resistant_to=data_no_minecraft.get("damage_resistant", {}).get("types"),
+            enchantments=data_no_minecraft.get("enchantments", {}),
+            book_enchantments=data_no_minecraft.get("stored_enchantments", {}),
+            debug_stick_state=data_no_minecraft.get("debug_stick_state", {}),
+            dye_color=data_no_minecraft.get("dyed_color"),
+            intangible_projectile=data_no_minecraft.get("intangible_projectile", False),
+            knowledge_book_recipes=data_no_minecraft.get("recipes", []),
+            loaded_projectiles=data_no_minecraft.get("charged_projectiles", {}).get("id") if data_no_minecraft.get("charged_projectiles") else None,
+            note_block_sound=data_no_minecraft.get("note_block_sound"),
+            ominous_bottle_amplifier=data_no_minecraft.get("ominous_bottle_amplifier"),
+            player_head_username=data_no_minecraft.get("profile"),
+            pot_decorations=data_no_minecraft.get("pot_decorations", []),
+            shield_base_color=data_no_minecraft.get("base_color"),
+            suspicious_stew_effects={x["id"]: x["duration"] for x in data_no_minecraft.get("suspicious_stew_effects", [])},
+            tooltip_style=data_no_minecraft.get("tooltip_style"),
 
-            armor_trim=ArmorTrim.from_dict(data["trim"]) if data.get("trim") else None,
-            attribute_modifiers=[AttributeModifier.from_dict(x) for x in data.get("attribute_modifiers", [])],
-            bees=[Bee.from_dict(x) for x in data.get("bees", [])],
-            banner_patterns=[BannerPattern.from_dict(x) for x in data.get("banner_patterns", [])],
-            blocks_attacks=BlocksAttacks.from_dict(data["blocks_attacks"]) if data.get("blocks_attacks") else None,
-            bucket_entity_data=BucketEntityData.from_dict(data["bucket_entity_data"]) if data.get("bucket_entity_data") else None,
-            bundle_contents=BundleContents.from_dict(data["bundle_contents"]) if data.get("bundle_contents") else None,
-            can_break=BlockPredicate.from_dict(data["can_break"]) if data.get("can_break") else None,
-            can_place_on=BlockPredicate.from_dict(data["can_place_on"]) if data.get("can_place_on") else None,
-            cooldown=Cooldown.from_dict(data["use_cooldown"]) if data.get("use_cooldown") else None,
-            consumable=Consumable.from_dict(data["consumable"]) if data.get("consumable") else None,
-            container_contents=ContainerContents.from_dict(data["container"]) if data.get("container") else None,
-            death_protection=DeathProtection.from_dict(data["death_protection"]) if data.get("death_protection") else None,
-            entity_data=EntityData.from_dict(data["entity_data"]) if data.get("entity_data") else None,
-            equippable=Equippable.from_dict(data["equippable"]) if data.get("equippable") else None,
-            firework_explosion=FireworkExplosion.from_dict(data["firework_explosion"]) if data.get("firework_explosion") else None,
-            firework=Firework.from_dict(data["fireworks"]) if data.get("fireworks") else None,
-            food=Food.from_dict(data["food"]) if data.get("food") else None,
-            instrument=Instrument.from_dict(data["instrument"]) if data.get("instrument") else None,
-            jukebox_playable=JukeboxPlayable.from_dict(data["jukebox_playable"]) if data.get("jukebox_playable") else None,
-            lodestone_tracker=LodestoneTracker.from_dict(data["lodestone_tracker"]) if data.get("lodestone_tracker") else None,
-            map_data=MapData.from_dict(data) if (data.get("map_color") or data.get("map_id") or data.get("map_decorations")) else None,
-            potion_contents=PotionContents.from_dict(data["potion_contents"]) if data.get("potion_contents") else None,
-            tool=Tool.from_dict(data["tool"]) if data.get("tool") else None,
-            tooltip_display=TooltipDisplay.from_dict(data["tooltip_display"]) if data.get("tooltip_display") else None,
-            use_remainder=UseRemainder.from_dict(data["use_remainder"]) if data.get("use_remainder") else None,
-            weapon=Weapon.from_dict(data["weapon"]) if data.get("weapon") else None,
-            written_book_content=WrittenBookContent.from_dict(data["written_book_content"]) if data.get("written_book_content") else None,
-            writable_book_content=WritableBookContent.from_dict(data["writable_book_content"]) if data.get("writable_book_content") else None,
+            armor_trim=ArmorTrim.from_dict(data_no_minecraft["trim"]) if data_no_minecraft.get("trim") else None,
+            attribute_modifiers=[AttributeModifier.from_dict(x) for x in data_no_minecraft.get("attribute_modifiers", [])],
+            bees=[Bee.from_dict(x) for x in data_no_minecraft.get("bees", [])],
+            banner_patterns=[BannerPattern.from_dict(x) for x in data_no_minecraft.get("banner_patterns", [])],
+            blocks_attacks=BlocksAttacks.from_dict(data_no_minecraft["blocks_attacks"]) if data_no_minecraft.get("blocks_attacks") else None,
+            bucket_entity_data=BucketEntityData.from_dict(data_no_minecraft["bucket_entity_data"]) if data_no_minecraft.get("bucket_entity_data") else None,
+            bundle_contents=BundleContents.from_dict(data_no_minecraft["bundle_contents"]) if data_no_minecraft.get("bundle_contents") else None,
+            can_break=BlockPredicate.from_dict(data_no_minecraft["can_break"]) if data_no_minecraft.get("can_break") else None,
+            can_place_on=BlockPredicate.from_dict(data_no_minecraft["can_place_on"]) if data_no_minecraft.get("can_place_on") else None,
+            cooldown=Cooldown.from_dict(data_no_minecraft["use_cooldown"]) if data_no_minecraft.get("use_cooldown") else None,
+            consumable=Consumable.from_dict(data_no_minecraft["consumable"]) if data_no_minecraft.get("consumable") else None,
+            container_contents=ContainerContents.from_dict(data_no_minecraft["container"]) if data_no_minecraft.get("container") else None,
+            death_protection=DeathProtection.from_dict(data_no_minecraft["death_protection"]) if data_no_minecraft.get("death_protection") else None,
+            entity_data=EntityData.from_dict(data_no_minecraft["entity_data"]) if data_no_minecraft.get("entity_data") else None,
+            equippable=Equippable.from_dict(data_no_minecraft["equippable"]) if data_no_minecraft.get("equippable") else None,
+            firework_explosion=FireworkExplosion.from_dict(data_no_minecraft["firework_explosion"]) if data_no_minecraft.get("firework_explosion") else None,
+            firework=Firework.from_dict(data_no_minecraft["fireworks"]) if data_no_minecraft.get("fireworks") else None,
+            food=Food.from_dict(data_no_minecraft["food"]) if data_no_minecraft.get("food") else None,
+            instrument=Instrument.from_dict(data_no_minecraft["instrument"]) if data_no_minecraft.get("instrument") else None,
+            jukebox_playable=JukeboxPlayable.from_dict(data_no_minecraft["jukebox_playable"]) if data_no_minecraft.get("jukebox_playable") else None,
+            lodestone_tracker=LodestoneTracker.from_dict(data_no_minecraft["lodestone_tracker"]) if data_no_minecraft.get("lodestone_tracker") else None,
+            map_data=MapData.from_dict(data_no_minecraft) if (data_no_minecraft.get("map_color") or data_no_minecraft.get("map_id") or data_no_minecraft.get("map_decorations")) else None,
+            potion_contents=PotionContents.from_dict(data_no_minecraft["potion_contents"]) if data_no_minecraft.get("potion_contents") else None,
+            tool=Tool.from_dict(data_no_minecraft["tool"]) if data_no_minecraft.get("tool") else None,
+            tooltip_display=TooltipDisplay.from_dict(data_no_minecraft["tooltip_display"]) if data_no_minecraft.get("tooltip_display") else None,
+            use_remainder=UseRemainder.from_dict(data_no_minecraft["use_remainder"]) if data_no_minecraft.get("use_remainder") else None,
+            weapon=Weapon.from_dict(data_no_minecraft["weapon"]) if data_no_minecraft.get("weapon") else None,
+            written_book_content=WrittenBookContent.from_dict(data_no_minecraft["written_book_content"]) if data_no_minecraft.get("written_book_content") else None,
+            writable_book_content=WritableBookContent.from_dict(data_no_minecraft["writable_book_content"]) if data_no_minecraft.get("writable_book_content") else None,
         )
 
+    __repr__ = BaseResource.__repr__
 
 # custom_model_data - https://minecraft.wiki/w/Data_component_format#custom_model_data  # TODO: This
 # potion_duration_scale - https://minecraft.wiki/w/Data_component_format#potion_duration_scale

@@ -61,7 +61,7 @@ class CustomNoiseSettings(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomNoiseSettings":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomNoiseSettings":  # type: ignore[override]  # TODO: Test if this can have subdirs
         return cls(
             internal_name=internal_name,
             sea_level=data["sea_level"],

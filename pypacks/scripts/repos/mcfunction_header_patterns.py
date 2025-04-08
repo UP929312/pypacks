@@ -47,7 +47,7 @@ SCOREBOARD_GET = re.compile(r"scoreboard players get ([A-Za-z0-9_#]*) ([A-Za-z0-
 DATA_MODIFY_STORAGE = re.compile(r"data modify storage (?:[A-Za-z0-9_#]*:[A-Za-z0-9_#]*) (?:[A-Za-z0-9_#]+(?:\.[A-Za-z0-9_#]+)*)? set from score ([A-Za-z0-9_#]*) ([A-Za-z0-9_#]*)")  # Group 1, 2 (player, objective)
 DATA_MODIFY_ENTITY = re.compile(r"data modify entity @[aesprn][A-Za-z_\-#\.]* [A-Za-z@_-]* set from score ([A-Za-z0-9_#]*) ([A-Za-z0-9_#]*)")  # Group 1, 2 (player, objective)
 
-VARIABLE_MESSAGE = "# This function interfaces with (requireds or sets) the following scoreboard values:\n"
+VARIABLE_MESSAGE = "# This function interfaces with (requires or sets) the following scoreboard values:\n"
 
 VARIABLE_PAIR_PATTERNS = [
     IF_UNLESS_SCORE_PATTERN, EXECUTE_STORE_RESULT, TEAM_MODIFY, TELLRAW_TITLE_ACTIONBAR, EXECUTE_STORE_STORAGE,

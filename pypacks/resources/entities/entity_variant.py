@@ -33,7 +33,7 @@ class GenericEntityVariant(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GenericEntityVariant":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GenericEntityVariant":  # type: ignore[override]
         return cls(
             internal_name=internal_name,
             texture_path=data["asset_id"].split(":")[1]+".png",

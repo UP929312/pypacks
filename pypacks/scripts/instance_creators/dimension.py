@@ -26,7 +26,7 @@ lines = [
 names = []
 instances: list["CustomDimension"] = []
 for item_name, data in all_data.items():
-    dimension = CustomDimension.from_dict(item_name, data)
+    dimension = CustomDimension.from_dict(item_name, data, [])
     # if loot_table.internal_name in ["archaeology_ocean_ruin_cold", "entities_fox"]:
     #     rint(data)
     names.append(dimension.internal_name)

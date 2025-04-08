@@ -72,6 +72,8 @@ class CustomAdvancement(BaseResource):
     announce_to_chat: bool = False
     send_telemetry_event: bool = False
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="advancement")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
@@ -101,7 +103,7 @@ class CustomAdvancement(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomAdvancement":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomAdvancement":
         return cls(
             internal_name,
             criteria=[Criteria.from_dict(key, value) for key, value in data["criteria"].items()],
@@ -119,6 +121,7 @@ class CustomAdvancement(BaseResource):
             show_toast=data.get("show_toast", True),
             announce_to_chat=data.get("announce_to_chat", False),
             send_telemetry_event=data.get("send_telemetry_event", False),
+            sub_directories=sub_directories,
         )
 
     def generate_grant_command(self) -> str:

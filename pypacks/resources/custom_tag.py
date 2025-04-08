@@ -28,9 +28,9 @@ class CustomTag(BaseResource):
     internal_name: str
     values: list["str | CustomTag | CustomItem"]
     tag_type: Literal["banner_pattern", "block", "cat_variant", "damage_type", "enchantment", "entity_type", "fluid", "function", "game_event", "instrument", "item", "painting_variant", "point_of_interest_type", "worldgen"]
-    sub_directories: list[str] = field(default_factory=list)
     replace: bool = False
     create_if_empty: bool = False
+    sub_directories: list[str] = field(default_factory=list)
 
     datapack_subdirectory_name: str = field(init=False, repr=False, default="tags")
 

@@ -43,17 +43,13 @@ class CustomSound(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomSound":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomSound":  # type: ignore[override]
         # Sounds can either be the complicated sound format, or simply
         # The path to a sound file from the "<namespace>/sounds" folder (excluding the .ogg file extension).
         if isinstance(data["sounds"][0], str):
             return cls(
                 internal_name,
                 ogg_path=data["sounds"][0].split(":")[1]+".ogg",
-                volume=1.0,
-                pitch=1.0,
-                stream=False,
-                subtitle=None,
             )
         return cls(
             internal_name,

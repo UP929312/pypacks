@@ -21,6 +21,8 @@ class CustomDimension(BaseResource):
     ] = "minecraft:overworld"  # The noise settings of the dimension.
     ref_book_config: "RefBookConfig" = field(repr=False, default_factory=lambda: DIMENSIONS_REF_BOOK_CONFIG)
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension")
 
     def generate_teleport_command(self, pack_namespace: str) -> str:
@@ -42,12 +44,13 @@ class CustomDimension(BaseResource):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDimension":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomDimension":
         return cls(
             internal_name,
             data["type"],  # Can't convert back to CustomBiome, just a reference
             data["generator"]["biome_source"]["biome"],  # Can't convert back to CustomBiome, just a reference
             data["generator"]["settings"],
+            sub_directories=sub_directories,
         )
 
     def create_datapack_files(self, pack: "Pack") -> None:
@@ -83,6 +86,8 @@ class CustomDimensionType(BaseResource):
     infiniburn: str = "#minecraft:infiniburn_overworld"  # Takes a block tag where all these blocks burn forever.
     effects: Literal["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"] = "minecraft:overworld"  # Determines the dimension effect used for this dimension. Setting to overworld makes the dimension have clouds, sun, stars and moon. Setting to the nether makes the dimension have thick fog blocking that sight, similar to the nether. Setting to the end makes the dimension have dark spotted sky similar to the end, ignoring the sky and fog color.
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="dimension_type")
 
     def __post_init__(self) -> None:
@@ -115,12 +120,12 @@ class CustomDimensionType(BaseResource):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDimensionType":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomDimensionType":
         return cls(
             internal_name,
             data["height"],
             data["logical_height"],
-            data["minimum_y"],
+            data.get("minimum_y", 0),
             data["coordinate_scale"],
             data["ambient_light"],
             IntProvider.from_dict(data["monster_spawn_light_level"]) if isinstance(data["monster_spawn_light_level"], dict) else data["monster_spawn_light_level"],
@@ -134,8 +139,11 @@ class CustomDimensionType(BaseResource):
             data["respawn_anchor_works"],
             data["has_raids"],
             data["infiniburn"],
-            data["effects"]
+            data["effects"],
+            sub_directories=sub_directories,
         )
+
+    __repr__ = BaseResource.__repr__
 
 
 # ============================================================================================================

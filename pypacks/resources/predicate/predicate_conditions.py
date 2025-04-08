@@ -383,7 +383,7 @@ class LocationTag:
         return cls(
             biomes=[CustomBiome.from_dict(f"{internal_name}_biome", biome) if isinstance(biome, dict) else biome for biome in data.get("biomes", [])],
             block=BlockPredicate.from_dict(data["block"]) if data.get("block") else None,
-            dimension=CustomDimension.from_dict(f"{internal_name}_dimension", data["dimension"]) if isinstance(data.get("dimension"), dict) else data.get("dimension"),
+            dimension=CustomDimension.from_dict(f"{internal_name}_dimension", data["dimension"], []) if isinstance(data.get("dimension"), dict) else data.get("dimension"),
             fluids=FluidPredicate.from_dict(data["fluid"]) if data.get("fluid") else None,
             light_level=IntRange.from_dict(data["light"]) if isinstance(data.get("light"), dict) else data.get("light"),
             x_position=IntRange.from_dict(data["position"]["x"]) if isinstance(data.get("position"), dict) else data.get("position"),
@@ -419,7 +419,7 @@ class ItemCondition:
         from pypacks.providers.int_provider import UniformIntProvider
         return cls(
             items=data.get("items", []),
-            count=UniformIntProvider.from_dict(data["count"]) if not isinstance(data.get("count"), (int, float)) else data.get("count"),
+            count=UniformIntProvider.from_dict(data["count"]) if not isinstance(data.get("count"), (int, float, type(None))) else data.get("count"),
             components=data.get("components", {}),
             predicates=[DataComponentPredicate.from_dict(internal_name, {key: value}) for key, value in data.get("predicates", {}).items()],
         )

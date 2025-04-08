@@ -59,7 +59,7 @@ class CustomBiome(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomBiome":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomBiome":  # type: ignore[override]
         return cls(
             internal_name,
             has_precipitation=data["has_precipitation"],

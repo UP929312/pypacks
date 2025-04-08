@@ -193,7 +193,7 @@ class CustomLootTable(BaseResource):
         )
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomLootTable":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomLootTable":  # type: ignore[override]  # TODO: Find out if this can have subdirs
         return cls(
             internal_name,
             pools=[Pool.from_dict(pool) for pool in data.get("pools", [])],

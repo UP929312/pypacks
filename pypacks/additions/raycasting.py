@@ -205,4 +205,4 @@ class EntityRaycast(Raycast):
         super().create_datapack_files(pack)
         # Create the entity tag
         if isinstance(self.entity_to_detect, CustomTag):
-            self.entity_to_detect.create_datapack_files(pack)
+            self.entity_to_detect.create_datapack_files(pack)  # TODO: Have a .children method to create all the children tags in one go, and then call that here.

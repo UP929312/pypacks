@@ -21,6 +21,8 @@ class CustomJukeboxSong(BaseResource):
     comparator_output: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     length_in_seconds: float  # | None = None  # Leave None to calculate it automatically (although it's recommended to set it manually)
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, default="jukebox_song")
     # resource_pack_subdirectory_name: str = field(init=False, repr=False, default="sounds")
 
@@ -39,13 +41,14 @@ class CustomJukeboxSong(BaseResource):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomJukeboxSong":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomJukeboxSong":
         return cls(
             internal_name,
             description=data["description"] if isinstance(data["description"], str) else data["description"].get("translate", "UNKNOWN:UNKNOWN"),
             ogg_path=(data["sound_event"] if isinstance(data.get("sound_event"), str) else data.get("sound_event", {}).get("sound_id", "UKNOWN:UKNOWN")).split(":")[-1],
             comparator_output=data["comparator_output"],
             length_in_seconds=data["length_in_seconds"],
+            sub_directories=sub_directories,
         )
 
     @classmethod

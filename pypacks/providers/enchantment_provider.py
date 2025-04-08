@@ -21,7 +21,7 @@ class EnchantmentProvider(BaseResource):
         raise NotImplementedError("This method must be implemented by the subclass")
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentProvider":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentProvider":  # type: ignore[override]
         cls_ = ENCHANTMENT_PROVIDER_NAME_TO_CLASSES[data["type"]]
         return cls_(internal_name=internal_name, **data)
 

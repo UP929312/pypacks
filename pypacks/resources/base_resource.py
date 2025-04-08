@@ -27,7 +27,7 @@ class BaseResource:
         raise NotImplementedError
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BaseResource":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "BaseResource":
         raise NotImplementedError
 
     def create_datapack_files(self, pack: "Pack") -> None:
@@ -59,17 +59,24 @@ class BaseResource:
 
     @classmethod
     def from_datapack_files(cls: type[T], data_path: "Path") -> list[T]:
-        """Path should be the root of the pack"""
+        assert issubclass(cls, BaseResource)
+        has_sub_dirs = any(f.name == "sub_directories" for f in fields(cls))  # type: ignore[arg-type]
+        # if not has_sub_dirs:
+        #     print(cls.__name__, "does not have sub_directories, so it will not be loaded correctly")
         return [
-            cls.from_dict(file_path.stem, json.loads(file_path.read_text()))  # type: ignore[attr-defined]
-            for file_path in data_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")  # type: ignore[attr-defined]
+            cls.from_dict(  # type: ignore[misc]
+                file_path.stem, json.loads(file_path.read_text()),
+                **({"sub_directories": list(file_path.relative_to(data_path).parent.parts[1:])} if has_sub_dirs else {}),
+            )
+            for file_path in data_path.glob(f"**/{cls.datapack_subdirectory_name}/**/*.json")
         ]
 
     @classmethod
     def from_resource_pack_files(cls: type[T], assets_path: "Path") -> list[T]:
-        """Path should be the root of the pack"""
         assert issubclass(cls, BaseResource)
         has_sub_dirs = any(f.name == "sub_directories" for f in fields(cls))  # type: ignore[arg-type]
+        # if not has_sub_dirs:
+        #     print(cls.__name__, "does not have sub_directories, so it will not be loaded correctly")
         return [
             cls.from_dict(  # type: ignore[misc]
                 file_path.stem, json.loads(file_path.read_text()),

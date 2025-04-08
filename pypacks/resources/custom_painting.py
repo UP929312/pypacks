@@ -24,6 +24,8 @@ class CustomPainting(BaseResource):
     width_in_blocks: int = 1
     height_in_blocks: int = 1
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, default="painting_variant")
     resource_pack_subdirectory_name: str = field(init=False, repr=False, default="textures/painting")
 
@@ -41,7 +43,7 @@ class CustomPainting(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomPainting":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomPainting":
         return cls(
             internal_name,
             data["asset_id"].split(":")[-1],
@@ -49,6 +51,7 @@ class CustomPainting(BaseResource):
             author=data.get("author", {}).get("text") or data.get("author", {}).get("translate", "UNKNOWN"),
             width_in_blocks=data.get("width", 1),
             height_in_blocks=data.get("height", 1),
+            sub_directories=sub_directories,
         )
 
     def create_resource_pack_files(self, pack: "Pack") -> None:
@@ -77,6 +80,8 @@ class CustomPainting(BaseResource):
             else:
                 raise FileNotFoundError(f"Could not find the image file for painting {painting.internal_name} at {path}")
         return paintings
+
+    __repr__ = BaseResource.__repr__
 
 
 # Original paintings:

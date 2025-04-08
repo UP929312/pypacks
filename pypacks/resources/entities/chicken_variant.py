@@ -26,7 +26,7 @@ class ChickenVariant(GenericEntityVariant):
         )
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ChickenVariant":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ChickenVariant":  # type: ignore[override]
         return cls(
             internal_name=internal_name,
             texture_path=data["asset_id"].split(":")[1]+".png",

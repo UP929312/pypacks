@@ -136,7 +136,7 @@ def generate_datapack(pack: "Pack") -> None:
         pack.custom_mcfunctions + pack.custom_tags + pack.custom_enchantments + pack.custom_damage_types +
         pack.custom_structures + pack.custom_structure_sets + pack.custom_biomes +
         pack.custom_dimensions + pack.custom_raycasts +
-        pack.custom_loops + pack.custom_chunk_scanners + pack.custom_ore_generations + pack.custom_entity_variants +
+        pack.custom_loops + pack.custom_chunk_scanners + pack.custom_entity_variants +
         pack.custom_test_environments + pack.custom_game_tests
     ):
         if pack.config.prevent_warning_issuing_resources and item.datapack_subdirectory_name in EXPERIMENTAL_FEATURES:

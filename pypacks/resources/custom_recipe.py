@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TypeAlias, Any, TYPE_CHECKING, Literal
 
+
 if TYPE_CHECKING:
     from pypacks.pack import Pack
     from pypacks.scripts.repos.all_items import MinecraftItem
@@ -29,7 +30,7 @@ class Recipe(BaseResource):
         raise NotImplementedError
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "Recipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "Recipe":  # type: ignore[override]
         cls_ = RECIPE_TYPE_TO_CLASSES[data["type"]]
         return cls_.from_dict(internal_name, data)
 
@@ -38,10 +39,6 @@ class Recipe(BaseResource):
         if "components" in data["result"]:
             return CustomItem.from_dict(internal_name+"_item", data["result"]["id"], data["result"]["components"])
         return data["result"]["id"]  # type: ignore[no-any-return]
-
-    def create_datapack_files(self, pack: "Pack") -> None:
-        if not isinstance(self, CustomCrafterRecipe):
-            super().create_datapack_files(pack)
 
     @staticmethod
     def resolve_ingredient_type(data: "MinecraftItem | CustomTag | list[MinecraftItem] | CustomItem") -> "str | CustomItem":
@@ -64,6 +61,10 @@ class CustomCrafterRecipe(Recipe):
     def __post_init__(self) -> None:
         self.used_ingredients = [self.resolve_ingredient_type(x) for x in self.ingredients]
         assert 0 < len(self.ingredients) <= 9, "Ingredients must be a list of 1-9 items"
+
+    def create_datapack_files(self, pack: "Pack") -> None:
+        # No .json file with the recipe for CustomCrafterRecipes
+        return
 
 
 @dataclass
@@ -105,7 +106,7 @@ class ShapedCraftingRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapedCraftingRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapedCraftingRecipe":  # type: ignore[override]
         rows = [data["pattern"][0]]
         if len(data["pattern"]) > 1:
             rows.append(data["pattern"][1])
@@ -149,7 +150,7 @@ class ShapelessCraftingRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapelessCraftingRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "ShapelessCraftingRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             ingredients=data["ingredients"],
@@ -181,7 +182,7 @@ class CraftingTransmuteRecipe(Recipe):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CraftingTransmuteRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CraftingTransmuteRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             result=data["result"].get("id") or data["result"],
@@ -219,7 +220,7 @@ class BlastFurnaceRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BlastFurnaceRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "BlastFurnaceRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             ingredient=data["ingredient"],
@@ -256,7 +257,7 @@ class CampfireRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CampfireRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CampfireRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             ingredient=data["ingredient"],
@@ -294,7 +295,7 @@ class FurnaceRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "FurnaceRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "FurnaceRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             ingredient=data["ingredient"],
@@ -331,7 +332,7 @@ class SmithingTransformRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmithingTransformRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmithingTransformRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             template_item=data["template"],
@@ -363,7 +364,7 @@ class SmithingTrimRecipe(Recipe):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmithingTrimRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmithingTrimRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             template_item=data["template"],
@@ -399,7 +400,7 @@ class SmokerRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmokerRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SmokerRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             ingredient=data["ingredient"],
@@ -433,7 +434,7 @@ class StonecutterRecipe(Recipe):
         return data
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "StonecutterRecipe":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "StonecutterRecipe":  # type: ignore[override]
         return cls(
             internal_name,
             ingredient=data["ingredient"],

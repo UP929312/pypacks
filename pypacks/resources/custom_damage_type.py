@@ -44,7 +44,12 @@ class CustomDamageType(BaseResource):
     effects: Literal["hurt", "thorns", "drowning", "burning", "poking", "freezing"] | None = None  # Optional field controlling how incoming damage is shown to the player.
     death_message_type: Literal["default", "fall_variants", "intentional_game_design"] | None = None  # Optional field that controls the kind of death messages to use.
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="damage_type")
+
+    def get_reference(self, pack_namespace: str) -> str:
+        return f"{pack_namespace}:{self.internal_name}"  # TODO: Do something about this, it doesn't have the subdirectories included.
 
     def __post_init__(self) -> None:
         language_codes = [translation.language_code for translation in self.translations] if self.translations is not None else []
@@ -60,7 +65,7 @@ class CustomDamageType(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomDamageType":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomDamageType":
         return cls(
             internal_name,
             translations=None,
@@ -68,12 +73,13 @@ class CustomDamageType(BaseResource):
             scaling=data.get("scaling", "never"),
             effects=data.get("effects"),
             death_message_type=data.get("death_message_type"),
+            sub_directories=sub_directories,
         )
 
     def get_translation_commands(self, pack_namespace: str) -> str:
-        return f"tellraw @a [{{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}\", \"with\": [\"Player\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.item\", \"with\": [\"Victim\", \"Attacker\", \"Item\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{pack_namespace}:{self.internal_name}.player\", \"with\": [\"Victim\", \"Attacker\"]}}]"
+        return f"tellraw @a [{{\"translate\":\"death.attack.{self.get_reference(pack_namespace)}\", \"with\": [\"Player\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{self.get_reference(pack_namespace)}.item\", \"with\": [\"Victim\", \"Attacker\", \"Item\"]}}, {{\"text\": \"\\n\"}}, {{\"translate\":\"death.attack.{self.get_reference(pack_namespace)}.player\", \"with\": [\"Victim\", \"Attacker\"]}}]"
 
     def generate_damage_command(self, pack_namespace: str, amount: int = 1) -> str:
-        return f"damage @ {amount} {pack_namespace}:{self.internal_name}"
+        return f"damage @ {amount} {self.get_reference(pack_namespace)}"
 
     __repr__ = BaseResource.__repr__

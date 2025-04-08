@@ -28,6 +28,8 @@ class CustomGameTest(BaseResource):
     type: Literal["block_based", "function"] = "block_based"  # The type of test.
     function: "MCFunction | str | None" = None  # The function to run for the test. Only used if type is "function".
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="test_instance")
 
     def __post_init__(self) -> None:
@@ -53,7 +55,7 @@ class CustomGameTest(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomGameTest":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomGameTest":
         return cls(
             internal_name,
             environment=data["environment"],
@@ -68,6 +70,7 @@ class CustomGameTest(BaseResource):
             required_successes=data.get("required_successes", 1),
             type=data.get("type", "block_based"),
             function=data.get("function"),
+            sub_directories=sub_directories,
         )
 
     def get_run_command(self, pack_namespace: str) -> str:
@@ -96,15 +99,17 @@ class CustomTestEnvironment(BaseResource):
     """Do not instantiate this class directly. Use one of the subclasses instead."""
     internal_name: str
 
+    # sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="test_environment")
 
     def to_dict(self, pack_namespace: str) -> dict[str, Any]:
         raise NotImplementedError
 
-    @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomTestEnvironment":
+    @classmethod  # TODO: Add sub directory support!
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomTestEnvironment":  # type: ignore[override]   # , sub_directories: list[str]
         cls_ = TEST_ENVIRONMENT_TO_CLASSES[data["type"]]
-        return cls_.from_dict(internal_name, data)
+        return cls_.from_dict(internal_name, data)  # sub_directories
 
 
 @dataclass
@@ -123,7 +128,7 @@ class AllOfEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AllOfEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "AllOfEnvironment":  # type: ignore[override]
         return cls(
             internal_name,
             definitions=data["definitions"],
@@ -152,7 +157,7 @@ class FunctionEnvironment(CustomTestEnvironment):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "FunctionEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "FunctionEnvironment":  # type: ignore[override]
         return cls(
             internal_name,
             setup=data.get("setup"),
@@ -175,7 +180,7 @@ class GameRulesEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GameRulesEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "GameRulesEnvironment":  # type: ignore[override]
         return cls(
             internal_name,
             bool_rules={rule["rule"]: rule["value"] for rule in data["bool_rules"]},
@@ -196,7 +201,7 @@ class WeatherEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WeatherEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "WeatherEnvironment":  # type: ignore[override]
         return cls(
             internal_name,
             weather=data["weather"],
@@ -220,7 +225,7 @@ class TimeOfDayEnvironment(CustomTestEnvironment):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TimeOfDayEnvironment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "TimeOfDayEnvironment":  # type: ignore[override]
         return cls(
             internal_name,
             time=data["time"],

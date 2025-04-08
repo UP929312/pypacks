@@ -15,7 +15,7 @@ lines = [
     "",
 ]
 
-instances = [CustomDamageType.from_dict(data["message_id"].replace(".", "_"), data) for item_name, data in all_data.items()]
+instances = [CustomDamageType.from_dict(data["message_id"].replace(".", "_"), data, []) for item_name, data in all_data.items()]
 lines += [f"{x.internal_name.upper().replace('/', '_')} = {repr(x)}" for x in instances]
 
 with open(output_path, "w", encoding="utf-8") as file:

@@ -115,6 +115,7 @@ class CustomLanguage(BaseResource):
     language_code: LanguageCode  # e.g. en_us
     translations: dict[str, str]
 
+    sub_directories: list[str] = field(init=False, repr=False, hash=False, default_factory=lambda: [])  # Used to nest and organise items nicely
     resource_pack_subdirectory_name: str = field(init=False, repr=False, hash=False, default="lang")
 
     def __post_init__(self) -> None:
@@ -124,7 +125,7 @@ class CustomLanguage(BaseResource):
         return self.translations
 
     @classmethod
-    def from_dict(cls, language_code: LanguageCode, data: dict[str, str]) -> "CustomLanguage":  # type: ignore[override]
+    def from_dict(cls, language_code: LanguageCode, data: dict[str, str], sub_directories: list[str]) -> "CustomLanguage":  # type: ignore[override]
         return cls(language_code, data)
 
     def get_run_command(self, pack_namespace: str, translation_code: str) -> str:

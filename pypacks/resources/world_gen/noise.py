@@ -29,7 +29,7 @@ class CustomNoise(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomNoise":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomNoise":  # type: ignore[override]  # TODO: Test if this can have sub dirs
         return cls(
             internal_name,
             first_octave=data["firstOctave"],

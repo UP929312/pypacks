@@ -104,8 +104,10 @@ class EnchantmentComponentPredicate(DataComponentPredicate):
 
     @classmethod
     def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "EnchantmentComponentPredicate":
+        if isinstance(data, list):
+            data = data[0]  # pyright: ignore data is a list of enchantments, take the first one
         return cls(
-            enchantments=data["enchantments"],
+            enchantments=data.get("enchantments"),
             levels=IntRange.from_dict(data["levels"]) if "min" in data.get("levels", {}) else data.get("levels")
         )
 

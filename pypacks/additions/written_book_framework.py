@@ -162,11 +162,14 @@ class Icon:
     on_click: "OnClickChangePage | OnClickRunCommand | OnClickCopyToClipboard | None" = field(repr=False, default=None)
 
     def get_json_data(self) -> dict[str, Any]:
-        # TODO: Only have hover/click on the char itself, maybe return 3 items, left padding, clickable icon, right padding
-        return Text(
-            f"{' '*self.left_padding}{self.unicode_char}{' '*self.right_padding}", color="white", font=f"{self.font_namespace}:all_fonts",
-            bold=False, underlined=False, on_hover=self.on_hover, on_click=self.on_click
-        ).to_dict()
+        return [  # type: ignore[return-value]
+            Text(' '*self.left_padding, font=f"{self.font_namespace}:all_fonts", bold=False, underlined=False).to_dict(),
+            Text(
+                self.unicode_char, color="white", font=f"{self.font_namespace}:all_fonts",
+                bold=False, underlined=False, on_hover=self.on_hover, on_click=self.on_click
+            ).to_dict(),
+            Text(' '*self.right_padding, font=f"{self.font_namespace}:all_fonts", bold=False, underlined=False).to_dict(),
+        ]
 
 
 @dataclass

@@ -39,7 +39,7 @@ class CustomItemRenderDefinition(BaseResource):
         return self.model.to_dict(pack_namespace) | ({"hand_animation_on_swap": False} if not self.hand_animation_on_swap else {})
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomItemRenderDefinition":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomItemRenderDefinition":  # type: ignore[override]
         return cls(
             internal_name,
             model=ItemModel.from_dict(data),
@@ -111,7 +111,7 @@ class CustomModelDefinition(BaseResource):
         return cls(internal_name, layers=layers, parent=parent, sub_directories=sub_directories)
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomModelDefinition":  # type: ignore[override]
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomModelDefinition":
         return cls(
             internal_name,
             layers=data["textures"],

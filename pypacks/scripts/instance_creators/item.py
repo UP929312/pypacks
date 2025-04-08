@@ -45,16 +45,24 @@ all_item_data: dict[str, Any] = requests.get("https://raw.githubusercontent.com/
 lines = [
     "from pypacks.resources.custom_item import CustomItem",
     "from pypacks.additions.item_components import (",
-    "    AttributeModifier, Components, Cooldown, Consumable, DeathProtection, EntityData, Equippable,",
-    "    Food, Instrument, JukeboxPlayable, PotionEffect, Tool, ToolRule, UseRemainder,",
+    "    AttributeModifier, BlocksAttacks, Components, Cooldown, Consumable, DeathProtection, EntityData, Equippable,",
+    "    Food, Instrument, JukeboxPlayable, PotionEffect, Tool, ToolRule, UseRemainder, Weapon,",
     ")",
     "",
 ]
 items = []
 for item, data in all_item_data.items():
     if is_not_normal_item(data):
+        # if item.removeprefix("minecraft:") == "honey_bottle":
+        #     print(data)
+        from pypacks.utils import recursively_remove_nones_from_data
         line = format_custom_item_name(item, item, Components.from_dict(data), data["minecraft:max_stack_size"], data.get("minecraft:rarity"))
         # custom_item = CustomItem(internal_name=f"minecraft:{item.removeprefix('minecraft:')}", base_item=item, components=components, max_stack_size=data["minecraft:max_stack_size"], rarity=data.get("minecraft:rarity"))
+        # ===== Check parsed is equal to double parsed (to check keys are correct in to_dict and from_dict)
+        parsed = Components.from_dict(data)
+        double_parsed = Components.from_dict(recursively_remove_nones_from_data(Components.from_dict(data).to_dict("minecraft")))
+        assert parsed == double_parsed, f"{item} different from dict,\n{parsed}\n!=\n{double_parsed}"
+        # ======
         items.append(item.upper())
         lines.append(line)
 
@@ -68,7 +76,7 @@ for goat_horn_sound_index, name in enumerate(GOAT_HORN_NAMES):
     lines.append(format_custom_item_name(f"GOAT_HORN_{name.upper()}", "minecraft:goat_horn", components, 1, 'common'))
 # ====================================================================================================================
 for painting in ALL_DEFAULT_PAINTINGS:
-    painting_item = painting.generate_custom_item("minecraft")  # type: ignore[arg-type]
+    painting_item = painting.generate_custom_item("minecraft")
     items.append(painting_item.internal_name.upper()+"_PAINTING")
     lines.append(format_custom_item_name(painting_item.internal_name+"_PAINTING", "minecraft:painting", painting_item.components, 1, 'common'))
 # ====================================================================================================================

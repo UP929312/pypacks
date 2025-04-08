@@ -44,6 +44,8 @@ class CustomEnchantment(BaseResource):
     slots: list[Literal["any", "hand", "mainhand", "offhand", "armor", "feet", "legs", "chest", "head", "body"]] = field(default_factory=lambda: ["any"])  # List of equipment slots that this enchantment works in.
     effects: list["EnchantValueEffect | AttributeEffect | EnchantmentEntityEffect"] = field(repr=False, default_factory=list)  # Effect components - Controls the effect of the enchantment.
 
+    sub_directories: list[str] = field(default_factory=list)  # Used to nest and organise items nicely
+
     datapack_subdirectory_name: str = field(init=False, repr=False, default="enchantment")
 
     def __post_init__(self) -> None:
@@ -74,7 +76,7 @@ class CustomEnchantment(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomEnchantment":
+    def from_dict(cls, internal_name: str, data: dict[str, Any], sub_directories: list[str]) -> "CustomEnchantment":
         effects: list["EnchantValueEffect | AttributeEffect | EnchantmentEntityEffect"] = []  # TODO: Do this
         for effect_name, effect_data in data.get("effects", []).items():
             effect_type_instance = resolve_effect_type({effect_name: effect_data})
@@ -98,6 +100,7 @@ class CustomEnchantment(BaseResource):
             anvil_cost=data.get("anvil_cost", 1),
             slots=data.get("slots", ["any"]),
             effects=effects,
+            sub_directories=sub_directories,
         )
 
     def generate_custom_item(self, pack_namespace: str) -> "CustomItem":
@@ -338,7 +341,7 @@ class EnchantmentEntityEffect(EntityEffect):
         return cls(
             component_id=key,  # type: ignore[arg-type]
             entity_effect=EntityEffect.from_dict(value[0]["effect"]),
-            requirements=Predicate.from_dict("TODO: UNKNOWN", value[0]["requirements"]) if value[0]["requirements"] is not None else None,
+            requirements=Predicate.from_dict("TODO: UNKNOWN", value[0]["requirements"]) if value[0].get("requirements") is not None else None,
             enchanted=value[0]["enchanted"],
             affected=value[0]["affected"],
         )

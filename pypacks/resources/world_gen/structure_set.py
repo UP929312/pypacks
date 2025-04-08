@@ -64,7 +64,7 @@ class CustomStructureSet(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructureSet":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructureSet":  # type: ignore[override]
         placement_type_class = RandomSpreadPlacementType if "spread_type" in data["placement"] else ConcentricRingsPlacementType
         return cls(
             internal_name,
@@ -123,7 +123,7 @@ class RandomSpreadPlacementType:
 class ConcentricRingsPlacementType:
     """A fixed number of structures is placed in concentric rings around the origin of the world. In vanilla, this placement is only used for strongholds."""
     distance: int = 0  # The thickness of a ring plus that of a gap between two rings. Value between 0 and 1023 (inclusive). Unit is 6 chunks
-    count: int = 0  # The total number of generation attempts in this dimension. Value between 1 and 4095 (inclusive).
+    count: int = 1  # The total number of generation attempts in this dimension. Value between 1 and 4095 (inclusive).
     preferred_biomes: list[str] | str = field(default_factory=list)  # (an ID, a #tag, or an array containing IDs) - Biomes in which the structure is likely to be generated.
     spread: int = 0  # How many attempts are on the closest ring to spawn. Value between 0 and 1023 (inclusive). The number of attempts on the Nth ring is: spread * (N^2 + 3 * N + 2) / 6, until the number of attempts reaches the total count.
 
@@ -147,8 +147,8 @@ class ConcentricRingsPlacementType:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ConcentricRingsPlacementType":
         return cls(
-            data["distance"],
-            data["count"],
+            data.get("distance", 0),
+            data.get("count", 1),
             data.get("preferred_biomes", []),
-            data["spread"]
+            data.get("spread", 0),
         )

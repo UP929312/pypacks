@@ -15,7 +15,7 @@ lines = [
     "",
 ]
 
-instances = [CustomJukeboxSong.from_dict(item_name, data) for item_name, data in all_data.items()]
+instances = [CustomJukeboxSong.from_dict(item_name.split("/")[0], data, item_name.split("/")[1:]) for item_name, data in all_data.items()]
 lines += [f"{x.internal_name.upper().replace('5', 'FIVE').replace('11', 'ELEVEN').replace('13', 'THIRTEEN')} = {repr(x)}" for x in instances]
 
 with open(output_path, "w", encoding="utf-8") as file:

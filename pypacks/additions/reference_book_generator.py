@@ -6,7 +6,6 @@ from pypacks.additions.written_book_framework import (
     ElementPage, GridPage, GridPageManager, Icon, RowManager, FormattedWrittenBook, RightAlignedIcon, ICONS_PER_PAGE,
 )
 from pypacks.additions.text import Text, OnClickRunCommand, OnHoverShowItem, OnHoverShowTextRaw, OnClickChangePage, OnHoverShowText
-from pypacks.resources.custom_recipe import SmithingTrimRecipe
 
 if TYPE_CHECKING:
     from pypacks.pack import Pack
@@ -49,15 +48,16 @@ class GenericItemPage:
             self.generate_info_icons(), MORE_INFO_ICONS_PER_ROW, self.pack.namespace, trailing_new_lines=MORE_INFO_ICONS_TRAILING_NEW_LINES,
             empty_icon=None,
         )
-        title = Text.from_input(self.title)
-        title.color = "black"
+        title = Text.from_input(self.title).update_attributes(color="black")
+        newlines_before_back_button = 2 if len(more_info_icon_rows.rows) == 1 else 0  # TODO: #### Make this take into account if the title takes 2 rows.
+        # If it does, change the 2 to a 3, and make it 2 if the title is two pages long
         return [
             title,
-            Text("\n"*2),
+            Text("\n"*2),  # This needs to be 2
             self.generate_main_icon(),
             Text("\n"*4),
             *more_info_icon_rows.rows,
-            Text("\n"*(2-(len(more_info_icon_rows.rows)))),
+            Text("\n"*newlines_before_back_button),
             RightAlignedIcon(
                 unicode_char=self.pack.font_mapping["satchel_icon"],
                 font_namespace=self.pack.namespace,
@@ -73,6 +73,7 @@ class GenericItemPage:
 class CustomItemPage(GenericItemPage):
     def generate_info_icons(self) -> list[Icon]:
         from pypacks.resources.custom_item import CustomItem
+        from pypacks.resources.custom_recipe import SmithingTrimRecipe
         assert isinstance(self.item, CustomItem)
         info_icons: list[Icon] = [self.generate_info_icon()]
         # ============================================================================================================

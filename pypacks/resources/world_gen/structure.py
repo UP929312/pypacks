@@ -48,7 +48,7 @@ class CustomStructure(BaseResource):
         })
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructure":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "CustomStructure":  # type: ignore[override]
         # TODO: This currently only works for Jigsaws
         return cls(
             internal_name,
@@ -185,7 +185,7 @@ class SingleItemTemplatePool(BaseResource):
         }
 
     @classmethod
-    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SingleItemTemplatePool":
+    def from_dict(cls, internal_name: str, data: dict[str, Any]) -> "SingleItemTemplatePool":  # type: ignore[override]
         return cls(
             internal_name,
             data["elements"][0]["element"]["location"],

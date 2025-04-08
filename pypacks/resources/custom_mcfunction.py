@@ -23,7 +23,7 @@ class MCFunction(BaseResource):
     - Functions invoked from enchantments."""  # To run a function if the executer is console: /execute unless entity @s[type=player] run function
     internal_name: str
     commands: list["str | MCFunction"]
-    sub_directories: list[str] = field(default_factory=list)  # Allow this to be a str
+    sub_directories: list[str] = field(default_factory=list)
 
     create_if_empty: bool = field(init=False, repr=False, default=False)
     datapack_subdirectory_name: str = field(init=False, repr=False, default="function")
@@ -50,6 +50,8 @@ class MCFunction(BaseResource):
             for line in command_lines:
                 if "$(" in line and not line.startswith("$"):
                     print(f"Warning, {self.internal_name}.mcfunction has lines without macro prefix: `{line}`")
+                if line.startswith("$") and ("$" not in line.removeprefix("$")):
+                    print(f"Warning, {self.internal_name}.mcfunction has macro prefix without references to macros!: `{line}`")
 
     def generate_headers(self, pack: "Pack") -> str:
         commands_str = "\n".join([x.get_reference(pack.namespace) if isinstance(x, MCFunction) else x for x in self.commands])
@@ -73,11 +75,11 @@ class MCFunction(BaseResource):
         return "\n".join([message for found_instances, message in pairings.items() if found_instances]) + (("\n"+HEADER_DIVIDER+"\n\n") if any(pairings.keys()) else "")
 
     @classmethod
-    def from_file_contents(cls, internal_name: str, file_contents: str, sub_directories: list[str] | None = None) -> "MCFunction":
+    def from_file_contents(cls, internal_name: str, file_contents: str, sub_directories: list[str]) -> "MCFunction":
         return cls(
             internal_name,
             file_contents.split("\n"),  # type: ignore[arg-type]
-            sub_directories=sub_directories or [],
+            sub_directories=sub_directories,
         )
 
     def create_datapack_files(self, pack: "Pack") -> None:
